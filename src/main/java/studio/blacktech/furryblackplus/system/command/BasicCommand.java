@@ -160,6 +160,7 @@ public class BasicCommand {
      * 将消息去掉命令以后 从指定位置拼接
      *
      * @param i index位置
+     *
      * @return 拼接后的内容
      */
     public String join(int i) {

@@ -4,13 +4,13 @@ package studio.blacktech.furryblackplus.system.command;
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.message.data.MessageChain;
 
-public class PrivateCommand extends BasicCommand {
+public class TempCommand extends BasicCommand {
 
 
     private final Member sender;
 
 
-    public PrivateCommand(Member sender, MessageChain messages) {
+    public TempCommand(Member sender, MessageChain messages) {
         super(messages);
         this.sender = sender;
     }

@@ -1,71 +1,67 @@
-package studio.blacktech.furryblackplus.module.command;
+package studio.blacktech.furryblackplus.module.executor;
 
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.MessageChain;
+import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
 import studio.blacktech.furryblackplus.system.command.BasicCommand;
+import studio.blacktech.furryblackplus.system.command.FriendCommand;
 import studio.blacktech.furryblackplus.system.command.GroupCommand;
-import studio.blacktech.furryblackplus.system.command.PrivateCommand;
+import studio.blacktech.furryblackplus.system.command.TempCommand;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
-import studio.blacktech.furryblackplus.system.module.ModuleExecutor;
+import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 
 import java.security.SecureRandom;
 
-public class Module_Roll extends ModuleExecutor {
+
+@ComponentHandlerExecutor(
+        name = "随机数",
+        description = "生成随机数并窥探本质",
+        privacy = {
+                "获取命令发送人"
+        },
+        command = "roll",
+        usage = {
+                "/roll - 抽取真假",
+                "/roll 数字 - 从零到给定数字任选一个数字",
+                "/roll 数字 数字 - 从给定两个数字中间抽取一个"
+        }
+)
+public class Executor_Roll extends EventHandlerExecutor {
 
 
-    public Module_Roll() {
-        super(
-                new ModuleExecutorInfo(
-                        "handler_command_roll",
-                        "随机数",
-                        "1.0.0",
-                        "生成随机数",
-                        new String[]{
-                                "获取命令发送人"
-                        },
-                        "roll",
-                        new String[]{
-                                "/roll - 抽取真假",
-                                "/roll 数字 - 从零到给定数字任选一个数字",
-                                "/roll 数字 数字 - 从给定两个数字中间抽取一个"
-                        })
-        );
+    public Executor_Roll(ExecutorInfo INFO) {
+        super(INFO);
     }
 
 
     @Override
     public void init() throws BotException {
-
     }
 
     @Override
     public void boot() throws BotException {
-
     }
 
     @Override
     public void shut() throws BotException {
-
     }
 
 
     @Override
-    public void handleTempMessage(PrivateCommand message) {
-
+    public void handleTempMessage(TempCommand message) {
+        message.getSender().sendMessage(roll(message));
     }
 
     @Override
-    public void handleFriendMessage(PrivateCommand message) {
-
+    public void handleFriendMessage(FriendCommand message) {
+        message.getSender().sendMessage(roll(message));
     }
 
     @Override
     public void handleGroupMessage(GroupCommand message) {
-
         At at = new At(message.getSender());
         MessageChain temp = at.plus(roll(message));
         message.getGroup().sendMessage(temp);
-
     }
 
 

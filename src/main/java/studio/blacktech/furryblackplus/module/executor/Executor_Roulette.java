@@ -1,41 +1,46 @@
-package studio.blacktech.furryblackplus.module.command;
+package studio.blacktech.furryblackplus.module.executor;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
-import net.mamoe.mirai.message.data.*;
+import net.mamoe.mirai.message.data.At;
+import net.mamoe.mirai.message.data.Face;
+import net.mamoe.mirai.message.data.Message;
+import net.mamoe.mirai.message.data.MessageChain;
+import net.mamoe.mirai.message.data.PlainText;
+import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
+import studio.blacktech.furryblackplus.system.command.FriendCommand;
 import studio.blacktech.furryblackplus.system.command.GroupCommand;
-import studio.blacktech.furryblackplus.system.command.PrivateCommand;
+import studio.blacktech.furryblackplus.system.command.TempCommand;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
 import studio.blacktech.furryblackplus.system.common.logger.LoggerX;
 import studio.blacktech.furryblackplus.system.common.utilties.RandomTool;
-import studio.blacktech.furryblackplus.system.module.ModuleExecutor;
+import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-public class Module_Roulette extends ModuleExecutor {
+
+@ComponentHandlerExecutor(
+        name = "俄罗斯轮盘赌",
+        description = "你看这子弹又尖又长，这名单又大又宽",
+        privacy = {
+                "获取命令发送人",
+                "缓存群-成员-回合 结束后丢弃"
+        },
+        command = "roulette",
+        usage = {
+                "/roulette 筹码 - 加入或者发起一局俄罗斯轮盘赌 重复下注可增加被枪毙的几率"
+        }
+)
+public class Executor_Roulette extends EventHandlerExecutor {
 
 
-    public Module_Roulette() {
-        super(
-                new ModuleExecutorInfo(
-                        "handler_command_roulette",
-                        "俄罗斯轮盘赌",
-                        "1.0.0",
-                        "你看这子弹又尖又长，这名单又大又宽",
-                        new String[]{
-                                "获取命令发送人",
-                                "按照\"群-成员-回合\"的层级关系暂存 枪毙后丢弃"
-                        },
-                        "roulette",
-                        new String[]{
-                                "/roulette 筹码 - 加入或者发起一局俄罗斯轮盘赌 重复下注可增加被枪毙的几率"
-                        })
-        );
+    public Executor_Roulette(ExecutorInfo INFO) {
+        super(INFO);
     }
 
 
@@ -54,23 +59,21 @@ public class Module_Roulette extends ModuleExecutor {
 
     @Override
     public void boot() {
-
     }
 
     @Override
     public void shut() {
-
     }
 
 
     @Override
-    public void handleTempMessage(PrivateCommand message) {
-
+    public void handleTempMessage(TempCommand message) {
+        message.getSender().sendMessage("仅支持群");
     }
 
     @Override
-    public void handleFriendMessage(PrivateCommand message) {
-
+    public void handleFriendMessage(FriendCommand message) {
+        message.getSender().sendMessage("仅支持群");
     }
 
     @Override

@@ -13,7 +13,11 @@ import net.mamoe.mirai.utils.PlatformLogger;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
 import studio.blacktech.furryblackplus.system.common.exception.initlization.InitLockedException;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -436,44 +440,6 @@ public class LoggerX extends PlatformLogger {
         long ss = ms / 1000;
         ms = ms % 1000;
         return dd + " - " + hh + ":" + mm + ":" + ss + ":" + String.format("%04d", ms);
-    }
-
-
-    // ================================================================
-
-
-    public enum ConsoleColor {
-        RESET("\u001b[0m"),
-        WHITE("\u001b[30m"),
-        RED("\u001b[31m"),
-        EMERALD_GREEN("\u001b[32m"),
-        GOLD("\u001b[33m"),
-        BLUE("\u001b[34m"),
-        PURPLE("\u001b[35m"),
-        GREEN("\u001b[36m"),
-        GRAY("\u001b[90m"),
-        LIGHT_RED("\u001b[91m"),
-        LIGHT_GREEN("\u001b[92m"),
-        LIGHT_YELLOW("\u001b[93m"),
-        LIGHT_BLUE("\u001b[94m"),
-        LIGHT_PURPLE("\u001b[95m"),
-        LIGHT_CYAN("\u001b[96m");
-
-        private final String color;
-
-        ConsoleColor(String color) {
-            this.color = color;
-        }
-
-        public String getColor() {
-            return color;
-        }
-
-        @Override
-        public String toString() {
-            return color;
-        }
-
     }
 
 

@@ -1,16 +1,34 @@
-package studio.blacktech.furryblackplus.module.command;
+package studio.blacktech.furryblackplus.module.executor;
 
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.MessageChain;
-import net.mamoe.mirai.message.data.PlainText;
+import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
 import studio.blacktech.furryblackplus.system.command.BasicCommand;
+import studio.blacktech.furryblackplus.system.command.FriendCommand;
 import studio.blacktech.furryblackplus.system.command.GroupCommand;
-import studio.blacktech.furryblackplus.system.command.PrivateCommand;
+import studio.blacktech.furryblackplus.system.command.TempCommand;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
 import studio.blacktech.furryblackplus.system.common.utilties.RandomTool;
-import studio.blacktech.furryblackplus.system.module.ModuleExecutor;
+import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 
-public class Module_Zhan extends ModuleExecutor {
+
+@ComponentHandlerExecutor(
+        name = "占卜",
+        description = "抽取一张大阿卡那塔罗牌为某事占卜 - 大失败酱",
+        privacy = {
+                "获取命令发送人"
+        },
+        command = "zhan",
+        usage = {
+                "/zhan XXX - 为某事占卜"
+        }
+)
+public class Executor_Zhan extends EventHandlerExecutor {
+
+
+    public Executor_Zhan(ExecutorInfo INFO) {
+        super(INFO);
+    }
 
 
     private final static String[] CARD = new String[]{
@@ -61,57 +79,34 @@ public class Module_Zhan extends ModuleExecutor {
     };
 
 
-    public Module_Zhan() {
-        super(
-                new ModuleExecutorInfo(
-                        "handler_command_zhan",
-                        "占卜",
-                        "1.0.0",
-                        "抽取一张大阿卡那塔罗牌为某事占卜",
-                        new String[]{
-                                "获取命令发送人"
-                        },
-                        "zhan",
-                        new String[]{
-                                "/zhan XXX - 为某事占卜"
-                        })
-        );
-    }
-
-
     @Override
     public void init() throws BotException {
-
     }
 
     @Override
     public void boot() throws BotException {
-
     }
 
     @Override
     public void shut() throws BotException {
-
     }
 
 
     @Override
-    public void handleTempMessage(PrivateCommand message) {
-
+    public void handleTempMessage(TempCommand message) {
+        message.getSender().sendMessage(chooseCard(message));
     }
 
     @Override
-    public void handleFriendMessage(PrivateCommand message) {
-
+    public void handleFriendMessage(FriendCommand message) {
+        message.getSender().sendMessage(chooseCard(message));
     }
 
     @Override
     public void handleGroupMessage(GroupCommand message) {
-
         At at = new At(message.getSender());
-        MessageChain temp = at.plus(new PlainText(chooseCard(message)));
+        MessageChain temp = at.plus(chooseCard(message));
         message.getGroup().sendMessage(temp);
-
     }
 
 

@@ -1,41 +1,34 @@
-package studio.blacktech.furryblackplus.system.module;
+package studio.blacktech.furryblackplus.system.handler;
 
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
 import studio.blacktech.furryblackplus.system.common.exception.working.NotAFolderException;
 import studio.blacktech.furryblackplus.system.common.logger.LoggerX;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Properties;
 
 
-public abstract class Handler {
+public abstract class AbstractEventHandler {
 
 
+    @Getter
+    @AllArgsConstructor
     public static class ModuleInfo {
 
-        public final String MODULE_ARTIFACT_NAME;
-        public final String MODULE_FRIENDLY_NAME;
-        public final String MODULE_VERSION;
-        public final String MODULE_DESCRIPTION;
-        public final String[] MODULE_PRIVACY;
+        public final String NAME;
+        public final String DESCRIPTION;
+        public final String[] PRIVACY;
 
-        public ModuleInfo(
-                String MODULE_ARTIFACT_NAME,
-                String MODULE_FRIENDLY_NAME,
-                String MODULE_VERSION,
-                String MODULE_DESCRIPTION,
-                String[] MODULE_PRIVACY
-        ) {
-            this.MODULE_ARTIFACT_NAME = MODULE_ARTIFACT_NAME;
-            this.MODULE_FRIENDLY_NAME = MODULE_FRIENDLY_NAME;
-            this.MODULE_VERSION = MODULE_VERSION;
-            this.MODULE_DESCRIPTION = MODULE_DESCRIPTION;
-            this.MODULE_PRIVACY = MODULE_PRIVACY;
-        }
     }
 
 
@@ -51,23 +44,22 @@ public abstract class Handler {
     protected final File FOLDER_LOGS;
     protected final File FILE_CONFIG;
 
+
     protected final Properties CONFIG;
 
 
     protected boolean NEW_CONFIG = false;
 
 
-    public Handler(ModuleInfo INFO) {
-
+    public AbstractEventHandler(ModuleInfo INFO) {
 
         this.INFO = INFO;
-
 
         logger = new LoggerX(this.getClass());
 
         CONFIG = new Properties();
 
-        FOLDER_ROOT = Paths.get(Driver.getModuleFolder(), this.INFO.MODULE_ARTIFACT_NAME).toFile();
+        FOLDER_ROOT = Paths.get(Driver.getModuleFolder(), this.getClass().getSimpleName()).toFile();
 
         FOLDER_CONF = Paths.get(FOLDER_ROOT.getAbsolutePath(), "conf").toFile();
         FOLDER_DATA = Paths.get(FOLDER_ROOT.getAbsolutePath(), "data").toFile();
@@ -128,7 +120,7 @@ public abstract class Handler {
                 throw new NotAFolderException("文件夹被文件占位：" + FOLDER_LOGS.getAbsolutePath());
             }
         } else {
-            logger.seek("创建目录 " + FOLDER_LOGS.getName());
+            logger.seek("创建目录 " + FOLDER_LOGS.getAbsolutePath());
             FOLDER_LOGS.mkdirs();
         }
     }
@@ -140,7 +132,7 @@ public abstract class Handler {
             try {
                 FILE_CONFIG.createNewFile();
             } catch (IOException exception) {
-                throw new BotException(INFO.MODULE_ARTIFACT_NAME + "初始化配置错误", exception);
+                throw new BotException("初始化配置错误", exception);
             }
             NEW_CONFIG = true;
         }
@@ -157,7 +149,7 @@ public abstract class Handler {
                 writer.flush();
                 writer.close();
             } catch (IOException exception) {
-                throw new BotException(INFO.MODULE_ARTIFACT_NAME + "初始化配置错误", exception);
+                throw new BotException("初始化配置错误", exception);
             }
             NEW_CONFIG = true;
         }
@@ -168,7 +160,7 @@ public abstract class Handler {
         try {
             CONFIG.load(new FileInputStream(FILE_CONFIG));
         } catch (IOException exception) {
-            throw new BotException(INFO.MODULE_ARTIFACT_NAME + "加载配置错误", exception);
+            throw new BotException("加载配置错误", exception);
         }
     }
 
@@ -177,7 +169,7 @@ public abstract class Handler {
         try {
             CONFIG.store(new FileOutputStream(FILE_CONFIG), null);
         } catch (IOException exception) {
-            throw new BotException(INFO.MODULE_ARTIFACT_NAME + "保存配置错误", exception);
+            throw new BotException("保存配置错误", exception);
         }
     }
 
@@ -186,8 +178,8 @@ public abstract class Handler {
         try {
             CONFIG.store(new FileOutputStream(FILE_CONFIG), comments);
         } catch (
-                IOException exception) {
-            throw new BotException(INFO.MODULE_ARTIFACT_NAME + "保存配置错误", exception);
+                  IOException exception) {
+            throw new BotException("保存配置错误", exception);
         }
     }
 

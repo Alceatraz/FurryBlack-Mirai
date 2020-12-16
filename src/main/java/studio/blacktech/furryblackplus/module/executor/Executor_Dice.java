@@ -1,66 +1,63 @@
-package studio.blacktech.furryblackplus.module.command;
+package studio.blacktech.furryblackplus.module.executor;
 
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.MessageChain;
-import net.mamoe.mirai.message.data.PlainText;
+import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
+import studio.blacktech.furryblackplus.system.command.FriendCommand;
 import studio.blacktech.furryblackplus.system.command.GroupCommand;
-import studio.blacktech.furryblackplus.system.command.PrivateCommand;
+import studio.blacktech.furryblackplus.system.command.TempCommand;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
 import studio.blacktech.furryblackplus.system.common.utilties.RandomTool;
-import studio.blacktech.furryblackplus.system.module.ModuleExecutor;
-
-public class Module_Dice extends ModuleExecutor {
+import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 
 
-    public Module_Dice() {
-        super(
-                new ModuleExecutorInfo(
-                        "handler_command_dice",
-                        "骰子",
-                        "1.0.0",
-                        "扔一个骰子",
-                        null,
-                        "dice",
-                        new String[]{
-                                "/dice - 投掷一枚骰子"
-                        })
-        );
+@ComponentHandlerExecutor(
+        name = "骰子",
+        description = "七面骰子",
+        privacy = {
+                "获取命令发送人"
+        },
+        command = "dice",
+        usage = {
+                "/dice - 投掷一枚骰子"
+        }
+)
+public class Executor_Dice extends EventHandlerExecutor {
+
+
+    public Executor_Dice(ExecutorInfo INFO) {
+        super(INFO);
     }
 
 
     @Override
     public void init() throws BotException {
-
     }
 
     @Override
     public void boot() throws BotException {
-
     }
 
     @Override
     public void shut() throws BotException {
-
     }
 
 
     @Override
-    public void handleTempMessage(PrivateCommand message) {
-
+    public void handleTempMessage(TempCommand message) {
+        message.getSender().sendMessage(dice());
     }
 
     @Override
-    public void handleFriendMessage(PrivateCommand message) {
-
+    public void handleFriendMessage(FriendCommand message) {
+        message.getSender().sendMessage(dice());
     }
 
     @Override
     public void handleGroupMessage(GroupCommand message) {
-
         At at = new At(message.getSender());
-        MessageChain temp = at.plus(new PlainText(dice()));
+        MessageChain temp = at.plus(dice());
         message.getGroup().sendMessage(temp);
-
     }
 
 

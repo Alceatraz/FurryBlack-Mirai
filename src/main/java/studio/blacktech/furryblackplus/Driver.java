@@ -5,7 +5,7 @@ import net.mamoe.mirai.contact.PermissionDeniedException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.widget.AutopairWidgets;
-import studio.blacktech.furryblackplus.system.Systemd;
+import studio.blacktech.furryblackplus.module.Systemd;
 import studio.blacktech.furryblackplus.system.common.exception.working.NotAFolderException;
 import studio.blacktech.furryblackplus.system.common.logger.LoggerX;
 
@@ -59,11 +59,8 @@ public class Driver {
     private static File FOLDER_LOGGER;
 
     private static File FILE_CONFIG;
-    private static File FILE_LOGGER;
-
 
     private static Properties CONFIG;
-
 
     private static JarFile JAR_INSTANCE;
 
@@ -105,7 +102,7 @@ public class Driver {
             FOLDER_LOGGER = Paths.get(userDir, "logger").toFile();
 
             FILE_CONFIG = Paths.get(FOLDER_CONFIG.getAbsolutePath(), "application.properties").toFile();
-            FILE_LOGGER = Paths.get(FOLDER_LOGGER.getAbsolutePath(), LoggerX.formatTime("yyyy_MM_dd_HH_mm_ss", BOOT_TIME) + ".txt").toFile();
+            File FILE_LOGGER = Paths.get(FOLDER_LOGGER.getAbsolutePath(), LoggerX.formatTime("yyyy_MM_dd_HH_mm_ss", BOOT_TIME) + ".txt").toFile();
 
 
             System.out.println("[FurryBlack][INIT]初始化目录");
@@ -169,19 +166,13 @@ public class Driver {
         }
 
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("[FurryBlack][SHUT]执行 Shutdown Hook");
-            if (systemd != null) systemd.shut();
-        }));
-
-
         try {
 
-
+            logger.seek("实例化Systemd");
             systemd = new Systemd();
 
+            logger.seek("初始化Systemd");
             systemd.init(FILE_CONFIG);
-
 
         } catch (Exception exception) {
 
@@ -191,15 +182,13 @@ public class Driver {
             exception.printStackTrace();
 
             System.exit(-1);
-
         }
 
 
         try {
 
-
+            logger.seek("启动Systemd");
             systemd.boot();
-
 
         } catch (Exception exception) {
 
@@ -209,7 +198,6 @@ public class Driver {
             exception.printStackTrace();
 
             System.exit(-1);
-
         }
 
 
@@ -258,11 +246,10 @@ public class Driver {
 
         enable = false;
 
+
         try {
 
-
             systemd.shut();
-
 
         } catch (Exception exception) {
             logger.error("关闭异常", exception);
