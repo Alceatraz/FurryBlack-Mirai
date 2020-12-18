@@ -31,6 +31,7 @@ import java.util.List;
                 "获取命令发送人",
                 "缓存群-成员-回合 结束后丢弃"
         },
+        users = false,
         command = "roulette",
         usage = {
                 "/roulette 筹码 - 加入或者发起一局俄罗斯轮盘赌 重复下注可增加被枪毙的几率"
@@ -157,7 +158,12 @@ public class Executor_Roulette extends EventHandlerExecutor {
                 builder.append(" ");
                 builder.append(temp.getMember().getId());
                 builder.append(" - ");
-                builder.append(temp.getJetton());
+                String jetton = temp.getJetton();
+                if (jetton.length() < 15) {
+                    builder.append(jetton, 0, 12).append("...");
+                } else {
+                    builder.append(jetton);
+                }
                 builder.append("\r\n");
             }
 
@@ -204,7 +210,7 @@ public class Executor_Roulette extends EventHandlerExecutor {
                 hint = false;
             }
 
-            gamblers.add(new PlayerJetton(message.getSender(), message.getCommandBody()));
+            gamblers.add(new PlayerJetton(message.getSender(), message.getCommandBody(200)));
             return gamblers.size() == 6;
         }
 

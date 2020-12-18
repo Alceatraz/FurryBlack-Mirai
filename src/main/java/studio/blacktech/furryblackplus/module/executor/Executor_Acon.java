@@ -21,6 +21,7 @@ import java.util.Map;
                 "按群存储耗工作模式",
                 "按群存储上次更改模式的时间戳"
         },
+        users = false,
         command = "acon",
         usage = {
                 "/acon cost - 耗电量",
@@ -104,7 +105,7 @@ public class Executor_Acon extends EventHandlerExecutor {
             WORKING_MODE.put(groupId, 0L);
         }
 
-        if (message.getParameterSection() > 0) {
+        if (message.getParameterLength() > 0) {
 
             BigInteger powerConsumption = CONSUMPTIONS.get(groupId);
 

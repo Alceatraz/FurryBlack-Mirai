@@ -1,6 +1,5 @@
 package studio.blacktech.furryblackplus.system.handler;
 
-import lombok.Getter;
 import studio.blacktech.furryblackplus.system.command.FriendCommand;
 import studio.blacktech.furryblackplus.system.command.GroupCommand;
 import studio.blacktech.furryblackplus.system.command.TempCommand;
@@ -8,10 +7,10 @@ import studio.blacktech.furryblackplus.system.command.TempCommand;
 public abstract class EventHandlerExecutor extends AbstractEventHandler {
 
 
-    @Getter
     public static class ExecutorInfo extends ModuleInfo {
         public final String COMMAND;
         public final String[] USAGE;
+        public final String HELP;
 
         public ExecutorInfo(
                 String NAME,
@@ -27,6 +26,23 @@ public abstract class EventHandlerExecutor extends AbstractEventHandler {
             );
             this.COMMAND = COMMAND;
             this.USAGE = USAGE;
+            StringBuilder builder = new StringBuilder();
+            builder.append(COMMAND);
+            builder.append(" ");
+            builder.append(NAME);
+            builder.append("\r\n");
+            builder.append(DESCRIPTION);
+            builder.append("\r\n命令用法: \r\n");
+            for (String temp : USAGE) {
+                builder.append(temp);
+                builder.append("\r\n");
+            }
+            builder.append("隐私: \r\n");
+            for (String temp : PRIVACY) {
+                builder.append(temp);
+                builder.append("\r\n");
+            }
+            HELP = builder.toString();
         }
     }
 

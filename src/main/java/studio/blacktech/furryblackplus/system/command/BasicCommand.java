@@ -16,6 +16,9 @@ import java.util.regex.Pattern;
 public class BasicCommand {
 
 
+    private MessageChain raw;
+
+
     private final String message;
 
     private final boolean command;
@@ -24,7 +27,7 @@ public class BasicCommand {
     private String commandName;
     private String commandBody;
 
-    private int section;
+    private int length;
     private String[] parameter;
 
 
@@ -49,7 +52,7 @@ public class BasicCommand {
 
         if (split < 0) {
             commandName = message.substring(1);
-            section = 0;
+            length = 0;
             return;
         }
 
@@ -139,7 +142,7 @@ public class BasicCommand {
         }
 
         parameter = result.toArray(new String[]{});
-        section = parameter.length;
+        this.length = parameter.length;
 
 
         System.out.println("[MESSAGE][DEBUG] " + this.toString());
@@ -150,6 +153,7 @@ public class BasicCommand {
 
     public BasicCommand(MessageChain messages) {
         this(messages.contentToString());
+        this.raw = messages;
     }
 
 
@@ -164,15 +168,20 @@ public class BasicCommand {
      * @return 拼接后的内容
      */
     public String join(int i) {
-        if (section == 0) {
+        if (length == 0) {
             return "";
         } else {
             StringBuilder builder = new StringBuilder();
-            for (; i < section; i++) {
+            for (; i < length; i++) {
                 builder.append(parameter[i]).append(" ");
             }
             return builder.substring(0, builder.length() - 1);
         }
+    }
+
+
+    public MessageChain getRaw() {
+        return raw;
     }
 
 
@@ -195,12 +204,18 @@ public class BasicCommand {
         return commandBody;
     }
 
-    public boolean hasCommandBody() {
-        return section > 0;
+    public String getCommandBody(int length) {
+        if (commandBody.length() > length) return commandBody.substring(0, length) + "...";
+        return commandBody;
     }
 
-    public int getParameterSection() {
-        return section;
+
+    public boolean hasCommandBody() {
+        return length > 0;
+    }
+
+    public int getParameterLength() {
+        return length;
     }
 
 

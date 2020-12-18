@@ -3,11 +3,16 @@ package studio.blacktech.furryblackplus.module;
 import kotlinx.serialization.json.Json;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactoryJvm;
+import net.mamoe.mirai.contact.Friend;
+import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.event.EventHandler;
 import net.mamoe.mirai.event.Events;
 import net.mamoe.mirai.event.Listener;
 import net.mamoe.mirai.event.ListenerHost;
+import net.mamoe.mirai.event.events.BotInvitedJoinGroupRequestEvent;
 import net.mamoe.mirai.event.events.BotOfflineEvent;
+import net.mamoe.mirai.event.events.NewFriendRequestEvent;
 import net.mamoe.mirai.message.FriendMessageEvent;
 import net.mamoe.mirai.message.GroupMessageEvent;
 import net.mamoe.mirai.message.TempMessageEvent;
@@ -18,11 +23,14 @@ import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.module.executor.Executor_Acon;
 import studio.blacktech.furryblackplus.module.executor.Executor_Chou;
 import studio.blacktech.furryblackplus.module.executor.Executor_Dice;
+import studio.blacktech.furryblackplus.module.executor.Executor_Echo;
 import studio.blacktech.furryblackplus.module.executor.Executor_Jrrp;
 import studio.blacktech.furryblackplus.module.executor.Executor_Roll;
 import studio.blacktech.furryblackplus.module.executor.Executor_Roulette;
+import studio.blacktech.furryblackplus.module.executor.Executor_Time;
 import studio.blacktech.furryblackplus.module.executor.Executor_Zhan;
 import studio.blacktech.furryblackplus.module.filter.Filter_UserDeny;
+import studio.blacktech.furryblackplus.module.filter.Filter_WordDeny;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerFilter;
 import studio.blacktech.furryblackplus.system.command.FriendCommand;
@@ -34,11 +42,15 @@ import studio.blacktech.furryblackplus.system.common.exception.initlization.Init
 import studio.blacktech.furryblackplus.system.common.exception.initlization.InitLockedException;
 import studio.blacktech.furryblackplus.system.common.exception.initlization.MisConfigException;
 import studio.blacktech.furryblackplus.system.common.logger.LoggerX;
+import studio.blacktech.furryblackplus.system.common.utilties.HashTool;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerFilter;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -172,6 +184,22 @@ public class Systemd implements ListenerHost {
     private Thread await;
 
 
+    private static String MESSAGE_INFO;
+    private static String MESSAGE_EULA;
+    private static String MESSAGE_HELP;
+    private static String MESSAGE_LIST_USERS;
+    private static String MESSAGE_LIST_GROUP;
+
+
+    private List<EventHandlerFilter> EVENT_HANDLER_FILTER;
+    private List<EventHandlerFilter> EVENT_HANDLER_FILTER_USERS;
+    private List<EventHandlerFilter> EVENT_HANDLER_FILTER_GROUP;
+
+    private List<EventHandlerExecutor> EVENT_HANDLER_EXECUTOR;
+    private Map<String, EventHandlerExecutor> EVENT_HANDLER_EXECUTOR_USERS;
+    private Map<String, EventHandlerExecutor> EVENT_HANDLER_EXECUTOR_GROUP;
+
+
     // ==========================================================================================================================
     // 对象控制
 
@@ -204,7 +232,16 @@ public class Systemd implements ListenerHost {
 
 
         // ==========================================================================================================================
-        // 扫描执行器
+        // 扫描模块
+
+
+        EVENT_HANDLER_FILTER = new LinkedList<>();
+        EVENT_HANDLER_FILTER_USERS = new LinkedList<>();
+        EVENT_HANDLER_FILTER_GROUP = new LinkedList<>();
+
+        EVENT_HANDLER_EXECUTOR = new LinkedList<>();
+        EVENT_HANDLER_EXECUTOR_USERS = new LinkedHashMap<>();
+        EVENT_HANDLER_EXECUTOR_GROUP = new LinkedHashMap<>();
 
 
         logger.seek("开始模块扫描");
@@ -212,7 +249,8 @@ public class Systemd implements ListenerHost {
 
         @SuppressWarnings("unchecked")
         Class<? extends EventHandlerFilter>[] FILTERS = new Class[]{
-                Filter_UserDeny.class
+                Filter_UserDeny.class,
+                Filter_WordDeny.class
         };
 
         @SuppressWarnings("unchecked")
@@ -220,8 +258,10 @@ public class Systemd implements ListenerHost {
                 Executor_Acon.class,
                 Executor_Chou.class,
                 Executor_Dice.class,
+                Executor_Echo.class,
                 Executor_Jrrp.class,
                 Executor_Roll.class,
+                Executor_Time.class,
                 Executor_Zhan.class,
                 Executor_Roulette.class
         };
@@ -230,6 +270,7 @@ public class Systemd implements ListenerHost {
         for (Class<? extends EventHandlerFilter> item : FILTERS) {
             try {
                 ComponentHandlerFilter annotation = item.getAnnotation(ComponentHandlerFilter.class);
+                if (!annotation.users() && !annotation.group()) continue; // 都不启用直接跳过注册
                 EventHandlerFilter.FilterInfo info = new EventHandlerFilter.FilterInfo(
                         annotation.name(),
                         annotation.description(),
@@ -239,6 +280,8 @@ public class Systemd implements ListenerHost {
                 EventHandlerFilter instance = item.getConstructor(EventHandlerFilter.FilterInfo.class).newInstance(info);
                 instance.init();
                 EVENT_HANDLER_FILTER.add(instance);
+                if (annotation.users()) EVENT_HANDLER_FILTER_USERS.add(instance);
+                if (annotation.group()) EVENT_HANDLER_FILTER_GROUP.add(instance);
             } catch (Exception exception) {
                 throw new BotException("过滤器初始化失败 " + item.getName(), exception);
             }
@@ -248,6 +291,7 @@ public class Systemd implements ListenerHost {
         for (Class<? extends EventHandlerExecutor> item : EXECUTORS) {
             try {
                 ComponentHandlerExecutor annotation = item.getAnnotation(ComponentHandlerExecutor.class);
+                if (!annotation.users() && !annotation.group()) continue; // 都不启用直接跳过注册
                 EventHandlerExecutor.ExecutorInfo info = new EventHandlerExecutor.ExecutorInfo(
                         annotation.name(),
                         annotation.description(),
@@ -258,7 +302,9 @@ public class Systemd implements ListenerHost {
                 logger.seek("注册执行器 " + info.COMMAND + " - " + item.getName());
                 EventHandlerExecutor instance = item.getConstructor(EventHandlerExecutor.ExecutorInfo.class).newInstance(info);
                 instance.init();
-                EVENT_HANDLER_EXECUTOR.put(instance.INFO.COMMAND, instance);
+                EVENT_HANDLER_EXECUTOR.add(instance);
+                if (annotation.users()) EVENT_HANDLER_EXECUTOR_USERS.put(instance.INFO.COMMAND, instance);
+                if (annotation.group()) EVENT_HANDLER_EXECUTOR_GROUP.put(instance.INFO.COMMAND, instance);
             } catch (Exception exception) {
                 throw new BotException("执行器初始化失败 " + item.getName(), exception);
             }
@@ -266,20 +312,48 @@ public class Systemd implements ListenerHost {
 
 
         // ==========================================================================================================================
-        // 启动阻塞
+        // 组装 /list 信息
 
 
-        await = new Thread(() -> {
-            blockLock.lock();
-            try {
-                blockCondition.await();
-            } catch (InterruptedException ignore) {
-                bot.close(null);
-            }
-            blockLock.unlock();
-        });
-        await.setContextClassLoader(getClass().getClassLoader());
-        await.setDaemon(false);
+        StringBuilder builder = new StringBuilder();
+
+
+        //
+
+
+        builder.setLength(0);
+
+        for (Map.Entry<String, EventHandlerExecutor> entry : EVENT_HANDLER_EXECUTOR_USERS.entrySet()) {
+            String key = entry.getKey();
+            EventHandlerExecutor value = entry.getValue();
+            builder.append(value.INFO.COMMAND);
+            builder.append(" ");
+            builder.append(value.INFO.NAME);
+            builder.append(" ");
+            builder.append(value.INFO.DESCRIPTION);
+            builder.append("\r\n");
+        }
+
+        MESSAGE_LIST_USERS = builder.toString();
+
+
+        //
+
+
+        builder.setLength(0);
+
+        for (Map.Entry<String, EventHandlerExecutor> entry : EVENT_HANDLER_EXECUTOR_GROUP.entrySet()) {
+            String k = entry.getKey();
+            EventHandlerExecutor v = entry.getValue();
+            builder.append(v.INFO.COMMAND);
+            builder.append(" ");
+            builder.append(v.INFO.NAME);
+            builder.append(" ");
+            builder.append(v.INFO.DESCRIPTION);
+            builder.append("\r\n");
+        }
+
+        MESSAGE_LIST_GROUP = builder.toString();
 
 
         // ==========================================================================================================================
@@ -325,6 +399,32 @@ public class Systemd implements ListenerHost {
         }
 
 
+        // ==========================================================================================================================
+        // 读取模板
+
+
+        File FILE_EULA = Paths.get(Driver.getConfigFolder(), "message_eula.txt").toFile();
+        File FILE_INFO = Paths.get(Driver.getConfigFolder(), "message_info.txt").toFile();
+        File FILE_HELP = Paths.get(Driver.getConfigFolder(), "message_help.txt").toFile();
+
+        MESSAGE_EULA = readFile(FILE_EULA);
+        MESSAGE_INFO = readFile(FILE_INFO);
+        MESSAGE_HELP = readFile(FILE_HELP);
+
+        MESSAGE_EULA = MESSAGE_EULA.replaceAll("\\$\\{VERSION}", Driver.getAppVersion());
+        MESSAGE_INFO = MESSAGE_INFO.replaceAll("\\$\\{VERSION}", Driver.getAppVersion());
+        MESSAGE_HELP = MESSAGE_HELP.replaceAll("\\$\\{VERSION}", Driver.getAppVersion());
+
+        String SHA_EULA = HashTool.SHA256(MESSAGE_EULA);
+        String SHA_INFO = HashTool.SHA256(MESSAGE_INFO);
+
+        MESSAGE_EULA = MESSAGE_EULA + "\r\nSHA-256: " + SHA_EULA;
+        MESSAGE_INFO = MESSAGE_INFO + "\r\nSHA-256: " + SHA_INFO;
+
+        logger.seek("EULA Digest " + SHA_EULA);
+        logger.seek("INFO Digest " + SHA_INFO);
+
+        // ==========================================================================================================================
         // 创建bot
 
 
@@ -386,8 +486,7 @@ public class Systemd implements ListenerHost {
         logger.info("启动执行器");
 
 
-        for (Map.Entry<String, EventHandlerExecutor> entry : EVENT_HANDLER_EXECUTOR.entrySet()) {
-            EventHandlerExecutor instance = entry.getValue();
+        for (EventHandlerExecutor instance : EVENT_HANDLER_EXECUTOR) {
             try {
                 instance.boot();
             } catch (Exception exception) {
@@ -405,7 +504,20 @@ public class Systemd implements ListenerHost {
 
 
         // ==========================================================================================================================
-        // 等待结束
+        // 启动阻塞
+
+
+        await = new Thread(() -> {
+            blockLock.lock();
+            try {
+                blockCondition.await();
+            } catch (InterruptedException ignore) {
+                bot.close(null);
+            }
+            blockLock.unlock();
+        });
+        await.setContextClassLoader(getClass().getClassLoader());
+        await.setDaemon(false);
 
         await.start();
 
@@ -419,17 +531,35 @@ public class Systemd implements ListenerHost {
     // ==========================================================================================================================================================
 
 
+    /**
+     * 即使发生异常也应该继续执行下一个
+     */
     public void shut() {
+
 
         if (await != null) await.interrupt();
 
-        EVENT_HANDLER_EXECUTOR.forEach((k, v) -> {
+
+        logger.info("关闭过滤器");
+
+        for (EventHandlerFilter instance : EVENT_HANDLER_FILTER) {
             try {
-                v.shut();
-            } catch (BotException exception) {
-                logger.error("关闭插件" + k + "发生异常", exception);
+                instance.shut();
+            } catch (Exception exception) {
+                logger.error("过滤器关闭失败 " + instance.getClass().getName(), exception);
             }
-        });
+        }
+
+
+        logger.info("关闭执行器");
+
+        for (EventHandlerExecutor instance : EVENT_HANDLER_EXECUTOR) {
+            try {
+                instance.shut();
+            } catch (Exception exception) {
+                logger.error("执行器关闭失败 " + instance.getClass().getName(), exception);
+            }
+        }
 
     }
 
@@ -450,6 +580,37 @@ public class Systemd implements ListenerHost {
             throw new MisConfigException("配置解析错误 " + temp, exception);
         }
         return result;
+    }
+
+
+    private String readFile(File file) throws BotException {
+
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+                logger.hint("创建新的文件 " + file.getAbsolutePath());
+            } catch (IOException exception) {
+                throw new BotException("文件创建失败 " + file.getAbsolutePath(), exception);
+            }
+        }
+        if (!file.exists()) throw new BotException("文件不存在 " + file.getAbsolutePath());
+        if (!file.canRead()) throw new BotException("文件无权读取 " + file.getAbsolutePath());
+
+        try (
+                FileReader fileReader = new FileReader(file, StandardCharsets.UTF_8);
+                BufferedReader bufferedReader = new BufferedReader(fileReader)
+        ) {
+
+            String temp;
+            StringBuilder builder = new StringBuilder();
+            while ((temp = bufferedReader.readLine()) != null) builder.append(temp).append("\r\n");
+            return builder.toString();
+
+        } catch (FileNotFoundException exception) {
+            throw new BotException("文件不存在 " + file.getAbsolutePath(), exception);
+        } catch (IOException exception) {
+            throw new BotException("文件读取失败 " + file.getAbsolutePath(), exception);
+        }
     }
 
 
@@ -500,59 +661,42 @@ public class Systemd implements ListenerHost {
     }
 
 
-    // ==========================================================================================================================
-    // 过滤器
-
-
-    private final List<EventHandlerFilter> EVENT_HANDLER_FILTER = new LinkedList<>();
-
-
-    @EventHandler(priority = Listener.EventPriority.NORMAL, concurrency = Listener.ConcurrencyKind.CONCURRENT)
-    public void handleTempMessageFilter(TempMessageEvent event) {
-        for (EventHandlerFilter eventHandlerFilter : EVENT_HANDLER_FILTER) {
-            if (eventHandlerFilter.handleTempMessage(event)) {
-                logger.hint("临时消息被拦截 " + event.getSender().getId() + " ->" + event.getMessage());
-                event.cancel();
-                break;
-            }
-        }
+    @EventHandler
+    public void handleBotInvitedJoinGroupRequestEvent(BotInvitedJoinGroupRequestEvent event) {
+        logger.hint("BOT被邀请入群 " + event.getGroupName() + "(" + event.getGroupId() + ") 邀请人 " + event.getInvitorNick() + "(" + event.getInvitorId() + ")");
+        event.accept();
     }
 
 
-    @EventHandler(priority = Listener.EventPriority.NORMAL, concurrency = Listener.ConcurrencyKind.CONCURRENT)
-    public void handleFriendMessageFilter(FriendMessageEvent event) {
-        for (EventHandlerFilter eventHandlerFilter : EVENT_HANDLER_FILTER) {
-            if (eventHandlerFilter.handleFriendMessage(event)) {
-                logger.hint("好友消息被拦截 " + event.getSender().getId() + " ->" + event.getMessage());
-                event.cancel();
-                break;
-            }
-        }
-    }
-
-
-    @EventHandler(priority = Listener.EventPriority.NORMAL, concurrency = Listener.ConcurrencyKind.CONCURRENT)
-    public void handleGroupMessageFilter(GroupMessageEvent event) {
-        for (EventHandlerFilter eventHandlerFilter : EVENT_HANDLER_FILTER) {
-            if (eventHandlerFilter.handleGroupMessage(event)) {
-                logger.hint("群组消息被拦截 " + event.getSender().getId() + " ->" + event.getMessage());
-                event.cancel();
-                break;
-            }
-        }
+    @EventHandler
+    public void handleNewFriendRequestEvent(NewFriendRequestEvent event) {
+        logger.hint("BOT被添加好友 " + event.getFromNick() + "(" + event.getFromId() + ")");
+        event.accept();
     }
 
 
     // ==========================================================================================================================
-    // 执行器
+    // MessageEvent居然不支持cancel
+    // 消息串
 
 
-    private final Map<String, EventHandlerExecutor> EVENT_HANDLER_EXECUTOR = new LinkedHashMap<>();
-
-
-    @EventHandler(priority = Listener.EventPriority.MONITOR, concurrency = Listener.ConcurrencyKind.CONCURRENT)
+    @EventHandler(
+            priority = Listener.EventPriority.MONITOR,
+            concurrency = Listener.ConcurrencyKind.CONCURRENT
+    )
     public void handleTempMessageExecutor(TempMessageEvent event) {
+
         try {
+
+            if (EVENT_HANDLER_FILTER_USERS
+                        .parallelStream()
+                        .anyMatch(
+                                item -> item.handleTempMessage(event)
+                        )
+            ) {
+                logger.hint("临时消息被拦截 " + event.getSender().getId() + " ->" + event.getMessage());
+                return;
+            }
 
             TempCommand message = new TempCommand(event.getSender(), event.getMessage());
 
@@ -562,24 +706,34 @@ public class Systemd implements ListenerHost {
 
                     case "?":
                     case "help":
-                        event.getSender().sendMessage("\uD83D\uDEA7 暂不可用"); // 🚧 路障 施工中
+                        // 🚧 路障 施工中
+                        // event.getSender().sendMessage("\uD83D\uDEA7 暂不可用");
+                        if (message.hasCommandBody()) {
+                            if (EVENT_HANDLER_EXECUTOR_USERS.containsKey(message.getParameterSegment(0))) {
+                                EventHandlerExecutor executor = EVENT_HANDLER_EXECUTOR_USERS.get(message.getParameterSegment(0));
+                                event.getSender().sendMessage(executor.INFO.HELP);
+                            }
+                        } else {
+                            event.getSender().sendMessage(MESSAGE_HELP);
+                        }
                         break;
 
                     case "list":
-                        StringBuilder builder = new StringBuilder();
-                        EVENT_HANDLER_EXECUTOR.forEach((k, v) -> {
-                            builder.append(v.INFO.COMMAND);
-                            builder.append(" ");
-                            builder.append(v.INFO.NAME);
-                            builder.append(" ");
-                            builder.append(v.INFO.DESCRIPTION);
-                            builder.append("\r\n");
-                        });
-                        event.getSender().sendMessage(builder.toString());
+                        event.getSender().sendMessage(MESSAGE_LIST_USERS);
+                        break;
+
+                    case "info":
+                        event.getSender().sendMessage(MESSAGE_INFO);
+                        break;
+
+                    case "eula":
+                        event.getSender().sendMessage(MESSAGE_EULA);
                         break;
 
                     default:
-                        if (EVENT_HANDLER_EXECUTOR.containsKey(message.getCommandName())) EVENT_HANDLER_EXECUTOR.get(message.getCommandName()).handleTempMessage(message);
+                        if (EVENT_HANDLER_EXECUTOR_USERS.containsKey(message.getCommandName())) {
+                            EVENT_HANDLER_EXECUTOR_USERS.get(message.getCommandName()).handleTempMessage(message);
+                        }
                 }
             }
 
@@ -589,9 +743,24 @@ public class Systemd implements ListenerHost {
     }
 
 
-    @EventHandler(priority = Listener.EventPriority.MONITOR, concurrency = Listener.ConcurrencyKind.CONCURRENT)
+    @EventHandler(
+            priority = Listener.EventPriority.MONITOR,
+            concurrency = Listener.ConcurrencyKind.CONCURRENT
+    )
     public void handleFriendMessageExecutor(FriendMessageEvent event) {
+
         try {
+
+            if (EVENT_HANDLER_FILTER_USERS
+                        .parallelStream()
+                        .anyMatch(
+                                item -> item.handleFriendMessage(event)
+                        )
+            ) {
+                logger.hint("好友消息被拦截 " + event.getSender().getId() + " ->" + event.getMessage());
+                return;
+            }
+
 
             FriendCommand message = new FriendCommand(event.getSender(), event.getMessage());
 
@@ -601,24 +770,34 @@ public class Systemd implements ListenerHost {
 
                     case "?":
                     case "help":
-                        event.getSender().sendMessage("\uD83D\uDEA7 暂不可用"); // 🚧 路障 施工中
+                        // 🚧 路障 施工中
+                        // event.getSender().sendMessage("\uD83D\uDEA7 暂不可用");
+                        if (message.hasCommandBody()) {
+                            if (EVENT_HANDLER_EXECUTOR_USERS.containsKey(message.getParameterSegment(0))) {
+                                EventHandlerExecutor executor = EVENT_HANDLER_EXECUTOR_USERS.get(message.getParameterSegment(0));
+                                event.getSender().sendMessage(executor.INFO.HELP);
+                            }
+                        } else {
+                            event.getSender().sendMessage(MESSAGE_HELP);
+                        }
                         break;
 
                     case "list":
-                        StringBuilder builder = new StringBuilder();
-                        EVENT_HANDLER_EXECUTOR.forEach((k, v) -> {
-                            builder.append(v.INFO.COMMAND);
-                            builder.append(" ");
-                            builder.append(v.INFO.NAME);
-                            builder.append(" ");
-                            builder.append(v.INFO.DESCRIPTION);
-                            builder.append("\r\n");
-                        });
-                        event.getSender().sendMessage(builder.toString());
+                        event.getSender().sendMessage(MESSAGE_LIST_USERS);
+                        break;
+
+                    case "info":
+                        event.getSender().sendMessage(MESSAGE_INFO);
+                        break;
+
+                    case "eula":
+                        event.getSender().sendMessage(MESSAGE_EULA);
                         break;
 
                     default:
-                        if (EVENT_HANDLER_EXECUTOR.containsKey(message.getCommandName())) EVENT_HANDLER_EXECUTOR.get(message.getCommandName()).handleFriendMessage(message);
+                        if (EVENT_HANDLER_EXECUTOR_USERS.containsKey(message.getCommandName())) {
+                            EVENT_HANDLER_EXECUTOR_USERS.get(message.getCommandName()).handleFriendMessage(message);
+                        }
                 }
             }
 
@@ -628,9 +807,23 @@ public class Systemd implements ListenerHost {
     }
 
 
-    @EventHandler(priority = Listener.EventPriority.MONITOR, concurrency = Listener.ConcurrencyKind.CONCURRENT)
+    @EventHandler(
+            priority = Listener.EventPriority.MONITOR,
+            concurrency = Listener.ConcurrencyKind.CONCURRENT
+    )
     public void handleGroupMessageExecutor(GroupMessageEvent event) {
+
         try {
+
+            if (EVENT_HANDLER_FILTER_GROUP
+                        .parallelStream()
+                        .anyMatch(
+                                item -> item.handleGroupMessage(event)
+                        )
+            ) {
+                logger.hint("群组消息被拦截 " + event.getSender().getId() + " ->" + event.getMessage());
+                return;
+            }
 
             GroupCommand message = new GroupCommand(event.getGroup(), event.getSender(), event.getMessage());
 
@@ -640,24 +833,34 @@ public class Systemd implements ListenerHost {
 
                     case "?":
                     case "help":
-                        event.getGroup().sendMessage("\uD83D\uDEA7 暂不可用"); // 🚧 路障 施工中
+                        // 🚧 路障 施工中
+                        // event.getGroup().sendMessage("\uD83D\uDEA7 暂不可用");
+                        if (message.hasCommandBody()) {
+                            if (EVENT_HANDLER_EXECUTOR_GROUP.containsKey(message.getParameterSegment(0))) {
+                                EventHandlerExecutor executor = EVENT_HANDLER_EXECUTOR_GROUP.get(message.getParameterSegment(0));
+                                event.getSender().sendMessage(executor.INFO.HELP);
+                            }
+                        } else {
+                            event.getSender().sendMessage(MESSAGE_HELP);
+                        }
                         break;
 
                     case "list":
-                        StringBuilder builder = new StringBuilder();
-                        EVENT_HANDLER_EXECUTOR.forEach((k, v) -> {
-                            builder.append(v.INFO.COMMAND);
-                            builder.append(" ");
-                            builder.append(v.INFO.NAME);
-                            builder.append(" ");
-                            builder.append(v.INFO.DESCRIPTION);
-                            builder.append("\r\n");
-                        });
-                        event.getGroup().sendMessage(new At(message.getSender()).plus("\r\n").plus(builder.toString()));
+                        event.getSender().sendMessage(MESSAGE_LIST_GROUP);
+                        break;
+
+                    case "info":
+                        event.getSender().sendMessage(MESSAGE_INFO);
+                        break;
+
+                    case "eula":
+                        event.getSender().sendMessage(MESSAGE_EULA);
                         break;
 
                     default:
-                        if (EVENT_HANDLER_EXECUTOR.containsKey(message.getCommandName())) EVENT_HANDLER_EXECUTOR.get(message.getCommandName()).handleGroupMessage(message);
+                        if (EVENT_HANDLER_EXECUTOR_GROUP.containsKey(message.getCommandName())) {
+                            EVENT_HANDLER_EXECUTOR_GROUP.get(message.getCommandName()).handleGroupMessage(message);
+                        }
 
                 }
             }
@@ -678,6 +881,22 @@ public class Systemd implements ListenerHost {
     // ⭕
     // 🚧
     // 🀄
+
+
+    public void sendGroupMessage(long groupid, long userid, String message) {
+        Group group = bot.getGroup(groupid);
+        Member member = group.get(userid);
+        sendGroupMessage(group, member, message);
+    }
+
+    public void sendGroupMessage(Group group, Member member, String message) {
+        group.sendMessage(new At(member).plus(message));
+    }
+
+
+    public Friend getFriend(long id) {
+        return bot.getFriend(id);
+    }
 
 
     private BotConfiguration extractBotConfig() throws MisConfigException {
@@ -827,5 +1046,6 @@ public class Systemd implements ListenerHost {
 
 
 }
+
 
 

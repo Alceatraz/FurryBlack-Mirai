@@ -76,9 +76,7 @@ public class Executor_Jrrp extends EventHandlerExecutor {
 
     @Override
     public void handleGroupMessage(GroupCommand message) {
-        message.getGroup().sendMessage(new At(message.getSender())
-                                               .plus("今天的运气是" + getRp(message.getSender().getId()) + "% !!!")
-        );
+        message.getGroup().sendMessage(new At(message.getSender()).plus("今天的运气是" + getRp(message.getSender().getId()) + "% !!!"));
     }
 
 
@@ -112,6 +110,7 @@ public class Executor_Jrrp extends EventHandlerExecutor {
                         time = time - date.getHours() * 3600L;
                         time = time * 1000L;
 
+                        //noinspection BusyWait
                         Thread.sleep(time);
 
                         JRRP.clear();

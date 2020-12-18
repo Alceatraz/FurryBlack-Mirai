@@ -1,16 +1,20 @@
 package studio.blacktech.furryblackplus;
 
 
+import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.contact.PermissionDeniedException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.widget.AutopairWidgets;
 import studio.blacktech.furryblackplus.module.Systemd;
+import studio.blacktech.furryblackplus.system.command.BasicCommand;
 import studio.blacktech.furryblackplus.system.common.exception.working.NotAFolderException;
 import studio.blacktech.furryblackplus.system.common.logger.LoggerX;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Properties;
@@ -34,13 +38,14 @@ public class Driver {
     // ==========================================================================================================================================================
 
 
-    private final static String APP_VERSION = "0.0.0";
+    private final static String APP_VERSION = "0.1.1";
 
 
     private final static long BOOT_TIME = System.currentTimeMillis();
 
 
     //
+
 
     private static boolean enable = true;
 
@@ -81,7 +86,31 @@ public class Driver {
         System.out.println("[FurryBlack][BOOT] FurryBlackPlus Mirai - ver " + APP_VERSION + " " + LoggerX.formatTime("yyyy-MM-dd HH:mm:ss", BOOT_TIME));
 
 
+        LineReader jlineReader = null;
+
+        BufferedReader bufferedReader = null;
+
+        boolean JLINE = true;
+
         try {
+
+
+            // ==========================================================================================================================
+            // 初始化文件
+
+
+            JLINE = !Arrays.asList(args).contains("--nojline");
+
+
+            if (JLINE) {
+                jlineReader = LineReaderBuilder.builder().build();
+                AutopairWidgets autopairWidgets = new AutopairWidgets(jlineReader);
+                autopairWidgets.enable();
+                System.out.println("[FurryBlack][INIT]使用JLine控制台");
+            } else {
+                bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+                System.out.println("[FurryBlack][INIT]BufferReader控制台");
+            }
 
 
             // ==========================================================================================================================
@@ -201,38 +230,47 @@ public class Driver {
         }
 
 
-        LineReader reader = LineReaderBuilder.builder().build();
-
-
-        AutopairWidgets autopairWidgets = new AutopairWidgets(reader);
-        autopairWidgets.enable();
-
-
         console:
         while (true) {
 
+
             try {
 
+                String temp;
 
-                String temp = reader.readLine("[console]$ ");
-
+                if (JLINE) {
+                    temp = jlineReader.readLine("[console]$ ");
+                } else {
+                    temp = bufferedReader.readLine();
+                }
 
                 if (temp == null || temp.equals("")) continue;
 
+                BasicCommand command = new BasicCommand(temp);
 
-                switch (temp) {
+                if (!command.isCommand()) {
+                    System.out.println("所有命令以/开头");
+                    continue;
+                }
 
+                switch (command.getCommandName()) {
 
-                    case "?":
-                    case ".help":
-                        System.out.println("所有命令以.开头");
-
-                    case ".exit":
+                    case "exit":
                         break console;
 
+                    case "help":
+                        System.out.println("所有命令以/开头");
+                        System.out.println("exit关闭");
+                        break;
+
+                    case "send":
+                        Friend friend = systemd.getFriend(Long.parseLong(command.getParameterSegment(0)));
+                        friend.sendMessage(command.join(1));
+                        break;
 
                     default:
-                        System.out.println("暂时没有功能");
+                        System.out.println("没有此命令");
+                        break;
 
                 }
 

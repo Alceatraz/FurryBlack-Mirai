@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
                 "获取命令发送人",
                 "获取群成员列表"
         },
+        users = false,
         command = "chou",
         usage = {
                 "/chou - 抽一个人",
@@ -64,6 +65,7 @@ public class Executor_Chou extends EventHandlerExecutor {
         if (!FILE_EXCLUDE.exists()) {
             try {
                 FILE_EXCLUDE.createNewFile();
+                logger.hint("创建新的配置文件 -> " + FILE_EXCLUDE.getAbsolutePath());
             } catch (IOException exception) {
                 throw new BotException("创建文件失败 -> " + FILE_EXCLUDE.getAbsolutePath(), exception);
             }
@@ -160,9 +162,9 @@ public class Executor_Chou extends EventHandlerExecutor {
             Member member = collect.get(RandomTool.nextInt(collect.size()));
             StringBuilder builder = new StringBuilder();
 
-            if (message.getParameterSection() > 0) {
+            if (message.getParameterLength() > 0) {
                 builder.append("因为: ");
-                builder.append(message.getCommandBody());
+                builder.append(message.getCommandBody(200));
                 builder.append("\r\n");
             }
 

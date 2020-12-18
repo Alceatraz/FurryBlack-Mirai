@@ -111,10 +111,10 @@ public class Executor_Zhan extends EventHandlerExecutor {
 
 
     private String chooseCard(BasicCommand basicCommand) {
-        if (basicCommand.getParameterSection() == 0) {
+        if (basicCommand.getParameterLength() == 0) {
             return "你不能占卜空气";
         } else {
-            return "你因为 " + basicCommand.getCommandBody() + "\r\n抽到了：" + CARD[RandomTool.nextInt(44)];
+            return "你因为 " + basicCommand.getCommandBody(200) + "\r\n抽到了：" + CARD[RandomTool.nextInt(44)];
         }
     }
 }

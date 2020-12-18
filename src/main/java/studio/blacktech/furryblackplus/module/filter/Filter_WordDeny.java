@@ -14,30 +14,26 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @ComponentHandlerFilter(
-        name = "用户过滤",
-        description = "按照ID过滤用户和群",
+        name = "正则过滤",
+        description = "按照正则过滤消息",
         privacy = {
                 "获取消息来源"
         }
 )
-public class Filter_UserDeny extends EventHandlerFilter {
+public class Filter_WordDeny extends EventHandlerFilter {
 
 
-    public Filter_UserDeny(FilterInfo INFO) {
+    public Filter_WordDeny(FilterInfo INFO) {
         super(INFO);
     }
 
 
-    private Set<Long> USER_IGNORE;
-    private Set<Long> GROUP_IGNORE;
-    private Map<Long, Set<Long>> MEMBER_IGNORE;
+    private List<String> REGEXES;
 
 
     @Override
@@ -46,9 +42,9 @@ public class Filter_UserDeny extends EventHandlerFilter {
         initAppFolder();
         initConfFolder();
 
-        USER_IGNORE = new HashSet<>();
-        GROUP_IGNORE = new HashSet<>();
-        MEMBER_IGNORE = new TreeMap<>();
+
+        REGEXES = new ArrayList<>();
+
 
         File FILE_BLACKLIST = Paths.get(FOLDER_CONF.getAbsolutePath(), "blacklist.txt").toFile();
 
@@ -64,11 +60,7 @@ public class Filter_UserDeny extends EventHandlerFilter {
         if (!FILE_BLACKLIST.canRead()) throw new BotException("文件无权读取 -> " + FILE_BLACKLIST.getAbsolutePath());
 
 
-        long gropid;
-        long userid;
-
         String line;
-        String[] temp;
 
         try (
                 FileInputStream fileInputStream = new FileInputStream(FILE_BLACKLIST);
@@ -79,38 +71,11 @@ public class Filter_UserDeny extends EventHandlerFilter {
             while ((line = reader.readLine()) != null) {
 
                 if (line.startsWith("#")) continue;
-                if (!line.contains(":")) continue;
                 if (line.contains("#")) line = line.substring(0, line.indexOf("#")).trim();
 
-                temp = line.split(":");
+                REGEXES.add(line);
+                logger.seek("添加规则 " + line);
 
-                if (temp.length != 2) {
-                    logger.warning("配置无效 " + line);
-                    continue;
-                }
-
-                if (temp[0].equals("*")) { // Global Deny User
-                    userid = Long.parseLong(temp[1]);
-                    USER_IGNORE.add(userid);
-                    logger.seek("拉黑用户 " + userid);
-
-                } else if (temp[1].equals("*")) { // Deny Group
-                    gropid = Long.parseLong(temp[0]);
-                    GROUP_IGNORE.add(gropid);
-                    logger.seek("拉黑群组 " + gropid);
-
-                } else { // Deny Member
-                    gropid = Long.parseLong(temp[0]);
-                    userid = Long.parseLong(temp[1]);
-                    Set<Long> tempSet;
-                    if (MEMBER_IGNORE.containsKey(gropid)) {
-                        tempSet = MEMBER_IGNORE.get(gropid);
-                    } else {
-                        MEMBER_IGNORE.put(gropid, tempSet = new HashSet<>());
-                    }
-                    tempSet.add(userid);
-                    logger.seek("拉黑成员 " + gropid + " - " + userid);
-                }
             }
 
         } catch (IOException exception) {
@@ -129,18 +94,32 @@ public class Filter_UserDeny extends EventHandlerFilter {
 
     @Override
     public boolean handleTempMessage(TempMessageEvent message) {
-        return USER_IGNORE.contains(message.getSender().getId());
+        String temp = message.getMessage().contentToString();
+        return REGEXES.parallelStream().anyMatch(temp::matches);
     }
+
 
     @Override
     public boolean handleFriendMessage(FriendMessageEvent message) {
-        return USER_IGNORE.contains(message.getSender().getId());
+        String temp = message.getMessage().contentToString();
+        return REGEXES.parallelStream().anyMatch(temp::matches);
     }
+
 
     @Override
     public boolean handleGroupMessage(GroupMessageEvent message) {
-        if (GROUP_IGNORE.contains(message.getGroup().getId())) return true;
-        if (MEMBER_IGNORE.containsKey(message.getGroup().getId())) return MEMBER_IGNORE.get(message.getGroup().getId()).contains(message.getSender().getId());
-        return false;
+/*                return message.getMessage()
+                               .parallelStream()
+                               .filter(item -> item instanceof PlainText)
+                               .anyMatch(
+                                       item -> REGEXES.parallelStream()
+                                                       .anyMatch(
+                                                               regex -> item.toString().matches(regex)
+                                                       )
+                               );*/
+        String temp = message.getMessage().contentToString();
+        return REGEXES.parallelStream().anyMatch(temp::matches);
     }
+
+
 }

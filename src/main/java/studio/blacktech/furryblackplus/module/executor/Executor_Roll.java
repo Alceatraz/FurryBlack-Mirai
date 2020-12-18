@@ -70,7 +70,7 @@ public class Executor_Roll extends EventHandlerExecutor {
         String res = null;
         SecureRandom random = new SecureRandom();
 
-        switch (basicCommand.getParameterSection()) {
+        switch (basicCommand.getParameterLength()) {
 
             // ============================================================
 
@@ -87,7 +87,7 @@ public class Executor_Roll extends EventHandlerExecutor {
                     res = Integer.toString(random.nextInt(range));
 
                 } catch (Exception ignored) {
-                    res = basicCommand.getCommandBody() + " 是 " + (random.nextBoolean() ? " 1️⃣" : " 0️⃣");
+                    res = basicCommand.getCommandBody(200) + " 是 " + (random.nextBoolean() ? " 1️⃣" : " 0️⃣");
                 }
                 break;
 

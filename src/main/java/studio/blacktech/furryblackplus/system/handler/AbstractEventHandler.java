@@ -2,7 +2,6 @@ package studio.blacktech.furryblackplus.system.handler;
 
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
 import studio.blacktech.furryblackplus.system.common.exception.working.NotAFolderException;
@@ -21,7 +20,6 @@ import java.util.Properties;
 public abstract class AbstractEventHandler {
 
 
-    @Getter
     @AllArgsConstructor
     public static class ModuleInfo {
 
