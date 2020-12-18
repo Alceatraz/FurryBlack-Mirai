@@ -38,7 +38,7 @@ public class Driver {
     // ==========================================================================================================================================================
 
 
-    private final static String APP_VERSION = "0.1.1";
+    private final static String APP_VERSION = "0.1.2";
 
 
     private final static long BOOT_TIME = System.currentTimeMillis();
@@ -246,12 +246,12 @@ public class Driver {
 
                 if (temp == null || temp.equals("")) continue;
 
-                BasicCommand command = new BasicCommand(temp);
-
-                if (!command.isCommand()) {
-                    System.out.println("所有命令以/开头");
+                if (temp.charAt(0) == '/') {
+                    System.out.println("控制台命令不要加/");
                     continue;
                 }
+
+                BasicCommand command = new BasicCommand("/" + temp);
 
                 switch (command.getCommandName()) {
 
@@ -259,14 +259,27 @@ public class Driver {
                         break console;
 
                     case "help":
-                        System.out.println("所有命令以/开头");
                         System.out.println("exit关闭");
+                        System.out.println("list列出模块");
+                        System.out.println("reload重启模");
                         break;
 
                     case "send":
                         Friend friend = systemd.getFriend(Long.parseLong(command.getParameterSegment(0)));
                         friend.sendMessage(command.join(1));
                         break;
+
+                    case "list":
+                        systemd.listAllPlugin().forEach(System.out::println);
+                        break;
+
+
+                    case "reload":
+                        for (String s : command.getParameterSegment()) {
+                            systemd.reloadPlugin(s);
+                        }
+                        break;
+
 
                     default:
                         System.out.println("没有此命令");

@@ -113,7 +113,7 @@ public class Executor_Chou extends EventHandlerExecutor {
 
                 tempList.add(userid);
 
-                logger.seek("排除成员 " + gropid + " - " + userid);
+                logger.hint("排除成员 " + gropid + " - " + userid);
             }
 
         } catch (IOException exception) {

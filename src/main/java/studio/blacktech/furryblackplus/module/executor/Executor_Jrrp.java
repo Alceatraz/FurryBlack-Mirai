@@ -7,12 +7,15 @@ import studio.blacktech.furryblackplus.system.command.FriendCommand;
 import studio.blacktech.furryblackplus.system.command.GroupCommand;
 import studio.blacktech.furryblackplus.system.command.TempCommand;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
+import studio.blacktech.furryblackplus.system.common.utilties.DateTool;
 import studio.blacktech.furryblackplus.system.common.utilties.RandomTool;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 @ComponentHandlerExecutor(
@@ -35,9 +38,9 @@ public class Executor_Jrrp extends EventHandlerExecutor {
     }
 
 
-    private Thread thread;
-
     private Map<Long, Integer> JRRP;
+
+    private Timer timer;
 
 
     @Override
@@ -48,19 +51,22 @@ public class Executor_Jrrp extends EventHandlerExecutor {
     @Override
     public void boot() throws BotException {
         logger.info("启动工作线程");
-        thread = new Thread(new Worker());
-        thread.start();
+        timer = new Timer();
+        timer.scheduleAtFixedRate(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        JRRP.clear();
+                    }
+                },
+                DateTool.getNextDate(),
+                86400000L
+        );
     }
 
     @Override
-    public void shut() throws BotException {
-        try {
-            thread.interrupt();
-            thread.join();
-            logger.info("关闭工作线程");
-        } catch (Exception exception) {
-            throw new BotException(exception);
-        }
+    public void shut() {
+        timer.cancel();
     }
 
 
@@ -93,6 +99,8 @@ public class Executor_Jrrp extends EventHandlerExecutor {
         @Override
         public void run() {
 
+            boolean interrupt = false;
+
             long time;
             Date date;
 
@@ -117,14 +125,11 @@ public class Executor_Jrrp extends EventHandlerExecutor {
                     }
 
                 } catch (InterruptedException ignored) {
-
-
+                    interrupt = true;
+                } catch (Exception exception) {
+                    logger.error("计划任务异常", exception);
                 }
-
-
-            } while (Driver.isEnable());
-
-
+            } while (Driver.isEnable() && interrupt);
         }
     }
 }

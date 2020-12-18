@@ -43,4 +43,11 @@ public @interface ComponentHandlerFilter {
      */
     boolean group() default true;
 
+
+    /**
+     * @return 插件的代码名字 用于控制台
+     */
+    String artificial() default "";
+
+
 }

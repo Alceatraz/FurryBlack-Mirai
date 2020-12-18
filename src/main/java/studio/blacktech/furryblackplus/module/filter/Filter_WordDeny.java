@@ -23,7 +23,8 @@ import java.util.List;
         description = "按照正则过滤消息",
         privacy = {
                 "获取消息来源"
-        }
+        },
+        artificial = "worddeny"
 )
 public class Filter_WordDeny extends EventHandlerFilter {
 
@@ -74,7 +75,7 @@ public class Filter_WordDeny extends EventHandlerFilter {
                 if (line.contains("#")) line = line.substring(0, line.indexOf("#")).trim();
 
                 REGEXES.add(line);
-                logger.seek("添加规则 " + line);
+                logger.hint("添加规则 " + line);
 
             }
 

@@ -43,6 +43,7 @@ import studio.blacktech.furryblackplus.system.common.exception.initlization.Init
 import studio.blacktech.furryblackplus.system.common.exception.initlization.MisConfigException;
 import studio.blacktech.furryblackplus.system.common.logger.LoggerX;
 import studio.blacktech.furryblackplus.system.common.utilties.HashTool;
+import studio.blacktech.furryblackplus.system.handler.AbstractEventHandler;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerFilter;
 
@@ -63,6 +64,7 @@ import java.util.Properties;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 
 public class Systemd implements ListenerHost {
@@ -191,11 +193,11 @@ public class Systemd implements ListenerHost {
     private static String MESSAGE_LIST_GROUP;
 
 
-    private List<EventHandlerFilter> EVENT_HANDLER_FILTER;
+    private Map<String, AbstractEventHandler> EVENT_HANDLER;
+
     private List<EventHandlerFilter> EVENT_HANDLER_FILTER_USERS;
     private List<EventHandlerFilter> EVENT_HANDLER_FILTER_GROUP;
 
-    private List<EventHandlerExecutor> EVENT_HANDLER_EXECUTOR;
     private Map<String, EventHandlerExecutor> EVENT_HANDLER_EXECUTOR_USERS;
     private Map<String, EventHandlerExecutor> EVENT_HANDLER_EXECUTOR_GROUP;
 
@@ -235,11 +237,11 @@ public class Systemd implements ListenerHost {
         // 扫描模块
 
 
-        EVENT_HANDLER_FILTER = new LinkedList<>();
+        EVENT_HANDLER = new LinkedHashMap<>();
+
         EVENT_HANDLER_FILTER_USERS = new LinkedList<>();
         EVENT_HANDLER_FILTER_GROUP = new LinkedList<>();
 
-        EVENT_HANDLER_EXECUTOR = new LinkedList<>();
         EVENT_HANDLER_EXECUTOR_USERS = new LinkedHashMap<>();
         EVENT_HANDLER_EXECUTOR_GROUP = new LinkedHashMap<>();
 
@@ -279,7 +281,7 @@ public class Systemd implements ListenerHost {
                 logger.seek("注册过滤器 " + item.getName());
                 EventHandlerFilter instance = item.getConstructor(EventHandlerFilter.FilterInfo.class).newInstance(info);
                 instance.init();
-                EVENT_HANDLER_FILTER.add(instance);
+                EVENT_HANDLER.put(annotation.artificial(), instance);
                 if (annotation.users()) EVENT_HANDLER_FILTER_USERS.add(instance);
                 if (annotation.group()) EVENT_HANDLER_FILTER_GROUP.add(instance);
             } catch (Exception exception) {
@@ -302,7 +304,7 @@ public class Systemd implements ListenerHost {
                 logger.seek("注册执行器 " + info.COMMAND + " - " + item.getName());
                 EventHandlerExecutor instance = item.getConstructor(EventHandlerExecutor.ExecutorInfo.class).newInstance(info);
                 instance.init();
-                EVENT_HANDLER_EXECUTOR.add(instance);
+                EVENT_HANDLER.put(annotation.command(), instance);
                 if (annotation.users()) EVENT_HANDLER_EXECUTOR_USERS.put(instance.INFO.COMMAND, instance);
                 if (annotation.group()) EVENT_HANDLER_EXECUTOR_GROUP.put(instance.INFO.COMMAND, instance);
             } catch (Exception exception) {
@@ -468,29 +470,15 @@ public class Systemd implements ListenerHost {
 
 
         // ==========================================================================================================================
-        // 列出所有好友和群组
+        // 启动模块
 
 
-        logger.info("启动过滤器");
-
-
-        for (EventHandlerFilter instance : EVENT_HANDLER_FILTER) {
+        for (Map.Entry<String, AbstractEventHandler> entry : EVENT_HANDLER.entrySet()) {
             try {
-                instance.boot();
+                entry.getValue().boot();
+                logger.info("启动模块 " + entry.getKey() + " -> " + entry.getValue().getClass().getName());
             } catch (Exception exception) {
-                throw new BotException("过滤器启动失败 " + instance.getClass().getName(), exception);
-            }
-        }
-
-
-        logger.info("启动执行器");
-
-
-        for (EventHandlerExecutor instance : EVENT_HANDLER_EXECUTOR) {
-            try {
-                instance.boot();
-            } catch (Exception exception) {
-                throw new BotException("执行器启动失败 " + instance.getClass().getName(), exception);
+                throw new BotException("过滤器启动失败 " + entry.getValue().getClass().getName(), exception);
             }
         }
 
@@ -499,8 +487,8 @@ public class Systemd implements ListenerHost {
         // 列出所有好友和群组
 
 
-        bot.getFriends().forEach(item -> logger.seek("F " + item.getNick() + "(" + item.getId() + ")"));
-        bot.getGroups().forEach(item -> logger.seek("G " + item.getName() + "(" + item.getId() + ") " + item.getMembers().size() + " -> " + item.getOwner().getNameCard() + "(" + item.getOwner().getId() + ")"));
+        bot.getFriends().forEach(item -> logger.seek(" F " + item.getNick() + "(" + item.getId() + ")"));
+        bot.getGroups().forEach(item -> logger.seek(" G " + item.getName() + "(" + item.getId() + ") " + item.getMembers().size() + " -> " + item.getOwner().getNameCard() + "(" + item.getOwner().getId() + ")"));
 
 
         // ==========================================================================================================================
@@ -540,24 +528,16 @@ public class Systemd implements ListenerHost {
         if (await != null) await.interrupt();
 
 
-        logger.info("关闭过滤器");
+        // ==========================================================================================================================
+        // 启动模块
 
-        for (EventHandlerFilter instance : EVENT_HANDLER_FILTER) {
+
+        for (Map.Entry<String, AbstractEventHandler> entry : EVENT_HANDLER.entrySet()) {
             try {
-                instance.shut();
+                entry.getValue().shut();
+                logger.info("关闭模块 " + entry.getKey() + " -> " + entry.getValue().getClass().getName());
             } catch (Exception exception) {
-                logger.error("过滤器关闭失败 " + instance.getClass().getName(), exception);
-            }
-        }
-
-
-        logger.info("关闭执行器");
-
-        for (EventHandlerExecutor instance : EVENT_HANDLER_EXECUTOR) {
-            try {
-                instance.shut();
-            } catch (Exception exception) {
-                logger.error("执行器关闭失败 " + instance.getClass().getName(), exception);
+                logger.error("关闭失败 " + entry.getValue().getClass().getName(), exception);
             }
         }
 
@@ -883,6 +863,49 @@ public class Systemd implements ListenerHost {
     // 🀄
 
 
+    // ==========================================================================================================================================================
+    //
+    // 模块相关
+    //
+    // ==========================================================================================================================================================
+
+
+    public List<String> listAllPlugin() {
+        return EVENT_HANDLER.keySet().stream().collect(Collectors.toUnmodifiableList());
+    }
+
+
+    public void reloadPlugin(String name) {
+        if (!EVENT_HANDLER.containsKey(name)) {
+            logger.warning("不存在此模块 -> " + name);
+            return;
+        }
+        AbstractEventHandler instance = EVENT_HANDLER.get(name);
+        try {
+            logger.info("停止 " + name);
+            instance.shut();
+            logger.info("加载 " + name);
+            instance.init();
+            logger.info("启动 " + name);
+            instance.boot();
+        } catch (BotException exception) {
+            logger.warning("重载模块发生错误 -> " + name, exception);
+        }
+    }
+
+
+    // ==========================================================================================================================================================
+    //
+    // BOT相关封装
+    //
+    // ==========================================================================================================================================================
+
+
+    public Friend getFriend(long id) {
+        return bot.getFriend(id);
+    }
+
+
     public void sendGroupMessage(long groupid, long userid, String message) {
         Group group = bot.getGroup(groupid);
         Member member = group.get(userid);
@@ -894,9 +917,11 @@ public class Systemd implements ListenerHost {
     }
 
 
-    public Friend getFriend(long id) {
-        return bot.getFriend(id);
-    }
+    // ==========================================================================================================================================================
+    //
+    // BOT相关
+    //
+    // ==========================================================================================================================================================
 
 
     private BotConfiguration extractBotConfig() throws MisConfigException {

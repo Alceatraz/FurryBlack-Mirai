@@ -233,14 +233,10 @@ public class Executor_Acon extends EventHandlerExecutor {
 
                     // @formatter:off
 
-                   group.sendMessage(
-
-                            String.format("累计共耗电：%skW(%s)度\r\n群主须支付：%s元",
-
+                   group.sendMessage( String.format("累计共耗电：%skW(%s)度\r\n群主须支付：%s元",
                                     powerConsumption.divide(BigInteger.valueOf(1000)).toString(),
                                     powerConsumption.divide(BigInteger.valueOf(3600000L)).toString(),
                                     powerConsumption.divide(BigInteger.valueOf(1936800L)).toString()
-
                             ));
 
                     // @formatter:on

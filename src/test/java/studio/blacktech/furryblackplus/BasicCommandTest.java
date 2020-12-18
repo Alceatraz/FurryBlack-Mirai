@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import studio.blacktech.furryblackplus.system.command.BasicCommand;
 
 
-@SuppressWarnings("deprecation")
 public class BasicCommandTest {
 
 
@@ -23,7 +22,6 @@ public class BasicCommandTest {
 
         for (String temp : sample) {
             BasicCommand basicCommand = new BasicCommand(temp);
-
             System.out.println(basicCommand.toString());
         }
 
