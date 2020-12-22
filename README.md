@@ -1,6 +1,8 @@
-# FurryBlack - Mirai
+# **FurryBlack - Mirai**
 
-**自豪的使用[Mirai](https://github.com/mamoe/mirai)**
+## 自豪的使用[Mirai](https://github.com/mamoe/mirai)
+
+![Java CI with Maven](https://github.com/Alceatraz/FurryBlack-Mirai/workflows/Java%20CI%20with%20Maven/badge.svg?branch=master)
 
 ### 消歧义
 
