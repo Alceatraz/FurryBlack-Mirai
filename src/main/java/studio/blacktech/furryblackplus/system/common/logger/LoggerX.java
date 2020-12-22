@@ -197,16 +197,6 @@ public class LoggerX extends PlatformLogger {
             builder.append(group.getId());
             builder.append(") -> ");
 
-            Member owner = group.getOwner();
-            builder.append(owner.getNick());
-            builder.append("[");
-            builder.append(owner.getNameCard());
-            builder.append("](");
-            builder.append(owner.getId());
-            builder.append(")");
-
-            builder.append("\r\n");
-
             Member sender = (Member) event.getSender();
             builder.append(sender.getNick());
             builder.append("[");
@@ -214,7 +204,6 @@ public class LoggerX extends PlatformLogger {
             builder.append("](");
             builder.append(sender.getId());
             builder.append(") -> ");
-
 
         } else if (event instanceof FriendMessageEvent) {
 

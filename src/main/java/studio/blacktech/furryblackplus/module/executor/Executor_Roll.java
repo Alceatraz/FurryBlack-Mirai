@@ -85,7 +85,6 @@ public class Executor_Roll extends EventHandlerExecutor {
                 try {
                     range = Integer.parseInt(basicCommand.getParameterSegment(0));
                     res = Integer.toString(random.nextInt(range));
-
                 } catch (Exception ignored) {
                     res = basicCommand.getCommandBody(200) + " 是 " + (random.nextBoolean() ? " 1️⃣" : " 0️⃣");
                 }
@@ -105,6 +104,9 @@ public class Executor_Roll extends EventHandlerExecutor {
                 int temp = random.nextInt(max - min);
                 res = Integer.toString(temp + min);
                 break;
+
+            default:
+                res = basicCommand.getCommandBody(200) + " 是 " + (random.nextBoolean() ? " 1️⃣" : " 0️⃣");
         }
 
 

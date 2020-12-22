@@ -818,23 +818,48 @@ public class Systemd implements ListenerHost {
                         if (message.hasCommandBody()) {
                             if (EVENT_HANDLER_EXECUTOR_GROUP.containsKey(message.getParameterSegment(0))) {
                                 EventHandlerExecutor executor = EVENT_HANDLER_EXECUTOR_GROUP.get(message.getParameterSegment(0));
-                                event.getSender().sendMessage(executor.INFO.HELP);
+                                try {
+                                    event.getSender().sendMessage(executor.INFO.HELP);
+                                } catch (Exception exception) {
+                                    At at = new At(message.getSender());
+                                    event.getGroup().sendMessage(at.plus("帮助信息发送至私聊失败 请允许临时会话权限"));
+                                }
                             }
                         } else {
-                            event.getSender().sendMessage(MESSAGE_HELP);
+                            try {
+                                event.getSender().sendMessage(MESSAGE_HELP);
+                            } catch (Exception exception) {
+                                At at = new At(message.getSender());
+                                event.getGroup().sendMessage(at.plus("帮助信息发送至私聊失败 请允许临时会话权限"));
+                            }
                         }
                         break;
 
                     case "list":
-                        event.getSender().sendMessage(MESSAGE_LIST_GROUP);
+                        try {
+                            event.getSender().sendMessage(MESSAGE_LIST_GROUP);
+                        } catch (Exception exception) {
+                            At at = new At(message.getSender());
+                            event.getGroup().sendMessage(at.plus("可用命令发送至私聊失败 请允许临时会话权限"));
+                        }
                         break;
 
                     case "info":
-                        event.getSender().sendMessage(MESSAGE_INFO);
+                        try {
+                            event.getSender().sendMessage(MESSAGE_INFO);
+                        } catch (Exception exception) {
+                            At at = new At(message.getSender());
+                            event.getGroup().sendMessage(at.plus("关于发送至私聊失败 请允许临时会话权限"));
+                        }
                         break;
 
                     case "eula":
-                        event.getSender().sendMessage(MESSAGE_EULA);
+                        try {
+                            event.getSender().sendMessage(MESSAGE_EULA);
+                        } catch (Exception exception) {
+                            At at = new At(message.getSender());
+                            event.getGroup().sendMessage(at.plus("EULA发送至私聊失败 请允许临时会话权限"));
+                        }
                         break;
 
                     default:

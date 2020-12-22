@@ -43,17 +43,17 @@ public class Executor_Echo extends EventHandlerExecutor {
 
     @Override
     public void handleTempMessage(TempCommand message) {
-        message.getSender().sendMessage(message.getCommandBody());
+        message.getSender().sendMessage(message.getParameterLength() == 0 ? "PONG!" : message.getCommandBody());
     }
 
     @Override
     public void handleFriendMessage(FriendCommand message) {
-        message.getSender().sendMessage(message.getCommandBody());
+        message.getSender().sendMessage(message.getParameterLength() == 0 ? "PONG!" : message.getCommandBody());
     }
 
     @Override
     public void handleGroupMessage(GroupCommand message) {
-        message.getGroup().sendMessage(message.getCommandBody());
+        message.getGroup().sendMessage(message.getParameterLength() == 0 ? "PONG!" : message.getCommandBody());
     }
 
 

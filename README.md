@@ -46,6 +46,14 @@
 
 ## CHANGELOG
 
+
+### 0.1.3
+
+- 修复ECHO空消息Exception的BUG
+- 修复ROLL空消息Exception的BUG
+- 改进LoggerX的DUMP
+- 群聊eula info help list在私聊不允许的情况下，提示消息增加try catch
+
 ### 0.1.2
 
 - 增强控制台
