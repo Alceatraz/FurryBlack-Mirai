@@ -1,7 +1,6 @@
 package studio.blacktech.furryblackplus.module.executor;
 
 import net.mamoe.mirai.message.data.At;
-import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
 import studio.blacktech.furryblackplus.system.command.FriendCommand;
 import studio.blacktech.furryblackplus.system.command.GroupCommand;
@@ -11,7 +10,6 @@ import studio.blacktech.furryblackplus.system.common.utilties.DateTool;
 import studio.blacktech.furryblackplus.system.common.utilties.RandomTool;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -93,43 +91,4 @@ public class Executor_Jrrp extends EventHandlerExecutor {
     }
 
 
-    private class Worker implements Runnable {
-
-
-        @Override
-        public void run() {
-
-            boolean interrupt = false;
-
-            long time;
-            Date date;
-
-            do {
-
-                try {
-
-                    //noinspection InfiniteLoopStatement
-                    while (true) {
-
-                        date = new Date();
-                        time = 86400L;
-                        time = time - date.getSeconds();
-                        time = time - date.getMinutes() * 60L;
-                        time = time - date.getHours() * 3600L;
-                        time = time * 1000L;
-
-                        //noinspection BusyWait
-                        Thread.sleep(time);
-
-                        JRRP.clear();
-                    }
-
-                } catch (InterruptedException ignored) {
-                    interrupt = true;
-                } catch (Exception exception) {
-                    logger.error("计划任务异常", exception);
-                }
-            } while (Driver.isEnable() && interrupt);
-        }
-    }
 }
