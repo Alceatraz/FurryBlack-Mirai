@@ -169,7 +169,7 @@ public class Executor_Chou extends EventHandlerExecutor {
             }
 
             builder.append("抽中了: ");
-            builder.append(member.getNameCard());
+            builder.append(member.getNick());
             builder.append("(");
             builder.append(member.getId());
             builder.append(")");

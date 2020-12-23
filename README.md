@@ -48,6 +48,10 @@
 
 ## CHANGELOG
 
+### 0.1.5
+
+- CHOU的NameCard是null，改成NickName
+
 ### 0.1.4
 
 - 删掉JRRP中没用的代码
