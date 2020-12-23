@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @ComponentHandlerExecutor(
@@ -106,37 +107,62 @@ public class Executor_Roulette extends EventHandlerExecutor {
         if (round.join(message)) {
 
 
-            int bullet = RandomTool.nextInt(6);
+            if (round.isSinglePlayer()) {
 
 
-            Message messages = new PlainText("名单已凑齐 装填子弹中\r\n");
+                RouletteRound.PlayerJetton loser = round.getGamblers().get(0);
 
-            RouletteRound.PlayerJetton loser = round.getGamblers().get(bullet);
 
-            At at = new At(loser.getMember());
+                group.sendMessage(new At(loser.getMember()).plus("好的，没有问题，成全你"));
 
-            for (int i = 0; i < 6; i++) {
+                group.sendMessage(new Face(169).plus("\uD83D\uDCA5\r\n"));
+                group.sendMessage(new Face(169).plus("\uD83D\uDCA5\r\n"));
+                group.sendMessage(new Face(169).plus("\uD83D\uDCA5\r\n"));
+                group.sendMessage(new Face(169).plus("\uD83D\uDCA5\r\n"));
+                group.sendMessage(new Face(169).plus("\uD83D\uDCA5\r\n"));
+                group.sendMessage(new Face(169).plus("\uD83D\uDCA5\r\n"));
 
-                RouletteRound.PlayerJetton temp = round.getGamblers().get(i);
+                group.sendMessage("目标已被击毙: " + loser.getMember().getNameCard() + "(" + loser.getMember().getId() + ") 掉落了以下物品: " + round.getAllJetton(loser.getMember().getId()));
 
-                messages = messages.plus(ICON[i]).plus(" " + temp.getMember().getNameCard() + " ").plus(new Face(169));
 
-                if (i == bullet) {
-                    messages = messages.plus("\uD83D\uDCA5\r\n"); // 💥 "\uD83D\uDCA5"
-                } else {
-                    messages = messages.plus("\r\n");
+            } else {
+
+
+                int bullet = RandomTool.nextInt(6);
+
+
+                Message messages = new PlainText("名单已凑齐 装填子弹中\r\n");
+
+                RouletteRound.PlayerJetton loser = round.getGamblers().get(bullet);
+
+                At at = new At(loser.getMember());
+
+                for (int i = 0; i < 6; i++) {
+
+                    RouletteRound.PlayerJetton temp = round.getGamblers().get(i);
+
+                    messages = messages.plus(ICON[i]).plus(" " + temp.getMember().getNameCard() + " ").plus(new Face(169));
+
+                    if (i == bullet) {
+                        messages = messages.plus("\uD83D\uDCA5\r\n"); // 💥 "\uD83D\uDCA5"
+                    } else {
+                        messages = messages.plus("\r\n");
+                    }
+
                 }
+
+                messages = messages.plus("\r\n");
+                messages = messages.plus(at);
+
+                group.sendMessage(messages);
+
+                group.sendMessage("目标已被击毙: " + loser.getMember().getNameCard() + "(" + loser.getMember().getId() + ") 掉落了以下物品: " + round.getAllJetton(loser.getMember().getId()));
 
             }
 
-            messages = messages.plus("\r\n");
-            messages = messages.plus(at);
-
-            group.sendMessage(messages);
-
-            group.sendMessage("目标已被击毙: " + loser.getMember().getNameCard() + "(" + loser.getMember().getId() + ") \r\n掉落了物品: " + loser.getJetton());
 
             rounds.remove(group.getId());
+
 
         } else {
 
@@ -159,7 +185,7 @@ public class Executor_Roulette extends EventHandlerExecutor {
                 builder.append(temp.getMember().getId());
                 builder.append(" - ");
                 String jetton = temp.getJetton();
-                if (jetton.length() < 15) {
+                if (jetton.length() > 15) {
                     builder.append(jetton, 0, 12).append("...");
                 } else {
                     builder.append(jetton);
@@ -230,6 +256,27 @@ public class Executor_Roulette extends EventHandlerExecutor {
         private static class PlayerJetton {
             private final Member member;
             private final String jetton;
+        }
+
+
+        public boolean isSinglePlayer() {
+            long id = gamblers.get(0).getMember().getId();
+            for (int i = 1; i < 6; i++) {
+                long current = gamblers.get(i).getMember().getId();
+                if (id != current) return false;
+            }
+            return true;
+        }
+
+
+        public String getAllJetton(long id) {
+            List<PlayerJetton> jettons = gamblers.stream().filter(item -> item.getMember().getId() == id).collect(Collectors.toList());
+            StringBuilder builder = new StringBuilder();
+            for (RouletteRound.PlayerJetton jetton : jettons) {
+                builder.append("\r\n");
+                builder.append(jetton.getJetton());
+            }
+            return builder.toString();
         }
 
 

@@ -48,6 +48,11 @@
 
 ## CHANGELOG
 
+### 0.1.6
+
+- 修复Roulette，对很长的筹码判断写错了>号
+- 强化Roulette，对单人模式体现更多临终关怀
+
 ### 0.1.5
 
 - CHOU的NameCard是null，改成NickName
