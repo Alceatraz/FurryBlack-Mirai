@@ -1,7 +1,6 @@
 package studio.blacktech.furryblackplus.system.handler;
 
 
-import lombok.AllArgsConstructor;
 import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
 import studio.blacktech.furryblackplus.system.common.exception.working.NotAFolderException;
@@ -20,13 +19,21 @@ import java.util.Properties;
 public abstract class AbstractEventHandler {
 
 
-    @AllArgsConstructor
     public static class ModuleInfo {
 
         public final String NAME;
         public final String DESCRIPTION;
         public final String[] PRIVACY;
 
+        public ModuleInfo(String NAME, String DESCRIPTION, String[] PRIVACY) {
+            if (NAME.equals("")) throw new IllegalArgumentException("NAME cannot be null");
+            if (DESCRIPTION.equals("")) throw new IllegalArgumentException("DESCRIPTION cannot be null");
+            if (PRIVACY == null) throw new IllegalArgumentException("PRIVACY cannot be null");
+
+            this.NAME = NAME;
+            this.DESCRIPTION = DESCRIPTION;
+            this.PRIVACY = PRIVACY;
+        }
     }
 
 

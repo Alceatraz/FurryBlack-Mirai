@@ -24,6 +24,9 @@ public abstract class EventHandlerExecutor extends AbstractEventHandler {
                     DESCRIPTION,
                     PRIVACY
             );
+            if (COMMAND.equals("")) throw new IllegalArgumentException("COMMAND cannot be null");
+            if (USAGE == null) throw new IllegalArgumentException("USAGE cannot be null");
+
             this.COMMAND = COMMAND;
             this.USAGE = USAGE;
             StringBuilder builder = new StringBuilder();

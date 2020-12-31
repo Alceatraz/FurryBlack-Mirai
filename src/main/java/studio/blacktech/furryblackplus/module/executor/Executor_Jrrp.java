@@ -48,7 +48,6 @@ public class Executor_Jrrp extends EventHandlerExecutor {
 
     @Override
     public void boot() throws BotException {
-        logger.info("启动工作线程");
         timer = new Timer();
         timer.scheduleAtFixedRate(
                 new TimerTask() {

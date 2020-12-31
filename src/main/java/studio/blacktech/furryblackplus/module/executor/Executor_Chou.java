@@ -65,7 +65,7 @@ public class Executor_Chou extends EventHandlerExecutor {
         if (!FILE_EXCLUDE.exists()) {
             try {
                 FILE_EXCLUDE.createNewFile();
-                logger.hint("创建新的配置文件 -> " + FILE_EXCLUDE.getAbsolutePath());
+                logger.seek("创建新的配置文件 -> " + FILE_EXCLUDE.getAbsolutePath());
             } catch (IOException exception) {
                 throw new BotException("创建文件失败 -> " + FILE_EXCLUDE.getAbsolutePath(), exception);
             }
@@ -113,7 +113,7 @@ public class Executor_Chou extends EventHandlerExecutor {
 
                 tempList.add(userid);
 
-                logger.hint("排除成员 " + gropid + " - " + userid);
+                logger.seek("排除成员 " + gropid + " - " + userid);
             }
 
         } catch (IOException exception) {

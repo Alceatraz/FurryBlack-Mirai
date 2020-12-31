@@ -64,76 +64,76 @@ public class LoggerX extends PlatformLogger {
     @Override
     public void error0(String message) {
         String result = "[" + LoggerX.datetime() + "][ERROR][" + name + "]" + message;
-        LoggerX.writeLog(result);
         LoggerX.printStd(Color.RED + result + Color.RESET);
+        LoggerX.writeLog(result);
     }
 
 
     @Override
     public void error0(String message, Throwable throwable) {
         String result = "[" + LoggerX.datetime() + "][INFO][" + name + "]" + message + "\r\n" + extractTrace(throwable);
-        LoggerX.writeLog(result);
         LoggerX.printStd(Color.RED + result + Color.RESET);
+        LoggerX.writeLog(result);
     }
 
 
     @Override
     public void warning0(String message) {
         String result = "[" + LoggerX.datetime() + "][WARN][" + name + "]" + message;
-        LoggerX.writeLog(result);
         LoggerX.printStd(Color.LIGHT_YELLOW + result + Color.RESET);
+        LoggerX.writeLog(result);
     }
 
 
     @Override
     public void warning0(String message, Throwable throwable) {
         String result = "[" + LoggerX.datetime() + "][WARN][" + name + "]" + message + "\r\n" + extractTrace(throwable);
-        LoggerX.writeLog(result);
         LoggerX.printStd(Color.LIGHT_YELLOW + result + Color.RESET);
+        LoggerX.writeLog(result);
     }
 
 
     public void hint(String message) {
         String result = "[" + LoggerX.datetime() + "][HINT][" + name + "]" + message;
+        LoggerX.printStd(Color.LIGHT_CYAN + result + Color.RESET);
         LoggerX.writeLog(result);
-        LoggerX.printStd(Color.EMERALD_GREEN + result + Color.RESET);
     }
 
 
     public void hint(String message, Throwable throwable) {
         String result = "[" + LoggerX.datetime() + "][HINT][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        LoggerX.printStd(Color.LIGHT_CYAN + result + Color.RESET);
         LoggerX.writeLog(result);
-        LoggerX.printStd(Color.EMERALD_GREEN + result + Color.RESET);
+    }
+
+
+    public void seek(String message) {
+        String result = "[" + LoggerX.datetime() + "][SEEK][" + name + "]" + message;
+        LoggerX.printStd(Color.LIGHT_GREEN + result + Color.RESET);
+        LoggerX.writeLog(result);
+    }
+
+
+    public void seek(String message, Throwable throwable) {
+        String result = "[" + LoggerX.datetime() + "][SEEK][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        LoggerX.printStd(Color.LIGHT_GREEN + result + Color.RESET);
+        LoggerX.writeLog(result);
     }
 
 
     @Override
     public void info0(String message) {
         String result = "[" + LoggerX.datetime() + "][INFO][" + name + "]" + message;
-        LoggerX.writeLog(result);
         LoggerX.printStd(result);
+        LoggerX.writeLog(result);
     }
 
 
     @Override
     public void info0(String message, Throwable throwable) {
         String result = "[" + LoggerX.datetime() + "][INFO][" + name + "]" + message + "\r\n" + extractTrace(throwable);
-        LoggerX.writeLog(result);
         LoggerX.printStd(result);
-    }
-
-
-    public void seek(String message) {
-        String result = "[" + LoggerX.datetime() + "][SEEK][" + name + "]" + message;
         LoggerX.writeLog(result);
-        LoggerX.printStd(result);
-    }
-
-
-    public void seek(String message, Throwable throwable) {
-        String result = "[" + LoggerX.datetime() + "][SEEK][" + name + "]" + message + "\r\n" + extractTrace(throwable);
-        LoggerX.writeLog(result);
-        LoggerX.printStd(result);
     }
 
 

@@ -99,7 +99,7 @@ public class Executor_Time extends EventHandlerExecutor {
 
                 TIME_ZONE.put(temp[0], timeZone);
 
-                logger.hint("添加时区 " + temp[0] + " -> " + timeZone.getDisplayName());
+                logger.seek("添加时区 " + temp[0] + " -> " + timeZone.getDisplayName());
             }
 
         } catch (IOException exception) {

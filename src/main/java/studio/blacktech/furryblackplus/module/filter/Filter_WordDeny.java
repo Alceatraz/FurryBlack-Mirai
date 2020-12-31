@@ -75,7 +75,7 @@ public class Filter_WordDeny extends EventHandlerFilter {
                 if (line.contains("#")) line = line.substring(0, line.indexOf("#")).trim();
 
                 REGEXES.add(line);
-                logger.hint("添加规则 " + line);
+                logger.seek("添加规则 " + line);
 
             }
 

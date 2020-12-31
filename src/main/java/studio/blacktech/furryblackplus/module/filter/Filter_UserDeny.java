@@ -93,12 +93,12 @@ public class Filter_UserDeny extends EventHandlerFilter {
                 if (temp[0].equals("*")) { // Global Deny User
                     userid = Long.parseLong(temp[1]);
                     USER_IGNORE.add(userid);
-                    logger.hint("拉黑用户 " + userid);
+                    logger.seek("拉黑用户 " + userid);
 
                 } else if (temp[1].equals("*")) { // Deny Group
                     gropid = Long.parseLong(temp[0]);
                     GROUP_IGNORE.add(gropid);
-                    logger.hint("拉黑群组 " + gropid);
+                    logger.seek("拉黑群组 " + gropid);
 
                 } else { // Deny Member
                     gropid = Long.parseLong(temp[0]);
@@ -110,7 +110,7 @@ public class Filter_UserDeny extends EventHandlerFilter {
                         MEMBER_IGNORE.put(gropid, tempSet = new HashSet<>());
                     }
                     tempSet.add(userid);
-                    logger.hint("拉黑成员 " + gropid + " - " + userid);
+                    logger.seek("拉黑成员 " + gropid + " - " + userid);
                 }
             }
 

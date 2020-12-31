@@ -6,7 +6,7 @@ import net.mamoe.mirai.contact.PermissionDeniedException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.widget.AutopairWidgets;
-import studio.blacktech.furryblackplus.module.Systemd;
+import studio.blacktech.furryblackplus.system.Systemd;
 import studio.blacktech.furryblackplus.system.command.BasicCommand;
 import studio.blacktech.furryblackplus.system.common.exception.working.NotAFolderException;
 import studio.blacktech.furryblackplus.system.common.logger.LoggerX;
@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.jar.JarFile;
 
@@ -47,8 +48,8 @@ public class Driver {
     //
 
 
-    private static boolean enable = true;
-
+    private static boolean enable = false;
+    private static boolean dryRun = false;
 
     private static LoggerX logger;
 
@@ -80,10 +81,7 @@ public class Driver {
     public static void main(String[] args) {
 
 
-        Arrays.stream(args).forEach(System.out::println);
-
-
-        System.out.println("[FurryBlack][BOOT] FurryBlackPlus Mirai - ver " + APP_VERSION + " " + LoggerX.formatTime("yyyy-MM-dd HH:mm:ss", BOOT_TIME));
+        System.out.println("[FurryBlack][BOOT]FurryBlackPlus Mirai - ver " + APP_VERSION + " " + LoggerX.formatTime("yyyy-MM-dd HH:mm:ss", BOOT_TIME));
 
 
         LineReader jlineReader = null;
@@ -92,26 +90,40 @@ public class Driver {
 
         boolean JLINE = true;
 
+
         try {
 
 
             // ==========================================================================================================================
-            // 初始化文件
+            // 初始化命令行参数
 
 
-            JLINE = !Arrays.asList(args).contains("--nojline");
+            List<String> parameters = Arrays.asList(args);
 
+
+            // jLine 设置
+            JLINE = !parameters.contains("--nojline");
 
             if (JLINE) {
                 jlineReader = LineReaderBuilder.builder().build();
                 AutopairWidgets autopairWidgets = new AutopairWidgets(jlineReader);
                 autopairWidgets.enable();
-                System.out.println("[FurryBlack][INIT]使用JLine控制台");
+                System.out.println("[FurryBlack][ARGS]jLine控制台");
             } else {
                 bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-                System.out.println("[FurryBlack][INIT]BufferReader控制台");
+                System.out.println("[FurryBlack][ARGS]stdin控制台");
             }
 
+
+            // Dry Run 测试
+
+
+            dryRun = parameters.contains("--dry-run");
+            if (dryRun) {
+                System.out.println("[FurryBlack][ARGS]模拟运行模式");
+            } else {
+                System.out.println("[FurryBlack][ARGS]真实运行模式");
+            }
 
             // ==========================================================================================================================
             // 初始化文件
@@ -173,14 +185,13 @@ public class Driver {
 
             System.out.println("[FurryBlack][INIT]日志系统初始化完成");
 
+            logger.hint("切换至完整日志模式");
 
-            logger.seek("应用工作目录 " + FOLDER_ROOT.getAbsolutePath());
-
-            logger.seek("核心配置目录 " + FOLDER_CONFIG.getAbsolutePath());
-            logger.seek("核心日志目录 " + FOLDER_LOGGER.getAbsolutePath());
-            logger.seek("模块数据目录 " + FOLDER_MODULE.getAbsolutePath());
-
-            logger.seek("当前日志文件 " + FILE_LOGGER.getAbsolutePath());
+            logger.info("应用工作目录 " + FOLDER_ROOT.getAbsolutePath());
+            logger.info("核心配置目录 " + FOLDER_CONFIG.getAbsolutePath());
+            logger.info("核心日志目录 " + FOLDER_LOGGER.getAbsolutePath());
+            logger.info("模块数据目录 " + FOLDER_MODULE.getAbsolutePath());
+            logger.info("当前日志文件 " + FILE_LOGGER.getAbsolutePath());
 
 
         } catch (Exception exception) {
@@ -197,10 +208,10 @@ public class Driver {
 
         try {
 
-            logger.seek("实例化Systemd");
+            logger.hint("实例化Systemd");
             systemd = new Systemd();
 
-            logger.seek("初始化Systemd");
+            logger.hint("初始化Systemd");
             systemd.init(FILE_CONFIG);
 
         } catch (Exception exception) {
@@ -216,8 +227,12 @@ public class Driver {
 
         try {
 
-            logger.seek("启动Systemd");
+            logger.hint("启动Systemd");
             systemd.boot();
+
+
+            logger.hint("启动完成 开始监听消息");
+            enable = true;
 
         } catch (Exception exception) {
 
@@ -258,6 +273,16 @@ public class Driver {
                     case "exit":
                         break console;
 
+                    case "enable":
+                        enable = true;
+                        System.out.println("启动事件响应");
+                        break;
+
+                    case "disable":
+                        enable = false;
+                        System.out.println("关闭事件响应");
+                        break;
+
                     case "help":
                         System.out.println("exit关闭");
                         System.out.println("list列出模块");
@@ -295,19 +320,20 @@ public class Driver {
         }
 
 
-        enable = false;
-
-
         try {
 
+            enable = false;
+
+            logger.hint("关闭Systemd");
             systemd.shut();
+
 
         } catch (Exception exception) {
             logger.error("关闭异常", exception);
         }
 
 
-        System.out.println("系统已关闭");
+        System.out.println("[FurryBlack][SHUT]Bye");
 
 
     }
@@ -332,6 +358,11 @@ public class Driver {
 
     public static boolean isEnable() {
         return enable;
+    }
+
+
+    public static boolean isDryRun() {
+        return dryRun;
     }
 
 
