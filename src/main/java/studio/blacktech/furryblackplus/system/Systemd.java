@@ -3,6 +3,7 @@ package studio.blacktech.furryblackplus.system;
 import kotlinx.serialization.json.Json;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactoryJvm;
+import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
@@ -15,6 +16,7 @@ import net.mamoe.mirai.event.events.BotOfflineEvent;
 import net.mamoe.mirai.event.events.NewFriendRequestEvent;
 import net.mamoe.mirai.message.FriendMessageEvent;
 import net.mamoe.mirai.message.GroupMessageEvent;
+import net.mamoe.mirai.message.MessageReceipt;
 import net.mamoe.mirai.message.TempMessageEvent;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.utils.BotConfiguration;
@@ -85,6 +87,10 @@ public class Systemd implements ListenerHost {
 
 
     //
+
+
+    private final Lock lock = new ReentrantLock(true);
+    private final Condition condition = lock.newCondition();
 
 
     // @formatter:off
@@ -158,9 +164,6 @@ public class Systemd implements ListenerHost {
     private static LoggerX logger;
 
 
-    private final Lock blockLock = new ReentrantLock(true);
-    private final Condition blockCondition = blockLock.newCondition();
-
     // ==========================================================================================================================================================
     //
     // 私有变量
@@ -176,7 +179,7 @@ public class Systemd implements ListenerHost {
     private long ACCOUNT_QQ;
     private String ACCOUNT_PW;
 
-    private Thread await;
+    private Thread thread;
 
 
     private static String MESSAGE_INFO;
@@ -466,6 +469,21 @@ public class Systemd implements ListenerHost {
         Events.registerEvents(bot, this);
 
 
+        // ==========================================================================================================================
+        // 初始化阻塞
+
+
+        thread = new Thread(() -> {
+            lock.lock();
+            try {
+                condition.await();
+            } catch (InterruptedException ignore) {
+                bot.close(null);
+            }
+            lock.unlock();
+        });
+
+
     }
 
 
@@ -531,19 +549,9 @@ public class Systemd implements ListenerHost {
         // ==========================================================================================================================
         // 启动阻塞
 
-        await = new Thread(() -> {
-            blockLock.lock();
-            try {
-                blockCondition.await();
-            } catch (InterruptedException ignore) {
-                bot.close(null);
-            }
-            blockLock.unlock();
-        });
-        await.setContextClassLoader(getClass().getClassLoader());
-        await.setDaemon(false);
 
-        await.start();
+        thread.start();
+
 
     }
 
@@ -564,7 +572,11 @@ public class Systemd implements ListenerHost {
         logger.hint("终止机器人");
 
 
-        if (await != null) await.interrupt();
+        if (thread != null && thread.isAlive()) {
+            lock.lock();
+            condition.signal();
+            lock.unlock();
+        }
 
 
         // ==========================================================================================================================
@@ -584,15 +596,68 @@ public class Systemd implements ListenerHost {
         }
 
 
-        logger.hint("销毁所有模块");
+    }
 
-        EVENT_HANDLER_FILTER_USERS.clear();
-        EVENT_HANDLER_FILTER_GROUP.clear();
 
-        EVENT_HANDLER_EXECUTOR_USERS.clear();
-        EVENT_HANDLER_EXECUTOR_GROUP.clear();
+    /**
+     * 强制杀死
+     */
+    public void kill() {
 
-        EVENT_HANDLER.clear();
+        try {
+            logger.info("尝试强制打断BOT阻塞线程");
+            if (thread != null) thread.interrupt();
+        } catch (Exception exception) {
+            logger.error("强制打断工作线程失败 尝试Mirai强制结束Bot");
+            if (bot != null) bot.close(new Exception("强制杀死机器人"));
+        }
+
+
+        try {
+            logger.info("尝试强制清空用户过滤链");
+            EVENT_HANDLER_FILTER_USERS.clear();
+        } catch (Exception exception) {
+            logger.error("销毁用户过滤链失败，尝试强制置为Null", exception);
+            EVENT_HANDLER_FILTER_USERS = null;
+            System.gc(); // 调用GC并不会直接GC
+        }
+
+        try {
+            logger.info("尝试强制清空群组过滤链");
+            EVENT_HANDLER_FILTER_GROUP.clear();
+        } catch (Exception exception) {
+            logger.error("销毁群组过滤链失败，尝试强制置为Null", exception);
+            EVENT_HANDLER_FILTER_GROUP = null;
+            System.gc(); // 调用GC并不会直接GC
+        }
+
+        try {
+            logger.info("尝试强制清空用户执行链");
+            EVENT_HANDLER_EXECUTOR_USERS.clear();
+        } catch (Exception exception) {
+            logger.error("销毁用户执行链失败，尝试强制置为Null", exception);
+            EVENT_HANDLER_EXECUTOR_USERS = null;
+            System.gc(); // 调用GC并不会直接GC
+        }
+
+        try {
+            logger.info("尝试强制清空群组执行链");
+            EVENT_HANDLER_EXECUTOR_GROUP.clear();
+        } catch (Exception exception) {
+            logger.error("销毁群组执行链失败，尝试强制置为Null", exception);
+            EVENT_HANDLER_EXECUTOR_GROUP = null;
+            System.gc(); // 调用GC并不会直接GC
+        }
+
+        try {
+            logger.info("尝试强制清空实例注册链");
+            EVENT_HANDLER.clear();
+        } catch (Exception exception) {
+            logger.error("销毁组件实例容器失败，尝试强制置为Null", exception);
+            EVENT_HANDLER = null;
+            System.gc(); // 调用GC并不会直接GC
+        }
+
 
     }
 
@@ -725,9 +790,7 @@ public class Systemd implements ListenerHost {
 
             if (EVENT_HANDLER_FILTER_USERS
                         .parallelStream()
-                        .anyMatch(
-                                item -> item.handleTempMessage(event)
-                        )
+                        .anyMatch(item -> item.handleTempMessage(event))
             ) {
                 logger.hint("临时消息被拦截 " + event.getSender().getId() + " ->" + event.getMessage());
                 return;
@@ -746,7 +809,7 @@ public class Systemd implements ListenerHost {
                         if (message.hasCommandBody()) {
                             if (EVENT_HANDLER_EXECUTOR_USERS.containsKey(message.getParameterSegment(0))) {
                                 EventHandlerExecutor executor = EVENT_HANDLER_EXECUTOR_USERS.get(message.getParameterSegment(0));
-                                event.getSender().sendMessage(executor.INFO.HELP);
+                               event.getSender().sendMessage(executor.INFO.HELP);
                             }
                         } else {
                             event.getSender().sendMessage(MESSAGE_HELP);
@@ -790,9 +853,7 @@ public class Systemd implements ListenerHost {
 
             if (EVENT_HANDLER_FILTER_USERS
                         .parallelStream()
-                        .anyMatch(
-                                item -> item.handleFriendMessage(event)
-                        )
+                        .anyMatch(item -> item.handleFriendMessage(event))
             ) {
                 logger.hint("好友消息被拦截 " + event.getSender().getId() + " ->" + event.getMessage());
                 return;
@@ -856,9 +917,7 @@ public class Systemd implements ListenerHost {
 
             if (EVENT_HANDLER_FILTER_GROUP
                         .parallelStream()
-                        .anyMatch(
-                                item -> item.handleGroupMessage(event)
-                        )
+                        .anyMatch(item -> item.handleGroupMessage(event))
             ) {
                 logger.hint("群组消息被拦截 " + event.getSender().getId() + " ->" + event.getMessage());
                 return;

@@ -1,7 +1,5 @@
 package studio.blacktech.furryblackplus.module.executor;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.message.data.At;
@@ -251,14 +249,6 @@ public class Executor_Roulette extends EventHandlerExecutor {
         }
 
 
-        @Getter
-        @AllArgsConstructor
-        private static class PlayerJetton {
-            private final Member member;
-            private final String jetton;
-        }
-
-
         public boolean isSinglePlayer() {
             long id = gamblers.get(0).getMember().getId();
             for (int i = 1; i < 6; i++) {
@@ -277,6 +267,28 @@ public class Executor_Roulette extends EventHandlerExecutor {
                 builder.append(jetton.getJetton());
             }
             return builder.toString();
+        }
+
+
+        private static class PlayerJetton {
+
+            private final Member member;
+            private final String jetton;
+
+
+            public PlayerJetton(Member member, String jetton) {
+                this.member = member;
+                this.jetton = jetton;
+            }
+
+            public Member getMember() {
+                return member;
+            }
+
+            public String getJetton() {
+                return jetton;
+            }
+
         }
 
 

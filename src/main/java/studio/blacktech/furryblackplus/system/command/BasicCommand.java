@@ -1,9 +1,9 @@
 package studio.blacktech.furryblackplus.system.command;
 
 
-import lombok.ToString;
 import net.mamoe.mirai.message.data.MessageChain;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,7 +12,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-@ToString
 public class BasicCommand {
 
 
@@ -34,7 +33,7 @@ public class BasicCommand {
     private Map<String, String> switchs;
 
 
-    private static final Pattern pattern = Pattern.compile("^/[a-z]+");
+    private static final Pattern pattern = Pattern.compile("^/[a-z]{3,8}");
 
 
     public BasicCommand(String message) {
@@ -42,8 +41,8 @@ public class BasicCommand {
 
         Matcher matcher = pattern.matcher(message);
 
-
         // 有个傻逼表情叫 /emm
+        // 还好Mirai不会出 /emm
         command = matcher.find();
 
         if (!command) return;
@@ -238,6 +237,21 @@ public class BasicCommand {
 
     public String getSwitch(String name) {
         return switchs.get(name);
+    }
+
+
+    @Override
+    public String toString() {
+        return "BasicCommand{" +
+                       "raw=" + raw +
+                       ", message='" + message + '\'' +
+                       ", command=" + command +
+                       ", commandName='" + commandName + '\'' +
+                       ", commandBody='" + commandBody + '\'' +
+                       ", length=" + length +
+                       ", parameter=" + Arrays.toString(parameter) +
+                       ", switchs=" + switchs +
+                       '}';
     }
 
 

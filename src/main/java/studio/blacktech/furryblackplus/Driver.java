@@ -39,7 +39,7 @@ public class Driver {
     // ==========================================================================================================================================================
 
 
-    private final static String APP_VERSION = "0.1.6";
+    private final static String APP_VERSION = "0.1.8";
 
 
     private final static long BOOT_TIME = System.currentTimeMillis();
@@ -261,12 +261,7 @@ public class Driver {
 
                 if (temp == null || temp.equals("")) continue;
 
-                if (temp.charAt(0) == '/') {
-                    System.out.println("控制台命令不要加/");
-                    continue;
-                }
-
-                BasicCommand command = new BasicCommand("/" + temp);
+                BasicCommand command = new BasicCommand(temp.charAt(0) == '/' ? temp : '/' + temp);
 
                 switch (command.getCommandName()) {
 
@@ -284,9 +279,11 @@ public class Driver {
                         break;
 
                     case "help":
-                        System.out.println("exit关闭");
-                        System.out.println("list列出模块");
-                        System.out.println("reload重启模");
+                        System.out.println("exit    退出");
+                        System.out.println("enable  开启消息处理");
+                        System.out.println("disable 关闭消息处理");
+                        System.out.println("list    列出所有模块");
+                        System.out.println("reload  重启指定模块");
                         break;
 
                     case "send":
@@ -298,11 +295,8 @@ public class Driver {
                         systemd.listAllPlugin().forEach(System.out::println);
                         break;
 
-
                     case "reload":
-                        for (String s : command.getParameterSegment()) {
-                            systemd.reloadPlugin(s);
-                        }
+                        for (String s : command.getParameterSegment()) systemd.reloadPlugin(s);
                         break;
 
 
@@ -329,7 +323,9 @@ public class Driver {
 
 
         } catch (Exception exception) {
-            logger.error("关闭异常", exception);
+            logger.error("系统关闭异常", exception);
+            logger.warning("进入紧急停机模式");
+            systemd.kill();
         }
 
 
