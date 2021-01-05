@@ -58,7 +58,6 @@ public abstract class EventHandlerExecutor extends AbstractEventHandler {
         this.INFO = INFO;
     }
 
-
     public abstract void handleTempMessage(TempCommand message);
 
     public abstract void handleFriendMessage(FriendCommand message);
