@@ -6,6 +6,11 @@ import java.util.Date;
 public class DateTool {
 
 
+    public static long durationDay() {
+        return 86400000L;
+    }
+
+
     public static Date getNextDate() {
         Calendar instance = Calendar.getInstance();
         int day = instance.get(Calendar.DATE) + 1;
@@ -15,4 +20,6 @@ public class DateTool {
         instance.set(Calendar.SECOND, 0);
         return instance.getTime();
     }
+
+
 }

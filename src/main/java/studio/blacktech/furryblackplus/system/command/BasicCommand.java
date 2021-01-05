@@ -2,6 +2,7 @@ package studio.blacktech.furryblackplus.system.command;
 
 
 import net.mamoe.mirai.message.data.MessageChain;
+import net.mamoe.mirai.message.data.MessageSource;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -239,6 +240,10 @@ public class BasicCommand {
         return switchs.get(name);
     }
 
+
+    public MessageSource getMessageSource() {
+        return (MessageSource) raw.get(0);
+    }
 
     @Override
     public String toString() {

@@ -57,7 +57,7 @@ public class Executor_Jrrp extends EventHandlerExecutor {
                     }
                 },
                 DateTool.getNextDate(),
-                86400000L
+                DateTool.durationDay()
         );
     }
 

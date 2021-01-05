@@ -3,7 +3,6 @@ package studio.blacktech.furryblackplus.system;
 import kotlinx.serialization.json.Json;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactoryJvm;
-import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
@@ -16,7 +15,6 @@ import net.mamoe.mirai.event.events.BotOfflineEvent;
 import net.mamoe.mirai.event.events.NewFriendRequestEvent;
 import net.mamoe.mirai.message.FriendMessageEvent;
 import net.mamoe.mirai.message.GroupMessageEvent;
-import net.mamoe.mirai.message.MessageReceipt;
 import net.mamoe.mirai.message.TempMessageEvent;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.utils.BotConfiguration;
@@ -70,6 +68,9 @@ public class Systemd implements ListenerHost {
     // 配置项名称
     //
     // ==========================================================================================================================================================
+
+
+    private static long BOT_ID;
 
 
     private static final String CONF_ACCOUNT_ID = "account.id";
@@ -508,6 +509,8 @@ public class Systemd implements ListenerHost {
             bot.login();
         }
 
+        BOT_ID = bot.getId();
+
 
         // ==========================================================================================================================
         // 启动模块
@@ -809,7 +812,7 @@ public class Systemd implements ListenerHost {
                         if (message.hasCommandBody()) {
                             if (EVENT_HANDLER_EXECUTOR_USERS.containsKey(message.getParameterSegment(0))) {
                                 EventHandlerExecutor executor = EVENT_HANDLER_EXECUTOR_USERS.get(message.getParameterSegment(0));
-                               event.getSender().sendMessage(executor.INFO.HELP);
+                                event.getSender().sendMessage(executor.INFO.HELP);
                             }
                         } else {
                             event.getSender().sendMessage(MESSAGE_HELP);
@@ -1044,8 +1047,22 @@ public class Systemd implements ListenerHost {
     // ==========================================================================================================================================================
 
 
+    public long getBotID() {
+        return BOT_ID;
+    }
+
+
     public Friend getFriend(long id) {
         return bot.getFriend(id);
+    }
+
+
+    public Group getGroup(long id) {
+        return bot.getGroup(id);
+    }
+
+    public Member getGroupMember(long group, long member) {
+        return bot.getGroup(group).get(member);
     }
 
 
@@ -1054,6 +1071,7 @@ public class Systemd implements ListenerHost {
         Member member = group.get(userid);
         sendGroupMessage(group, member, message);
     }
+
 
     public void sendGroupMessage(Group group, Member member, String message) {
         group.sendMessage(new At(member).plus(message));

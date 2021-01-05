@@ -2,6 +2,8 @@ package studio.blacktech.furryblackplus;
 
 
 import net.mamoe.mirai.contact.Friend;
+import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.contact.PermissionDeniedException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
@@ -39,7 +41,7 @@ public class Driver {
     // ==========================================================================================================================================================
 
 
-    private final static String APP_VERSION = "0.1.8";
+    private final static String APP_VERSION = "0.1.9";
 
 
     private final static long BOOT_TIME = System.currentTimeMillis();
@@ -352,6 +354,7 @@ public class Driver {
     }
 
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isEnable() {
         return enable;
     }
@@ -381,5 +384,31 @@ public class Driver {
         return FOLDER_LOGGER.getAbsolutePath();
     }
 
+
+    // ==========================================================================================================================================================
+    //
+    // Bot相关
+    //
+    // ==========================================================================================================================================================
+
+
+    public static long getBotID() {
+        return systemd.getBotID();
+    }
+
+
+    public static Friend getFriend(long id) {
+        return systemd.getFriend(id);
+    }
+
+
+    public static Group getGroup(long id) {
+        return systemd.getGroup(id);
+    }
+
+
+    public static Member getGroupMember(long group, long member) {
+        return systemd.getGroupMember(group, member);
+    }
 
 }

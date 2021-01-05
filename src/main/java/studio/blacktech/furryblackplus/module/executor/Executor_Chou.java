@@ -1,10 +1,12 @@
 package studio.blacktech.furryblackplus.module.executor;
 
-import net.mamoe.mirai.Bot;
+import net.mamoe.mirai.contact.ContactList;
+import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.MessageChain;
-import net.mamoe.mirai.message.data.PlainText;
+import net.mamoe.mirai.message.data.MessageChainBuilder;
+import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
 import studio.blacktech.furryblackplus.system.command.FriendCommand;
 import studio.blacktech.furryblackplus.system.command.GroupCommand;
@@ -25,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @ComponentHandlerExecutor(
@@ -146,36 +149,72 @@ public class Executor_Chou extends EventHandlerExecutor {
     @Override
     public void handleGroupMessage(GroupCommand message) {
 
-        List<Member> collect = message.getGroup().getMembers().parallelStream()
-                                       .filter(item -> item.getId() != message.getSender().getId())
-                                       .filter(item -> item.getId() != Bot.getBotInstances().get(0).getId())
-                                       .filter(item -> !EXCLUDE.get(message.getGroup().getId()).contains(item.getId()))
-                                       .collect(Collectors.toList());
+        Group group = message.getGroup();
+        Member sender = message.getSender();
+        ContactList<Member> members = group.getMembers();
 
-        At at = new At(message.getSender());
+        if (members.size() < 4) {
 
-        MessageChain temp;
+            MessageChain messages = new MessageChainBuilder()
+                                            .append(new At(sender))
+                                            .append("可用成员人数不足，无法使用此功能。")
+                                            .build();
+            group.sendMessage(messages);
+            return;
 
-        if (collect.size() < 2) {
-            temp = at.plus(new PlainText("无法抽人"));
-        } else {
-            Member member = collect.get(RandomTool.nextInt(collect.size()));
-            StringBuilder builder = new StringBuilder();
-
-            if (message.getParameterLength() > 0) {
-                builder.append("因为: ");
-                builder.append(message.getCommandBody(200));
-                builder.append("\r\n");
-            }
-
-            builder.append("抽中了: ");
-            builder.append(member.getNick());
-            builder.append("(");
-            builder.append(member.getId());
-            builder.append(")");
-            temp = at.plus(builder.toString());
         }
-        message.getGroup().sendMessage(temp);
+
+        long botID = Driver.getBotID();
+        long userID = message.getSender().getId();
+        long groupID = group.getId();
+
+        Stream<Long> range = members.stream().map(Member::getId)
+                                     .filter(item -> item != botID)
+                                     .filter(item -> item != userID);
+
+        if (EXCLUDE.containsKey(groupID)) {
+            List<Long> list = EXCLUDE.get(groupID);
+            if (!list.isEmpty()) range.filter(item -> !list.contains(item));
+        }
+
+        List<Long> list = range.collect(Collectors.toUnmodifiableList());
+
+        int size = list.size();
+
+        if (size < 2) {
+            MessageChain messages = new MessageChainBuilder()
+                                            .append(new At(sender))
+                                            .append("可用成员人数不足，无法使用此功能。")
+                                            .build();
+            group.sendMessage(messages);
+            return;
+        }
+
+        Long memberID = list.get(RandomTool.nextInt(size));
+
+        Member member = Driver.getGroupMember(groupID, memberID);
+
+        StringBuilder builder = new StringBuilder();
+
+        if (message.getParameterLength() > 0) {
+            builder.append("因为: ");
+            builder.append(message.getCommandBody(200));
+            builder.append("\r\n");
+        }
+
+        builder.append("抽中了: ");
+        builder.append(member.getNick());
+        builder.append("(");
+        builder.append(member.getId());
+        builder.append(")");
+
+        MessageChain messages = new MessageChainBuilder()
+                                        .append(new At(sender))
+                                        .append(builder.toString())
+                                        .build();
+        group.sendMessage(messages);
+
+
     }
 
 

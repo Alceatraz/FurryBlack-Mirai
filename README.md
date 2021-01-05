@@ -48,6 +48,12 @@
 
 ## CHANGELOG
 
+### 0.1.9
+
+- 加强了Chou，虽然算法更合理了，但是我觉得他运行反而慢了
+- 加强了BasicCommand
+- 加强了Bot相关方法的穿透
+
 ### 0.1.8
 
 - 研究了一下Lock和Condition，MiraBoot之前的写法好怪啊
