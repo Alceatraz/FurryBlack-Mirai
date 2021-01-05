@@ -174,7 +174,7 @@ public class Executor_Chou extends EventHandlerExecutor {
 
         if (EXCLUDE.containsKey(groupID)) {
             List<Long> list = EXCLUDE.get(groupID);
-            if (!list.isEmpty()) range.filter(item -> !list.contains(item));
+            if (!list.isEmpty()) range = range.filter(item -> !list.contains(item));
         }
 
         List<Long> list = range.collect(Collectors.toUnmodifiableList());
