@@ -8,13 +8,7 @@ import studio.blacktech.furryblackplus.system.common.exception.BotException;
 import studio.blacktech.furryblackplus.system.common.logger.LoggerX;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -54,57 +48,36 @@ public class Executor_Time extends EventHandlerExecutor {
     @Override
     public void init() throws BotException {
 
-
         initAppFolder();
         initConfFolder();
 
         TIME_ZONE = new LinkedHashMap<>();
 
-        File FILE_TIMEZONE = Paths.get(FOLDER_CONF.getAbsolutePath(), "timezone.txt").toFile();
+        File FILE_TIMEZONE = initConfFile("timezone.txt");
 
-        if (!FILE_TIMEZONE.exists()) {
-            try {
-                FILE_TIMEZONE.createNewFile();
-                logger.hint("创建新的配置文件 -> " + FILE_TIMEZONE.getAbsolutePath());
-            } catch (IOException exception) {
-                throw new BotException("创建文件失败 -> " + FILE_TIMEZONE.getAbsolutePath(), exception);
-            }
-        }
+        for (String line : readFile(FILE_TIMEZONE)) {
 
-        if (!FILE_TIMEZONE.canRead()) throw new BotException("文件无权读取 -> " + FILE_TIMEZONE.getAbsolutePath());
-
-        String line;
-        String[] temp;
-
-        try (
-                FileInputStream fileInputStream = new FileInputStream(FILE_TIMEZONE);
-                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
-                BufferedReader reader = new BufferedReader(inputStreamReader)
-        ) {
-
-            while ((line = reader.readLine()) != null) {
-
-                if (line.startsWith("#")) continue;
-                if (!line.contains(":")) continue;
-                if (line.contains("#")) line = line.substring(0, line.indexOf("#")).trim();
-
-                temp = line.split(":");
-
-                if (temp.length != 2) {
-                    logger.warning("配置无效 " + line);
-                    continue;
-                }
-
-                TimeZone timeZone = TimeZone.getTimeZone(temp[1]);
-
-                TIME_ZONE.put(temp[0], timeZone);
-
-                logger.seek("添加时区 " + temp[0] + " -> " + timeZone.getDisplayName());
+            if (!line.contains(":")) {
+                logger.warning("配置无效 " + line);
+                continue;
             }
 
-        } catch (IOException exception) {
-            throw new BotException(exception);
+            String[] temp = line.split(":");
+
+            if (temp.length != 2) {
+                logger.warning("配置无效 " + line);
+                continue;
+            }
+
+            TimeZone timeZone = TimeZone.getTimeZone(temp[1]);
+
+            if (!temp[1].equals("GMT") && timeZone.getID().equals("GMT")) logger.warning("配置无效 TimeZone将不可识别的区域转换为GMT " + line);
+
+            TIME_ZONE.put(temp[0], timeZone);
+
+            logger.seek("添加时区 " + temp[0] + " -> " + timeZone.getDisplayName());
         }
+
     }
 
     @Override

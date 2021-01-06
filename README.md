@@ -27,6 +27,10 @@
 
 没有Mirai这个世界会变成什么样？
 
+## 关于2.0
+
+Mirai正在急速开发2.0中，一旦稳定FurryBlack将迅速跟进
+
 ## 关于PR
 
 架构和API随时会变，因为这是个人的项目，所以会完全的放飞自我，不按套路来，提PR需要慎重，极有可能PR还未提交就重构了。
@@ -35,7 +39,7 @@
 
 项目继承FurryBlack的设计，但是Mirai是一个库框架而非宿主，所以FurryBlackPlus有main方法。
 
-- Mirai的Message是工具式的而非String，Mirai作为唯一存活的框架是因为他的协议库不开源、不可反编译、不可查看，所以无法跳过extract Mirai code步骤，也不能拼接后再调用extract。所以之前的所有关于Message的设计作废，强行将消息提取以后作为String按照以前的方式处理。
+- Mirai的Message是工具式的而非String，所以之前的所有关于Message的设计作废，将消息提取以后作为按照以前的方式处理。
 - Mirai的Event比CoolQ多，而且是类似BukkitAPI的根据参数选择性注册，Mirai自身包含线程模型，而非纯调用库。
 - 随着QQ改版，消息事件变成了：临时、好友和群，对应的，插件列表设计改为了USERS和GROUP。
 - Mirai的可扩展性极高，所以不再将FurryBlack设计成CoolQ-JCQ版那样高扩展，严格规范的模式。
@@ -46,7 +50,17 @@
 - ComponentHandlerFilter注解用于过滤器，类需要继承自EventHandlerFilter
 - 除非你知道你在干什么，不然绝对不要注册Mirai的EventHandler
 
-## CHANGELOG
+## CHANGELOG**
+
+### 0.1.12
+
+- 添加Food v0.0
+- 修复acon发送两遍消息的BUG
+- 加强AbstractEventHandler
+- 修改Chou 使用加强方法
+- 修改Time 使用加强方法
+- 修改UserDeny 使用加强方法
+- 修改WordDeny 使用加强方法
 
 ### 0.1.11
 

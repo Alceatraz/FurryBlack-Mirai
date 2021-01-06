@@ -6,14 +6,20 @@ import studio.blacktech.furryblackplus.system.common.exception.BotException;
 import studio.blacktech.furryblackplus.system.common.exception.working.NotAFolderException;
 import studio.blacktech.furryblackplus.system.common.logger.LoggerX;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 
 public abstract class AbstractEventHandler {
@@ -158,6 +164,85 @@ public abstract class AbstractEventHandler {
             }
             NEW_CONFIG = true;
         }
+    }
+
+
+    public File initConfFile(String fileName) throws BotException {
+        return initFile(Paths.get(FOLDER_CONF.getAbsolutePath(), fileName));
+    }
+
+
+    public File initDataFile(String fileName) throws BotException {
+        return initFile(Paths.get(FOLDER_DATA.getAbsolutePath(), fileName));
+    }
+
+
+    public File initLogsFile(String fileName) throws BotException {
+        return initFile(Paths.get(FOLDER_LOGS.getAbsolutePath(), fileName));
+    }
+
+
+    public File initFile(Path path) throws BotException {
+        return initFile(path.toFile());
+    }
+
+
+    public File initFile(File file) throws BotException {
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+                logger.seek("创建新的配置文件 -> " + file.getAbsolutePath());
+            } catch (IOException exception) {
+                throw new BotException("创建文件失败 -> " + file.getAbsolutePath(), exception);
+            }
+        }
+        if (!file.canRead()) throw new BotException("文件无权读取 -> " + file.getAbsolutePath());
+        if (!file.canWrite()) throw new BotException("文件无权写入 -> " + file.getAbsolutePath());
+        return file;
+    }
+
+
+    public List<String> readFile(File file) throws BotException {
+        return readFile(file, false);
+    }
+
+
+    public List<String> readFile(File file, boolean keepComment) throws BotException {
+        if (!file.exists()) throw new BotException("文件不存在 -> " + file.getAbsolutePath());
+        if (!file.isFile()) throw new BotException("文件是目录 -> " + file.getAbsolutePath());
+        if (!file.canRead()) throw new BotException("文件无权读取 -> " + file.getAbsolutePath());
+        String line;
+        List<String> temp = new LinkedList<>();
+        try (
+                FileInputStream fileInputStream = new FileInputStream(file);
+                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
+                BufferedReader reader = new BufferedReader(inputStreamReader);
+        ) {
+            while ((line = reader.readLine()) != null) temp.add(line);
+
+            reader.close();
+            inputStreamReader.close();
+            fileInputStream.close();
+
+            if (keepComment) return temp;
+
+            // @formatter:off
+
+            return temp
+               .parallelStream()
+               .filter(item-> item.length()>0)
+               .filter(item -> item.charAt(0) != '#')
+               .map(item -> item.contains("#") ?
+                            item.substring(0, item.indexOf("#")).stripTrailing() :
+                            item)
+               .collect(Collectors.toList());
+
+            // @formatter:on
+
+        } catch (Exception exception) {
+            throw new BotException(exception);
+        }
+
     }
 
 

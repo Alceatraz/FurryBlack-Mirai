@@ -41,7 +41,7 @@ public class Driver {
     // ==========================================================================================================================================================
 
 
-    private final static String APP_VERSION = "0.1.11";
+    private final static String APP_VERSION = "0.1.12";
 
 
     private final static long BOOT_TIME = System.currentTimeMillis();
@@ -410,5 +410,6 @@ public class Driver {
     public static Member getGroupMember(long group, long member) {
         return systemd.getGroupMember(group, member);
     }
+
 
 }

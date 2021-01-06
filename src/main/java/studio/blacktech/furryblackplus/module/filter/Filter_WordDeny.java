@@ -7,13 +7,7 @@ import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerFilter;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerFilter;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,46 +37,17 @@ public class Filter_WordDeny extends EventHandlerFilter {
         initAppFolder();
         initConfFolder();
 
-
         REGEXES = new ArrayList<>();
 
+        File FILE_BLACKLIST = initConfFile("blacklist.txt");
 
-        File FILE_BLACKLIST = Paths.get(FOLDER_CONF.getAbsolutePath(), "blacklist.txt").toFile();
-
-        if (!FILE_BLACKLIST.exists()) {
-            try {
-                FILE_BLACKLIST.createNewFile();
-                logger.hint("创建新的配置文件 -> " + FILE_BLACKLIST.getAbsolutePath());
-            } catch (IOException exception) {
-                throw new BotException("创建文件失败 -> " + FILE_BLACKLIST.getAbsolutePath(), exception);
-            }
+        for (String item : readFile(FILE_BLACKLIST)) {
+            REGEXES.add(item);
+            logger.seek("添加规则 " + item);
         }
 
-        if (!FILE_BLACKLIST.canRead()) throw new BotException("文件无权读取 -> " + FILE_BLACKLIST.getAbsolutePath());
-
-
-        String line;
-
-        try (
-                FileInputStream fileInputStream = new FileInputStream(FILE_BLACKLIST);
-                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
-                BufferedReader reader = new BufferedReader(inputStreamReader)
-        ) {
-
-            while ((line = reader.readLine()) != null) {
-
-                if (line.startsWith("#")) continue;
-                if (line.contains("#")) line = line.substring(0, line.indexOf("#")).trim();
-
-                REGEXES.add(line);
-                logger.seek("添加规则 " + line);
-
-            }
-
-        } catch (IOException exception) {
-            throw new BotException(exception);
-        }
     }
+
 
     @Override
     public void boot() throws BotException {
@@ -109,15 +74,6 @@ public class Filter_WordDeny extends EventHandlerFilter {
 
     @Override
     public boolean handleGroupMessage(GroupMessageEvent message) {
-/*                return message.getMessage()
-                               .parallelStream()
-                               .filter(item -> item instanceof PlainText)
-                               .anyMatch(
-                                       item -> REGEXES.parallelStream()
-                                                       .anyMatch(
-                                                               regex -> item.toString().matches(regex)
-                                                       )
-                               );*/
         String temp = message.getMessage().contentToString();
         return REGEXES.parallelStream().anyMatch(temp::matches);
     }

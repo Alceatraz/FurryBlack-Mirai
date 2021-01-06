@@ -22,8 +22,8 @@ import java.security.SecureRandom;
         command = "roll",
         usage = {
                 "/roll - 抽取真假",
-                "/roll 数字 - 从零到给定数字任选一个数字",
-                "/roll 数字 数字 - 从给定两个数字中间抽取一个"
+                "/roll 数字 - 从零到给定数字任选一个数字[0,x)",
+                "/roll 数字 数字 - 从给定两个数字中间抽取一个[x,y)"
         }
 )
 public class Executor_Roll extends EventHandlerExecutor {
@@ -65,12 +65,12 @@ public class Executor_Roll extends EventHandlerExecutor {
     }
 
 
-    private String roll(BasicCommand basicCommand) {
+    private String roll(BasicCommand command) {
 
-        String res = null;
+        String res;
         SecureRandom random = new SecureRandom();
 
-        switch (basicCommand.getParameterLength()) {
+        switch (command.getParameterLength()) {
 
             // ============================================================
 
@@ -83,10 +83,10 @@ public class Executor_Roll extends EventHandlerExecutor {
             case 1:
                 int range;
                 try {
-                    range = Integer.parseInt(basicCommand.getParameterSegment(0));
+                    range = Integer.parseInt(command.getParameterSegment(0));
                     res = Integer.toString(random.nextInt(range));
                 } catch (Exception ignored) {
-                    res = basicCommand.getCommandBody(200) + " 是 " + (random.nextBoolean() ? " 1️⃣" : " 0️⃣");
+                    res = command.getCommandBody(200) + " 是 " + (random.nextBoolean() ? " 1️⃣" : " 0️⃣");
                 }
                 break;
 
@@ -96,8 +96,8 @@ public class Executor_Roll extends EventHandlerExecutor {
                 int min;
                 int max;
                 try {
-                    min = Integer.parseInt(basicCommand.getParameterSegment(0));
-                    max = Integer.parseInt(basicCommand.getParameterSegment(1));
+                    min = Integer.parseInt(command.getParameterSegment(0));
+                    max = Integer.parseInt(command.getParameterSegment(1));
                 } catch (Exception ignored) {
                     return "参数必须是罗马数字";
                 }
@@ -106,7 +106,7 @@ public class Executor_Roll extends EventHandlerExecutor {
                 break;
 
             default:
-                res = basicCommand.getCommandBody(200) + " 是 " + (random.nextBoolean() ? " 1️⃣" : " 0️⃣");
+                res = command.getCommandBody(200) + " 是 " + (random.nextBoolean() ? " 1️⃣" : " 0️⃣");
         }
 
 

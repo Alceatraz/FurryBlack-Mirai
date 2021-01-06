@@ -7,13 +7,7 @@ import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerFilter;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerFilter;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -51,73 +45,49 @@ public class Filter_UserDeny extends EventHandlerFilter {
         GROUP_IGNORE = new HashSet<>();
         MEMBER_IGNORE = new TreeMap<>();
 
-        File FILE_BLACKLIST = Paths.get(FOLDER_CONF.getAbsolutePath(), "blacklist.txt").toFile();
+        File FILE_BLACKLIST = initConfFile("blacklist.txt");
 
-        if (!FILE_BLACKLIST.exists()) {
-            try {
-                FILE_BLACKLIST.createNewFile();
-                logger.hint("创建新的配置文件 -> " + FILE_BLACKLIST.getAbsolutePath());
-            } catch (IOException exception) {
-                throw new BotException("创建文件失败 -> " + FILE_BLACKLIST.getAbsolutePath(), exception);
+        for (String line : readFile(FILE_BLACKLIST)) {
+
+            if (!line.matches("^(?:\\*|[0-9]{5,12}):(?:\\*|[0-9]{5,12})$")) {
+                logger.warning("配置无效 " + line);
+                continue;
             }
-        }
 
-        if (!FILE_BLACKLIST.canRead()) throw new BotException("文件无权读取 -> " + FILE_BLACKLIST.getAbsolutePath());
+            String[] temp = line.split(":");
 
+            long group;
+            long member;
 
-        long gropid;
-        long userid;
-
-        String line;
-        String[] temp;
-
-        try (
-                FileInputStream fileInputStream = new FileInputStream(FILE_BLACKLIST);
-                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
-                BufferedReader reader = new BufferedReader(inputStreamReader)
-        ) {
-
-            while ((line = reader.readLine()) != null) {
-
-                if (line.startsWith("#")) continue;
-                if (!line.contains(":")) continue;
-                if (line.contains("#")) line = line.substring(0, line.indexOf("#")).trim();
-
-                temp = line.split(":");
-
-                if (temp.length != 2) {
+            if (temp[0].equals("*")) { // Global Deny User
+                if (temp[1].equals("*")) { // Invalidate
                     logger.warning("配置无效 " + line);
                     continue;
                 }
-
-                if (temp[0].equals("*")) { // Global Deny User
-                    userid = Long.parseLong(temp[1]);
-                    USER_IGNORE.add(userid);
-                    logger.seek("拉黑用户 " + userid);
-
-                } else if (temp[1].equals("*")) { // Deny Group
-                    gropid = Long.parseLong(temp[0]);
-                    GROUP_IGNORE.add(gropid);
-                    logger.seek("拉黑群组 " + gropid);
-
-                } else { // Deny Member
-                    gropid = Long.parseLong(temp[0]);
-                    userid = Long.parseLong(temp[1]);
-                    Set<Long> tempSet;
-                    if (MEMBER_IGNORE.containsKey(gropid)) {
-                        tempSet = MEMBER_IGNORE.get(gropid);
-                    } else {
-                        MEMBER_IGNORE.put(gropid, tempSet = new HashSet<>());
-                    }
-                    tempSet.add(userid);
-                    logger.seek("拉黑成员 " + gropid + " - " + userid);
+                member = Long.parseLong(temp[1]);
+                USER_IGNORE.add(member);
+                logger.seek("拉黑用户 " + member);
+            } else if (temp[1].equals("*")) { // Deny Group
+                group = Long.parseLong(temp[0]);
+                GROUP_IGNORE.add(group);
+                logger.seek("拉黑群组 " + group);
+            } else { // Deny Member
+                group = Long.parseLong(temp[0]);
+                member = Long.parseLong(temp[1]);
+                Set<Long> tempSet;
+                if (MEMBER_IGNORE.containsKey(group)) {
+                    tempSet = MEMBER_IGNORE.get(group);
+                } else {
+                    MEMBER_IGNORE.put(group, tempSet = new HashSet<>());
                 }
+                tempSet.add(member);
+                logger.seek("拉黑成员 " + group + " - " + member);
             }
 
-        } catch (IOException exception) {
-            throw new BotException(exception);
         }
+
     }
+
 
     @Override
     public void boot() throws BotException {

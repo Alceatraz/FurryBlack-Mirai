@@ -15,13 +15,7 @@ import studio.blacktech.furryblackplus.system.common.exception.BotException;
 import studio.blacktech.furryblackplus.system.common.utilties.RandomTool;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,64 +57,31 @@ public class Executor_Chou extends EventHandlerExecutor {
 
         EXCLUDE = new HashMap<>();
 
-        File FILE_EXCLUDE = Paths.get(FOLDER_CONF.getAbsolutePath(), "exclude.txt").toFile();
+        File FILE_EXCLUDE = initConfFile("exclude.txt");
 
-        if (!FILE_EXCLUDE.exists()) {
-            try {
-                FILE_EXCLUDE.createNewFile();
-                logger.seek("创建新的配置文件 -> " + FILE_EXCLUDE.getAbsolutePath());
-            } catch (IOException exception) {
-                throw new BotException("创建文件失败 -> " + FILE_EXCLUDE.getAbsolutePath(), exception);
-            }
-        }
+        for (String line : readFile(FILE_EXCLUDE)) {
 
-        if (!FILE_EXCLUDE.canRead()) throw new BotException("文件无权读取 -> " + FILE_EXCLUDE.getAbsolutePath());
-
-
-        long gropid;
-        long userid;
-
-        String line;
-        String[] temp;
-
-
-        try (
-                FileInputStream fileInputStream = new FileInputStream(FILE_EXCLUDE);
-                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
-                BufferedReader reader = new BufferedReader(inputStreamReader)
-        ) {
-
-            while ((line = reader.readLine()) != null) {
-
-                if (line.startsWith("#")) continue;
-                if (!line.contains(":")) continue;
-                if (line.contains("#")) line = line.substring(0, line.indexOf("#")).trim();
-
-                temp = line.split(":");
-
-                if (temp.length != 2) {
-                    logger.warning("配置无效 " + line);
-                    continue;
-                }
-
-                gropid = Long.parseLong(temp[0]);
-                userid = Long.parseLong(temp[1]);
-
-                List<Long> tempList;
-
-                if (EXCLUDE.containsKey(gropid)) {
-                    tempList = EXCLUDE.get(gropid);
-                } else {
-                    EXCLUDE.put(gropid, tempList = new ArrayList<>());
-                }
-
-                tempList.add(userid);
-
-                logger.seek("排除成员 " + gropid + " - " + userid);
+            if (!line.matches("^[0-9]{5,12}:[0-9]{5,12}$")) {
+                logger.warning("配置无效 " + line);
+                continue;
             }
 
-        } catch (IOException exception) {
-            throw new BotException(exception);
+            String[] temp = line.split(":");
+
+            long group = Long.parseLong(temp[0]);
+            long member = Long.parseLong(temp[1]);
+
+            List<Long> tempList;
+
+            if (EXCLUDE.containsKey(group)) {
+                tempList = EXCLUDE.get(group);
+            } else {
+                EXCLUDE.put(group, tempList = new ArrayList<>());
+            }
+
+            tempList.add(member);
+
+            logger.seek("排除成员 " + group + " - " + member);
         }
     }
 
