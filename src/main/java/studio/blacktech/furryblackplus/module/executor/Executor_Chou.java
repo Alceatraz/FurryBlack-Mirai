@@ -3,16 +3,16 @@ package studio.blacktech.furryblackplus.module.executor;
 import net.mamoe.mirai.contact.ContactList;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
+import net.mamoe.mirai.message.FriendMessageEvent;
+import net.mamoe.mirai.message.GroupMessageEvent;
+import net.mamoe.mirai.message.TempMessageEvent;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
-import studio.blacktech.furryblackplus.system.command.FriendCommand;
-import studio.blacktech.furryblackplus.system.command.GroupCommand;
-import studio.blacktech.furryblackplus.system.command.TempCommand;
+import studio.blacktech.furryblackplus.system.command.Command;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
-import studio.blacktech.furryblackplus.system.common.utilties.RandomTool;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 
 import java.io.File;
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -97,21 +98,23 @@ public class Executor_Chou extends EventHandlerExecutor {
 
 
     @Override
-    public void handleTempMessage(TempCommand message) {
-
-    }
-
-    @Override
-    public void handleFriendMessage(FriendCommand message) {
+    public void handleTempMessage(TempMessageEvent event, Command command) {
 
     }
 
 
     @Override
-    public void handleGroupMessage(GroupCommand message) {
+    public void handleFriendMessage(FriendMessageEvent event, Command command) {
 
-        Group group = message.getGroup();
-        Member sender = message.getSender();
+    }
+
+
+    @Override
+    public void handleGroupMessage(GroupMessageEvent event, Command command) {
+
+
+        Group group = event.getGroup();
+        Member sender = event.getSender();
         ContactList<Member> members = group.getMembers();
 
         if (members.size() < 4) {
@@ -126,7 +129,7 @@ public class Executor_Chou extends EventHandlerExecutor {
         }
 
         long botID = Driver.getBotID();
-        long userID = message.getSender().getId();
+        long userID = sender.getId();
         long groupID = group.getId();
 
         Stream<Long> range = members.stream().map(Member::getId)
@@ -151,15 +154,15 @@ public class Executor_Chou extends EventHandlerExecutor {
             return;
         }
 
-        Long memberID = list.get(RandomTool.nextInt(size));
+        Long memberID = list.get(ThreadLocalRandom.current().nextInt(size));
 
         Member member = Driver.getGroupMember(groupID, memberID);
 
         StringBuilder builder = new StringBuilder();
 
-        if (message.getParameterLength() > 0) {
+        if (command.getCommandParameterLength() > 0) {
             builder.append("因为: ");
-            builder.append(message.getCommandBody(200));
+            builder.append(command.getCommandBody(200));
             builder.append("\r\n");
         }
 

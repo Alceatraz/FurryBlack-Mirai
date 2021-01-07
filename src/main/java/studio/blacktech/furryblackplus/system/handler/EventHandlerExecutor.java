@@ -1,8 +1,9 @@
 package studio.blacktech.furryblackplus.system.handler;
 
-import studio.blacktech.furryblackplus.system.command.FriendCommand;
-import studio.blacktech.furryblackplus.system.command.GroupCommand;
-import studio.blacktech.furryblackplus.system.command.TempCommand;
+import net.mamoe.mirai.message.FriendMessageEvent;
+import net.mamoe.mirai.message.GroupMessageEvent;
+import net.mamoe.mirai.message.TempMessageEvent;
+import studio.blacktech.furryblackplus.system.command.Command;
 
 public abstract class EventHandlerExecutor extends AbstractEventHandler {
 
@@ -58,10 +59,10 @@ public abstract class EventHandlerExecutor extends AbstractEventHandler {
         this.INFO = INFO;
     }
 
-    public abstract void handleTempMessage(TempCommand message);
+    public abstract void handleTempMessage(TempMessageEvent event, Command command);
 
-    public abstract void handleFriendMessage(FriendCommand message);
+    public abstract void handleFriendMessage(FriendMessageEvent event, Command command);
 
-    public abstract void handleGroupMessage(GroupCommand message);
+    public abstract void handleGroupMessage(GroupMessageEvent event, Command command);
 
 }

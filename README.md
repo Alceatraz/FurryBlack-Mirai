@@ -50,7 +50,16 @@ Mirai正在急速开发2.0中，一旦稳定FurryBlack将迅速跟进
 - ComponentHandlerFilter注解用于过滤器，类需要继承自EventHandlerFilter
 - 除非你知道你在干什么，不然绝对不要注册Mirai的EventHandler
 
-## CHANGELOG**
+## CHANGELOG
+
+### 0.2.0
+
+- 重新设计了命令解析
+- 支持修改命令前缀
+- 是否命令判断交给系统路由
+- 命令简化为一种
+- 系统路由一次性生成content无需过滤器多次执行拼接
+- 修改了模块入参
 
 ### 0.1.12
 

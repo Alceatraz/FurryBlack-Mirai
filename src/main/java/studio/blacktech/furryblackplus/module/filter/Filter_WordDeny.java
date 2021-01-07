@@ -59,23 +59,20 @@ public class Filter_WordDeny extends EventHandlerFilter {
 
 
     @Override
-    public boolean handleTempMessage(TempMessageEvent message) {
-        String temp = message.getMessage().contentToString();
-        return REGEXES.parallelStream().anyMatch(temp::matches);
+    public boolean handleTempMessage(TempMessageEvent message, String content) {
+        return REGEXES.stream().anyMatch(content::matches);
     }
 
 
     @Override
-    public boolean handleFriendMessage(FriendMessageEvent message) {
-        String temp = message.getMessage().contentToString();
-        return REGEXES.parallelStream().anyMatch(temp::matches);
+    public boolean handleFriendMessage(FriendMessageEvent message, String content) {
+        return REGEXES.stream().anyMatch(content::matches);
     }
 
 
     @Override
-    public boolean handleGroupMessage(GroupMessageEvent message) {
-        String temp = message.getMessage().contentToString();
-        return REGEXES.parallelStream().anyMatch(temp::matches);
+    public boolean handleGroupMessage(GroupMessageEvent message, String content) {
+        return REGEXES.stream().anyMatch(content::matches);
     }
 
 

@@ -1,14 +1,16 @@
 package studio.blacktech.furryblackplus.module.executor;
 
+import net.mamoe.mirai.message.FriendMessageEvent;
+import net.mamoe.mirai.message.GroupMessageEvent;
+import net.mamoe.mirai.message.TempMessageEvent;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.MessageChain;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
-import studio.blacktech.furryblackplus.system.command.FriendCommand;
-import studio.blacktech.furryblackplus.system.command.GroupCommand;
-import studio.blacktech.furryblackplus.system.command.TempCommand;
+import studio.blacktech.furryblackplus.system.command.Command;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
-import studio.blacktech.furryblackplus.system.common.utilties.RandomTool;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 
 @ComponentHandlerExecutor(
@@ -44,20 +46,22 @@ public class Executor_Dice extends EventHandlerExecutor {
 
 
     @Override
-    public void handleTempMessage(TempCommand message) {
-        message.getSender().sendMessage(dice());
+    public void handleTempMessage(TempMessageEvent event, Command command) {
+        event.getSender().sendMessage(dice());
     }
 
-    @Override
-    public void handleFriendMessage(FriendCommand message) {
-        message.getSender().sendMessage(dice());
-    }
 
     @Override
-    public void handleGroupMessage(GroupCommand message) {
-        At at = new At(message.getSender());
+    public void handleFriendMessage(FriendMessageEvent event, Command command) {
+        event.getSender().sendMessage(dice());
+    }
+
+
+    @Override
+    public void handleGroupMessage(GroupMessageEvent event, Command command) {
+        At at = new At(event.getSender());
         MessageChain temp = at.plus(dice());
-        message.getGroup().sendMessage(temp);
+        event.getGroup().sendMessage(temp);
     }
 
 
@@ -67,7 +71,7 @@ public class Executor_Dice extends EventHandlerExecutor {
 
 
     private String dice() {
-        int i = RandomTool.nextInt(61);
+        int i = ThreadLocalRandom.current().nextInt(61);
         if (i == 0) {
             return DICE[0];
         } else {
@@ -77,7 +81,7 @@ public class Executor_Dice extends EventHandlerExecutor {
 
 
     private String diceNormal() {
-        return DICE[RandomTool.nextInt(5) + 1];
+        return DICE[ThreadLocalRandom.current().nextInt(5) + 1];
     }
 
 

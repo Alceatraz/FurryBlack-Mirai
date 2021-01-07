@@ -2,24 +2,25 @@ package studio.blacktech.furryblackplus.module.executor;
 
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
+import net.mamoe.mirai.message.FriendMessageEvent;
+import net.mamoe.mirai.message.GroupMessageEvent;
+import net.mamoe.mirai.message.TempMessageEvent;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.Face;
 import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.PlainText;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
-import studio.blacktech.furryblackplus.system.command.FriendCommand;
-import studio.blacktech.furryblackplus.system.command.GroupCommand;
-import studio.blacktech.furryblackplus.system.command.TempCommand;
+import studio.blacktech.furryblackplus.system.command.Command;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
 import studio.blacktech.furryblackplus.system.common.logger.LoggerX;
-import studio.blacktech.furryblackplus.system.common.utilties.RandomTool;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 
@@ -67,22 +68,24 @@ public class Executor_Roulette extends EventHandlerExecutor {
 
 
     @Override
-    public void handleTempMessage(TempCommand message) {
-        message.getSender().sendMessage("仅支持群");
+    public void handleTempMessage(TempMessageEvent event, Command command) {
+
     }
 
+
     @Override
-    public void handleFriendMessage(FriendCommand message) {
-        message.getSender().sendMessage("仅支持群");
+    public void handleFriendMessage(FriendMessageEvent event, Command command) {
+
     }
 
+
     @Override
-    public synchronized void handleGroupMessage(GroupCommand message) {
+    public void handleGroupMessage(GroupMessageEvent event, Command command) {
 
-        Group group = message.getGroup();
+        Group group = event.getGroup();
 
-        if (!message.hasCommandBody()) {
-            group.sendMessage(new At(message.getSender()).plus("你必须下注"));
+        if (!command.hasCommandBody()) {
+            group.sendMessage(new At(event.getSender()).plus("你必须下注"));
             return;
         }
 
@@ -102,7 +105,7 @@ public class Executor_Roulette extends EventHandlerExecutor {
         }
 
 
-        if (round.join(message)) {
+        if (round.join(event, command)) {
 
 
             if (round.isSinglePlayer()) {
@@ -126,7 +129,7 @@ public class Executor_Roulette extends EventHandlerExecutor {
             } else {
 
 
-                int bullet = RandomTool.nextInt(6);
+                int bullet = ThreadLocalRandom.current().nextInt(6);
 
 
                 Message messages = new PlainText("名单已凑齐 装填子弹中\r\n");
@@ -201,7 +204,7 @@ public class Executor_Roulette extends EventHandlerExecutor {
 
 
             MessageChain temp = new Face(169).plus(builder.toString());
-            message.getGroup().sendMessage(temp);
+            event.getGroup().sendMessage(temp);
 
         }
 
@@ -220,21 +223,21 @@ public class Executor_Roulette extends EventHandlerExecutor {
         private final List<PlayerJetton> gamblers = new ArrayList<>(6);
 
 
-        public boolean join(GroupCommand message) {
+        public boolean join(GroupMessageEvent event, Command command) {
 
             if (gamblers.size() >= 6) {
-                MessageChain temp = new At(message.getSender()).plus("❌ 对局已满");
-                message.getGroup().sendMessage(temp);
+                MessageChain temp = new At(event.getSender()).plus("❌ 对局已满");
+                event.getGroup().sendMessage(temp);
                 return false;
             }
 
-            if (hint && gamblers.stream().anyMatch(item -> item.getMember().getId() == message.getSender().getId())) {
-                MessageChain temp = new At(message.getSender()).plus("✔️ 经科学证实重复下注可有效增加被枪毙的机率");
-                message.getGroup().sendMessage(temp);
+            if (hint && gamblers.stream().anyMatch(item -> item.getMember().getId() == event.getSender().getId())) {
+                MessageChain temp = new At(event.getSender()).plus("✔️ 经科学证实重复下注可有效增加被枪毙的机率");
+                event.getGroup().sendMessage(temp);
                 hint = false;
             }
 
-            gamblers.add(new PlayerJetton(message.getSender(), message.getCommandBody(200)));
+            gamblers.add(new PlayerJetton(event.getSender(), command.getCommandBody(200)));
             return gamblers.size() == 6;
         }
 

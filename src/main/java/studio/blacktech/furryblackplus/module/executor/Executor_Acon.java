@@ -1,10 +1,11 @@
 package studio.blacktech.furryblackplus.module.executor;
 
 import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.message.FriendMessageEvent;
+import net.mamoe.mirai.message.GroupMessageEvent;
+import net.mamoe.mirai.message.TempMessageEvent;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
-import studio.blacktech.furryblackplus.system.command.FriendCommand;
-import studio.blacktech.furryblackplus.system.command.GroupCommand;
-import studio.blacktech.furryblackplus.system.command.TempCommand;
+import studio.blacktech.furryblackplus.system.command.Command;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 
 import java.math.BigInteger;
@@ -83,30 +84,26 @@ public class Executor_Acon extends EventHandlerExecutor {
 
 
     @Override
-    public void handleTempMessage(TempCommand message) {
+    public void handleTempMessage(TempMessageEvent event, Command command) {
 
     }
 
 
     @Override
-    public void handleFriendMessage(FriendCommand message) {
+    public void handleFriendMessage(FriendMessageEvent event, Command command) {
 
     }
 
 
     @Override
-    public synchronized void handleGroupMessage(GroupCommand message) {
-
+    public void handleGroupMessage(GroupMessageEvent event, Command command) {
 
         long current = System.currentTimeMillis() / 1000;
 
-
-        Group group = message.getGroup();
+        Group group = event.getGroup();
         long groupId = group.getId();
 
-
         AirCondition airCondition;
-
 
         if (AIR_CONDITIONS.containsKey(groupId)) {
             airCondition = AIR_CONDITIONS.get(groupId);
@@ -115,10 +112,10 @@ public class Executor_Acon extends EventHandlerExecutor {
         }
 
 
-        if (message.hasCommandBody()) {
+        if (command.hasCommandBody()) {
 
 
-            switch (message.getParameterSegment(0)) {
+            switch (command.getParameterSegment(0)) {
 
                 case "off":
                     group.sendMessage("空调已关闭");

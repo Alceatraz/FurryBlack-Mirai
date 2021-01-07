@@ -32,10 +32,10 @@ public abstract class EventHandlerFilter extends AbstractEventHandler {
     }
 
 
-    public abstract boolean handleTempMessage(TempMessageEvent message);
+    public abstract boolean handleTempMessage(TempMessageEvent message, String content);
 
-    public abstract boolean handleFriendMessage(FriendMessageEvent message);
+    public abstract boolean handleFriendMessage(FriendMessageEvent message, String content);
 
-    public abstract boolean handleGroupMessage(GroupMessageEvent message);
+    public abstract boolean handleGroupMessage(GroupMessageEvent message, String content);
 
 }

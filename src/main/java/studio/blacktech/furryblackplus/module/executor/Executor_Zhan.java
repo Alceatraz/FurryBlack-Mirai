@@ -1,15 +1,16 @@
 package studio.blacktech.furryblackplus.module.executor;
 
+import net.mamoe.mirai.message.FriendMessageEvent;
+import net.mamoe.mirai.message.GroupMessageEvent;
+import net.mamoe.mirai.message.TempMessageEvent;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.MessageChain;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
-import studio.blacktech.furryblackplus.system.command.BasicCommand;
-import studio.blacktech.furryblackplus.system.command.FriendCommand;
-import studio.blacktech.furryblackplus.system.command.GroupCommand;
-import studio.blacktech.furryblackplus.system.command.TempCommand;
+import studio.blacktech.furryblackplus.system.command.Command;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
-import studio.blacktech.furryblackplus.system.common.utilties.RandomTool;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 
 @ComponentHandlerExecutor(
@@ -93,28 +94,30 @@ public class Executor_Zhan extends EventHandlerExecutor {
 
 
     @Override
-    public void handleTempMessage(TempCommand message) {
-        message.getSender().sendMessage(chooseCard(message));
+    public void handleTempMessage(TempMessageEvent event, Command command) {
+        event.getSender().sendMessage(chooseCard(command));
     }
+
 
     @Override
-    public void handleFriendMessage(FriendCommand message) {
-        message.getSender().sendMessage(chooseCard(message));
+    public void handleFriendMessage(FriendMessageEvent event, Command command) {
+        event.getSender().sendMessage(chooseCard(command));
     }
+
 
     @Override
-    public void handleGroupMessage(GroupCommand message) {
-        At at = new At(message.getSender());
-        MessageChain temp = at.plus(chooseCard(message));
-        message.getGroup().sendMessage(temp);
+    public void handleGroupMessage(GroupMessageEvent event, Command command) {
+        At at = new At(event.getSender());
+        MessageChain temp = at.plus(chooseCard(command));
+        event.getGroup().sendMessage(temp);
     }
 
 
-    private String chooseCard(BasicCommand basicCommand) {
-        if (basicCommand.getParameterLength() == 0) {
+    private String chooseCard(Command command) {
+        if (command.getCommandParameterLength() == 0) {
             return "你不能占卜空气";
         } else {
-            return "你因为 " + basicCommand.getCommandBody(200) + "\r\n抽到了：" + CARD[RandomTool.nextInt(44)];
+            return "你因为 " + command.getCommandBody(200) + "\r\n抽到了：" + CARD[ThreadLocalRandom.current().nextInt(44)];
         }
     }
 }

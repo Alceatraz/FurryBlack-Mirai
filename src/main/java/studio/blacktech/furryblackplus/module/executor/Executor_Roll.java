@@ -1,12 +1,12 @@
 package studio.blacktech.furryblackplus.module.executor;
 
+import net.mamoe.mirai.message.FriendMessageEvent;
+import net.mamoe.mirai.message.GroupMessageEvent;
+import net.mamoe.mirai.message.TempMessageEvent;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.MessageChain;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
-import studio.blacktech.furryblackplus.system.command.BasicCommand;
-import studio.blacktech.furryblackplus.system.command.FriendCommand;
-import studio.blacktech.furryblackplus.system.command.GroupCommand;
-import studio.blacktech.furryblackplus.system.command.TempCommand;
+import studio.blacktech.furryblackplus.system.command.Command;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 
@@ -48,29 +48,31 @@ public class Executor_Roll extends EventHandlerExecutor {
 
 
     @Override
-    public void handleTempMessage(TempCommand message) {
-        message.getSender().sendMessage(roll(message));
+    public void handleTempMessage(TempMessageEvent event, Command command) {
+        event.getSender().sendMessage(roll(command));
     }
+
 
     @Override
-    public void handleFriendMessage(FriendCommand message) {
-        message.getSender().sendMessage(roll(message));
+    public void handleFriendMessage(FriendMessageEvent event, Command command) {
+        event.getSender().sendMessage(roll(command));
     }
+
 
     @Override
-    public void handleGroupMessage(GroupCommand message) {
-        At at = new At(message.getSender());
-        MessageChain temp = at.plus(roll(message));
-        message.getGroup().sendMessage(temp);
+    public void handleGroupMessage(GroupMessageEvent event, Command command) {
+        At at = new At(event.getSender());
+        MessageChain temp = at.plus(roll(command));
+        event.getGroup().sendMessage(temp);
     }
 
 
-    private String roll(BasicCommand command) {
+    private String roll(Command command) {
 
         String res;
         SecureRandom random = new SecureRandom();
 
-        switch (command.getParameterLength()) {
+        switch (command.getCommandParameterLength()) {
 
             // ============================================================
 

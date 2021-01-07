@@ -99,17 +99,17 @@ public class Filter_UserDeny extends EventHandlerFilter {
 
 
     @Override
-    public boolean handleTempMessage(TempMessageEvent message) {
+    public boolean handleTempMessage(TempMessageEvent message, String content) {
         return USER_IGNORE.contains(message.getSender().getId());
     }
 
     @Override
-    public boolean handleFriendMessage(FriendMessageEvent message) {
+    public boolean handleFriendMessage(FriendMessageEvent message, String content) {
         return USER_IGNORE.contains(message.getSender().getId());
     }
 
     @Override
-    public boolean handleGroupMessage(GroupMessageEvent message) {
+    public boolean handleGroupMessage(GroupMessageEvent message, String content) {
         if (GROUP_IGNORE.contains(message.getGroup().getId())) return true;
         if (MEMBER_IGNORE.containsKey(message.getGroup().getId())) return MEMBER_IGNORE.get(message.getGroup().getId()).contains(message.getSender().getId());
         return false;

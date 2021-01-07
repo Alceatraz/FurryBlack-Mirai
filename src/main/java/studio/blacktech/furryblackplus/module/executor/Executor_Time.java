@@ -1,9 +1,11 @@
 package studio.blacktech.furryblackplus.module.executor;
 
+import net.mamoe.mirai.message.FriendMessageEvent;
+import net.mamoe.mirai.message.GroupMessageEvent;
+import net.mamoe.mirai.message.TempMessageEvent;
+import net.mamoe.mirai.message.data.At;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
-import studio.blacktech.furryblackplus.system.command.FriendCommand;
-import studio.blacktech.furryblackplus.system.command.GroupCommand;
-import studio.blacktech.furryblackplus.system.command.TempCommand;
+import studio.blacktech.furryblackplus.system.command.Command;
 import studio.blacktech.furryblackplus.system.common.exception.BotException;
 import studio.blacktech.furryblackplus.system.common.logger.LoggerX;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
@@ -92,19 +94,20 @@ public class Executor_Time extends EventHandlerExecutor {
 
 
     @Override
-    public void handleTempMessage(TempCommand message) {
-        message.getSender().sendMessage(getTime());
-    }
-
-    @Override
-    public void handleFriendMessage(FriendCommand message) {
-        message.getSender().sendMessage(getTime());
+    public void handleTempMessage(TempMessageEvent event, Command command) {
+        event.getSender().sendMessage(getTime());
     }
 
 
     @Override
-    public void handleGroupMessage(GroupCommand message) {
-        message.getGroup().sendMessage(getTime());
+    public void handleFriendMessage(FriendMessageEvent event, Command command) {
+        event.getSender().sendMessage(getTime());
+    }
+
+
+    @Override
+    public void handleGroupMessage(GroupMessageEvent event, Command command) {
+        event.getGroup().sendMessage(new At(event.getSender()).plus("\r\n" + getTime()));
     }
 
 

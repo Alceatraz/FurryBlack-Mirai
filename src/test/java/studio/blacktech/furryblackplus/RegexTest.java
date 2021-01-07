@@ -2,6 +2,9 @@ package studio.blacktech.furryblackplus;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class RegexTest {
 
 
@@ -23,6 +26,26 @@ public class RegexTest {
             System.out.println(matches);
         }
 
+    }
+
+
+    @Test
+    void test2() {
+        String[] test = new String[]{
+                "/food",
+                "/list",
+                "/list 1234 `1234 1234 1234`",
+                "/list 1234 `1234 \\`1234 1234\\` 123`",
+        };
+
+
+        Pattern pattern = Pattern.compile("^(?:/[a-z]{3,8})");
+
+
+        for (String temp : test) {
+            Matcher matcher = pattern.matcher(temp);
+            System.out.println(matcher.find());
+        }
     }
 
 }

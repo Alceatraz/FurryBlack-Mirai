@@ -9,7 +9,7 @@ import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.widget.AutopairWidgets;
 import studio.blacktech.furryblackplus.system.Systemd;
-import studio.blacktech.furryblackplus.system.command.BasicCommand;
+import studio.blacktech.furryblackplus.system.command.Command;
 import studio.blacktech.furryblackplus.system.common.exception.working.NotAFolderException;
 import studio.blacktech.furryblackplus.system.common.logger.LoggerX;
 
@@ -41,7 +41,7 @@ public class Driver {
     // ==========================================================================================================================================================
 
 
-    private final static String APP_VERSION = "0.1.12";
+    private final static String APP_VERSION = "0.2.0";
 
 
     private final static long BOOT_TIME = System.currentTimeMillis();
@@ -190,7 +190,6 @@ public class Driver {
             logger.hint("切换至完整日志模式");
 
             logger.info("应用工作目录 " + FOLDER_ROOT.getAbsolutePath());
-            logger.info("核心配置目录 " + FOLDER_CONFIG.getAbsolutePath());
             logger.info("核心日志目录 " + FOLDER_LOGGER.getAbsolutePath());
             logger.info("模块数据目录 " + FOLDER_MODULE.getAbsolutePath());
             logger.info("当前日志文件 " + FILE_LOGGER.getAbsolutePath());
@@ -263,7 +262,7 @@ public class Driver {
 
                 if (temp == null || temp.equals("")) continue;
 
-                BasicCommand command = new BasicCommand(temp.charAt(0) == '/' ? temp : '/' + temp);
+                Command command = new Command(temp);
 
                 switch (command.getCommandName()) {
 
@@ -290,7 +289,7 @@ public class Driver {
 
                     case "send":
                         Friend friend = systemd.getFriend(Long.parseLong(command.getParameterSegment(0)));
-                        friend.sendMessage(command.join(1));
+                        friend.sendMessage(command.getCommandBody());
                         break;
 
                     case "list":
@@ -298,7 +297,7 @@ public class Driver {
                         break;
 
                     case "reload":
-                        for (String s : command.getParameterSegment()) systemd.reloadPlugin(s);
+                        for (String name : command.getParameterSegment()) systemd.reloadPlugin(name);
                         break;
 
 
