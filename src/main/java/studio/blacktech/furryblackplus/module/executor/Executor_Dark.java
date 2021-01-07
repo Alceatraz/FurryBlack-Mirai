@@ -133,9 +133,11 @@ public class Executor_Dark extends EventHandlerExecutor {
             try {
                 size = Integer.parseInt(command.getParameterSegment(0));
             } catch (Exception exception) {
-                builder.append("输入无效, 我觉得你在想peach成全你");
-                size = 26;
+                builder.append("无效 我觉得你在想peach 成全你\r\n");
+                size = sizeCookMethod;
             }
+            if (size == 0) size = sizeCookMethod;
+            if (size > sizeCookMethod) size = sizeCookMethod;
         } else {
             ThreadLocalRandom random = ThreadLocalRandom.current();
             size = random.nextInt(4) + 2;
@@ -176,12 +178,10 @@ public class Executor_Dark extends EventHandlerExecutor {
         StringBuilder builder = new StringBuilder();
 
         for (int i = 0; i < size; i++) {
-            builder.append("\r\n");
             builder.append(USED_INGREDIENTS.remove(0));
             builder.append(USED_COOK_METHOD.remove(0));
         }
 
-        builder.append("\r\n");
         builder.append(USED_INGREDIENTS.remove(0));
 
         return builder.toString();
