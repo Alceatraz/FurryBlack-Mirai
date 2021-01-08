@@ -29,7 +29,11 @@
 
 ## 关于2.0
 
-Mirai正在急速开发2.0中，一旦稳定FurryBlack将迅速跟进
+Mirai正在急速开发2.0中，FurryBlack将在2.0正式版发布后跟进 1.x的BUG不会被修复
+
+## Mirai 1.x 已知BUG
+
+- `bot.join()`在`bot.close()`不会释放，进入无限等待，此时发一条消息即可解锁
 
 ## 关于PR
 
@@ -51,6 +55,11 @@ Mirai正在急速开发2.0中，一旦稳定FurryBlack将迅速跟进
 - 除非你知道你在干什么，不然绝对不要注册Mirai的EventHandler
 
 ## CHANGELOG
+
+### 0.2.2
+
+- 修复0.2.0引入的/info /eula的BUG
+- 发现Mirai的BUG
 
 ### 0.2.1
 

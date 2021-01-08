@@ -31,6 +31,7 @@ import studio.blacktech.furryblackplus.system.common.exception.initlization.Init
 import studio.blacktech.furryblackplus.system.common.exception.initlization.InitLockedException;
 import studio.blacktech.furryblackplus.system.common.exception.initlization.MisConfigException;
 import studio.blacktech.furryblackplus.system.common.logger.LoggerX;
+import studio.blacktech.furryblackplus.system.common.utilties.HashTool;
 import studio.blacktech.furryblackplus.system.handler.AbstractEventHandler;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerFilter;
@@ -58,17 +59,6 @@ import java.util.stream.Collectors;
 
 
 public class Systemd implements ListenerHost {
-
-
-    // ==========================================================================================================================================================
-    //
-    // 私有对象
-    //
-    // ==========================================================================================================================================================
-
-
-    private final Lock lock = new ReentrantLock(true);
-    private final Condition condition = lock.newCondition();
 
 
     // ==========================================================================================================================================================
@@ -145,12 +135,18 @@ public class Systemd implements ListenerHost {
 
     private final LoggerX logger = new LoggerX(this.getClass());
 
+
+    private final Lock lock = new ReentrantLock(true);
+    private final Condition condition = lock.newCondition();
+
+
     private Bot bot;
 
     private Thread thread;
 
     private char COMMAND_PREFIX = '/';
     private Pattern COMMAND_PATTERN;
+
 
     // =========================================================================
     // 预生成消息
@@ -280,6 +276,40 @@ public class Systemd implements ListenerHost {
             COMMAND_PATTERN = Pattern.compile("^" + COMMAND_PREFIX + "[a-z]{3,8}");
 
         }
+
+
+        // ==========================================================================================================================
+        // 读取模板
+
+
+        logger.hint("初始化预生成消息");
+
+
+        File FILE_EULA = Paths.get(Driver.getConfigFolder(), "message_eula.txt").toFile();
+        File FILE_INFO = Paths.get(Driver.getConfigFolder(), "message_info.txt").toFile();
+        File FILE_HELP = Paths.get(Driver.getConfigFolder(), "message_help.txt").toFile();
+
+        logger.info("初始化eula");
+        MESSAGE_EULA = readFile(FILE_EULA);
+
+        logger.info("初始化info");
+        MESSAGE_INFO = readFile(FILE_INFO);
+
+        logger.info("初始化help");
+        MESSAGE_HELP = readFile(FILE_HELP);
+
+        MESSAGE_EULA = MESSAGE_EULA.replaceAll("\\$\\{VERSION}", Driver.getAppVersion());
+        MESSAGE_INFO = MESSAGE_INFO.replaceAll("\\$\\{VERSION}", Driver.getAppVersion());
+        MESSAGE_HELP = MESSAGE_HELP.replaceAll("\\$\\{VERSION}", Driver.getAppVersion());
+
+        String SHA_EULA = HashTool.SHA256(MESSAGE_EULA);
+        String SHA_INFO = HashTool.SHA256(MESSAGE_INFO);
+
+        MESSAGE_EULA = MESSAGE_EULA + "\r\nSHA-256: " + SHA_EULA;
+        MESSAGE_INFO = MESSAGE_INFO + "\r\nSHA-256: " + SHA_INFO;
+
+        logger.info("EULA Digest " + SHA_EULA);
+        logger.info("INFO Digest " + SHA_INFO);
 
 
         // ==========================================================================================================================
@@ -567,22 +597,8 @@ public class Systemd implements ListenerHost {
         // ==========================================================================================================================
         // 注册消息路由
 
+
         Events.registerEvents(bot, this);
-
-
-        // ==========================================================================================================================
-        // 初始化阻塞
-
-
-        thread = new Thread(() -> {
-            lock.lock();
-            try {
-                condition.await();
-            } catch (InterruptedException ignore) {
-                bot.close(null);
-            }
-            lock.unlock();
-        });
 
 
     }
@@ -648,6 +664,21 @@ public class Systemd implements ListenerHost {
 
 
         // ==========================================================================================================================
+        // 初始化阻塞
+
+
+        thread = new Thread(() -> {
+            lock.lock();
+            try {
+                condition.await();
+                bot.close(null);
+            } catch (Exception exception) {
+                lock.unlock();
+            }
+        });
+
+
+        // ==========================================================================================================================
         // 启动阻塞
 
 
@@ -670,21 +701,11 @@ public class Systemd implements ListenerHost {
     public void shut() {
 
 
-        logger.hint("终止机器人");
-
-
-        if (thread != null && thread.isAlive()) {
-            lock.lock();
-            condition.signal();
-            lock.unlock();
-        }
-
-
         // ==========================================================================================================================
         // 关闭模块
 
 
-        logger.hint("关闭所有模块");
+        logger.hint("关闭模块");
 
 
         for (Map.Entry<String, AbstractEventHandler> entry : EVENT_HANDLER.entrySet()) {
@@ -694,6 +715,21 @@ public class Systemd implements ListenerHost {
             } catch (Exception exception) {
                 logger.error("关闭失败 " + entry.getValue().getClass().getName(), exception);
             }
+        }
+
+
+        // ==========================================================================================================================
+        // 关闭阻塞
+
+
+        logger.hint("关闭机器人");
+
+
+        try {
+            lock.lock();
+            condition.signal();
+        } finally {
+            lock.unlock();
         }
 
 
