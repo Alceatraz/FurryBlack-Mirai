@@ -64,16 +64,16 @@ public class Filter_UserDeny extends EventHandlerFilter {
                     logger.warning("配置无效 " + line);
                     continue;
                 }
-                member = Long.parseLong(temp[1]);
+                member = Long.parseLong(temp[1].trim());
                 USER_IGNORE.add(member);
                 logger.seek("拉黑用户 " + member);
             } else if (temp[1].equals("*")) { // Deny Group
-                group = Long.parseLong(temp[0]);
+                group = Long.parseLong(temp[0].trim());
                 GROUP_IGNORE.add(group);
                 logger.seek("拉黑群组 " + group);
             } else { // Deny Member
-                group = Long.parseLong(temp[0]);
-                member = Long.parseLong(temp[1]);
+                group = Long.parseLong(temp[0].trim());
+                member = Long.parseLong(temp[1].trim());
                 Set<Long> tempSet;
                 if (MEMBER_IGNORE.containsKey(group)) {
                     tempSet = MEMBER_IGNORE.get(group);

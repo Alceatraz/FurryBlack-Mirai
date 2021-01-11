@@ -56,6 +56,11 @@ Mirai正在急速开发2.0中，FurryBlack将在2.0正式版发布后跟进 1.x�
 
 ## CHANGELOG
 
+### 0.2.3
+
+- 增强chou的配置读取 裁剪掉多余空格
+- 增强userDeny的配置读取 裁剪掉多余空格
+
 ### 0.2.2
 
 - 修复0.2.0引入的/info /eula的BUG

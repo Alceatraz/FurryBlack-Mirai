@@ -69,8 +69,8 @@ public class Executor_Chou extends EventHandlerExecutor {
 
             String[] temp = line.split(":");
 
-            long group = Long.parseLong(temp[0]);
-            long member = Long.parseLong(temp[1]);
+            long group = Long.parseLong(temp[0].trim());
+            long member = Long.parseLong(temp[1].trim());
 
             List<Long> tempList;
 
