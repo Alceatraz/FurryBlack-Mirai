@@ -2,9 +2,9 @@ package studio.blacktech.furryblackplus.module.executor;
 
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
-import net.mamoe.mirai.message.FriendMessageEvent;
-import net.mamoe.mirai.message.GroupMessageEvent;
-import net.mamoe.mirai.message.TempMessageEvent;
+import net.mamoe.mirai.event.events.FriendMessageEvent;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.GroupTempMessageEvent;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.Face;
 import net.mamoe.mirai.message.data.Message;
@@ -12,9 +12,9 @@ import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.PlainText;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
 import studio.blacktech.furryblackplus.system.command.Command;
-import studio.blacktech.furryblackplus.system.common.exception.BotException;
-import studio.blacktech.furryblackplus.system.common.logger.LoggerX;
+import studio.blacktech.furryblackplus.system.exception.BotException;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
+import studio.blacktech.furryblackplus.system.logger.LoggerX;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -68,7 +68,7 @@ public class Executor_Roulette extends EventHandlerExecutor {
 
 
     @Override
-    public void handleTempMessage(TempMessageEvent event, Command command) {
+    public void handleTempMessage(GroupTempMessageEvent event, Command command) {
 
     }
 
@@ -85,7 +85,7 @@ public class Executor_Roulette extends EventHandlerExecutor {
         Group group = event.getGroup();
 
         if (!command.hasCommandBody()) {
-            group.sendMessage(new At(event.getSender()).plus("你必须下注"));
+            group.sendMessage(new At(event.getSender().getId()).plus("你必须下注"));
             return;
         }
 
@@ -114,7 +114,7 @@ public class Executor_Roulette extends EventHandlerExecutor {
                 RouletteRound.PlayerJetton loser = round.getGamblers().get(0);
 
 
-                group.sendMessage(new At(loser.getMember()).plus("好的，没有问题，成全你"));
+                group.sendMessage(new At(loser.getMember().getId()).plus("好的，没有问题，成全你"));
 
                 group.sendMessage(new Face(169).plus("\uD83D\uDCA5\r\n"));
                 group.sendMessage(new Face(169).plus("\uD83D\uDCA5\r\n"));
@@ -136,7 +136,7 @@ public class Executor_Roulette extends EventHandlerExecutor {
 
                 RouletteRound.PlayerJetton loser = round.getGamblers().get(bullet);
 
-                At at = new At(loser.getMember());
+                At at = new At(loser.getMember().getId());
 
                 for (int i = 0; i < 6; i++) {
 
@@ -226,13 +226,13 @@ public class Executor_Roulette extends EventHandlerExecutor {
         public boolean join(GroupMessageEvent event, Command command) {
 
             if (gamblers.size() >= 6) {
-                MessageChain temp = new At(event.getSender()).plus("❌ 对局已满");
+                MessageChain temp = new At(event.getSender().getId()).plus("❌ 对局已满");
                 event.getGroup().sendMessage(temp);
                 return false;
             }
 
             if (hint && gamblers.stream().anyMatch(item -> item.getMember().getId() == event.getSender().getId())) {
-                MessageChain temp = new At(event.getSender()).plus("✔️ 经科学证实重复下注可有效增加被枪毙的机率");
+                MessageChain temp = new At(event.getSender().getId()).plus("✔️ 经科学证实重复下注可有效增加被枪毙的机率");
                 event.getGroup().sendMessage(temp);
                 hint = false;
             }

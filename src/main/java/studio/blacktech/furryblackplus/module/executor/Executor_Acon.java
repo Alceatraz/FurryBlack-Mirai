@@ -1,9 +1,9 @@
 package studio.blacktech.furryblackplus.module.executor;
 
 import net.mamoe.mirai.contact.Group;
-import net.mamoe.mirai.message.FriendMessageEvent;
-import net.mamoe.mirai.message.GroupMessageEvent;
-import net.mamoe.mirai.message.TempMessageEvent;
+import net.mamoe.mirai.event.events.FriendMessageEvent;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.GroupTempMessageEvent;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
 import studio.blacktech.furryblackplus.system.command.Command;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
@@ -84,7 +84,7 @@ public class Executor_Acon extends EventHandlerExecutor {
 
 
     @Override
-    public void handleTempMessage(TempMessageEvent event, Command command) {
+    public void handleTempMessage(GroupTempMessageEvent event, Command command) {
 
     }
 

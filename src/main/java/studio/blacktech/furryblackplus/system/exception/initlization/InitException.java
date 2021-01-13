@@ -1,7 +1,7 @@
-package studio.blacktech.furryblackplus.system.common.exception.initlization;
+package studio.blacktech.furryblackplus.system.exception.initlization;
 
 
-import studio.blacktech.furryblackplus.system.common.exception.BotException;
+import studio.blacktech.furryblackplus.system.exception.BotException;
 
 
 /**

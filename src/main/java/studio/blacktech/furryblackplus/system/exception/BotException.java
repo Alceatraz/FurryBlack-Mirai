@@ -1,4 +1,4 @@
-package studio.blacktech.furryblackplus.system.common.exception;
+package studio.blacktech.furryblackplus.system.exception;
 
 
 public class BotException extends Exception {

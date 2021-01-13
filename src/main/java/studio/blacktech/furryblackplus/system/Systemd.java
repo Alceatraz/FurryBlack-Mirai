@@ -1,40 +1,40 @@
 package studio.blacktech.furryblackplus.system;
 
-import kotlinx.serialization.json.Json;
+
 import net.mamoe.mirai.Bot;
-import net.mamoe.mirai.BotFactoryJvm;
+import net.mamoe.mirai.BotFactory;
 import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
+import net.mamoe.mirai.event.ConcurrencyKind;
 import net.mamoe.mirai.event.EventHandler;
-import net.mamoe.mirai.event.Events;
-import net.mamoe.mirai.event.Listener;
+import net.mamoe.mirai.event.EventPriority;
 import net.mamoe.mirai.event.ListenerHost;
 import net.mamoe.mirai.event.events.BotInvitedJoinGroupRequestEvent;
+import net.mamoe.mirai.event.events.FriendMessageEvent;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.GroupTempMessageEvent;
 import net.mamoe.mirai.event.events.NewFriendRequestEvent;
-import net.mamoe.mirai.message.FriendMessageEvent;
-import net.mamoe.mirai.message.GroupMessageEvent;
-import net.mamoe.mirai.message.TempMessageEvent;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.utils.BotConfiguration;
-import net.mamoe.mirai.utils.SystemDeviceInfoKt;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ConfigurationBuilder;
 import studio.blacktech.furryblackplus.Driver;
+import studio.blacktech.furryblackplus.bridge.MiraiBridge;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerFilter;
 import studio.blacktech.furryblackplus.system.command.Command;
-import studio.blacktech.furryblackplus.system.common.exception.BotException;
-import studio.blacktech.furryblackplus.system.common.exception.initlization.FirstBootException;
-import studio.blacktech.furryblackplus.system.common.exception.initlization.InitException;
-import studio.blacktech.furryblackplus.system.common.exception.initlization.InitLockedException;
-import studio.blacktech.furryblackplus.system.common.exception.initlization.MisConfigException;
-import studio.blacktech.furryblackplus.system.common.logger.LoggerX;
-import studio.blacktech.furryblackplus.system.common.utilties.HashTool;
+import studio.blacktech.furryblackplus.system.exception.BotException;
+import studio.blacktech.furryblackplus.system.exception.initlization.FirstBootException;
+import studio.blacktech.furryblackplus.system.exception.initlization.InitException;
+import studio.blacktech.furryblackplus.system.exception.initlization.InitLockedException;
+import studio.blacktech.furryblackplus.system.exception.initlization.MisConfigException;
 import studio.blacktech.furryblackplus.system.handler.AbstractEventHandler;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerFilter;
+import studio.blacktech.furryblackplus.system.logger.LoggerX;
+import studio.blacktech.furryblackplus.system.utilties.HashTool;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -209,6 +209,7 @@ public class Systemd implements ListenerHost {
         if (!FILE_CONFIG.exists()) {
 
             try {
+                //noinspection ResultOfMethodCallIgnored
                 FILE_CONFIG.createNewFile();
             } catch (IOException exception) {
                 throw new FirstBootException("配置文件创建失败 -> " + FILE_CONFIG.getAbsolutePath(), exception);
@@ -409,9 +410,7 @@ public class Systemd implements ListenerHost {
 
         }
 
-
-        configuration.setDeviceInfo(context -> SystemDeviceInfoKt.loadAsDeviceInfo(DEVICE_INFO, Json.Default, context));
-
+        configuration.fileBasedDeviceInfo(DEVICE_INFO.getAbsolutePath());
 
         // ==========================================================================================================================
         // 读取网络配置
@@ -471,7 +470,7 @@ public class Systemd implements ListenerHost {
 
 
         logger.hint("初始化机器人");
-        bot = BotFactoryJvm.newBot(ACCOUNT_QQ, ACCOUNT_PW, configuration);
+        bot = BotFactory.INSTANCE.newBot(ACCOUNT_QQ, ACCOUNT_PW, configuration);
 
 
         logger.info("机器人类型 " + bot.getClass().getName());
@@ -597,8 +596,7 @@ public class Systemd implements ListenerHost {
         // ==========================================================================================================================
         // 注册消息路由
 
-
-        Events.registerEvents(bot, this);
+        bot.getEventChannel().registerListenerHost(this);
 
 
     }
@@ -648,11 +646,7 @@ public class Systemd implements ListenerHost {
 
         if (!Driver.isDryRun()) {
 
-            logger.hint("机器人信息");
-            logger.info("上下文 " + bot.getContext().toString());
-
-            logger.info("账号 " + bot.getId());
-            logger.info("昵称 " + bot.getNick());
+            logger.hint("机器人昵称 " + bot.getNick());
 
             logger.hint("所有好友");
             bot.getFriends().forEach(item -> logger.info(item.getNick() + "(" + item.getId() + ")"));
@@ -661,29 +655,6 @@ public class Systemd implements ListenerHost {
             bot.getGroups().forEach(item -> logger.info(item.getName() + "(" + item.getId() + ") " + item.getMembers().size() + " -> " + item.getOwner().getNameCard() + "(" + item.getOwner().getId() + ")"));
 
         }
-
-
-        // ==========================================================================================================================
-        // 初始化阻塞
-
-
-        thread = new Thread(() -> {
-            lock.lock();
-            try {
-                condition.await();
-                bot.close(null);
-            } catch (Exception exception) {
-                lock.unlock();
-            }
-        });
-
-
-        // ==========================================================================================================================
-        // 启动阻塞
-
-
-        thread.start();
-
 
     }
 
@@ -724,84 +695,8 @@ public class Systemd implements ListenerHost {
 
         logger.hint("关闭机器人");
 
-
-        try {
-            lock.lock();
-            condition.signal();
-        } finally {
-            lock.unlock();
-        }
-
-
-    }
-
-
-    // ==========================================================================================================================================================
-    //
-    // 杀死
-    //
-    // ==========================================================================================================================================================
-
-
-    /**
-     * 强制杀死
-     */
-    public void kill() {
-
-        try {
-            logger.info("尝试强制打断BOT阻塞线程");
-            if (thread != null) thread.interrupt();
-        } catch (Exception exception) {
-            logger.error("强制打断工作线程失败 尝试Mirai强制结束Bot");
-            if (bot != null) bot.close(new Exception("强制杀死机器人"));
-        }
-
-
-        try {
-            logger.info("尝试强制清空用户过滤链");
-            EVENT_HANDLER_FILTER_USERS.clear();
-        } catch (Exception exception) {
-            logger.error("销毁用户过滤链失败，尝试强制置为Null", exception);
-            EVENT_HANDLER_FILTER_USERS = null;
-            System.gc(); // 调用GC并不会直接GC
-        }
-
-        try {
-            logger.info("尝试强制清空群组过滤链");
-            EVENT_HANDLER_FILTER_GROUP.clear();
-        } catch (Exception exception) {
-            logger.error("销毁群组过滤链失败，尝试强制置为Null", exception);
-            EVENT_HANDLER_FILTER_GROUP = null;
-            System.gc(); // 调用GC并不会直接GC
-        }
-
-        try {
-            logger.info("尝试强制清空用户执行链");
-            EVENT_HANDLER_EXECUTOR_USERS.clear();
-        } catch (Exception exception) {
-            logger.error("销毁用户执行链失败，尝试强制置为Null", exception);
-            EVENT_HANDLER_EXECUTOR_USERS = null;
-            System.gc(); // 调用GC并不会直接GC
-        }
-
-        try {
-            logger.info("尝试强制清空群组执行链");
-            EVENT_HANDLER_EXECUTOR_GROUP.clear();
-        } catch (Exception exception) {
-            logger.error("销毁群组执行链失败，尝试强制置为Null", exception);
-            EVENT_HANDLER_EXECUTOR_GROUP = null;
-            System.gc(); // 调用GC并不会直接GC
-        }
-
-        try {
-            logger.info("尝试强制清空实例注册链");
-            EVENT_HANDLER.clear();
-        } catch (Exception exception) {
-            logger.error("销毁组件实例容器失败，尝试强制置为Null", exception);
-            EVENT_HANDLER = null;
-            System.gc(); // 调用GC并不会直接GC
-        }
-
+        MiraiBridge.close(bot);
+        MiraiBridge.join(bot);
 
     }
 
@@ -826,6 +721,7 @@ public class Systemd implements ListenerHost {
 
         if (!file.exists()) {
             try {
+                //noinspection ResultOfMethodCallIgnored
                 file.createNewFile();
                 logger.hint("创建新的文件 " + file.getAbsolutePath());
             } catch (IOException exception) {
@@ -906,10 +802,10 @@ public class Systemd implements ListenerHost {
 
 
     @EventHandler(
-            priority = Listener.EventPriority.MONITOR,
-            concurrency = Listener.ConcurrencyKind.CONCURRENT
+            priority = EventPriority.MONITOR,
+            concurrency = ConcurrencyKind.CONCURRENT
     )
-    public void handleTempMessageExecutor(TempMessageEvent event) {
+    public void handleTempMessageExecutor(GroupTempMessageEvent event) {
 
         if (!Driver.isEnable()) return;
 
@@ -968,8 +864,8 @@ public class Systemd implements ListenerHost {
 
 
     @EventHandler(
-            priority = Listener.EventPriority.MONITOR,
-            concurrency = Listener.ConcurrencyKind.CONCURRENT
+            priority = EventPriority.MONITOR,
+            concurrency = ConcurrencyKind.CONCURRENT
     )
     public void handleFriendMessageExecutor(FriendMessageEvent event) {
 
@@ -1031,8 +927,8 @@ public class Systemd implements ListenerHost {
 
 
     @EventHandler(
-            priority = Listener.EventPriority.MONITOR,
-            concurrency = Listener.ConcurrencyKind.CONCURRENT
+            priority = EventPriority.MONITOR,
+            concurrency = ConcurrencyKind.CONCURRENT
     )
     public void handleGroupMessageExecutor(GroupMessageEvent event) {
 
@@ -1063,7 +959,7 @@ public class Systemd implements ListenerHost {
                                 try {
                                     event.getSender().sendMessage(executor.INFO.HELP);
                                 } catch (Exception exception) {
-                                    At at = new At(event.getSender());
+                                    At at = new At(event.getSender().getId());
                                     event.getGroup().sendMessage(at.plus("帮助信息发送至私聊失败 请允许临时会话权限"));
                                 }
                             }
@@ -1071,7 +967,7 @@ public class Systemd implements ListenerHost {
                             try {
                                 event.getSender().sendMessage(MESSAGE_HELP);
                             } catch (Exception exception) {
-                                At at = new At(event.getSender());
+                                At at = new At(event.getSender().getId());
                                 event.getGroup().sendMessage(at.plus("帮助信息发送至私聊失败 请允许临时会话权限"));
                             }
                         }
@@ -1081,7 +977,7 @@ public class Systemd implements ListenerHost {
                         try {
                             event.getSender().sendMessage(MESSAGE_LIST_GROUP);
                         } catch (Exception exception) {
-                            At at = new At(event.getSender());
+                            At at = new At(event.getSender().getId());
                             event.getGroup().sendMessage(at.plus("可用命令发送至私聊失败 请允许临时会话权限"));
                         }
                         break;
@@ -1090,7 +986,7 @@ public class Systemd implements ListenerHost {
                         try {
                             event.getSender().sendMessage(MESSAGE_INFO);
                         } catch (Exception exception) {
-                            At at = new At(event.getSender());
+                            At at = new At(event.getSender().getId());
                             event.getGroup().sendMessage(at.plus("关于发送至私聊失败 请允许临时会话权限"));
                         }
                         break;
@@ -1099,7 +995,7 @@ public class Systemd implements ListenerHost {
                         try {
                             event.getSender().sendMessage(MESSAGE_EULA);
                         } catch (Exception exception) {
-                            At at = new At(event.getSender());
+                            At at = new At(event.getSender().getId());
                             event.getGroup().sendMessage(at.plus("EULA发送至私聊失败 请允许临时会话权限"));
                         }
                         break;
@@ -1181,22 +1077,20 @@ public class Systemd implements ListenerHost {
         return bot.getGroup(id);
     }
 
+
     public Member getGroupMember(long group, long member) {
-        return bot.getGroup(group).get(member);
-    }
-
-
-    public void sendGroupMessage(long groupid, long userid, String message) {
-        Group group = bot.getGroup(groupid);
-        Member member = group.get(userid);
-        sendGroupMessage(group, member, message);
+        return bot.getGroupOrFail(group).getOrFail(member);
     }
 
 
     public void sendGroupMessage(Group group, Member member, String message) {
-        group.sendMessage(new At(member).plus(message));
+        sendGroupMessage(group.getId(), member.getId(), message);
     }
 
+
+    public void sendGroupMessage(long group, long member, String message) {
+        bot.getGroupOrFail(group).getOrFail(member).sendMessage(new At(member).plus(message));
+    }
 
 }
 

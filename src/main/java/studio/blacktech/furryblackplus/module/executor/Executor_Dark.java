@@ -1,12 +1,12 @@
 package studio.blacktech.furryblackplus.module.executor;
 
-import net.mamoe.mirai.message.FriendMessageEvent;
-import net.mamoe.mirai.message.GroupMessageEvent;
-import net.mamoe.mirai.message.TempMessageEvent;
+import net.mamoe.mirai.event.events.FriendMessageEvent;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.GroupTempMessageEvent;
 import net.mamoe.mirai.message.data.At;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
 import studio.blacktech.furryblackplus.system.command.Command;
-import studio.blacktech.furryblackplus.system.common.exception.BotException;
+import studio.blacktech.furryblackplus.system.exception.BotException;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 
 import java.io.File;
@@ -106,7 +106,7 @@ public class Executor_Dark extends EventHandlerExecutor {
 
 
     @Override
-    public void handleTempMessage(TempMessageEvent event, Command command) {
+    public void handleTempMessage(GroupTempMessageEvent event, Command command) {
         event.getSender().sendMessage(generate(command));
     }
 
@@ -119,7 +119,7 @@ public class Executor_Dark extends EventHandlerExecutor {
 
     @Override
     public void handleGroupMessage(GroupMessageEvent event, Command command) {
-        event.getGroup().sendMessage(new At(event.getSender()).plus(generate(command)));
+        event.getGroup().sendMessage(new At(event.getSender().getId()).plus(generate(command)));
     }
 
 

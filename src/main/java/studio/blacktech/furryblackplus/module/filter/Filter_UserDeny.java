@@ -1,10 +1,10 @@
 package studio.blacktech.furryblackplus.module.filter;
 
-import net.mamoe.mirai.message.FriendMessageEvent;
-import net.mamoe.mirai.message.GroupMessageEvent;
-import net.mamoe.mirai.message.TempMessageEvent;
+import net.mamoe.mirai.event.events.FriendMessageEvent;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.GroupTempMessageEvent;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerFilter;
-import studio.blacktech.furryblackplus.system.common.exception.BotException;
+import studio.blacktech.furryblackplus.system.exception.BotException;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerFilter;
 
 import java.io.File;
@@ -99,7 +99,7 @@ public class Filter_UserDeny extends EventHandlerFilter {
 
 
     @Override
-    public boolean handleTempMessage(TempMessageEvent message, String content) {
+    public boolean handleTempMessage(GroupTempMessageEvent message, String content) {
         return USER_IGNORE.contains(message.getSender().getId());
     }
 

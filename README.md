@@ -27,14 +27,6 @@
 
 没有Mirai这个世界会变成什么样？
 
-## 关于2.0
-
-Mirai正在急速开发2.0中，FurryBlack将在2.0正式版发布后跟进 1.x的BUG不会被修复
-
-## Mirai 1.x 已知BUG
-
-- `bot.join()`在`bot.close()`不会释放，进入无限等待，此时发一条消息即可解锁
-
 ## 关于PR
 
 架构和API随时会变，因为这是个人的项目，所以会完全的放飞自我，不按套路来，提PR需要慎重，极有可能PR还未提交就重构了。
@@ -55,6 +47,16 @@ Mirai正在急速开发2.0中，FurryBlack将在2.0正式版发布后跟进 1.x�
 - 除非你知道你在干什么，不然绝对不要注册Mirai的EventHandler
 
 ## CHANGELOG
+
+### 0.3.0-RC
+
+- RC是因为Mirai2.0仍处于RC阶段
+- 参数修改为--no-jline
+- Driver 删除Kill使用Exit(-1)代替
+- Systemd 修改了实例化BOT和注册事件的新方式
+- Systemd 完全抛弃了之前Mirai-Boot的写法 因为没有必要, FurryBlack本身会有主线程阻塞
+- AbstractEventHandler 修改了参数类型 GroupTempMessageEvent
+- 修改所有使用At的代码
 
 ### 0.2.4
 

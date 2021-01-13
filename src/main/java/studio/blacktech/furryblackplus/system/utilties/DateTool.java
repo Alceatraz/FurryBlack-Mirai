@@ -1,4 +1,4 @@
-package studio.blacktech.furryblackplus.system.common.utilties;
+package studio.blacktech.furryblackplus.system.utilties;
 
 import java.util.Calendar;
 import java.util.Date;

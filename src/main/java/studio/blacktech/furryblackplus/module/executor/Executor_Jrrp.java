@@ -1,14 +1,14 @@
 package studio.blacktech.furryblackplus.module.executor;
 
-import net.mamoe.mirai.message.FriendMessageEvent;
-import net.mamoe.mirai.message.GroupMessageEvent;
-import net.mamoe.mirai.message.TempMessageEvent;
+import net.mamoe.mirai.event.events.FriendMessageEvent;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.GroupTempMessageEvent;
 import net.mamoe.mirai.message.data.At;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
 import studio.blacktech.furryblackplus.system.command.Command;
-import studio.blacktech.furryblackplus.system.common.exception.BotException;
-import studio.blacktech.furryblackplus.system.common.utilties.DateTool;
+import studio.blacktech.furryblackplus.system.exception.BotException;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
+import studio.blacktech.furryblackplus.system.utilties.DateTool;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -69,7 +69,7 @@ public class Executor_Jrrp extends EventHandlerExecutor {
 
 
     @Override
-    public void handleTempMessage(TempMessageEvent event, Command command) {
+    public void handleTempMessage(GroupTempMessageEvent event, Command command) {
         event.getSender().sendMessage("今天的运气是" + getRp(event.getSender().getId()) + "% !!!");
     }
 
@@ -82,7 +82,7 @@ public class Executor_Jrrp extends EventHandlerExecutor {
 
     @Override
     public void handleGroupMessage(GroupMessageEvent event, Command command) {
-        event.getGroup().sendMessage(new At(event.getSender()).plus("今天的运气是" + getRp(event.getSender().getId()) + "% !!!"));
+        event.getGroup().sendMessage(new At(event.getSender().getId()).plus("今天的运气是" + getRp(event.getSender().getId()) + "% !!!"));
     }
 
 

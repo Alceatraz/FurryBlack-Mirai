@@ -1,7 +1,7 @@
-package studio.blacktech.furryblackplus.system.common.exception.working;
+package studio.blacktech.furryblackplus.system.exception.working;
 
 
-import studio.blacktech.furryblackplus.system.common.exception.BotException;
+import studio.blacktech.furryblackplus.system.exception.BotException;
 
 public class NotAFolderException extends BotException {
 

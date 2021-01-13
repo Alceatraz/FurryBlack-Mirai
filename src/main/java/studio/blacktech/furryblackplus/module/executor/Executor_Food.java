@@ -1,12 +1,12 @@
 package studio.blacktech.furryblackplus.module.executor;
 
-import net.mamoe.mirai.message.FriendMessageEvent;
-import net.mamoe.mirai.message.GroupMessageEvent;
-import net.mamoe.mirai.message.TempMessageEvent;
+import net.mamoe.mirai.event.events.FriendMessageEvent;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.GroupTempMessageEvent;
 import net.mamoe.mirai.message.data.At;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
 import studio.blacktech.furryblackplus.system.command.Command;
-import studio.blacktech.furryblackplus.system.common.exception.BotException;
+import studio.blacktech.furryblackplus.system.exception.BotException;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 
 import java.io.File;
@@ -99,7 +99,7 @@ public class Executor_Food extends EventHandlerExecutor {
 
 
     @Override
-    public void handleTempMessage(TempMessageEvent event, Command command) {
+    public void handleTempMessage(GroupTempMessageEvent event, Command command) {
 
     }
 
@@ -118,24 +118,24 @@ public class Executor_Food extends EventHandlerExecutor {
             switch (command.getParameterSegment(0)) {
 
                 case "dark":
-                    event.getGroup().sendMessage(new At(event.getSender()).plus("请使用/dark以获取极致美食体验"));
+                    event.getGroup().sendMessage(new At(event.getSender().getId()).plus("请使用/dark以获取极致美食体验"));
                     break;
 
                 case "list":
-                    event.getGroup().sendMessage(new At(event.getSender()).plus(FOOD.getList()));
+                    event.getGroup().sendMessage(new At(event.getSender().getId()).plus(FOOD.getList()));
                     break;
 
                 default:
                     try {
                         int type = Integer.parseInt(command.getParameterSegment(0));
-                        event.getGroup().sendMessage(new At(event.getSender()).plus(FOOD.random(type - 1)));
+                        event.getGroup().sendMessage(new At(event.getSender().getId()).plus(FOOD.random(type - 1)));
                     } catch (Exception exception) {
-                        event.getGroup().sendMessage(new At(event.getSender()).plus("没有这个类别 你在想Peach"));
+                        event.getGroup().sendMessage(new At(event.getSender().getId()).plus("没有这个类别 你在想Peach"));
                     }
             }
 
         } else {
-            event.getGroup().sendMessage(new At(event.getSender()).plus(FOOD.random()));
+            event.getGroup().sendMessage(new At(event.getSender().getId()).plus(FOOD.random()));
         }
     }
 

@@ -4,28 +4,27 @@ package studio.blacktech.furryblackplus;
 import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
-import net.mamoe.mirai.contact.PermissionDeniedException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.widget.AutopairWidgets;
 import studio.blacktech.furryblackplus.system.Systemd;
 import studio.blacktech.furryblackplus.system.command.Command;
-import studio.blacktech.furryblackplus.system.common.exception.working.NotAFolderException;
-import studio.blacktech.furryblackplus.system.common.logger.LoggerX;
+import studio.blacktech.furryblackplus.system.exception.initlization.InitException;
+import studio.blacktech.furryblackplus.system.exception.working.NotAFolderException;
+import studio.blacktech.furryblackplus.system.logger.LoggerX;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
-import java.util.jar.JarFile;
 
 
 /**
  * FurryBlack Plus Framework
+ *
+ * 本项目并非使用纯AGPLv3协议，请认真阅读LICENSE
  *
  * @author Alceatraz Warprays alceatraz@blacktech.studio
  * @see Driver 为启动类main方法所在地，初始化日志和目录系统，提供控制台
@@ -41,7 +40,7 @@ public class Driver {
     // ==========================================================================================================================================================
 
 
-    private final static String APP_VERSION = "0.2.4";
+    private final static String APP_VERSION = "0.3.0-RC";
 
 
     private final static long BOOT_TIME = System.currentTimeMillis();
@@ -67,10 +66,6 @@ public class Driver {
     private static File FOLDER_LOGGER;
 
     private static File FILE_CONFIG;
-
-    private static Properties CONFIG;
-
-    private static JarFile JAR_INSTANCE;
 
 
     // ==========================================================================================================================================================
@@ -104,7 +99,7 @@ public class Driver {
 
 
             // jLine 设置
-            JLINE = !parameters.contains("--nojline");
+            JLINE = !parameters.contains("--no-jline");
 
             if (JLINE) {
                 jlineReader = LineReaderBuilder.builder().build();
@@ -151,17 +146,17 @@ public class Driver {
             System.out.println("[FurryBlack][INIT]初始化目录");
 
 
-            if (!FOLDER_CONFIG.exists()) FOLDER_CONFIG.mkdirs();
-            if (!FOLDER_MODULE.exists()) FOLDER_MODULE.mkdirs();
-            if (!FOLDER_LOGGER.exists()) FOLDER_LOGGER.mkdirs();
+            if (!FOLDER_CONFIG.exists()) if (!FOLDER_CONFIG.mkdirs()) throw new InitException("无法创建文件夹 " + FOLDER_CONFIG.getAbsolutePath());
+            if (!FOLDER_MODULE.exists()) if (!FOLDER_MODULE.mkdirs()) throw new InitException("无法创建文件夹 " + FOLDER_MODULE.getAbsolutePath());
+            if (!FOLDER_LOGGER.exists()) if (!FOLDER_LOGGER.mkdirs()) throw new InitException("无法创建文件夹 " + FOLDER_LOGGER.getAbsolutePath());
 
 
             System.out.println("[FurryBlack][INIT]初始化检查");
 
 
-            if (!FOLDER_CONFIG.isDirectory()) throw new NotAFolderException("文件夹被文件占位：" + FOLDER_CONFIG.getAbsolutePath());
-            if (!FOLDER_MODULE.isDirectory()) throw new NotAFolderException("文件夹被文件占位：" + FOLDER_MODULE.getAbsolutePath());
-            if (!FOLDER_LOGGER.isDirectory()) throw new NotAFolderException("文件夹被文件占位：" + FOLDER_LOGGER.getAbsolutePath());
+            if (!FOLDER_CONFIG.isDirectory()) throw new NotAFolderException("文件夹被文件占位 " + FOLDER_CONFIG.getAbsolutePath());
+            if (!FOLDER_MODULE.isDirectory()) throw new NotAFolderException("文件夹被文件占位 " + FOLDER_MODULE.getAbsolutePath());
+            if (!FOLDER_LOGGER.isDirectory()) throw new NotAFolderException("文件夹被文件占位 " + FOLDER_LOGGER.getAbsolutePath());
 
 
             // ==========================================================================================================================
@@ -171,12 +166,9 @@ public class Driver {
             System.out.println("[FurryBlack][INIT]创建日志文件");
 
 
-            FILE_LOGGER.createNewFile();
-
-
-            if (!FILE_LOGGER.exists()) throw new FileNotFoundException("日志文件不存在: " + FILE_LOGGER.getAbsolutePath());
-
-            if (!FILE_LOGGER.canWrite()) throw new PermissionDeniedException("日志文件没有写权限: " + FILE_LOGGER.getAbsolutePath());
+            if (!FILE_LOGGER.createNewFile()) throw new InitException("日志文件创建失败 " + FILE_LOGGER.getAbsolutePath());
+            if (!FILE_LOGGER.exists()) throw new InitException("日志文件不存在 " + FILE_LOGGER.getAbsolutePath());
+            if (!FILE_LOGGER.canWrite()) throw new InitException("日志文件没有写权限 " + FILE_LOGGER.getAbsolutePath());
 
 
             LoggerX.init(FILE_LOGGER);
@@ -326,7 +318,7 @@ public class Driver {
         } catch (Exception exception) {
             logger.error("系统关闭异常", exception);
             logger.warning("进入紧急停机模式");
-            systemd.kill();
+            System.exit(-1);
         }
 
 

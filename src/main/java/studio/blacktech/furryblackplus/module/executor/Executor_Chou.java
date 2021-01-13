@@ -3,16 +3,17 @@ package studio.blacktech.furryblackplus.module.executor;
 import net.mamoe.mirai.contact.ContactList;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
-import net.mamoe.mirai.message.FriendMessageEvent;
-import net.mamoe.mirai.message.GroupMessageEvent;
-import net.mamoe.mirai.message.TempMessageEvent;
+import net.mamoe.mirai.contact.NormalMember;
+import net.mamoe.mirai.event.events.FriendMessageEvent;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.GroupTempMessageEvent;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.system.annotation.ComponentHandlerExecutor;
 import studio.blacktech.furryblackplus.system.command.Command;
-import studio.blacktech.furryblackplus.system.common.exception.BotException;
+import studio.blacktech.furryblackplus.system.exception.BotException;
 import studio.blacktech.furryblackplus.system.handler.EventHandlerExecutor;
 
 import java.io.File;
@@ -98,7 +99,7 @@ public class Executor_Chou extends EventHandlerExecutor {
 
 
     @Override
-    public void handleTempMessage(TempMessageEvent event, Command command) {
+    public void handleTempMessage(GroupTempMessageEvent event, Command command) {
 
     }
 
@@ -115,12 +116,12 @@ public class Executor_Chou extends EventHandlerExecutor {
 
         Group group = event.getGroup();
         Member sender = event.getSender();
-        ContactList<Member> members = group.getMembers();
+        ContactList<NormalMember> members = group.getMembers();
 
         if (members.size() < 4) {
 
             MessageChain messages = new MessageChainBuilder()
-                                            .append(new At(sender))
+                                            .append(new At(sender.getId()))
                                             .append("可用成员人数不足，无法使用此功能。")
                                             .build();
             group.sendMessage(messages);
@@ -147,7 +148,7 @@ public class Executor_Chou extends EventHandlerExecutor {
 
         if (size < 2) {
             MessageChain messages = new MessageChainBuilder()
-                                            .append(new At(sender))
+                                            .append(new At(sender.getId()))
                                             .append("可用成员人数不足，无法使用此功能。")
                                             .build();
             group.sendMessage(messages);
@@ -173,7 +174,7 @@ public class Executor_Chou extends EventHandlerExecutor {
         builder.append(")");
 
         MessageChain messages = new MessageChainBuilder()
-                                        .append(new At(sender))
+                                        .append(new At(sender.getId()))
                                         .append(builder.toString())
                                         .build();
         group.sendMessage(messages);

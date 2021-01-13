@@ -1,17 +1,17 @@
-package studio.blacktech.furryblackplus.system.common.logger;
+package studio.blacktech.furryblackplus.system.logger;
 
 import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
-import net.mamoe.mirai.message.FriendMessageEvent;
-import net.mamoe.mirai.message.GroupMessageEvent;
-import net.mamoe.mirai.message.MessageEvent;
-import net.mamoe.mirai.message.TempMessageEvent;
+import net.mamoe.mirai.event.events.FriendMessageEvent;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.GroupTempMessageEvent;
+import net.mamoe.mirai.event.events.MessageEvent;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.SingleMessage;
 import net.mamoe.mirai.utils.PlatformLogger;
-import studio.blacktech.furryblackplus.system.common.exception.BotException;
-import studio.blacktech.furryblackplus.system.common.exception.initlization.InitLockedException;
+import studio.blacktech.furryblackplus.system.exception.BotException;
+import studio.blacktech.furryblackplus.system.exception.initlization.InitLockedException;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -215,11 +215,11 @@ public class LoggerX extends PlatformLogger {
             builder.append(sender.getId());
             builder.append(") -> ");
 
-        } else if (event instanceof TempMessageEvent) {
+        } else if (event instanceof GroupTempMessageEvent) {
 
             builder.append("TempMessageEvent");
 
-            Member sender = ((TempMessageEvent) event).getSender();
+            Member sender = ((GroupTempMessageEvent) event).getSender();
             builder.append(sender.getNick());
             builder.append("(");
             builder.append(sender.getId());

@@ -1,9 +1,9 @@
 package studio.blacktech.furryblackplus.system.handler;
 
-import net.mamoe.mirai.message.FriendMessageEvent;
-import net.mamoe.mirai.message.GroupMessageEvent;
-import net.mamoe.mirai.message.TempMessageEvent;
 
+import net.mamoe.mirai.event.events.FriendMessageEvent;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.GroupTempMessageEvent;
 
 public abstract class EventHandlerFilter extends AbstractEventHandler {
 
@@ -32,7 +32,7 @@ public abstract class EventHandlerFilter extends AbstractEventHandler {
     }
 
 
-    public abstract boolean handleTempMessage(TempMessageEvent message, String content);
+    public abstract boolean handleTempMessage(GroupTempMessageEvent message, String content);
 
     public abstract boolean handleFriendMessage(FriendMessageEvent message, String content);
 
