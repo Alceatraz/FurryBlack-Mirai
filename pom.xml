@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>studio.blacktech</groupId>
-    <artifactId>furryblackplus</artifactId>
+    <groupId>studio.blacktech.furryblackplus</groupId>
+    <artifactId>core</artifactId>
 
-    <name>Furry Black Plus</name>
+    <name>FurryBlack-Mirai-Core</name>
 
-    <version>0.3.0-RC</version>
+    <version>0.4.0</version>
 
     <packaging>jar</packaging>
 
     <properties>
 
-        <kotlin.version>1.4.21-2</kotlin.version>
+        <mirai.version>2.0.0</mirai.version>
+
+        <kotlin.version>1.4.21</kotlin.version>
 
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.source>11</maven.compiler.source>
@@ -24,53 +25,44 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-
     </properties>
 
-
     <repositories>
-
 
         <repository>
             <id>jcenter</id>
             <url>https://jcenter.bintray.com/</url>
         </repository>
 
-
         <repository>
             <id>central</id>
             <url>https://repo1.maven.org/maven2/</url>
         </repository>
-
-
-        <repository>
-            <id>kotlin-eap</id>
-            <url>https://dl.bintray.com/kotlin/kotlin-eap</url>
-        </repository>
-
 
         <repository>
             <id>kotlin-x</id>
             <url>https://kotlin.bintray.com/kotlinx</url>
         </repository>
 
+        <repository>
+            <id>kotlin-eap</id>
+            <url>https://dl.bintray.com/kotlin/kotlin-eap</url>
+        </repository>
 
         <repository>
             <id>google</id>
             <url>https://maven.google.com</url>
         </repository>
 
-
     </repositories>
-
 
     <dependencies>
 
 
         <dependency>
             <groupId>net.mamoe</groupId>
-            <artifactId>mirai-core-jvm</artifactId>
-            <version>2.0-RC</version>
+            <artifactId>mirai-core-api-jvm</artifactId>
+            <version>${mirai.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jetbrains.kotlin</groupId>
@@ -86,8 +78,8 @@
 
         <dependency>
             <groupId>net.mamoe</groupId>
-            <artifactId>mirai-core-api-jvm</artifactId>
-            <version>2.0-RC</version>
+            <artifactId>mirai-core-jvm</artifactId>
+            <version>${mirai.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jetbrains.kotlin</groupId>
@@ -189,15 +181,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.2.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>libs/</classpathPrefix>
-                            <mainClass>studio.blacktech.furryblackplus.Driver</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
             </plugin>
 
 

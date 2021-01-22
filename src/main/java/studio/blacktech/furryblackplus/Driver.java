@@ -1,24 +1,40 @@
 package studio.blacktech.furryblackplus;
 
 
+import net.mamoe.mirai.contact.Contact;
+import net.mamoe.mirai.contact.ContactList;
 import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
+import net.mamoe.mirai.contact.Stranger;
+import net.mamoe.mirai.contact.User;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.UserMessageEvent;
+import net.mamoe.mirai.message.data.At;
+import net.mamoe.mirai.message.data.FlashImage;
+import net.mamoe.mirai.message.data.Image;
+import net.mamoe.mirai.message.data.Message;
+import net.mamoe.mirai.message.data.PlainText;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.widget.AutopairWidgets;
-import studio.blacktech.furryblackplus.system.Systemd;
-import studio.blacktech.furryblackplus.system.command.Command;
-import studio.blacktech.furryblackplus.system.exception.initlization.InitException;
-import studio.blacktech.furryblackplus.system.exception.working.NotAFolderException;
-import studio.blacktech.furryblackplus.system.logger.LoggerX;
+import studio.blacktech.furryblackplus.core.Systemd;
+import studio.blacktech.furryblackplus.core.annotation.Api;
+import studio.blacktech.furryblackplus.core.exception.initlization.InitException;
+import studio.blacktech.furryblackplus.core.utilties.Command;
+import studio.blacktech.furryblackplus.core.utilties.LoggerX;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -28,7 +44,7 @@ import java.util.List;
  *
  * @author Alceatraz Warprays alceatraz@blacktech.studio
  * @see Driver 为启动类main方法所在地，初始化日志和目录系统，提供控制台
- * @see Systemd 是整个系统的内核所在，.exit
+ * @see Systemd 是整个系统的内核所在
  */
 public class Driver {
 
@@ -40,7 +56,7 @@ public class Driver {
     // ==========================================================================================================================================================
 
 
-    private final static String APP_VERSION = "0.3.0-RC";
+    private final static String APP_VERSION = "0.4.0";
 
 
     private final static long BOOT_TIME = System.currentTimeMillis();
@@ -51,20 +67,18 @@ public class Driver {
 
     private static boolean enable = false;
     private static boolean dryRun = false;
+    private static boolean reader = false;
+
+    private static boolean debug = false;
+    private static boolean shutdown = false;
 
     private static LoggerX logger;
-
-
     private static Systemd systemd;
 
-
     private static File FOLDER_ROOT;
-
     private static File FOLDER_CONFIG;
-
     private static File FOLDER_MODULE;
     private static File FOLDER_LOGGER;
-
     private static File FILE_CONFIG;
 
 
@@ -77,15 +91,9 @@ public class Driver {
 
     public static void main(String[] args) {
 
+        if (isEnable()) return;
 
         System.out.println("[FurryBlack][BOOT]FurryBlackPlus Mirai - ver " + APP_VERSION + " " + LoggerX.formatTime("yyyy-MM-dd HH:mm:ss", BOOT_TIME));
-
-
-        LineReader jlineReader = null;
-
-        BufferedReader bufferedReader = null;
-
-        boolean JLINE = true;
 
 
         try {
@@ -99,17 +107,7 @@ public class Driver {
 
 
             // jLine 设置
-            JLINE = !parameters.contains("--no-jline");
-
-            if (JLINE) {
-                jlineReader = LineReaderBuilder.builder().build();
-                AutopairWidgets autopairWidgets = new AutopairWidgets(jlineReader);
-                autopairWidgets.enable();
-                System.out.println("[FurryBlack][ARGS]jLine控制台");
-            } else {
-                bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-                System.out.println("[FurryBlack][ARGS]stdin控制台");
-            }
+            reader = parameters.contains("--no-jline");
 
 
             // Dry Run 测试
@@ -154,9 +152,9 @@ public class Driver {
             System.out.println("[FurryBlack][INIT]初始化检查");
 
 
-            if (!FOLDER_CONFIG.isDirectory()) throw new NotAFolderException("文件夹被文件占位 " + FOLDER_CONFIG.getAbsolutePath());
-            if (!FOLDER_MODULE.isDirectory()) throw new NotAFolderException("文件夹被文件占位 " + FOLDER_MODULE.getAbsolutePath());
-            if (!FOLDER_LOGGER.isDirectory()) throw new NotAFolderException("文件夹被文件占位 " + FOLDER_LOGGER.getAbsolutePath());
+            if (!FOLDER_CONFIG.isDirectory()) throw new InitException("文件夹被文件占位 " + FOLDER_CONFIG.getAbsolutePath());
+            if (!FOLDER_MODULE.isDirectory()) throw new InitException("文件夹被文件占位 " + FOLDER_MODULE.getAbsolutePath());
+            if (!FOLDER_LOGGER.isDirectory()) throw new InitException("文件夹被文件占位 " + FOLDER_LOGGER.getAbsolutePath());
 
 
             // ==========================================================================================================================
@@ -199,67 +197,120 @@ public class Driver {
         }
 
 
-        try {
+        // =====================================================================
+        // 实例化 初始化 Systemd
 
+        try {
             logger.hint("实例化Systemd");
             systemd = new Systemd();
-
             logger.hint("初始化Systemd");
             systemd.init(FILE_CONFIG);
-
         } catch (Exception exception) {
-
-            System.err.println("[FurryBlack][FATAL] 路由系统初始化发生异常 终止启动");
+            System.err.println("[FurryBlack][FATAL]路由系统初始化发生异常 终止启动");
             System.err.println(exception.getMessage());
-
             exception.printStackTrace();
-
             System.exit(-1);
         }
 
 
-        try {
+        // =====================================================================
+        // 启动 Systemd
 
+
+        try {
             logger.hint("启动Systemd");
             systemd.boot();
-
-
             logger.hint("启动完成 开始监听消息");
             enable = true;
 
         } catch (Exception exception) {
-
-            System.err.println("[FurryBlack][FATAL] 路由系统启动发生异常 终止启动");
+            System.err.println("[FurryBlack][FATAL]路由系统启动发生异常 终止启动");
             System.err.println(exception.getMessage());
-
             exception.printStackTrace();
-
             System.exit(-1);
         }
 
 
+        // =====================================================================
+        // 注册关闭钩子
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (shutdown) return;
+            enable = false;
+            systemd.shutBot(); // 关闭Bot 打断 Driver的join
+        }));
+
+
+        // =====================================================================
+        // 启动 异步控制台
+
+        Thread console = new Thread(Driver::console);
+        console.start();
+
+
+        // =====================================================================
+        // 阻塞主线程
+
+        systemd.join();
+
+        logger.seek("阻塞被打断");
+
+        shutdown = true;
+
+        // =====================================================================
+        // 关闭 Systemd
+
+
+        try {
+            enable = false;
+            logger.hint("关闭Console");
+            console.interrupt();
+            logger.hint("关闭Systemd");
+            systemd.shut();
+        } catch (Exception exception) {
+            logger.error("系统关闭异常", exception);
+            System.exit(-1);
+        }
+
+        System.out.println("[FurryBlack][SHUT] Normal Exit, Bye.");
+
+    }
+
+
+    // ==========================================================================================================================================================
+    //
+    //
+    //
+    // ==========================================================================================================================================================
+
+
+    private static void console() {
+        Console console = new Console();
         console:
         while (true) {
-
-
             try {
-
-                String temp;
-
-                if (JLINE) {
-                    temp = jlineReader.readLine("[console]$ ");
-                } else {
-                    temp = bufferedReader.readLine();
-                }
-
+                String temp = console.read("[console]$ ");
                 if (temp == null || temp.equals("")) continue;
-
                 Command command = new Command(temp);
-
                 switch (command.getCommandName()) {
 
                     case "exit":
+                        systemd.shutBot();
                         break console;
+
+                    case "help":
+                        System.out.println("exit    退出");
+                        System.out.println("list    列出好友和群");
+                        System.out.println("enable  开启消息处理");
+                        System.out.println("disable 关闭消息处理");
+                        System.out.println("module  列出所有模块");
+                        System.out.println("reload  重启指定模块");
+                        break;
+
+                    case "debug":
+                        debug = !debug;
+                        System.out.println(debug ? "Enable DEBUG" : "Disable DEBUG");
+                        break;
 
                     case "enable":
                         enable = true;
@@ -271,20 +322,115 @@ public class Driver {
                         System.out.println("关闭事件响应");
                         break;
 
-                    case "help":
-                        System.out.println("exit    退出");
-                        System.out.println("enable  开启消息处理");
-                        System.out.println("disable 关闭消息处理");
-                        System.out.println("list    列出所有模块");
-                        System.out.println("reload  重启指定模块");
-                        break;
-
-                    case "send":
-                        Friend friend = systemd.getFriend(Long.parseLong(command.getParameterSegment(0)));
-                        friend.sendMessage(command.getCommandBody());
+                    case "level":
+                        if (command.hasCommandBody()) {
+                            int level = Integer.parseInt(command.getParameterSegment(0));
+                            if (level < 0) {
+                                level = 0;
+                            } else if (level > 7) {
+                                level = 7;
+                            }
+                            LoggerX.setPrintLevel(level);
+                        } else {
+                            logger.error("1 错误 红色 Error");
+                            logger.warning("2 警告 黄色 Warning");
+                            logger.hint("3 提示 青色 Hint");
+                            logger.seek("4 探索 绿色 Seek");
+                            logger.info("5 信息 白色 Info ");
+                            logger.debug("6 调试 灰色 Debug");
+                            logger.verbose("7 详情 灰色 Verbose");
+                        }
                         break;
 
                     case "list":
+                        switch (command.getParameterSegment(0)) {
+                            case "u":
+                            case "usr":
+                            case "user":
+                            case "users":
+                            case "f":
+                            case "fri":
+                            case "friend":
+                            case "friends":
+                                List<Friend> friends = Driver.getFriends().stream().filter(item -> item.getId() != systemd.getBotID()).collect(Collectors.toList());
+                                if (friends.size() == 0) {
+                                    System.out.println("你没有朋友");
+                                    break;
+                                }
+                                friends.stream()
+                                        .map(item -> item.getNick() + "(" + item.getId() + ")")
+                                        .forEach(System.out::println);
+                                break;
+                            case "g":
+                            case "grp":
+                            case "group":
+                            case "groups":
+                                ContactList<Group> groups = Driver.getGroups();
+                                if (groups.size() == 0) {
+                                    System.out.println("你没有群组");
+                                    break;
+                                }
+                                groups.stream()
+                                        .map(item -> item.getName() + "(" + item.getId() + ") " + item.getMembers().size())
+                                        .forEach(System.out::println);
+                                break;
+                            default:
+                                long group;
+                                try {
+                                    group = Long.parseLong(command.getParameterSegment(0));
+                                } catch (Exception exception) {
+                                    System.out.println("命令发生异常 省略group需要指定群号");
+                                    break;
+                                }
+                                Driver.getGroup(group).getMembers().stream()
+                                        .sorted((_$1, _$2) -> _$2.getPermission().getLevel() - _$1.getPermission().getLevel())
+                                        .forEach(item -> {
+                                            StringBuilder builder = new StringBuilder();
+                                            builder.append(item.getNameCard());
+                                            builder.append(" - ");
+                                            builder.append(item.getNick());
+                                            builder.append("(");
+                                            builder.append(item.getId());
+                                            builder.append(") ");
+                                            switch (item.getPermission().getLevel()) {
+                                                case 2:
+                                                    builder.append(" 群主");
+                                                    break;
+                                                case 1:
+                                                    builder.append(" 管理");
+                                                    break;
+                                                default:
+
+                                            }
+                                            System.out.println(builder.toString());
+                                        });
+                        }
+                        break;
+
+                    case "send":
+                        switch (command.getParameterSegment(0)) {
+                            case "u":
+                            case "usr":
+                            case "user":
+                            case "users":
+                                long user = Long.parseLong(command.getParameterSegment(1));
+                                Driver.sendUserMessage(user, command.join(2));
+                                break;
+                            case "g":
+                            case "grp":
+                            case "group":
+                            case "groups":
+                                long group = Long.parseLong(command.getParameterSegment(1));
+                                Driver.sendGroupMessage(group, command.join(2));
+                                break;
+                            default:
+                                group = Long.parseLong(command.getParameterSegment(0));
+                                user = Long.parseLong(command.getParameterSegment(1));
+                                Driver.sendAtMessage(group, user, command.join(2));
+                        }
+                        break;
+
+                    case "module":
                         systemd.listAllPlugin().forEach(System.out::println);
                         break;
 
@@ -292,41 +438,63 @@ public class Driver {
                         for (String name : command.getParameterSegment()) systemd.reloadPlugin(name);
                         break;
 
+                    case "stat":
+                    case "status":
+                        long time = System.currentTimeMillis();
+                        int second = Math.toIntExact((time - BOOT_TIME) / 1000);
+                        int days = second / 86400;
+                        second = second % 86400;
+                        Calendar instance = Calendar.getInstance();
+                        instance.set(Calendar.SECOND, second);
+                        DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+                        long totalMemory = Runtime.getRuntime().totalMemory() / 1024;
+                        long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
+                        long maxMemory = Runtime.getRuntime().maxMemory() / 1024;
+                        System.out.println("消息事件: " + (enable ? "启用" : "关闭"));
+                        System.out.println("运行时间: " + days + " - " + dateFormat.format(instance.getTime()));
+                        System.out.println("内存占用: " + (totalMemory - freeMemory) + "KB/" + totalMemory + "KB/" + maxMemory + "KB(" + (maxMemory / 1024) + "MB)");
+                        break;
+
 
                     default:
                         System.out.println("没有此命令");
                         break;
-
                 }
-
-
             } catch (Exception exception) {
                 logger.error("命令导致了异常", exception);
             }
-
         }
-
-
-        try {
-
-            enable = false;
-
-            logger.hint("关闭Systemd");
-            systemd.shut();
-
-
-        } catch (Exception exception) {
-            logger.error("系统关闭异常", exception);
-            logger.warning("进入紧急停机模式");
-            System.exit(-1);
-        }
-
-
-        System.out.println("[FurryBlack][SHUT]Bye");
-
-
     }
 
+    private static class Console {
+
+        private LineReader jlineReader;
+        private BufferedReader bufferedReader;
+
+        public Console() {
+            if (reader) {
+                bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+            } else {
+                jlineReader = LineReaderBuilder.builder().build();
+                AutopairWidgets autopairWidgets = new AutopairWidgets(jlineReader);
+                autopairWidgets.enable();
+                assert jlineReader != null;
+            }
+        }
+
+        public String read(String prompt) {
+            if (reader) {
+                System.out.print(prompt);
+                try {
+                    return bufferedReader.readLine();
+                } catch (IOException exception) {
+                    return "";
+                }
+            } else {
+                return jlineReader.readLine(prompt);
+            }
+        }
+    }
 
     // ==========================================================================================================================================================
     //
@@ -335,42 +503,55 @@ public class Driver {
     // ==========================================================================================================================================================
 
 
+    @Api
     public static String getAppVersion() {
         return APP_VERSION;
     }
 
 
+    @Api
     public static long getBootTime() {
         return BOOT_TIME;
     }
 
 
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    @Api
     public static boolean isEnable() {
         return enable;
     }
 
 
+    @Api
     public static boolean isDryRun() {
         return dryRun;
     }
 
 
+    @Api
+    public static boolean isDebug() {
+        return debug;
+    }
+
+
+    @Api
     public static String getRootFolder() {
         return FOLDER_ROOT.getAbsolutePath();
     }
 
 
+    @Api
     public static String getConfigFolder() {
         return FOLDER_CONFIG.getAbsolutePath();
     }
 
 
+    @Api
     public static String getModuleFolder() {
         return FOLDER_MODULE.getAbsolutePath();
     }
 
 
+    @Api
     public static String getLoggerFolder() {
         return FOLDER_LOGGER.getAbsolutePath();
     }
@@ -383,24 +564,193 @@ public class Driver {
     // ==========================================================================================================================================================
 
 
+    @Api("获取BOT自身QQ号")
     public static long getBotID() {
         return systemd.getBotID();
     }
 
 
+    @Api("列出所有好友")
+    public static ContactList<Friend> getFriends() {
+        return systemd.getFriends();
+    }
+
+
+    @Api("列出所有群组")
+    public static ContactList<Group> getGroups() {
+        return systemd.getGroups();
+    }
+
+
+    @Api("根据ID获取陌生人")
+    public static Stranger getStranger(long id) {
+        return systemd.getStranger(id);
+    }
+
+
+    @Api("根据ID获取陌生人")
+    public static Stranger getStrangerOrFail(long id) {
+        return systemd.getStrangerOrFail(id);
+    }
+
+
+    @Api("根据ID获取好友")
     public static Friend getFriend(long id) {
         return systemd.getFriend(id);
     }
 
 
+    @Api("根据ID获取好友")
+    public static Friend getFriendOrFail(long id) {
+        return systemd.getFriendOrFail(id);
+    }
+
+
+    @Api("根据ID获取群组")
     public static Group getGroup(long id) {
         return systemd.getGroup(id);
     }
 
 
-    public static Member getGroupMember(long group, long member) {
-        return systemd.getGroupMember(group, member);
+    @Api("根据ID获取群组")
+    public static Group getGroupOrFail(long id) {
+        return systemd.getGroupOrFail(id);
+    }
+
+
+    @Api("根据ID获取群组")
+    public static Member getMemberOrFail(long group, long member) {
+        return systemd.getGroupOrFail(group).getOrFail(member);
+    }
+
+
+    @Api("获取图片的URL")
+    public static String getImageURL(Image image) {
+        return systemd.getImageURL(image);
+    }
+
+
+    @Api("获取图片的URL")
+    public static String getImageURL(FlashImage flashImage) {
+        return systemd.getImageURL(flashImage.getImage());
+    }
+
+
+    // == Systemd仅转发原生方法 Driver负责二次封装
+
+
+    private static void sendContactMessage(Contact contact, Message message) {
+        systemd.sendMessage(contact, message);
+    }
+
+
+    // ====
+
+
+    @Api("发送私聊消息")
+    public static void sendMessage(User user, Message message) {
+        sendContactMessage(user, message);
+    }
+
+    @Api("发送私聊消息")
+    public static void sendMessage(User user, String message) {
+        sendMessage(user, new PlainText(message));
+    }
+
+    @Api("发送私聊消息")
+    public static void sendMessage(UserMessageEvent event, Message message) {
+        sendMessage(event.getSender(), message);
+    }
+
+    @Api("发送私聊消息")
+    public static void sendMessage(UserMessageEvent event, String message) {
+        sendMessage(event, new PlainText(message));
+    }
+
+    @Api("发送私聊消息")
+    public static void sendUserMessage(long id, Message message) {
+        User user = getFriend(id);
+        if (user == null) user = getStrangerOrFail(id);
+        sendMessage(user, message);
+    }
+
+    @Api("发送私聊消息")
+    public static void sendUserMessage(long id, String message) {
+        sendUserMessage(id, new PlainText(message));
+    }
+
+
+    // ====
+
+
+    @Api("发送群组消息")
+    public static void sendMessage(Group group, Message message) {
+        sendContactMessage(group, message);
+    }
+
+    @Api("发送群组消息")
+    public static void sendMessage(Group group, String message) {
+        sendMessage(group, new PlainText(message));
+    }
+
+    @Api("发送群组消息")
+    public static void sendMessage(GroupMessageEvent event, Message message) {
+        sendMessage(event.getGroup(), message);
+    }
+
+    @Api("发送群组消息")
+    public static void sendMessage(GroupMessageEvent event, String message) {
+        sendMessage(event, new PlainText(message));
+    }
+
+    @Api("发送群组消息")
+    public static void sendGroupMessage(long group, Message message) {
+        sendMessage(getGroupOrFail(group), message);
+    }
+
+    @Api("发送群组消息")
+    public static void sendGroupMessage(long group, String message) {
+        sendGroupMessage(group, new PlainText(message));
+    }
+
+
+    // ====
+
+
+    @Api("发送群组消息")
+    public static void sendAtMessage(Group group, Member member, Message message) {
+        sendMessage(group, new At(member.getId()).plus(message));
+    }
+
+    @Api("发送群组消息")
+    public static void sendAtMessage(Group group, Member member, String message) {
+        sendAtMessage(group, member, new PlainText(message));
+    }
+
+    @Api("发送群组消息")
+    public static void sendAtMessage(GroupMessageEvent event, Message message) {
+        sendAtMessage(event.getGroup(), event.getSender(), message);
+    }
+
+    @Api("发送群组消息")
+    public static void sendAtMessage(GroupMessageEvent event, String message) {
+        sendAtMessage(event, new PlainText(message));
+    }
+
+    @Api("发送群组消息")
+    public static void sendAtMessage(long group, long member, Message message) {
+        Group groupOrFail = getGroupOrFail(group);
+        Member memberOrFail = groupOrFail.getOrFail(member);
+        sendAtMessage(groupOrFail, memberOrFail, message);
+    }
+
+    @Api("发送群组消息")
+    public static void sendAtMessage(long group, long member, String message) {
+        Group groupOrFail = getGroupOrFail(group);
+        Member memberOrFail = groupOrFail.getOrFail(member);
+        sendAtMessage(groupOrFail, memberOrFail, new PlainText(message));
     }
 
 
 }
+
