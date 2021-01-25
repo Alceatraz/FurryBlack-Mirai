@@ -2,8 +2,6 @@ package studio.blacktech.furryblackplus.core.bridge
 
 import kotlinx.coroutines.runBlocking
 import net.mamoe.mirai.Bot
-import net.mamoe.mirai.Mirai
-import net.mamoe.mirai.message.data.Image
 
 
 /**
@@ -24,10 +22,5 @@ object MiraiBridge {
         bot.closeAndJoin(null)
     }
 
-
-    @JvmStatic
-    fun getImageURL(bot: Bot, image: Image) = runBlocking {
-        return@runBlocking Mirai.queryImageUrl(bot, image)
-    }
 
 }

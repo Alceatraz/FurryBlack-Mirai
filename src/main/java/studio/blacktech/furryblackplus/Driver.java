@@ -62,7 +62,7 @@ public final class Driver {
     // ==========================================================================================================================================================
 
 
-    private final static String APP_VERSION = "0.4.1";
+    private final static String APP_VERSION = "0.4.2";
 
 
     private final static long BOOT_TIME = System.currentTimeMillis();
@@ -275,6 +275,7 @@ public final class Driver {
         }
 
         System.out.println("[FurryBlack][SHUT] Normal Exit, Bye.");
+        System.exit(0);
 
     }
 
@@ -296,10 +297,13 @@ public final class Driver {
                 Command command = new Command(temp);
                 switch (command.getCommandName()) {
 
+                    case "stop":
+                    case "quit":
                     case "exit":
                         systemd.shutBot();
                         break console;
 
+                    case "?":
                     case "help":
                         System.out.println("exit    退出");
                         System.out.println("list    列出好友和群");
@@ -576,6 +580,12 @@ public final class Driver {
 
 
     @Api("按照配置的映射表获取ID")
+    public static String getNickName(long user) {
+        return systemd.getNickName(user);
+    }
+
+
+    @Api("按照配置的映射表获取ID")
     public static String getFormattedNickName(User user) {
         return getNickName(user) + "(" + user.getId() + ")";
     }
@@ -643,7 +653,7 @@ public final class Driver {
 
     @Api("根据ID获取群组")
     public static Member getMemberOrFail(long group, long member) {
-        return systemd.getGroupOrFail(group).getOrFail(member);
+        return getGroupOrFail(group).getOrFail(member);
     }
 
 
@@ -655,7 +665,7 @@ public final class Driver {
 
     @Api("获取图片的URL")
     public static String getImageURL(FlashImage flashImage) {
-        return systemd.getImageURL(flashImage.getImage());
+        return getImageURL(flashImage.getImage());
     }
 
 

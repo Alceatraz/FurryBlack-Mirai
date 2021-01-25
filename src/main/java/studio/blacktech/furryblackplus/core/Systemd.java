@@ -3,6 +3,7 @@ package studio.blacktech.furryblackplus.core;
 
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactory;
+import net.mamoe.mirai.Mirai;
 import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.ContactList;
 import net.mamoe.mirai.contact.Friend;
@@ -1108,13 +1109,13 @@ public final class Systemd {
 
     private void handleFriendRequest(NewFriendRequestEvent event) {
         logger.hint("BOT被添加好友 " + event.getFromNick() + "(" + event.getFromId() + ")");
-        event.accept();
+        Mirai.getInstance().acceptNewFriendRequest(event);
     }
 
 
     private void handleInvitedRequest(BotInvitedJoinGroupRequestEvent event) {
         logger.hint("BOT被邀请入群 " + event.getGroupName() + "(" + event.getGroupId() + ") 邀请人 " + event.getInvitorNick() + "(" + event.getInvitorId() + ")");
-        event.accept();
+        Mirai.getInstance().acceptInvitedJoinGroupRequest(event);
     }
 
 
@@ -1241,20 +1242,8 @@ public final class Systemd {
     @Api("获取模块实例")
     @SuppressWarnings("unchecked")
     public <T extends AbstractEventHandler> T getPlugin(Class<T> clazz) {
-        List<AbstractEventHandler> items = MODULES.values().stream().filter(clazz::isInstance).collect(Collectors.toList());
-        if (items.size() == 0) throw new IllegalArgumentException("没有此模块");
-        AbstractEventHandler handler = items.get(0);
-        return (T) handler;
-    }
-
-
-    @Api("按照配置的映射表获取ID")
-    public String getNickName(User user) {
-        if (NICKNAME.containsKey(user.getId())) {
-            return NICKNAME.get(user.getId());
-        } else {
-            return user.getNick();
-        }
+        for (AbstractEventHandler value : MODULES.values()) if (clazz.isInstance(value)) return (T) value;
+        throw new IllegalArgumentException("不存在此模块");
     }
 
 
@@ -1270,76 +1259,87 @@ public final class Systemd {
         MiraiBridge.join(bot);
     }
 
-
     @Api("关闭Bot")
     public void shutBot() {
         MiraiBridge.shut(bot);
     }
-
 
     @Api("获取BOT自身QQ号")
     public long getBotID() {
         return bot.getId();
     }
 
-
     @Api("列出所有好友")
     public ContactList<Friend> getFriends() {
         return bot.getFriends();
     }
-
 
     @Api("列出所有群组")
     public ContactList<Group> getGroups() {
         return bot.getGroups();
     }
 
-
     @Api("根据ID获取陌生人")
     public Stranger getStranger(long id) {
         return bot.getStranger(id);
     }
-
 
     @Api("根据ID获取陌生人")
     public Stranger getStrangerOrFail(long id) {
         return bot.getStrangerOrFail(id);
     }
 
-
     @Api("根据ID获取好友")
     public Friend getFriend(long id) {
         return bot.getFriend(id);
     }
-
 
     @Api("根据ID获取好友")
     public Friend getFriendOrFail(long id) {
         return bot.getFriendOrFail(id);
     }
 
-
     @Api("根据ID获取群组")
     public Group getGroup(long id) {
         return bot.getGroup(id);
     }
-
 
     @Api("根据ID获取群组")
     public Group getGroupOrFail(long id) {
         return bot.getGroupOrFail(id);
     }
 
-
     @Api("发送消息的核心方法")
     public void sendMessage(Contact contact, Message message) {
         contact.sendMessage(message);
     }
 
-
     @Api("获取图片的URL")
     public String getImageURL(Image image) {
-        return MiraiBridge.getImageURL(bot, image);
+        return Mirai.getInstance().queryImageUrl(bot, image);
+    }
+
+    @Api("按照配置的映射表获取ID")
+    public String getUserProfile(long user) {
+        return Mirai.getInstance().queryProfile(bot, user).getNickname();
+    }
+
+    @Api("按照配置的映射表获取ID")
+    public String getNickName(User user) {
+        if (NICKNAME.containsKey(user.getId())) {
+            return NICKNAME.get(user.getId());
+        } else {
+            return user.getNick(); // User包含了nick强行使用重载方法是一种浪费
+        }
+    }
+
+    @Api("按照配置的映射表获取ID")
+    public String getNickName(long user) {
+        if (NICKNAME.containsKey(user)) {
+            return NICKNAME.get(user);
+        } else {
+            return Mirai.getInstance().queryProfile(bot, user).getNickname();
+        }
     }
 
 

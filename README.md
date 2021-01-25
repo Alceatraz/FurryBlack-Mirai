@@ -51,6 +51,10 @@ FurryBlack和全功能框架的最大区别在于，极度强化文本处理，�
 
 ## CHANGELOG
 
+### 0.4.2
+
+- Mirai 2.1.0提供了用户Profile查询
+
 ### 0.4.1
 
 - Mirai释出了 2.1.0
