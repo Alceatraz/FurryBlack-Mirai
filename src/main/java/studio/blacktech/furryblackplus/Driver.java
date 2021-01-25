@@ -21,6 +21,7 @@ import org.jline.widget.AutopairWidgets;
 import studio.blacktech.furryblackplus.core.Systemd;
 import studio.blacktech.furryblackplus.core.annotation.Api;
 import studio.blacktech.furryblackplus.core.exception.initlization.InitException;
+import studio.blacktech.furryblackplus.core.interfaces.AbstractEventHandler;
 import studio.blacktech.furryblackplus.core.utilties.Command;
 import studio.blacktech.furryblackplus.core.utilties.LoggerX;
 
@@ -46,7 +47,12 @@ import java.util.stream.Collectors;
  * @see Driver 为启动类main方法所在地，初始化日志和目录系统，提供控制台
  * @see Systemd 是整个系统的内核所在
  */
-public class Driver {
+public final class Driver {
+
+
+    static {
+        System.setProperty("mirai.no-desktop", "");
+    }
 
 
     // ==========================================================================================================================================================
@@ -56,13 +62,10 @@ public class Driver {
     // ==========================================================================================================================================================
 
 
-    private final static String APP_VERSION = "0.4.0";
+    private final static String APP_VERSION = "0.4.1";
 
 
     private final static long BOOT_TIME = System.currentTimeMillis();
-
-
-    //
 
 
     private static boolean enable = false;
@@ -94,7 +97,6 @@ public class Driver {
         if (isEnable()) return;
 
         System.out.println("[FurryBlack][BOOT]FurryBlackPlus Mirai - ver " + APP_VERSION + " " + LoggerX.formatTime("yyyy-MM-dd HH:mm:ss", BOOT_TIME));
-
 
         try {
 
@@ -358,7 +360,7 @@ public class Driver {
                                     break;
                                 }
                                 friends.stream()
-                                        .map(item -> item.getNick() + "(" + item.getId() + ")")
+                                        .map(Driver::getFormattedNickName)
                                         .forEach(System.out::println);
                                 break;
                             case "g":
@@ -371,7 +373,7 @@ public class Driver {
                                     break;
                                 }
                                 groups.stream()
-                                        .map(item -> item.getName() + "(" + item.getId() + ") " + item.getMembers().size())
+                                        .map(item -> item.getName() + "(" + item.getId() + ") " + item.getMembers().size() + "人")
                                         .forEach(System.out::println);
                                 break;
                             default:
@@ -388,10 +390,7 @@ public class Driver {
                                             StringBuilder builder = new StringBuilder();
                                             builder.append(item.getNameCard());
                                             builder.append(" - ");
-                                            builder.append(item.getNick());
-                                            builder.append("(");
-                                            builder.append(item.getId());
-                                            builder.append(") ");
+                                            builder.append(Driver.getFormattedNickName(item));
                                             switch (item.getPermission().getLevel()) {
                                                 case 2:
                                                     builder.append(" 群主");
@@ -503,57 +502,63 @@ public class Driver {
     // ==========================================================================================================================================================
 
 
-    @Api
+    @Api("获取版本")
     public static String getAppVersion() {
         return APP_VERSION;
     }
 
 
-    @Api
+    @Api("获取启动时间戳")
     public static long getBootTime() {
         return BOOT_TIME;
     }
 
 
-    @Api
+    @Api("是否正在监听消息")
     public static boolean isEnable() {
         return enable;
     }
 
 
-    @Api
+    @Api("否是真的登录账号")
     public static boolean isDryRun() {
         return dryRun;
     }
 
 
-    @Api
+    @Api("否是进入调试模式")
     public static boolean isDebug() {
         return debug;
     }
 
 
-    @Api
+    @Api("获取运行目录 - 不是插件私有目录")
     public static String getRootFolder() {
         return FOLDER_ROOT.getAbsolutePath();
     }
 
 
-    @Api
+    @Api("获取配置目录 - 不是插件私有目录")
     public static String getConfigFolder() {
         return FOLDER_CONFIG.getAbsolutePath();
     }
 
 
-    @Api
+    @Api("获取数据目录 - 不是插件私有目录")
     public static String getModuleFolder() {
         return FOLDER_MODULE.getAbsolutePath();
     }
 
 
-    @Api
+    @Api("获取日志目录 - 不是插件私有目录")
     public static String getLoggerFolder() {
         return FOLDER_LOGGER.getAbsolutePath();
+    }
+
+
+    @Api("获取模块实例")
+    public static <T extends AbstractEventHandler> T getPlugin(Class<T> clazz) {
+        return systemd.getPlugin(clazz);
     }
 
 
@@ -562,6 +567,24 @@ public class Driver {
     // Bot相关
     //
     // ==========================================================================================================================================================
+
+
+    @Api("按照配置的映射表获取ID")
+    public static String getNickName(User user) {
+        return systemd.getNickName(user);
+    }
+
+
+    @Api("按照配置的映射表获取ID")
+    public static String getFormattedNickName(User user) {
+        return getNickName(user) + "(" + user.getId() + ")";
+    }
+
+
+    @Api("格式化群组信息")
+    public static String getGroupInfo(Group group) {
+        return group.getName() + "(" + group.getId() + ") " + group.getMembers().size() + " -> " + group.getOwner().getNameCard() + "(" + group.getOwner().getId() + ")";
+    }
 
 
     @Api("获取BOT自身QQ号")

@@ -38,16 +38,4 @@ public @interface Runner {
     String[] privacy() default {};
 
 
-    /**
-     * @return 对私聊启用 默认启用
-     */
-    boolean users() default true;
-
-
-    /**
-     * @return 对群聊启用 默认启用
-     */
-    boolean group() default true;
-
-
 }

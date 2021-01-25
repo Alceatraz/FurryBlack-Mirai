@@ -8,6 +8,7 @@ import net.mamoe.mirai.contact.ContactList;
 import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Stranger;
+import net.mamoe.mirai.contact.User;
 import net.mamoe.mirai.event.GlobalEventChannel;
 import net.mamoe.mirai.event.events.BotInvitedJoinGroupRequestEvent;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
@@ -49,6 +50,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -62,7 +64,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
-public class Systemd {
+public final class Systemd {
 
 
     // ==========================================================================================================================================================
@@ -153,8 +155,7 @@ public class Systemd {
     private Pattern COMMAND_PATTERN;
 
 
-    // =========================================================================
-    // 预生成消息
+    private Map<Long, String> NICKNAME;
 
 
     private String MESSAGE_INFO;
@@ -163,26 +164,23 @@ public class Systemd {
     private String MESSAGE_LIST_USERS;
     private String MESSAGE_LIST_GROUP;
 
-
-    // =========================================================================
-    // 模块注册
-
-
-    private Map<String, AbstractEventHandler> EVENT_HANDLER; // 所有模块及注册名
-
-    private Map<String, EventHandlerRunner> EVENT_RUNNER;
-
     private ExecutorService EXECUTOR_SERVICE;
 
+    private Map<String, AbstractEventHandler> MODULES; // 所有模块及注册名
+
+    private Map<String, EventHandlerRunner> EVENT_RUNNER;
     private Map<String, EventHandlerMonitor> EVENT_MONITOR;
+
     private List<EventHandlerMonitor> EVENT_MONITOR_USERS; // 私聊过滤器注册
     private List<EventHandlerMonitor> EVENT_MONITOR_GROUP; // 群聊过滤器注册
 
     private Map<String, EventHandlerFilter> EVENT_FILTER;
+
     private List<EventHandlerFilter> EVENT_FILTER_USERS; // 私聊过滤器注册
     private List<EventHandlerFilter> EVENT_FILTER_GROUP; // 群聊过滤器注册
 
     private Map<String, EventHandlerExecutor> EVENT_EXECUTOR;
+
     private Map<String, EventHandlerExecutor> EVENT_EXECUTOR_USERS; // 私聊执行器注册
     private Map<String, EventHandlerExecutor> EVENT_EXECUTOR_GROUP; // 群聊执行器注册
 
@@ -195,12 +193,10 @@ public class Systemd {
 
 
     public Systemd() throws BotException {
-
         synchronized (Systemd.class) {
             if (INSTANCE_LOCK) throw new InitLockedException();
             INSTANCE_LOCK = true;
         }
-
     }
 
 
@@ -327,6 +323,44 @@ public class Systemd {
         logger.info("EULA Digest " + SHA_EULA);
         logger.info("INFO Digest " + SHA_INFO);
 
+
+        // ==========================================================================================================================
+        // 加载常用昵称
+
+
+        NICKNAME = new HashMap<>();
+
+
+        File commonNick = initFile(Paths.get(Driver.getConfigFolder(), "nickname.txt").toFile());
+
+        try (
+                FileReader fileReader = new FileReader(commonNick);
+                BufferedReader bufferedReader = new BufferedReader(fileReader)
+        ) {
+
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+
+                if (!line.contains(":")) {
+                    logger.warning("配置无效 " + line);
+                    continue;
+                }
+
+                String[] temp1 = line.split(":");
+
+                if (temp1.length != 2) {
+                    logger.warning("配置无效 " + line);
+                    continue;
+                }
+
+                long userID = Long.parseLong(temp1[0]);
+                NICKNAME.put(userID, temp1[1]);
+
+            }
+
+        } catch (Exception exception) {
+            throw new InitException("昵称映射表读取失败", exception);
+        }
 
         // ==========================================================================================================================
         // 读取机器人配置
@@ -489,7 +523,7 @@ public class Systemd {
         // 初始化注册
 
 
-        EVENT_HANDLER = new LinkedHashMap<>();
+        MODULES = new LinkedHashMap<>();
 
         EVENT_RUNNER = new LinkedHashMap<>();
 
@@ -572,24 +606,20 @@ public class Systemd {
                     continue;
                 }
                 Runner annotation = clazz.getAnnotation(Runner.class);
-                if (!annotation.users() && !annotation.group()) {
-                    logger.warning("发现无用定时器 " + clazz.getName());
-                    continue;
-                }
                 EventHandlerRunner.RunnerInfo info = new EventHandlerRunner.RunnerInfo(
                         annotation.name(),
                         annotation.artificial(),
                         annotation.description(),
                         annotation.privacy()
                 );
-                if (EVENT_HANDLER.containsKey(info.ARTIFICIAL)) {
-                    AbstractEventHandler handler = EVENT_HANDLER.get(info.ARTIFICIAL);
+                if (MODULES.containsKey(info.ARTIFICIAL)) {
+                    AbstractEventHandler handler = MODULES.get(info.ARTIFICIAL);
                     throw new InitException("注册监听器失败 " + clazz.getName() + " 同名已存在 -> " + handler.getClass().getName());
                 }
                 EventHandlerRunner instance = clazz.getConstructor(EventHandlerRunner.RunnerInfo.class).newInstance(info);
                 instance.init();
                 logger.info("注册定时器 " + info.ARTIFICIAL + " - " + clazz.getName());
-                EVENT_HANDLER.put(info.ARTIFICIAL, instance);
+                MODULES.put(info.ARTIFICIAL, instance);
                 EVENT_RUNNER.put(info.ARTIFICIAL, instance);
             } catch (Exception exception) {
                 throw new InitException("定时器初始化失败 " + clazz.getName(), exception);
@@ -619,14 +649,14 @@ public class Systemd {
                         annotation.description(),
                         annotation.privacy()
                 );
-                if (EVENT_HANDLER.containsKey(info.ARTIFICIAL)) {
-                    AbstractEventHandler handler = EVENT_HANDLER.get(info.ARTIFICIAL);
+                if (MODULES.containsKey(info.ARTIFICIAL)) {
+                    AbstractEventHandler handler = MODULES.get(info.ARTIFICIAL);
                     throw new InitException("注册监听器失败 " + clazz.getName() + " 同名已存在 -> " + handler.getClass().getName());
                 }
                 EventHandlerMonitor instance = clazz.getConstructor(EventHandlerMonitor.MonitorInfo.class).newInstance(info);
                 instance.init();
                 logger.info("注册定时器 " + info.ARTIFICIAL + " - " + clazz.getName());
-                EVENT_HANDLER.put(info.ARTIFICIAL, instance);
+                MODULES.put(info.ARTIFICIAL, instance);
                 EVENT_MONITOR.put(info.ARTIFICIAL, instance);
                 if (annotation.users()) EVENT_MONITOR_USERS.add(instance);
                 if (annotation.group()) EVENT_MONITOR_GROUP.add(instance);
@@ -658,14 +688,14 @@ public class Systemd {
                         annotation.description(),
                         annotation.privacy()
                 );
-                if (EVENT_HANDLER.containsKey(info.ARTIFICIAL)) {
-                    AbstractEventHandler handler = EVENT_HANDLER.get(info.ARTIFICIAL);
+                if (MODULES.containsKey(info.ARTIFICIAL)) {
+                    AbstractEventHandler handler = MODULES.get(info.ARTIFICIAL);
                     throw new InitException("注册过滤器失败 " + clazz.getName() + " 同名已存在 -> " + handler.getClass().getName());
                 }
                 EventHandlerFilter instance = clazz.getConstructor(EventHandlerFilter.FilterInfo.class).newInstance(info);
                 instance.init();
                 logger.info("注册过滤器 " + info.ARTIFICIAL + " - " + clazz.getName());
-                EVENT_HANDLER.put(info.ARTIFICIAL, instance);
+                MODULES.put(info.ARTIFICIAL, instance);
                 EVENT_FILTER.put(info.ARTIFICIAL, instance);
                 if (annotation.users()) EVENT_FILTER_USERS.add(instance);
                 if (annotation.group()) EVENT_FILTER_GROUP.add(instance);
@@ -700,8 +730,8 @@ public class Systemd {
                         annotation.command(),
                         annotation.usage()
                 );
-                if (EVENT_HANDLER.containsKey(info.ARTIFICIAL)) {
-                    AbstractEventHandler handler = EVENT_HANDLER.get(info.ARTIFICIAL);
+                if (MODULES.containsKey(info.ARTIFICIAL)) {
+                    AbstractEventHandler handler = MODULES.get(info.ARTIFICIAL);
                     throw new InitException("注册过滤器失败 " + clazz.getName() + " 同名已存在 -> " + handler.getClass().getName());
                 }
                 if (EVENT_EXECUTOR.containsKey(info.ARTIFICIAL)) {
@@ -711,7 +741,7 @@ public class Systemd {
                 EventHandlerExecutor instance = clazz.getConstructor(EventHandlerExecutor.ExecutorInfo.class).newInstance(info);
                 instance.init();
                 logger.info("注册入执行链 " + info.ARTIFICIAL + " - " + info.COMMAND + " > " + clazz.getName());
-                EVENT_HANDLER.put(info.ARTIFICIAL, instance);
+                MODULES.put(info.ARTIFICIAL, instance);
                 EVENT_EXECUTOR.put(info.ARTIFICIAL, instance);
                 if (annotation.users()) EVENT_EXECUTOR_USERS.put(info.COMMAND, instance);
                 if (annotation.group()) EVENT_EXECUTOR_GROUP.put(info.COMMAND, instance);
@@ -834,10 +864,10 @@ public class Systemd {
             logger.hint("机器人昵称 " + bot.getNick());
 
             logger.hint("所有好友");
-            bot.getFriends().forEach(item -> logger.info(item.getNick() + "(" + item.getId() + ")"));
+            bot.getFriends().forEach(item -> logger.info(Driver.getFormattedNickName(item)));
 
             logger.hint("所有群组");
-            bot.getGroups().forEach(item -> logger.info(item.getName() + "(" + item.getId() + ") " + item.getMembers().size() + " -> " + item.getOwner().getNameCard() + "(" + item.getOwner().getId() + ")"));
+            bot.getGroups().forEach(item -> logger.info(Driver.getGroupInfo(item)));
 
         }
 
@@ -1076,6 +1106,18 @@ public class Systemd {
     // 🀄
 
 
+    private void handleFriendRequest(NewFriendRequestEvent event) {
+        logger.hint("BOT被添加好友 " + event.getFromNick() + "(" + event.getFromId() + ")");
+        event.accept();
+    }
+
+
+    private void handleInvitedRequest(BotInvitedJoinGroupRequestEvent event) {
+        logger.hint("BOT被邀请入群 " + event.getGroupName() + "(" + event.getGroupId() + ") 邀请人 " + event.getInvitorNick() + "(" + event.getInvitorId() + ")");
+        event.accept();
+    }
+
+
     // ==========================================================================================================================================================
     //
     // 工具
@@ -1108,8 +1150,7 @@ public class Systemd {
     }
 
 
-    private String readFile(File file) throws InitException {
-
+    private File initFile(File file) throws InitException {
         if (!file.exists()) {
             try {
                 //noinspection ResultOfMethodCallIgnored
@@ -1119,9 +1160,15 @@ public class Systemd {
                 throw new InitException("文件创建失败 " + file.getAbsolutePath(), exception);
             }
         }
-
         if (!file.exists()) throw new InitException("文件不存在 " + file.getAbsolutePath());
         if (!file.canRead()) throw new InitException("文件无权读取 " + file.getAbsolutePath());
+        return file;
+    }
+
+
+    private String readFile(File file) throws InitException {
+
+        initFile(file);
 
         try (
                 FileReader fileReader = new FileReader(file, StandardCharsets.UTF_8);
@@ -1167,17 +1214,17 @@ public class Systemd {
 
     @Api
     public List<String> listAllPlugin() {
-        return EVENT_HANDLER.keySet().stream().collect(Collectors.toUnmodifiableList());
+        return MODULES.keySet().stream().collect(Collectors.toUnmodifiableList());
     }
 
 
     @Api
     public void reloadPlugin(String name) {
-        if (!EVENT_HANDLER.containsKey(name)) {
+        if (!MODULES.containsKey(name)) {
             logger.warning("不存在此模块 -> " + name);
             return;
         }
-        AbstractEventHandler instance = EVENT_HANDLER.get(name);
+        AbstractEventHandler instance = MODULES.get(name);
         try {
             logger.info("停止 " + name);
             instance.shut();
@@ -1187,6 +1234,26 @@ public class Systemd {
             instance.boot();
         } catch (BotException exception) {
             logger.warning("重载模块发生错误 -> " + name, exception);
+        }
+    }
+
+
+    @Api("获取模块实例")
+    @SuppressWarnings("unchecked")
+    public <T extends AbstractEventHandler> T getPlugin(Class<T> clazz) {
+        List<AbstractEventHandler> items = MODULES.values().stream().filter(clazz::isInstance).collect(Collectors.toList());
+        if (items.size() == 0) throw new IllegalArgumentException("没有此模块");
+        AbstractEventHandler handler = items.get(0);
+        return (T) handler;
+    }
+
+
+    @Api("按照配置的映射表获取ID")
+    public String getNickName(User user) {
+        if (NICKNAME.containsKey(user.getId())) {
+            return NICKNAME.get(user.getId());
+        } else {
+            return user.getNick();
         }
     }
 
@@ -1203,6 +1270,8 @@ public class Systemd {
         MiraiBridge.join(bot);
     }
 
+
+    @Api("关闭Bot")
     public void shutBot() {
         MiraiBridge.shut(bot);
     }
@@ -1274,15 +1343,6 @@ public class Systemd {
     }
 
 
-    private void handleFriendRequest(NewFriendRequestEvent event) {
-        logger.hint("BOT被添加好友 " + event.getFromNick() + "(" + event.getFromId() + ")");
-        event.accept();
-    }
-
-    private void handleInvitedRequest(BotInvitedJoinGroupRequestEvent event) {
-        logger.hint("BOT被邀请入群 " + event.getGroupName() + "(" + event.getGroupId() + ") 邀请人 " + event.getInvitorNick() + "(" + event.getInvitorId() + ")");
-        event.accept();
-    }
 }
 
 

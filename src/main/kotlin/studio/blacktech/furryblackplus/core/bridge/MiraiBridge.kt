@@ -30,5 +30,4 @@ object MiraiBridge {
         return@runBlocking Mirai.queryImageUrl(bot, image)
     }
 
-
 }
