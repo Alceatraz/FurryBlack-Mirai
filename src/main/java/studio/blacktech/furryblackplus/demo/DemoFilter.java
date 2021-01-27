@@ -7,12 +7,12 @@ import studio.blacktech.furryblackplus.core.interfaces.EventHandlerFilter;
 
 
 @Filter(
-        artificial = "Filter_Demo",
-        name = "示例",
-        description = "示例过滤器",
-        privacy = {
-                "无"
-        }
+    artificial = "Filter_Demo",
+    name = "示例",
+    description = "示例过滤器",
+    privacy = {
+        "无"
+    }
 )
 public class DemoFilter extends EventHandlerFilter {
 

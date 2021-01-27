@@ -192,12 +192,12 @@ public class Command {
     @Override
     public String toString() {
         return "Command{" +
-                       "commandName='" + commandName + '\'' +
-                       ", commandBody='" + commandBody + '\'' +
-                       ", commandBodyLength=" + commandBodyLength +
-                       ", commandParameters=" + Arrays.toString(commandParameters) +
-                       ", commandParameterLength=" + commandParameterLength +
-                       ", commandOptions=" + commandOptions +
-                       '}';
+                   "commandName='" + commandName + '\'' +
+                   ", commandBody='" + commandBody + '\'' +
+                   ", commandBodyLength=" + commandBodyLength +
+                   ", commandParameters=" + Arrays.toString(commandParameters) +
+                   ", commandParameterLength=" + commandParameterLength +
+                   ", commandOptions=" + commandOptions +
+                   '}';
     }
 }

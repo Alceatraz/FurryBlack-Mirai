@@ -337,8 +337,8 @@ public final class Systemd {
         File commonNick = initFile(Paths.get(Driver.getConfigFolder(), "nickname.txt").toFile());
 
         try (
-                FileReader fileReader = new FileReader(commonNick);
-                BufferedReader bufferedReader = new BufferedReader(fileReader)
+            FileReader fileReader = new FileReader(commonNick);
+            BufferedReader bufferedReader = new BufferedReader(fileReader)
         ) {
 
             String line;
@@ -643,10 +643,10 @@ public final class Systemd {
                 }
                 Runner annotation = clazz.getAnnotation(Runner.class);
                 EventHandlerRunner.RunnerInfo info = new EventHandlerRunner.RunnerInfo(
-                        annotation.name(),
-                        annotation.artificial(),
-                        annotation.description(),
-                        annotation.privacy()
+                    annotation.name(),
+                    annotation.artificial(),
+                    annotation.description(),
+                    annotation.privacy()
                 );
                 if (MODULES.containsKey(info.ARTIFICIAL)) {
                     AbstractEventHandler handler = MODULES.get(info.ARTIFICIAL);
@@ -680,10 +680,10 @@ public final class Systemd {
                     continue;
                 }
                 EventHandlerMonitor.MonitorInfo info = new EventHandlerMonitor.MonitorInfo(
-                        annotation.name(),
-                        annotation.artificial(),
-                        annotation.description(),
-                        annotation.privacy()
+                    annotation.name(),
+                    annotation.artificial(),
+                    annotation.description(),
+                    annotation.privacy()
                 );
                 if (MODULES.containsKey(info.ARTIFICIAL)) {
                     AbstractEventHandler handler = MODULES.get(info.ARTIFICIAL);
@@ -719,10 +719,10 @@ public final class Systemd {
                     continue;
                 }
                 EventHandlerFilter.FilterInfo info = new EventHandlerFilter.FilterInfo(
-                        annotation.name(),
-                        annotation.artificial(),
-                        annotation.description(),
-                        annotation.privacy()
+                    annotation.name(),
+                    annotation.artificial(),
+                    annotation.description(),
+                    annotation.privacy()
                 );
                 if (MODULES.containsKey(info.ARTIFICIAL)) {
                     AbstractEventHandler handler = MODULES.get(info.ARTIFICIAL);
@@ -759,12 +759,12 @@ public final class Systemd {
                     continue;
                 }
                 EventHandlerExecutor.ExecutorInfo info = new EventHandlerExecutor.ExecutorInfo(
-                        annotation.name(),
-                        annotation.artificial(),
-                        annotation.description(),
-                        annotation.privacy(),
-                        annotation.command(),
-                        annotation.usage()
+                    annotation.name(),
+                    annotation.artificial(),
+                    annotation.description(),
+                    annotation.privacy(),
+                    annotation.command(),
+                    annotation.usage()
                 );
                 if (MODULES.containsKey(info.ARTIFICIAL)) {
                     AbstractEventHandler handler = MODULES.get(info.ARTIFICIAL);
@@ -1207,8 +1207,8 @@ public final class Systemd {
         initFile(file);
 
         try (
-                FileReader fileReader = new FileReader(file, StandardCharsets.UTF_8);
-                BufferedReader bufferedReader = new BufferedReader(fileReader)
+            FileReader fileReader = new FileReader(file, StandardCharsets.UTF_8);
+            BufferedReader bufferedReader = new BufferedReader(fileReader)
         ) {
 
             String temp;

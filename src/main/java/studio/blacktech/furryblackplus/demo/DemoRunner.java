@@ -5,12 +5,12 @@ import studio.blacktech.furryblackplus.core.interfaces.EventHandlerRunner;
 
 
 @Runner(
-        artificial = "Runner_Demo",
-        name = "示例",
-        description = "示例执行器",
-        privacy = {
-                "无"
-        }
+    artificial = "Runner_Demo",
+    name = "示例",
+    description = "示例执行器",
+    privacy = {
+        "无"
+    }
 )
 public class DemoRunner extends EventHandlerRunner {
 

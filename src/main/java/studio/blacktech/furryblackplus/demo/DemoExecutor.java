@@ -8,16 +8,16 @@ import studio.blacktech.furryblackplus.core.utilties.Command;
 
 
 @Executor(
-        artificial = "Executor_Demo",
-        name = "示例",
-        description = "示例执行器",
-        privacy = {
-                "无"
-        },
-        command = "demo",
-        usage = {
-                "/demo - 示例执行器"
-        }
+    artificial = "Executor_Demo",
+    name = "示例",
+    description = "示例执行器",
+    privacy = {
+        "无"
+    },
+    command = "demo",
+    usage = {
+        "/demo - 示例执行器"
+    }
 )
 public class DemoExecutor extends EventHandlerExecutor {
 

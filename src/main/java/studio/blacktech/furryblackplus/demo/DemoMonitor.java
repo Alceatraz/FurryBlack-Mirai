@@ -7,12 +7,12 @@ import studio.blacktech.furryblackplus.core.interfaces.EventHandlerMonitor;
 
 
 @Monitor(
-        artificial = "Monitor_Demo",
-        name = "示例",
-        description = "示例监视器",
-        privacy = {
-                "无"
-        }
+    artificial = "Monitor_Demo",
+    name = "示例",
+    description = "示例监视器",
+    privacy = {
+        "无"
+    }
 )
 public class DemoMonitor extends EventHandlerMonitor {
 

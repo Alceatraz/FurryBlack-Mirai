@@ -197,9 +197,9 @@ public abstract class AbstractEventHandler {
         String line;
         List<String> temp = new LinkedList<>();
         try (
-                FileInputStream fileInputStream = new FileInputStream(file);
-                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
-                BufferedReader reader = new BufferedReader(inputStreamReader)
+            FileInputStream fileInputStream = new FileInputStream(file);
+            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
+            BufferedReader reader = new BufferedReader(inputStreamReader)
         ) {
             while ((line = reader.readLine()) != null) temp.add(line);
             reader.close();

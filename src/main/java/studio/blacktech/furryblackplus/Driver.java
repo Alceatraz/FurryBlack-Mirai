@@ -62,7 +62,7 @@ public final class Driver {
     // ==========================================================================================================================================================
 
 
-    private final static String APP_VERSION = "0.4.3";
+    private final static String APP_VERSION = "0.4.5";
 
 
     private final static long BOOT_TIME = System.currentTimeMillis();
@@ -355,8 +355,8 @@ public final class Driver {
                                     break;
                                 }
                                 friends.stream()
-                                        .map(Driver::getFormattedNickName)
-                                        .forEach(System.out::println);
+                                    .map(Driver::getFormattedNickName)
+                                    .forEach(System.out::println);
                                 break;
                             case "g":
                             case "grp":
@@ -368,8 +368,8 @@ public final class Driver {
                                     break;
                                 }
                                 groups.stream()
-                                        .map(item -> item.getName() + "(" + item.getId() + ") " + item.getMembers().size() + "人")
-                                        .forEach(System.out::println);
+                                    .map(item -> item.getName() + "(" + item.getId() + ") " + item.getMembers().size() + "人")
+                                    .forEach(System.out::println);
                                 break;
                             default:
                                 long group;
@@ -380,24 +380,24 @@ public final class Driver {
                                     break;
                                 }
                                 Driver.getGroup(group).getMembers().stream()
-                                        .sorted((_$1, _$2) -> _$2.getPermission().getLevel() - _$1.getPermission().getLevel())
-                                        .forEach(item -> {
-                                            StringBuilder builder = new StringBuilder();
-                                            builder.append(item.getNameCard());
-                                            builder.append(" - ");
-                                            builder.append(Driver.getFormattedNickName(item));
-                                            switch (item.getPermission().getLevel()) {
-                                                case 2:
-                                                    builder.append(" 群主");
-                                                    break;
-                                                case 1:
-                                                    builder.append(" 管理");
-                                                    break;
-                                                default:
+                                    .sorted((_$1, _$2) -> _$2.getPermission().getLevel() - _$1.getPermission().getLevel())
+                                    .forEach(item -> {
+                                        StringBuilder builder = new StringBuilder();
+                                        builder.append(item.getNameCard());
+                                        builder.append(" - ");
+                                        builder.append(Driver.getFormattedNickName(item));
+                                        switch (item.getPermission().getLevel()) {
+                                            case 2:
+                                                builder.append(" 群主");
+                                                break;
+                                            case 1:
+                                                builder.append(" 管理");
+                                                break;
+                                            default:
 
-                                            }
-                                            System.out.println(builder.toString());
-                                        });
+                                        }
+                                        System.out.println(builder.toString());
+                                    });
                         }
                         break;
 
@@ -579,6 +579,12 @@ public final class Driver {
     @Api("按照配置的映射表获取ID")
     public static String getFormattedNickName(User user) {
         return getNickName(user) + "(" + user.getId() + ")";
+    }
+
+
+    @Api("按照配置的映射表获取ID")
+    public static String getFormattedNickName(long user) {
+        return getNickName(user) + "(" + user + ")";
     }
 
 
