@@ -231,9 +231,9 @@ public abstract class AbstractEventHandler {
     @Api("初始化文件夹")
     protected File initFolder(File file) {
         if (file.exists()) {
-            if (!file.isDirectory()) throw new IllegalArgumentException("文件夹被文件占位：" + file.getAbsolutePath());
+            if (!file.isDirectory()) throw new IllegalArgumentException("文件夹被文件占位 -> " + file.getAbsolutePath());
         } else {
-            logger.seek("创建目录 " + file.getAbsolutePath());
+            logger.seek("创建目录 -> " + file.getAbsolutePath());
             //noinspection ResultOfMethodCallIgnored
             file.mkdirs();
         }
@@ -252,7 +252,7 @@ public abstract class AbstractEventHandler {
         if (!file.exists()) {
             try {
                 if (file.createNewFile()) {
-                    logger.seek("创建新的文件 -> " + file.getAbsolutePath());
+                    logger.seek("创建文件 -> " + file.getAbsolutePath());
                 } else {
                     throw new IllegalArgumentException("文件名被占用 -> " + file.getAbsolutePath());
                 }

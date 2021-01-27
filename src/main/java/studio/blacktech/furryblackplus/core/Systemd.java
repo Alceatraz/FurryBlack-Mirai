@@ -19,6 +19,7 @@ import net.mamoe.mirai.message.data.Image;
 import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.utils.BotConfiguration;
 import org.reflections.Reflections;
+import org.reflections.ReflectionsException;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ConfigurationBuilder;
 import studio.blacktech.furryblackplus.Driver;
@@ -52,6 +53,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -570,23 +572,63 @@ public final class Systemd {
         // ==========================================================================================================================
         // 分析扫描结果
 
+        Set<Class<? extends EventHandlerRunner>> RUNNERS = new HashSet<>();
+        Set<Class<? extends EventHandlerMonitor>> MONITORS = new HashSet<>();
+        Set<Class<? extends EventHandlerFilter>> FILTERS = new HashSet<>();
+        Set<Class<? extends EventHandlerExecutor>> EXECUTORS = new HashSet<>();
 
-        Set<Class<? extends EventHandlerRunner>> RUNNERS = reflections.getSubTypesOf(EventHandlerRunner.class);
-        logger.hint("扫描到以下定时器");
-        RUNNERS.forEach(item -> logger.info(item.getName()));
+        try {
+            RUNNERS = reflections.getSubTypesOf(EventHandlerRunner.class);
+            logger.hint("扫描到以下定时器");
+            RUNNERS.forEach(item -> logger.info(item.getName()));
+        } catch (Exception exception) {
+            if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equals(exception.getMessage())) {
+                logger.info("没有扫描到任何定时器");
+            } else {
+                logger.warning("扫描定时器时发生异常", exception);
+            }
+        }
 
-        Set<Class<? extends EventHandlerMonitor>> MONITORS = reflections.getSubTypesOf(EventHandlerMonitor.class);
-        logger.hint("扫描到以下监视器");
-        MONITORS.forEach(item -> logger.info(item.getName()));
+        try {
+            MONITORS = reflections.getSubTypesOf(EventHandlerMonitor.class);
+            logger.hint("扫描到以下监视器");
+            MONITORS.forEach(item -> logger.info(item.getName()));
+        } catch (Exception exception) {
+            if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equals(exception.getMessage())) {
+                logger.info("没有扫描到任何监视器");
+            } else {
+                logger.warning("扫描监视器时发生异常", exception);
+            }
+        }
 
-        Set<Class<? extends EventHandlerFilter>> FILTERS = reflections.getSubTypesOf(EventHandlerFilter.class);
-        logger.hint("扫描到以下过滤器");
-        FILTERS.forEach(item -> logger.info(item.getName()));
+        try {
+            FILTERS = reflections.getSubTypesOf(EventHandlerFilter.class);
+            logger.hint("扫描到以下过滤器");
+            FILTERS.forEach(item -> logger.info(item.getName()));
+        } catch (Exception exception) {
+            if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equals(exception.getMessage())) {
+                logger.info("没有扫描到任何过滤器");
+            } else {
+                logger.warning("扫描过滤器时发生异常", exception);
+            }
+        }
 
-        Set<Class<? extends EventHandlerExecutor>> EXECUTORS = reflections.getSubTypesOf(EventHandlerExecutor.class);
-        logger.hint("扫描到以下执行器");
-        EXECUTORS.forEach(item -> logger.info(item.getName()));
+        try {
+            EXECUTORS = reflections.getSubTypesOf(EventHandlerExecutor.class);
+            logger.hint("扫描到以下执行器");
+            EXECUTORS.forEach(item -> logger.info(item.getName()));
+        } catch (Exception exception) {
+            if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equals(exception.getMessage())) {
+                logger.info("没有扫描到任何执行器");
+            } else {
+                logger.warning("扫描执行器时发生异常", exception);
+            }
+        }
 
+
+        if (RUNNERS.size() + MONITORS.size() + FILTERS.size() + EXECUTORS.size() == 0) {
+            logger.warning("没有扫描到任何模块 请检查扫描路径");
+        }
 
         // ==========================================================================================================================
         // 注册定时器
@@ -784,7 +826,7 @@ public final class Systemd {
 
 
         if (Driver.isDryRun()) {
-            logger.hint("跳过登录");
+            logger.warning("指定了--dry-run参数 跳过真实登录");
         } else {
             logger.hint("开始登录");
             bot.login();
@@ -1335,8 +1377,4 @@ public final class Systemd {
         }
     }
 
-
 }
-
-
-

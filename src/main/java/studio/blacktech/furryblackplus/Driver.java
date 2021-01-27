@@ -110,7 +110,11 @@ public final class Driver {
 
             // jLine 设置
             reader = parameters.contains("--no-jline");
-
+            if (reader) {
+                System.out.println("[FurryBlack][ARGS]使用精简控制台");
+            } else {
+                System.out.println("[FurryBlack][ARGS]使用完整控制台");
+            }
 
             // Dry Run 测试
 
@@ -170,12 +174,9 @@ public final class Driver {
             if (!FILE_LOGGER.exists()) throw new InitException("日志文件不存在 " + FILE_LOGGER.getAbsolutePath());
             if (!FILE_LOGGER.canWrite()) throw new InitException("日志文件没有写权限 " + FILE_LOGGER.getAbsolutePath());
 
-
             LoggerX.init(FILE_LOGGER);
 
-
             logger = new LoggerX(Driver.class);
-
 
             System.out.println("[FurryBlack][INIT]日志系统初始化完成");
 
@@ -188,14 +189,9 @@ public final class Driver {
 
 
         } catch (Exception exception) {
-
             System.err.println("[FurryBlack][FATAL]核心系统初始化发生异常 终止启动");
-            System.err.println(exception.getMessage());
-
             exception.printStackTrace();
-
             System.exit(-1);
-
         }
 
 
@@ -208,9 +204,7 @@ public final class Driver {
             logger.hint("初始化Systemd");
             systemd.init(FILE_CONFIG);
         } catch (Exception exception) {
-            System.err.println("[FurryBlack][FATAL]路由系统初始化发生异常 终止启动");
-            System.err.println(exception.getMessage());
-            exception.printStackTrace();
+            logger.error("路由系统初始化发生异常 终止启动", exception);
             System.exit(-1);
         }
 
@@ -224,11 +218,8 @@ public final class Driver {
             systemd.boot();
             logger.hint("启动完成 开始监听消息");
             enable = true;
-
         } catch (Exception exception) {
-            System.err.println("[FurryBlack][FATAL]路由系统启动发生异常 终止启动");
-            System.err.println(exception.getMessage());
-            exception.printStackTrace();
+            logger.error("路由系启动发生异常 终止启动", exception);
             System.exit(-1);
         }
 
@@ -427,9 +418,9 @@ public final class Driver {
                                 Driver.sendGroupMessage(group, command.join(2));
                                 break;
                             default:
-                                group = Long.parseLong(command.getParameterSegment(0));
-                                user = Long.parseLong(command.getParameterSegment(1));
-                                Driver.sendAtMessage(group, user, command.join(2));
+                                group = Long.parseLong(command.getParameterSegment(1));
+                                user = Long.parseLong(command.getParameterSegment(2));
+                                Driver.sendAtMessage(group, user, command.join(3));
                         }
                         break;
 
