@@ -495,13 +495,6 @@ public final class Systemd {
         configuration.setFirstReconnectDelayMillis(NET_RECONNECT_DELAY);
 
 
-        System.out.println(configuration.getHeartbeatPeriodMillis());
-        System.out.println(configuration.getHeartbeatTimeoutMillis());
-        System.out.println(configuration.getReconnectPeriodMillis());
-        System.out.println(configuration.getReconnectionRetryTimes());
-        System.out.println(configuration.getFirstReconnectDelayMillis());
-
-
         // 传入日志
 
 
