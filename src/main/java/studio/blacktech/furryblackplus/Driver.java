@@ -62,7 +62,7 @@ public final class Driver {
     // ==========================================================================================================================================================
 
 
-    private final static String APP_VERSION = "0.4.6";
+    private final static String APP_VERSION = "0.4.7";
 
 
     private final static long BOOT_TIME = System.currentTimeMillis();
@@ -108,6 +108,15 @@ public final class Driver {
             List<String> parameters = Arrays.asList(args);
 
 
+            // debug
+            debug = parameters.contains("--debug");
+            if (debug) {
+                System.out.println("[FurryBlack][ARGS]启动调试模式");
+            } else {
+                System.out.println("[FurryBlack][ARGS]启动生产模式");
+            }
+
+
             // jLine 设置
             reader = parameters.contains("--no-jline");
             if (reader) {
@@ -116,15 +125,15 @@ public final class Driver {
                 System.out.println("[FurryBlack][ARGS]使用完整控制台");
             }
 
+
             // Dry Run 测试
-
-
             dryRun = parameters.contains("--dry-run");
             if (dryRun) {
                 System.out.println("[FurryBlack][ARGS]模拟运行模式");
             } else {
                 System.out.println("[FurryBlack][ARGS]真实运行模式");
             }
+
 
             // ==========================================================================================================================
             // 初始化文件

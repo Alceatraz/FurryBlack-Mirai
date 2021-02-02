@@ -190,10 +190,9 @@ public final class Systemd {
 
     // ==========================================================================================================================
     // 对象控制
-
+    // 🔫 🧦 ❌ ✔️ ⭕ 🚧 🀄
 
     private static volatile boolean INSTANCE_LOCK = false;
-
 
     public Systemd() throws BotException {
         synchronized (Systemd.class) {
@@ -266,9 +265,9 @@ public final class Systemd {
 
         String prefix = config.getProperty(CONF_BOT_COMMAND_PREFIX);
 
-        if (prefix == null) {
+        if (prefix == null || prefix.equals("") || prefix.matches("\\s")) {
 
-            logger.warning("指定的命令前缀不可用 将自动设置为默认值");
+            logger.warning("指定的命令前缀不可用 将自动设置为默认值: /");
 
         } else {
 
@@ -282,7 +281,7 @@ public final class Systemd {
                     COMMAND_PREFIX = prefix.charAt(1);
                     break;
                 default:
-                    logger.warning("指定的命令前缀不可用 将自动设置为默认值");
+                    logger.warning("指定的命令前缀不可用 将自动设置为默认值: /");
 
             }
 
@@ -298,7 +297,6 @@ public final class Systemd {
 
 
         logger.hint("初始化预生成消息");
-
 
         File FILE_EULA = Paths.get(Driver.getConfigFolder(), "message_eula.txt").toFile();
         File FILE_INFO = Paths.get(Driver.getConfigFolder(), "message_info.txt").toFile();
@@ -357,13 +355,14 @@ public final class Systemd {
                 }
 
                 long userID = Long.parseLong(temp1[0]);
-                NICKNAME.put(userID, temp1[1]);
+                NICKNAME.put(userID, temp1[1].trim());
 
             }
 
         } catch (Exception exception) {
             throw new InitException("昵称映射表读取失败", exception);
         }
+
 
         // ==========================================================================================================================
         // 读取机器人配置
@@ -391,10 +390,12 @@ public final class Systemd {
 
         length = ACCOUNT_PW.length();
 
-        String shadow_ACCOUNT_PW = ACCOUNT_PW.charAt(0) + "*".repeat(length - 2) + ACCOUNT_PW.charAt(length - 1);
-
-        logger.seek("QQ密码 " + shadow_ACCOUNT_PW);
-
+        if (Driver.isDebug()) {
+            logger.warning("QQ密码 " + ACCOUNT_PW + "关闭调试模式以给此条日志打码");
+        } else {
+            String shadow_ACCOUNT_PW = ACCOUNT_PW.charAt(0) + "*".repeat(length - 2) + ACCOUNT_PW.charAt(length - 1);
+            logger.seek("QQ密码 " + shadow_ACCOUNT_PW);
+        }
 
         // ==========================================================================================================================
         // 读取设备配置
@@ -582,7 +583,7 @@ public final class Systemd {
             logger.hint("扫描到以下定时器");
             RUNNERS.forEach(item -> logger.info(item.getName()));
         } catch (Exception exception) {
-            if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equals(exception.getMessage())) {
+            if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equalsIgnoreCase(exception.getMessage())) {
                 logger.info("没有扫描到任何定时器");
             } else {
                 logger.warning("扫描定时器时发生异常", exception);
@@ -594,7 +595,7 @@ public final class Systemd {
             logger.hint("扫描到以下监视器");
             MONITORS.forEach(item -> logger.info(item.getName()));
         } catch (Exception exception) {
-            if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equals(exception.getMessage())) {
+            if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equalsIgnoreCase(exception.getMessage())) {
                 logger.info("没有扫描到任何监视器");
             } else {
                 logger.warning("扫描监视器时发生异常", exception);
@@ -606,7 +607,7 @@ public final class Systemd {
             logger.hint("扫描到以下过滤器");
             FILTERS.forEach(item -> logger.info(item.getName()));
         } catch (Exception exception) {
-            if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equals(exception.getMessage())) {
+            if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equalsIgnoreCase(exception.getMessage())) {
                 logger.info("没有扫描到任何过滤器");
             } else {
                 logger.warning("扫描过滤器时发生异常", exception);
@@ -618,7 +619,7 @@ public final class Systemd {
             logger.hint("扫描到以下执行器");
             EXECUTORS.forEach(item -> logger.info(item.getName()));
         } catch (Exception exception) {
-            if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equals(exception.getMessage())) {
+            if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equalsIgnoreCase(exception.getMessage())) {
                 logger.info("没有扫描到任何执行器");
             } else {
                 logger.warning("扫描执行器时发生异常", exception);
@@ -629,6 +630,7 @@ public final class Systemd {
         if (RUNNERS.size() + MONITORS.size() + FILTERS.size() + EXECUTORS.size() == 0) {
             logger.warning("没有扫描到任何模块 请检查扫描路径");
         }
+
 
         // ==========================================================================================================================
         // 注册定时器
@@ -849,8 +851,8 @@ public final class Systemd {
             }
         }
 
-        logger.hint("启动监听器");
 
+        logger.hint("启动监听器");
         for (Map.Entry<String, EventHandlerMonitor> entry : EVENT_MONITOR.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
@@ -875,6 +877,7 @@ public final class Systemd {
             }
         }
 
+
         logger.hint("启动执行器");
         for (Map.Entry<String, EventHandlerExecutor> entry : EVENT_EXECUTOR.entrySet()) {
             var k = entry.getKey();
@@ -886,9 +889,6 @@ public final class Systemd {
                 throw new BotException("启动执行器失败 " + v.getClass().getName(), exception);
             }
         }
-
-
-        logger.hint("启动工作线程");
 
 
         // ==========================================================================================================================
@@ -937,9 +937,8 @@ public final class Systemd {
             }
         }
 
+
         logger.hint("关闭监听器工作线程");
-
-
         try {
             EXECUTOR_SERVICE.shutdown();
             boolean res = EXECUTOR_SERVICE.awaitTermination(3600, TimeUnit.SECONDS);
@@ -1129,17 +1128,6 @@ public final class Systemd {
         }
 
     }
-
-
-    //    Face faceHandCannon = new Face(169); // QQ表情 左轮手枪
-    //    Face faceMic = new Face(140); // QQ表情 麦克风
-    // 🔫
-    // 🧦
-    // ❌
-    // ✔️
-    // ⭕
-    // 🚧
-    // 🀄
 
 
     private void handleFriendRequest(NewFriendRequestEvent event) {
