@@ -62,7 +62,7 @@ public final class Driver {
     // ==========================================================================================================================================================
 
 
-    private final static String APP_VERSION = "0.4.7";
+    private final static String APP_VERSION = "0.4.8";
 
 
     private final static long BOOT_TIME = System.currentTimeMillis();

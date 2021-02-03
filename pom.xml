@@ -9,13 +9,13 @@
 
     <name>FurryBlack-Mirai-Core</name>
 
-    <version>0.4.7</version>
+    <version>0.4.8</version>
 
     <packaging>jar</packaging>
 
     <properties>
 
-        <mirai.version>2.2.2</mirai.version>
+        <mirai.version>2.3.1</mirai.version>
 
         <kotlin.version>1.4.21</kotlin.version>
 
