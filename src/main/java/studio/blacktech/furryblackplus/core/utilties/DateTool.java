@@ -1,7 +1,8 @@
 package studio.blacktech.furryblackplus.core.utilties;
 
+
 import java.util.Calendar;
-import java.util.Date;
+
 
 public class DateTool {
 
@@ -11,14 +12,14 @@ public class DateTool {
     }
 
 
-    public static Date getNextDate() {
-        Calendar instance = Calendar.getInstance();
-        int day = instance.get(Calendar.DATE) + 1;
-        instance.set(Calendar.DATE, day);
-        instance.set(Calendar.HOUR, 0);
-        instance.set(Calendar.MINUTE, 0);
-        instance.set(Calendar.SECOND, 0);
-        return instance.getTime();
+    public static long getNextDate() {
+        Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DATE) + 1;
+        calendar.set(Calendar.DATE, day);
+        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        return calendar.getTime().getTime() - System.currentTimeMillis();
     }
 
 

@@ -2,24 +2,23 @@ package studio.blacktech.furryblackplus.core.bridge
 
 import kotlinx.coroutines.runBlocking
 import net.mamoe.mirai.Bot
+import studio.blacktech.furryblackplus.core.annotation.Api
 
 
-/**
- * Mirai使用Kotlin编写
- * 这里提供suspend方法的runBlocking桥
- */
 object MiraiBridge {
 
 
     @JvmStatic
+    @Api("以Bot阻塞")
     fun join(bot: Bot) = runBlocking {
         bot.join();
     }
 
 
     @JvmStatic
+    @Api("关闭Bot")
     fun shut(bot: Bot) = runBlocking {
-        bot.closeAndJoin(null)
+        bot.close(null)
     }
 
 

@@ -1278,7 +1278,7 @@ public final class Systemd {
 
 
     @Api("以Mirai阻塞")
-    public void join() {
+    public void joinBot() {
         MiraiBridge.join(bot);
     }
 
@@ -1286,6 +1286,10 @@ public final class Systemd {
     public void shutBot() {
         MiraiBridge.shut(bot);
     }
+
+
+    // =========================================================================
+
 
     @Api("获取BOT自身QQ号")
     public long getBotID() {
