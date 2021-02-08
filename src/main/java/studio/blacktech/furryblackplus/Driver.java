@@ -62,7 +62,7 @@ public final class Driver {
     // ==========================================================================================================================================================
 
 
-    private final static String APP_VERSION = "0.4.8";
+    private final static String APP_VERSION = "0.4.10";
 
 
     private final static long BOOT_TIME = System.currentTimeMillis();
@@ -352,6 +352,7 @@ public final class Driver {
                         break;
 
                     case "list":
+                        if (!command.hasCommandBody()) continue console;
                         switch (command.getParameterSegment(0)) {
                             case "u":
                             case "usr":
