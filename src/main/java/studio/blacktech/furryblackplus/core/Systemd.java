@@ -1132,13 +1132,13 @@ public final class Systemd {
 
     private void handleFriendRequest(NewFriendRequestEvent event) {
         logger.hint("BOT被添加好友 " + event.getFromNick() + "(" + event.getFromId() + ")");
-        Mirai.getInstance().acceptNewFriendRequest(event);
+        event.accept();
     }
 
 
     private void handleInvitedRequest(BotInvitedJoinGroupRequestEvent event) {
         logger.hint("BOT被邀请入群 " + event.getGroupName() + "(" + event.getGroupId() + ") 邀请人 " + event.getInvitorNick() + "(" + event.getInvitorId() + ")");
-        Mirai.getInstance().acceptInvitedJoinGroupRequest(event);
+        event.accept();
     }
 
 
