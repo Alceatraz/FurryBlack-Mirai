@@ -209,7 +209,7 @@ public final class Systemd {
     // ==========================================================================================================================================================
 
 
-    public void init(File FILE_CONFIG) throws InitException {
+    public void init(File FOLDER_CONFIG) throws InitException {
 
 
         // ==========================================================================================================================
@@ -217,6 +217,9 @@ public final class Systemd {
 
 
         logger.hint("初始化Systemd配置文件");
+
+
+        File FILE_CONFIG = Paths.get(FOLDER_CONFIG.getAbsolutePath(), "application.properties").toFile();
 
 
         if (!FILE_CONFIG.exists()) {
@@ -371,6 +374,10 @@ public final class Systemd {
         logger.hint("加载机器人配置");
         BotConfiguration configuration = new BotConfiguration();
 
+        File cacheFolder = Paths.get(FOLDER_CONFIG.getAbsolutePath(),"cache").toFile();
+
+        configuration.setCacheDir(cacheFolder);
+
 
         // ==========================================================================================================================
         // 读取账号配置
@@ -437,25 +444,25 @@ public final class Systemd {
         // 设备信息
 
 
-        String temp_DEVICE_INFO = config.getProperty(CONF_BOT_DEVICE_INFO);
+        String DEVICE_INFO = config.getProperty(CONF_BOT_DEVICE_INFO);
 
-        File DEVICE_INFO = Paths.get(Driver.getConfigFolder(), temp_DEVICE_INFO).toFile();
+        File deviceInfo = Paths.get(Driver.getConfigFolder(), DEVICE_INFO).toFile();
 
-        if (DEVICE_INFO.exists()) {
+        if (deviceInfo.exists()) {
 
-            if (!DEVICE_INFO.isFile()) {
-                String temp = "设备信息配置错误 指定的路径不是文件 " + DEVICE_INFO.getAbsolutePath();
+            if (!deviceInfo.isFile()) {
+                String temp = "设备信息配置错误 指定的路径不是文件 " + deviceInfo.getAbsolutePath();
                 logger.error(temp);
                 throw new MisConfigException(temp);
             }
 
-            if (!DEVICE_INFO.canRead()) {
-                String temp = "设备信息配置错误 指定的文件无权读取 " + DEVICE_INFO.getAbsolutePath();
+            if (!deviceInfo.canRead()) {
+                String temp = "设备信息配置错误 指定的文件无权读取 " + deviceInfo.getAbsolutePath();
                 logger.error(temp);
                 throw new MisConfigException(temp);
             }
 
-            logger.seek("设备信息 " + DEVICE_INFO.getName());
+            logger.seek("设备信息 " + deviceInfo.getName());
 
         } else {
 
@@ -463,7 +470,8 @@ public final class Systemd {
 
         }
 
-        configuration.fileBasedDeviceInfo(DEVICE_INFO.getAbsolutePath());
+        configuration.fileBasedDeviceInfo(deviceInfo.getAbsolutePath());
+
 
         // ==========================================================================================================================
         // 读取网络配置

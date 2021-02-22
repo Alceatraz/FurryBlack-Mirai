@@ -62,7 +62,7 @@ public final class Driver {
     // ==========================================================================================================================================================
 
 
-    private final static String APP_VERSION = "0.4.12";
+    private final static String APP_VERSION = "0.4.13";
 
 
     private final static long BOOT_TIME = System.currentTimeMillis();
@@ -84,7 +84,6 @@ public final class Driver {
     private static File FOLDER_CONFIG;
     private static File FOLDER_MODULE;
     private static File FOLDER_LOGGER;
-    private static File FILE_CONFIG;
 
 
     // ==========================================================================================================================================================
@@ -151,7 +150,6 @@ public final class Driver {
             FOLDER_MODULE = Paths.get(userDir, "module").toFile();
             FOLDER_LOGGER = Paths.get(userDir, "logger").toFile();
 
-            FILE_CONFIG = Paths.get(FOLDER_CONFIG.getAbsolutePath(), "application.properties").toFile();
             File FILE_LOGGER = Paths.get(FOLDER_LOGGER.getAbsolutePath(), LoggerX.formatTime("yyyy_MM_dd_HH_mm_ss", BOOT_TIME) + ".txt").toFile();
 
             System.out.println("[FurryBlack][INIT]初始化目录");
@@ -208,7 +206,7 @@ public final class Driver {
 
         logger.hint("初始化路由系统");
         try {
-            systemd.init(FILE_CONFIG);
+            systemd.init(FOLDER_CONFIG);
         } catch (Exception exception) {
             logger.error("初始化路由系统发生异常 终止启动", exception);
             System.exit(-1);

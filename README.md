@@ -51,6 +51,11 @@ FurryBlack和全功能框架的最大区别在于，极度强化文本处理，�
 
 ## CHANGELOG
 
+### 0.4.13
+
+- 修改Systemd初始化参数
+- 把Mirai的cache文件夹藏到config中
+
 ### 0.4.12
 
 - 升级Mirai-2.4.0
