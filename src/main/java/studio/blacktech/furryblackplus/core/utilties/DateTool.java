@@ -1,16 +1,11 @@
 package studio.blacktech.furryblackplus.core.utilties;
 
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 
 public class DateTool {
-
-
-    public static long durationDay() {
-        return 86400000L;
-    }
-
 
     public static long getNextDate() {
         Calendar calendar = Calendar.getInstance();

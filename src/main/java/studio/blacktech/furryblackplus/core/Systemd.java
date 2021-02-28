@@ -374,7 +374,7 @@ public final class Systemd {
         logger.hint("加载机器人配置");
         BotConfiguration configuration = new BotConfiguration();
 
-        File cacheFolder = Paths.get(FOLDER_CONFIG.getAbsolutePath(),"cache").toFile();
+        File cacheFolder = Paths.get(FOLDER_CONFIG.getAbsolutePath(), "cache").toFile();
 
         configuration.setCacheDir(cacheFolder);
 
@@ -545,6 +545,8 @@ public final class Systemd {
         EVENT_EXECUTOR_GROUP = new LinkedHashMap<>();
 
         int poolSize = parseInteger(config.getProperty(CONF_CPU_THREADS));
+
+        logger.seek("监听器线程池设置为" + poolSize + "线程");
 
         EXECUTOR_SERVICE = Executors.newFixedThreadPool(poolSize);
 
