@@ -23,6 +23,7 @@ import studio.blacktech.furryblackplus.core.annotation.Api;
 import studio.blacktech.furryblackplus.core.exception.initlization.InitException;
 import studio.blacktech.furryblackplus.core.interfaces.AbstractEventHandler;
 import studio.blacktech.furryblackplus.core.utilties.Command;
+import studio.blacktech.furryblackplus.core.utilties.DateTool;
 import studio.blacktech.furryblackplus.core.utilties.LoggerX;
 
 import java.io.BufferedReader;
@@ -47,13 +48,12 @@ import java.util.stream.Collectors;
  * @see Driver 为启动类main方法所在地，初始化日志和目录系统，提供控制台
  * @see Systemd 是整个系统的内核所在
  */
+@Api("项目开源地址https://github.com/Alceatraz/FurryBlack-Mirai")
 public final class Driver {
-
 
     static {
         System.setProperty("mirai.no-desktop", "");
     }
-
 
     // ==========================================================================================================================================================
     //
@@ -61,12 +61,9 @@ public final class Driver {
     //
     // ==========================================================================================================================================================
 
-
-    private final static String APP_VERSION = "0.4.14";
-
+    private final static String APP_VERSION = "0.4.15";
 
     private final static long BOOT_TIME = System.currentTimeMillis();
-
 
     private static boolean enable = false;
     private static boolean dryRun = false;
@@ -95,7 +92,7 @@ public final class Driver {
 
     public static void main(String[] args) {
 
-        System.out.println("[FurryBlack][BOOT]FurryBlackPlus Mirai - ver " + APP_VERSION + " " + LoggerX.formatTime("yyyy-MM-dd HH:mm:ss", BOOT_TIME));
+        System.out.println("[FurryBlack][BOOT]FurryBlackPlus Mirai - ver " + APP_VERSION + " " + DateTool.formatTime("yyyy-MM-dd HH:mm:ss", BOOT_TIME));
 
         // =====================================================================
         // 初始化命令行参数
@@ -150,7 +147,7 @@ public final class Driver {
             FOLDER_MODULE = Paths.get(userDir, "module").toFile();
             FOLDER_LOGGER = Paths.get(userDir, "logger").toFile();
 
-            File FILE_LOGGER = Paths.get(FOLDER_LOGGER.getAbsolutePath(), LoggerX.formatTime("yyyy_MM_dd_HH_mm_ss", BOOT_TIME) + ".txt").toFile();
+            File FILE_LOGGER = Paths.get(FOLDER_LOGGER.getAbsolutePath(), DateTool.formatTime("yyyy_MM_dd_HH_mm_ss", BOOT_TIME) + ".txt").toFile();
 
             System.out.println("[FurryBlack][INIT]初始化目录");
 

@@ -2,8 +2,12 @@ package studio.blacktech.furryblackplus.core.interfaces;
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
+import studio.blacktech.furryblackplus.core.annotation.Api;
 import studio.blacktech.furryblackplus.core.utilties.Command;
+import studio.blacktech.furryblackplus.demo.DemoExecutor;
 
+
+@Api(value = "具体使用方法请见示例", see = DemoExecutor.class)
 public abstract class EventHandlerExecutor extends AbstractEventHandler {
 
     public final ExecutorInfo INFO;
@@ -13,8 +17,10 @@ public abstract class EventHandlerExecutor extends AbstractEventHandler {
         this.INFO = INFO;
     }
 
+    @Api("生命周期 处理私聊命令")
     public abstract void handleUsersMessage(UserMessageEvent event, Command command);
 
+    @Api("生命周期 处理群聊命令")
     public abstract void handleGroupMessage(GroupMessageEvent event, Command command);
 
     public static class ExecutorInfo extends ModuleInfo {

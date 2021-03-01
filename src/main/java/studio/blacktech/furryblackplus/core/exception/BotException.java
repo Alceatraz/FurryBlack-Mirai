@@ -1,30 +1,26 @@
 package studio.blacktech.furryblackplus.core.exception;
 
 
+import studio.blacktech.furryblackplus.core.annotation.Api;
+
+
+@Api("基础异常")
 public class BotException extends Exception {
-
-
-    private static final long serialVersionUID = 1L;
-
 
     public BotException() {
         super();
     }
 
-
     public BotException(String message) {
         super(message);
     }
-
 
     public BotException(String message, Throwable cause) {
         super(message, cause);
     }
 
-
     public BotException(Throwable cause) {
         super(cause);
     }
-
 
 }

@@ -1,6 +1,8 @@
 package studio.blacktech.furryblackplus.core.utilties;
 
 
+import studio.blacktech.furryblackplus.core.annotation.Api;
+
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -8,7 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 
-public class Command {
+@Api("命令解析工具")
+public final class Command {
 
 
     // =========================================================================

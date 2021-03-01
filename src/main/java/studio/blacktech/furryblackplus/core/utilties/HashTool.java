@@ -1,6 +1,8 @@
 package studio.blacktech.furryblackplus.core.utilties;
 
 
+import studio.blacktech.furryblackplus.core.annotation.Api;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -12,8 +14,8 @@ import java.util.Objects;
  * 密码学中md5和MD5是不一样的 注意严谨性 即使这么命名会破坏JAVA命名规范
  */
 
-
-public class HashTool {
+@Api("哈希工具类")
+public final class HashTool {
 
 
     // ==========================================================================================================================================================

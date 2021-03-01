@@ -1,12 +1,11 @@
 package studio.blacktech.furryblackplus.core.exception.initlization;
 
 
+import studio.blacktech.furryblackplus.core.annotation.Api;
 import studio.blacktech.furryblackplus.core.exception.BotException;
 
 
-/**
- * 初始化时的异常
- */
+@Api("初始化时的异常 只在init()阶段抛出")
 public class InitException extends BotException {
 
 

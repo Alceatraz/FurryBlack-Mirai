@@ -67,6 +67,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
+@Api("系统核心路由")
 public final class Systemd {
 
 

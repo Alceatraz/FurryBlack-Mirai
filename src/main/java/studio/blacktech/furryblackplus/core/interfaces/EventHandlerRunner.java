@@ -1,6 +1,11 @@
 package studio.blacktech.furryblackplus.core.interfaces;
 
 
+import studio.blacktech.furryblackplus.core.annotation.Api;
+import studio.blacktech.furryblackplus.demo.DemoRunner;
+
+
+@Api(value = "具体使用方法请见示例", see = DemoRunner.class)
 public abstract class EventHandlerRunner extends AbstractEventHandler {
 
     public final RunnerInfo INFO;

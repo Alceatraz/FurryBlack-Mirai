@@ -5,8 +5,8 @@ import net.mamoe.mirai.Bot
 import studio.blacktech.furryblackplus.core.annotation.Api
 
 
+@Api("Kotlin桥")
 object MiraiBridge {
-
 
     @JvmStatic
     @Api("以Bot阻塞")
@@ -14,12 +14,10 @@ object MiraiBridge {
         bot.join();
     }
 
-
     @JvmStatic
     @Api("关闭Bot")
     fun shut(bot: Bot) = runBlocking {
         bot.close(null)
     }
-
 
 }

@@ -22,7 +22,7 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 
-@Api("事件处理器")
+@Api("基础模块类")
 public abstract class AbstractEventHandler {
 
     public final ModuleInfo INFO;
@@ -33,16 +33,15 @@ public abstract class AbstractEventHandler {
     protected final File FOLDER_LOGS;
     protected final File FILE_CONFIG;
 
-    protected final Properties CONFIG;
+    @Api("内建的LoggerX实例") protected LoggerX logger;
 
-    protected LoggerX logger;
-    protected boolean NEW_CONFIG = false;
+    @Api("内建的config.properties实例") protected final Properties CONFIG;
 
-    protected boolean INIT_ROOT = false;
-    protected boolean INIT_CONF = false;
-    protected boolean INIT_DATA = false;
-    protected boolean INIT_LOGS = false;
-
+    @Api("标志位表示是否初始化过插件目录") protected boolean INIT_ROOT = false;
+    @Api("标志位表示是否初始化过配置目录") protected boolean INIT_CONF = false;
+    @Api("标志位表示是否初始化过数据目录") protected boolean INIT_DATA = false;
+    @Api("标志位表示是否初始化过日志目录") protected boolean INIT_LOGS = false;
+    @Api("标志位表示是否初始化过配置文件") protected boolean NEW_CONFIG = false;
 
     public AbstractEventHandler(ModuleInfo INFO) {
         this.INFO = INFO;
@@ -56,12 +55,13 @@ public abstract class AbstractEventHandler {
     }
 
 
+    @Api("生命周期 初始化时")
     public abstract void init() throws InitException;
 
-
+    @Api("生命周期 启动时")
     public abstract void boot() throws BotException;
 
-
+    @Api("生命周期 关闭时")
     public abstract void shut() throws BotException;
 
 

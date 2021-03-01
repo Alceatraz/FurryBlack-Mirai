@@ -10,6 +10,7 @@ import net.mamoe.mirai.event.events.MessageEvent;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.SingleMessage;
 import net.mamoe.mirai.utils.PlatformLogger;
+import studio.blacktech.furryblackplus.core.annotation.Api;
 import studio.blacktech.furryblackplus.core.exception.BotException;
 import studio.blacktech.furryblackplus.core.exception.initlization.InitLockedException;
 
@@ -19,15 +20,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
 
 
 @SuppressWarnings("unused")
-public class LoggerX extends PlatformLogger {
+@Api("日志工具 为了兼容Mirai继承了PlatformLogger 同时添加了新的级别 seek hint")
+public final class LoggerX extends PlatformLogger {
 
 
     private static boolean INIT_LOCK = false;
@@ -92,7 +91,7 @@ public class LoggerX extends PlatformLogger {
 
     @Override
     public void error0(String message) {
-        String result = "[" + LoggerX.datetime() + "][EXCE][" + name + "]" + message;
+        String result = "[" + DateTool.datetime() + "][EXCE][" + name + "]" + message;
         if (PRINT_ERROR) LoggerX.printStd(Color.RED + result + Color.RESET);
         LoggerX.writeLog(result);
     }
@@ -100,7 +99,7 @@ public class LoggerX extends PlatformLogger {
 
     @Override
     public void error0(String message, Throwable throwable) {
-        String result = "[" + LoggerX.datetime() + "][EXCE][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + DateTool.datetime() + "][EXCE][" + name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_ERROR) LoggerX.printStd(Color.RED + result + Color.RESET);
         LoggerX.writeLog(result);
     }
@@ -108,7 +107,7 @@ public class LoggerX extends PlatformLogger {
 
     @Override
     public void warning0(String message) {
-        String result = "[" + LoggerX.datetime() + "][WARN][" + name + "]" + message;
+        String result = "[" + DateTool.datetime() + "][WARN][" + name + "]" + message;
         if (PRINT_WARN) LoggerX.printStd(Color.LIGHT_YELLOW + result + Color.RESET);
         LoggerX.writeLog(result);
     }
@@ -116,35 +115,35 @@ public class LoggerX extends PlatformLogger {
 
     @Override
     public void warning0(String message, Throwable throwable) {
-        String result = "[" + LoggerX.datetime() + "][WARN][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + DateTool.datetime() + "][WARN][" + name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_WARN) LoggerX.printStd(Color.LIGHT_YELLOW + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
 
     public void hint(String message) {
-        String result = "[" + LoggerX.datetime() + "][HINT][" + name + "]" + message;
+        String result = "[" + DateTool.datetime() + "][HINT][" + name + "]" + message;
         if (PRINT_HINT) LoggerX.printStd(Color.LIGHT_CYAN + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
 
     public void hint(String message, Throwable throwable) {
-        String result = "[" + LoggerX.datetime() + "][HINT][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + DateTool.datetime() + "][HINT][" + name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_HINT) LoggerX.printStd(Color.LIGHT_CYAN + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
 
     public void seek(String message) {
-        String result = "[" + LoggerX.datetime() + "][SEEK][" + name + "]" + message;
+        String result = "[" + DateTool.datetime() + "][SEEK][" + name + "]" + message;
         if (PRINT_SEEK) LoggerX.printStd(Color.LIGHT_GREEN + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
 
     public void seek(String message, Throwable throwable) {
-        String result = "[" + LoggerX.datetime() + "][SEEK][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + DateTool.datetime() + "][SEEK][" + name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_SEEK) LoggerX.printStd(Color.LIGHT_GREEN + result + Color.RESET);
         LoggerX.writeLog(result);
     }
@@ -152,7 +151,7 @@ public class LoggerX extends PlatformLogger {
 
     @Override
     public void info0(String message) {
-        String result = "[" + LoggerX.datetime() + "][INFO][" + name + "]" + message;
+        String result = "[" + DateTool.datetime() + "][INFO][" + name + "]" + message;
         if (PRINT_INFO) LoggerX.printStd(result);
         LoggerX.writeLog(result);
     }
@@ -160,7 +159,7 @@ public class LoggerX extends PlatformLogger {
 
     @Override
     public void info0(String message, Throwable throwable) {
-        String result = "[" + LoggerX.datetime() + "][INFO][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + DateTool.datetime() + "][INFO][" + name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_INFO) LoggerX.printStd(result);
         LoggerX.writeLog(result);
     }
@@ -168,7 +167,7 @@ public class LoggerX extends PlatformLogger {
 
     @Override
     public void debug0(String message) {
-        String result = "[" + LoggerX.datetime() + "][DEBG][" + name + "]" + message;
+        String result = "[" + DateTool.datetime() + "][DEBG][" + name + "]" + message;
         if (PRINT_DEBUG) LoggerX.printStd(Color.GRAY + result + Color.RESET);
         LoggerX.writeLog(result);
     }
@@ -176,7 +175,7 @@ public class LoggerX extends PlatformLogger {
 
     @Override
     public void debug0(String message, Throwable throwable) {
-        String result = "[" + LoggerX.datetime() + "][DEBG][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + DateTool.datetime() + "][DEBG][" + name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_DEBUG) LoggerX.printStd(Color.GRAY + result + Color.RESET);
         LoggerX.writeLog(result);
     }
@@ -184,7 +183,7 @@ public class LoggerX extends PlatformLogger {
 
     @Override
     public void verbose0(String message) {
-        String result = "[" + LoggerX.datetime() + "][VERB][" + name + "]" + message;
+        String result = "[" + DateTool.datetime() + "][VERB][" + name + "]" + message;
         if (PRINT_VERB) LoggerX.printStd(Color.GRAY + result + Color.RESET);
         LoggerX.writeLog(result);
     }
@@ -192,7 +191,7 @@ public class LoggerX extends PlatformLogger {
 
     @Override
     public void verbose0(String message, Throwable throwable) {
-        String result = "[" + LoggerX.datetime() + "][VERB][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + DateTool.datetime() + "][VERB][" + name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_VERB) LoggerX.printStd(Color.GRAY + result + Color.RESET);
         LoggerX.writeLog(result);
     }
@@ -211,7 +210,7 @@ public class LoggerX extends PlatformLogger {
         StringBuilder builder = new StringBuilder();
 
         builder.append("[");
-        builder.append(LoggerX.datetime());
+        builder.append(DateTool.datetime());
         builder.append("][DUMP][");
         builder.append(name);
         builder.append("]");
@@ -343,122 +342,5 @@ public class LoggerX extends PlatformLogger {
         tmp.toArray(res);
         return res;
     }
-
-
-    // ==================================================================================================
-    //
-    //
-    // ==================================================================================================
-
-
-    public static String date() {
-        return new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-    }
-
-
-    public static String date(Date date) {
-        return new SimpleDateFormat("yyyy-MM-dd").format(date);
-    }
-
-
-    public static String date(long timestamp) {
-        return new SimpleDateFormat("yyyy-MM-dd").format(new Date(timestamp));
-    }
-
-
-    public static String time() {
-        return new SimpleDateFormat("HH:mm:ss").format(new Date());
-    }
-
-
-    public static String time(Date date) {
-        return new SimpleDateFormat("HH:mm:ss").format(date);
-    }
-
-
-    public static String time(long timestamp) {
-        return new SimpleDateFormat("HH:mm:ss").format(new Date(timestamp));
-    }
-
-
-    public static String datetime() {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-    }
-
-
-    public static String datetime(Date date) {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
-    }
-
-
-    public static String datetime(long timestamp) {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(timestamp));
-    }
-
-
-    // ================================================================
-
-
-    public static String formatTime(String format) {
-        return new SimpleDateFormat(format).format(new Date());
-    }
-
-
-    public static String formatTime(String format, Date date) {
-        return new SimpleDateFormat(format).format(date);
-    }
-
-
-    public static String formatTime(String format, long timestamp) {
-        return new SimpleDateFormat(format).format(new Date(timestamp));
-    }
-
-
-    public static String formatTime(String format, TimeZone timezone) {
-        SimpleDateFormat formatter = new SimpleDateFormat(format);
-        formatter.setTimeZone(timezone);
-        return formatter.format(new Date());
-    }
-
-
-    public static String formatTime(String format, TimeZone timezone, Date date) {
-        SimpleDateFormat formatter = new SimpleDateFormat(format);
-        formatter.setTimeZone(timezone);
-        return formatter.format(date);
-    }
-
-
-    public static String formatTime(String format, TimeZone timezone, long timestamp) {
-        SimpleDateFormat formatter = new SimpleDateFormat(format);
-        formatter.setTimeZone(timezone);
-        return formatter.format(new Date(timestamp));
-    }
-
-
-    public static String duration(long time) {
-        long ss = time;
-        long dd = ss / 86400;
-        ss = ss % 86400;
-        long hh = ss / 3600;
-        ss = ss % 3600;
-        long mm = ss / 60;
-        ss = ss % 60;
-        return dd + " - " + String.format("%02d", hh) + ":" + String.format("%02d", mm) + ":" + String.format("%02d", ss);
-    }
-
-
-    public static String durationMille(long time) {
-        long ms = time;
-        long dd = ms / 86400000;
-        ms = ms % 86400000;
-        long hh = ms / 3600000;
-        ms = ms % 3600000;
-        long mm = ms / 60000;
-        ms = ms % 60000;
-        long ss = ms / 1000;
-        ms = ms % 1000;
-        return dd + " - " + hh + ":" + mm + ":" + ss + ":" + String.format("%04d", ms);
-    }
-
 
 }
