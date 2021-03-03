@@ -121,14 +121,14 @@ public final class DateTool {
         return dd + " - " + hh + ":" + mm + ":" + ss + ":" + String.format("%04d", ms);
     }
 
-    public static long getNextDate() {
+    public static Date getNextDate() {
         Calendar calendar = Calendar.getInstance();
         int day = calendar.get(Calendar.DATE) + 1;
         calendar.set(Calendar.DATE, day);
         calendar.set(Calendar.HOUR, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-        return calendar.getTime().getTime() - System.currentTimeMillis();
+        return calendar.getTime();
     }
 
 
