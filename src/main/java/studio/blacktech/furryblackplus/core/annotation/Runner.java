@@ -16,29 +16,24 @@ import java.lang.annotation.Target;
 @Api(value = "具体使用方法请见示例", see = DemoRunner.class)
 public @interface Runner {
 
-
     /**
      * @return 插件的名字 用于控制台
      */
     String artificial() default "";
-
 
     /**
      * @return 插件的名字
      */
     String name() default "";
 
-
     /**
      * @return 插件的简介
      */
     String description() default "";
 
-
     /**
      * @return 插件的隐私
      */
     String[] privacy() default {};
-
 
 }

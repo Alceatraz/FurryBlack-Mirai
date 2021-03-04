@@ -5,6 +5,7 @@ import studio.blacktech.furryblackplus.core.annotation.Api;
 import studio.blacktech.furryblackplus.core.exception.BotException;
 
 
+@SuppressWarnings("unused")
 @Api("初始化时的异常 只在init()阶段抛出")
 public class InitException extends BotException {
 

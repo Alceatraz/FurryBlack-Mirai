@@ -4,6 +4,7 @@ package studio.blacktech.furryblackplus.core.exception;
 import studio.blacktech.furryblackplus.core.annotation.Api;
 
 
+@SuppressWarnings("unused")
 @Api("基础异常")
 public class BotException extends Exception {
 

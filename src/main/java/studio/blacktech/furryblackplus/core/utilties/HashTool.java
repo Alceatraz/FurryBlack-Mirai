@@ -13,7 +13,7 @@ import java.util.Objects;
  * HASH工具类
  * 密码学中md5和MD5是不一样的 注意严谨性 即使这么命名会破坏JAVA命名规范
  */
-
+@SuppressWarnings("unused")
 @Api("哈希工具类")
 public final class HashTool {
 

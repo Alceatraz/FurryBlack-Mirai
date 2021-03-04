@@ -13,10 +13,6 @@ import java.util.Map;
 @Api("命令解析工具")
 public final class Command {
 
-
-    // =========================================================================
-
-
     private final String commandName;
     private final String commandBody;
     private final int commandBodyLength;
@@ -26,26 +22,17 @@ public final class Command {
 
     private final Map<String, String> commandOptions = new LinkedHashMap<>();
 
-
-    // =========================================================================
-
-
     public Command(String message) {
 
         int split = message.indexOf(' ');
 
         if (split < 0) {
-
             commandName = message;
-
             commandBody = null;
             commandBodyLength = 0;
-
             commandParameters = null;
             commandParameterLength = 0;
-
             return;
-
         }
 
         // 命令名按照第一个空格拆分
@@ -127,33 +114,27 @@ public final class Command {
 
     }
 
-
     // ===================================================================================
 
-
+    @Api("从指定位置拼接剩余的内容")
     public String join(int index) {
         StringBuilder builder = new StringBuilder();
-        if (commandParameterLength == 0) return null;
+        if (commandParameterLength == 0 || index > commandParameterLength) return null;
         for (; index < commandParameterLength; index++) builder.append(commandParameters[index]).append(" ");
         return builder.toString();
     }
 
-
+    @Api("获取命令名")
     public String getCommandName() {
         return commandName;
     }
 
-
+    @Api("获取命令体")
     public String getCommandBody() {
         return commandBody;
     }
 
-
-    public int getCommandBodyLength() {
-        return commandBodyLength;
-    }
-
-
+    @Api("获取命令体 - 最大字符限制")
     public String getCommandBody(int length) {
         if (length > commandBodyLength) {
             return commandBody;
@@ -162,31 +143,37 @@ public final class Command {
         }
     }
 
+    @Api("获取参数长度")
+    public int getCommandBodyLength() {
+        return commandBodyLength;
+    }
+
+    @Api("是否有命令体")
     public boolean hasCommandBody() {
         return commandParameterLength > 0;
     }
 
+    @Api("获取参数个数")
     public int getParameterLength() {
         return commandParameterLength;
     }
 
-
+    @Api("获取所有参数")
     public String[] getParameterSegment() {
         return commandParameters;
     }
 
-
+    @Api("获取指定位置的参数")
     public String getParameterSegment(int i) {
-        if (commandParameters == null) return null;
         return commandParameters[i];
     }
 
-
+    @Api("是否包含选项")
     public boolean hasSwitch(String name) {
         return commandOptions.containsKey(name);
     }
 
-
+    @Api("获取指定选项")
     public String getSwitch(String name) {
         return commandOptions.get(name);
     }

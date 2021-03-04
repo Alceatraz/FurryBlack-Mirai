@@ -11,9 +11,9 @@ public abstract class EventHandlerMonitor extends AbstractEventHandler {
 
     public final MonitorInfo INFO;
 
-    public EventHandlerMonitor(MonitorInfo INFO) {
-        super(INFO);
-        this.INFO = INFO;
+    public EventHandlerMonitor(MonitorInfo info) {
+        super(info);
+        this.INFO = info;
     }
 
     @Api("生命周期 监听私聊消息")
@@ -23,8 +23,8 @@ public abstract class EventHandlerMonitor extends AbstractEventHandler {
     public abstract void handleGroupMessage(GroupMessageEvent message);
 
     public static class MonitorInfo extends ModuleInfo {
-        public MonitorInfo(String MODULE_NAME, String MODULE_ARTIFICIAL, String MODULE_DESCRIPTION, String[] MODULE_PRIVACY) {
-            super(MODULE_NAME, MODULE_ARTIFICIAL, MODULE_DESCRIPTION, MODULE_PRIVACY);
+        public MonitorInfo(String name, String artificial, String description, String[] privacy) {
+            super(name, artificial, description, privacy);
         }
     }
 }

@@ -4,6 +4,7 @@ package studio.blacktech.furryblackplus.core.exception.initlization;
 import studio.blacktech.furryblackplus.core.annotation.Api;
 
 
+@SuppressWarnings("unused")
 @Api("配置错误")
 public class MisConfigException extends InitException {
 

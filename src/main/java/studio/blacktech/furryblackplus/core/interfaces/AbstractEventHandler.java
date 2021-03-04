@@ -27,21 +27,22 @@ public abstract class AbstractEventHandler {
 
     public final ModuleInfo INFO;
 
-    protected final File FOLDER_ROOT;
-    protected final File FOLDER_CONF;
-    protected final File FOLDER_DATA;
-    protected final File FOLDER_LOGS;
-    protected final File FILE_CONFIG;
+    @Api("模块内建的插件目录对象") protected final File FOLDER_ROOT;
+    @Api("模块内建的配置目录对象") protected final File FOLDER_CONF;
+    @Api("模块内建的数据目录对象") protected final File FOLDER_DATA;
+    @Api("模块内建的日志目录对象") protected final File FOLDER_LOGS;
+    @Api("模块内建的配置文件对象") protected final File FILE_CONFIG;
 
-    @Api("内建的LoggerX实例") protected LoggerX logger;
+    @Api("模块内建的LoggerX实例") protected LoggerX logger;
 
-    @Api("内建的config.properties实例") protected final Properties CONFIG;
+    @Api("模块内建的config.properties实例") protected final Properties CONFIG;
 
-    @Api("标志位表示是否初始化过插件目录") protected boolean INIT_ROOT = false;
-    @Api("标志位表示是否初始化过配置目录") protected boolean INIT_CONF = false;
-    @Api("标志位表示是否初始化过数据目录") protected boolean INIT_DATA = false;
-    @Api("标志位表示是否初始化过日志目录") protected boolean INIT_LOGS = false;
-    @Api("标志位表示是否初始化过配置文件") protected boolean NEW_CONFIG = false;
+    @Api("模块标志位表示是否初始化过插件目录") protected boolean INIT_ROOT = false;
+    @Api("模块标志位表示是否初始化过配置目录") protected boolean INIT_CONF = false;
+    @Api("模块标志位表示是否初始化过数据目录") protected boolean INIT_DATA = false;
+    @Api("模块标志位表示是否初始化过日志目录") protected boolean INIT_LOGS = false;
+    @Api("模块标志位表示是否初始化过配置文件") protected boolean NEW_CONFIG = false;
+
 
     public AbstractEventHandler(ModuleInfo INFO) {
         this.INFO = INFO;
@@ -71,14 +72,12 @@ public abstract class AbstractEventHandler {
         INIT_ROOT = true;
     }
 
-
     @Api("初始化插件配置文件目录")
     public void initConfFolder() {
         if (!INIT_ROOT) initRootFolder();
         initFolder(FOLDER_CONF);
         INIT_CONF = true;
     }
-
 
     @Api("初始化插件数据目录")
     public void initDataFolder() {
@@ -87,14 +86,12 @@ public abstract class AbstractEventHandler {
         INIT_DATA = true;
     }
 
-
     @Api("初始化插件日志目录")
     public void initLogsFolder() {
         if (!INIT_ROOT) initRootFolder();
         initFolder(FOLDER_LOGS);
         INIT_LOGS = true;
     }
-
 
     @Api("初始化插件配置下的目录")
     public File initConfFolder(String folderName) {
@@ -103,7 +100,6 @@ public abstract class AbstractEventHandler {
         INIT_CONF = true;
         return file;
     }
-
 
     @Api("初始化插件数据下的目录")
     public File initDataFolder(String folderName) {
@@ -121,13 +117,11 @@ public abstract class AbstractEventHandler {
         return file;
     }
 
-
     @Api("初始化配置文件夹下的文件")
     public File initConfFile(String fileName) {
         if (!INIT_CONF) initConfFolder();
         return initFile(Paths.get(FOLDER_CONF.getAbsolutePath(), fileName));
     }
-
 
     @Api("初始化数据文件夹下的文件")
     public File initDataFile(String fileName) {
@@ -135,13 +129,11 @@ public abstract class AbstractEventHandler {
         return initFile(Paths.get(FOLDER_DATA.getAbsolutePath(), fileName));
     }
 
-
     @Api("初始化日志文件夹下的文件")
     public File initLogsFile(String fileName) {
         if (!INIT_LOGS) initLogsFolder();
         return initFile(Paths.get(FOLDER_LOGS.getAbsolutePath(), fileName));
     }
-
 
     @Api("初始化默认配置文件")
     public void initConfiguration() {
@@ -156,7 +148,6 @@ public abstract class AbstractEventHandler {
         }
     }
 
-
     @Api("加载默认配置文件")
     protected void loadConfig() {
         try {
@@ -166,12 +157,10 @@ public abstract class AbstractEventHandler {
         }
     }
 
-
     @Api("保存默认配置文件")
     protected void saveConfig() {
         saveConfig(null);
     }
-
 
     @Api("保存默认配置文件")
     protected void saveConfig(String comments) {
@@ -182,12 +171,10 @@ public abstract class AbstractEventHandler {
         }
     }
 
-
     @Api("按行读取文件 删除注释")
     protected List<String> readFile(File file) {
         return readFile(file, false);
     }
-
 
     @Api("按行读取文件 可选注释")
     protected List<String> readFile(File file, boolean keepComment) {
@@ -221,12 +208,10 @@ public abstract class AbstractEventHandler {
         }
     }
 
-
     @Api("初始化文件夹")
     protected File initFolder(String folder) {
         return initFolder(Paths.get(FOLDER_ROOT.getAbsolutePath(), folder).toFile());
     }
-
 
     @Api("初始化文件夹")
     protected File initFolder(File file) {
@@ -240,12 +225,10 @@ public abstract class AbstractEventHandler {
         return file;
     }
 
-
     @Api("初始化文件")
     protected File initFile(Path path) {
         return initFile(path.toFile());
     }
-
 
     @Api("初始化文件")
     protected File initFile(File file) {
@@ -265,7 +248,6 @@ public abstract class AbstractEventHandler {
         return file;
     }
 
-
     public static class ModuleInfo {
 
         public final String NAME;
@@ -273,16 +255,14 @@ public abstract class AbstractEventHandler {
         public final String DESCRIPTION;
         public final String[] PRIVACY;
 
-        public ModuleInfo(String NAME, String ARTIFICIAL, String DESCRIPTION, String[] PRIVACY) {
-            if (NAME.equals("")) throw new IllegalArgumentException("NAME cannot be null");
-            if (ARTIFICIAL.equals("")) throw new IllegalArgumentException("ARTIFICIAL cannot be null");
-            if (DESCRIPTION.equals("")) throw new IllegalArgumentException("DESCRIPTION cannot be null");
-            if (PRIVACY == null) throw new IllegalArgumentException("PRIVACY cannot be null");
-
-            this.NAME = NAME;
-            this.ARTIFICIAL = ARTIFICIAL;
-            this.DESCRIPTION = DESCRIPTION;
-            this.PRIVACY = PRIVACY;
+        public ModuleInfo(String name, String artificial, String description, String[] privacy) {
+            if (name.equals("")) throw new IllegalArgumentException("无效的模块名称`name`");
+            if (artificial.equals("")) throw new IllegalArgumentException("无效的模块全名`artificial`");
+            if (description.equals("")) throw new IllegalArgumentException("无效的模块介绍`description`");
+            this.NAME = name;
+            this.ARTIFICIAL = artificial;
+            this.DESCRIPTION = description;
+            this.PRIVACY = privacy;
         }
     }
 }

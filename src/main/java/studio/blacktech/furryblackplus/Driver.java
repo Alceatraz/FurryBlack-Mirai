@@ -410,6 +410,7 @@ public final class Driver {
                         break;
 
                     case "send":
+                        if (command.getParameterLength() < 1) continue;
                         switch (command.getParameterSegment(0)) {
                             case "u":
                             case "usr":

@@ -10,14 +10,14 @@ public abstract class EventHandlerRunner extends AbstractEventHandler {
 
     public final RunnerInfo INFO;
 
-    public EventHandlerRunner(RunnerInfo INFO) {
-        super(INFO);
-        this.INFO = INFO;
+    public EventHandlerRunner(RunnerInfo info) {
+        super(info);
+        this.INFO = info;
     }
 
     public static class RunnerInfo extends ModuleInfo {
-        public RunnerInfo(String MODULE_NAME, String MODULE_ARTIFICIAL, String MODULE_DESCRIPTION, String[] MODULE_PRIVACY) {
-            super(MODULE_NAME, MODULE_ARTIFICIAL, MODULE_DESCRIPTION, MODULE_PRIVACY);
+        public RunnerInfo(String name, String artificial, String description, String[] privacy) {
+            super(name, artificial, description, privacy);
         }
     }
 }

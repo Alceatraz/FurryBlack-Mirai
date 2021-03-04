@@ -8,7 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-
+@SuppressWarnings("unused")
 @Api("日期工具类")
 public final class DateTool {
 

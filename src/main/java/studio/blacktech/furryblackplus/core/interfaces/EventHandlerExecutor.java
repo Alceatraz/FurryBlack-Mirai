@@ -12,9 +12,9 @@ public abstract class EventHandlerExecutor extends AbstractEventHandler {
 
     public final ExecutorInfo INFO;
 
-    public EventHandlerExecutor(ExecutorInfo INFO) {
-        super(INFO);
-        this.INFO = INFO;
+    public EventHandlerExecutor(ExecutorInfo info) {
+        super(info);
+        this.INFO = info;
     }
 
     @Api("生命周期 处理私聊命令")
@@ -29,12 +29,11 @@ public abstract class EventHandlerExecutor extends AbstractEventHandler {
         public final String[] USAGE;
         public final String HELP;
 
-        public ExecutorInfo(String MODULE_NAME, String MODULE_ARTIFICIAL, String MODULE_DESCRIPTION, String[] MODULE_PRIVACY, String COMMAND, String[] USAGE) {
-            super(MODULE_NAME, MODULE_ARTIFICIAL, MODULE_DESCRIPTION, MODULE_PRIVACY);
-            if (COMMAND.equals("")) throw new IllegalArgumentException("COMMAND cannot be null");
-            if (USAGE == null) throw new IllegalArgumentException("USAGE cannot be null");
-            this.COMMAND = COMMAND;
-            this.USAGE = USAGE;
+        public ExecutorInfo(String name, String artificial, String description, String[] privacy, String command, String[] usage) {
+            super(name, artificial, description, privacy);
+            if (command.equals("")) throw new IllegalArgumentException("无效的模块命令`command`");
+            this.COMMAND = command;
+            this.USAGE = usage;
             StringBuilder builder = new StringBuilder();
             builder.append(COMMAND);
             builder.append(" ");
