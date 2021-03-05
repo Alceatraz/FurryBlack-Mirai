@@ -60,8 +60,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -168,7 +170,8 @@ public final class Systemd {
     private String MESSAGE_LIST_USERS;
     private String MESSAGE_LIST_GROUP;
 
-    private ExecutorService EXECUTOR_SERVICE;
+    private ThreadPoolExecutor MONITOR_SERVICE;
+    private ScheduledExecutorService SCHEDULERS_POOL;
 
     private Map<String, AbstractEventHandler> MODULES; // 所有模块及注册名
 
@@ -549,8 +552,8 @@ public final class Systemd {
 
         logger.seek("监听器线程池设置为" + poolSize + "线程");
 
-        EXECUTOR_SERVICE = Executors.newFixedThreadPool(poolSize);
-
+        MONITOR_SERVICE = (ThreadPoolExecutor) Executors.newFixedThreadPool(poolSize);
+        SCHEDULERS_POOL = Executors.newScheduledThreadPool(poolSize);
 
         // ==========================================================================================================================
         // 扫描模块
@@ -951,8 +954,8 @@ public final class Systemd {
 
         logger.hint("关闭监听器工作线程");
         try {
-            EXECUTOR_SERVICE.shutdown();
-            boolean res = EXECUTOR_SERVICE.awaitTermination(3600, TimeUnit.SECONDS);
+            MONITOR_SERVICE.shutdown();
+            boolean res = MONITOR_SERVICE.awaitTermination(3600, TimeUnit.SECONDS);
             if (res) {
                 logger.info("线程池正常退出");
             } else {
@@ -960,9 +963,22 @@ public final class Systemd {
             }
         } catch (InterruptedException exception) {
             logger.error("线程池关闭异常 强制关闭", exception);
-            EXECUTOR_SERVICE.shutdownNow();
+            MONITOR_SERVICE.shutdownNow();
         }
 
+        logger.hint("关闭计划任务线程池");
+        try {
+            SCHEDULERS_POOL.shutdown();
+            boolean res = SCHEDULERS_POOL.awaitTermination(3600, TimeUnit.SECONDS);
+            if (res) {
+                logger.info("线程池正常退出");
+            } else {
+                logger.info("线程池超时退出");
+            }
+        } catch (InterruptedException exception) {
+            logger.error("线程池关闭异常 强制关闭", exception);
+            SCHEDULERS_POOL.shutdownNow();
+        }
 
         logger.hint("关闭监听器");
         for (Map.Entry<String, EventHandlerMonitor> entry : EVENT_MONITOR.entrySet()) {
@@ -1010,7 +1026,7 @@ public final class Systemd {
 
         try {
 
-            EXECUTOR_SERVICE.submit(() -> EVENT_MONITOR_USERS.forEach(item -> item.handleUsersMessage(event)));
+            MONITOR_SERVICE.submit(() -> EVENT_MONITOR_USERS.forEach(item -> item.handleUsersMessage(event)));
 
             if (EVENT_FILTER_USERS.parallelStream().anyMatch(item -> item.handleUsersMessage(event))) {
                 logger.hint("用户消息被拦截 " + event.getSender().getId() + " ->" + event.getMessage());
@@ -1070,7 +1086,7 @@ public final class Systemd {
 
         try {
 
-            EXECUTOR_SERVICE.submit(() -> EVENT_MONITOR_GROUP.forEach(item -> item.handleGroupMessage(event)));
+            MONITOR_SERVICE.submit(() -> EVENT_MONITOR_GROUP.forEach(item -> item.handleGroupMessage(event)));
 
             if (EVENT_FILTER_GROUP.stream().anyMatch(item -> item.handleGroupMessage(event))) {
                 logger.hint("群组消息被拦截 " + event.getSender().getId() + " ->" + event.getMessage());
@@ -1298,6 +1314,20 @@ public final class Systemd {
         MiraiBridge.shut(bot);
     }
 
+    @Api("提交定时任务")
+    public ScheduledFuture<?> schedule(Runnable runnable , long delay , TimeUnit unit){
+        return SCHEDULERS_POOL.schedule(runnable,delay,unit);
+    }
+
+    @Api("提交定时任务")
+    public ScheduledFuture<?> scheduleAtFixedRate(Runnable runnable , long initialDelay , long period, TimeUnit unit){
+        return SCHEDULERS_POOL.scheduleAtFixedRate(runnable,initialDelay,period,unit);
+    }
+
+    @Api("提交定时任务")
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable runnable , long initialDelay , long delay, TimeUnit unit){
+       return  SCHEDULERS_POOL.scheduleWithFixedDelay(runnable,initialDelay,delay,unit);
+    }
 
     // =========================================================================
 

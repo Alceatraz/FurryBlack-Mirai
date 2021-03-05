@@ -121,14 +121,15 @@ public final class DateTool {
         ms = ms % 60000;
         long ss = ms / 1000;
         ms = ms % 1000;
-        return dd + " - " + hh + ":" + mm + ":" + ss + "." + String.format("%03d", ms);
+        return dd + " - " + String.format("%02d", hh) + ":" + String.format("%02d", mm) + ":" + String.format("%02d", ss) + "." + String.format("%03d", ms);
     }
 
     // ================================================================
 
     @Api("获取明天")
     public static Date getNextDate() {
-        return getNextDate(TimeZone.getDefault());
+        TimeZone timeZone = TimeZone.getDefault();
+        return getNextDate(timeZone);
     }
 
     @Api("获取明天")
@@ -140,6 +141,7 @@ public final class DateTool {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.AM_PM, Calendar.AM);
         return calendar.getTime();
     }
 

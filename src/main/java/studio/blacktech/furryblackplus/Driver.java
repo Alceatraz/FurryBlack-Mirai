@@ -37,6 +37,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -63,7 +65,7 @@ public final class Driver {
     //
     // ==========================================================================================================================================================
 
-    private final static String APP_VERSION = "0.4.19";
+    private final static String APP_VERSION = "0.4.20";
 
     private final static long BOOT_TIME = System.currentTimeMillis();
 
@@ -568,6 +570,20 @@ public final class Driver {
         return systemd.getPlugin(clazz);
     }
 
+    @Api("提交定时任务")
+    public static ScheduledFuture<?> schedule(Runnable runnable, long delay, TimeUnit unit) {
+        return systemd.schedule(runnable, delay, unit);
+    }
+
+    @Api("提交定时任务")
+    public static ScheduledFuture<?> scheduleAtFixedRate(Runnable runnable, long initialDelay, long period, TimeUnit unit) {
+        return systemd.scheduleAtFixedRate(runnable, initialDelay, period, unit);
+    }
+
+    @Api("提交定时任务")
+    public static ScheduledFuture<?> scheduleWithFixedDelay(Runnable runnable, long initialDelay, long delay, TimeUnit unit) {
+        return systemd.scheduleWithFixedDelay(runnable, initialDelay, delay, unit);
+    }
 
     // ==========================================================================================================================================================
     //
