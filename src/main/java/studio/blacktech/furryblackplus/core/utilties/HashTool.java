@@ -13,30 +13,14 @@ import java.util.Objects;
  * HASH工具类
  * 密码学中md5和MD5是不一样的 注意严谨性 即使这么命名会破坏JAVA命名规范
  */
-@SuppressWarnings("unused")
 @Api("哈希工具类")
 public final class HashTool {
 
 
-    // ==========================================================================================================================================================
+    private HashTool() { }
 
 
-    private static final HashTool instance = new HashTool();
-
-
-    private HashTool() {
-
-    }
-
-
-    public HashTool getInstance() {
-        return instance;
-    }
-
-
-    // ==========================================================================================================================================================
-
-
+    @Api("md5")
     public static String md5(byte[] message) {
         MessageDigest digest = null;
         try {
@@ -52,25 +36,22 @@ public final class HashTool {
         return builder.toString();
     }
 
-
+    @Api("MD5")
     public static String MD5(byte[] message) {
         return md5(message).toUpperCase();
     }
 
-
+    @Api("md5")
     public static String md5(String message) {
         return md5(message.getBytes(StandardCharsets.UTF_8));
     }
 
-
+    @Api("MD5")
     public static String MD5(String message) {
         return MD5(message.getBytes(StandardCharsets.UTF_8));
     }
 
-
-    // ==========================================================================================================================================================
-
-
+    @Api("sha256")
     public static String sha256(byte[] message) {
         MessageDigest digest = null;
         try {
@@ -88,25 +69,22 @@ public final class HashTool {
         return builder.toString();
     }
 
-
+    @Api("SHA256")
     public static String SHA256(byte[] message) {
         return sha256(message).toUpperCase();
     }
 
-
+    @Api("sha256")
     public static String sha256(String message) {
         return sha256(message.getBytes(StandardCharsets.UTF_8));
     }
 
-
+    @Api("SHA256")
     public static String SHA256(String message) {
         return SHA256(message.getBytes(StandardCharsets.UTF_8));
     }
 
-
-    // ==========================================================================================================================================================
-
-
+    @Api("sha384")
     public static String sha384(byte[] message) {
         MessageDigest digest = null;
         try {
@@ -124,25 +102,22 @@ public final class HashTool {
         return builder.toString();
     }
 
-
+    @Api("SHA384")
     public static String SHA384(byte[] message) {
         return sha384(message).toUpperCase();
     }
 
-
+    @Api("sha384")
     public static String sha384(String message) {
         return sha384(message.getBytes(StandardCharsets.UTF_8));
     }
 
-
+    @Api("SHA384")
     public static String SHA384(String message) {
         return SHA384(message.getBytes(StandardCharsets.UTF_8));
     }
 
-
-    // ==========================================================================================================================================================
-
-
+    @Api("sha512")
     public static String sha512(byte[] message) {
         MessageDigest digest = null;
         try {
@@ -160,23 +135,19 @@ public final class HashTool {
         return builder.toString();
     }
 
-
+    @Api("SHA512")
     public static String SHA512(byte[] message) {
         return sha512(message).toUpperCase();
     }
 
-
+    @Api("sha512")
     public static String sha512(String message) {
         return sha512(message.getBytes(StandardCharsets.UTF_8));
     }
 
-
+    @Api("SHA512")
     public static String SHA512(String message) {
         return SHA512(message.getBytes(StandardCharsets.UTF_8));
     }
-
-
-    // ==========================================================================================================================================================
-
 
 }

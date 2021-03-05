@@ -36,6 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 
@@ -53,6 +54,7 @@ public final class Driver {
 
     static {
         System.setProperty("mirai.no-desktop", "");
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
     }
 
     // ==========================================================================================================================================================
@@ -61,7 +63,7 @@ public final class Driver {
     //
     // ==========================================================================================================================================================
 
-    private final static String APP_VERSION = "0.4.17";
+    private final static String APP_VERSION = "0.4.19";
 
     private final static long BOOT_TIME = System.currentTimeMillis();
 

@@ -111,7 +111,6 @@ public final class Command {
 
         this.commandParameters = commandParameters.toArray(new String[0]);
         this.commandParameterLength = this.commandParameters.length;
-
     }
 
     // ===================================================================================
@@ -177,7 +176,6 @@ public final class Command {
     public String getSwitch(String name) {
         return commandOptions.get(name);
     }
-
 
     @Override
     public String toString() {
