@@ -65,7 +65,7 @@ public final class Driver {
     //
     // ==========================================================================================================================================================
 
-    private final static String APP_VERSION = "0.4.20";
+    private final static String APP_VERSION = "0.4.21";
 
     private final static long BOOT_TIME = System.currentTimeMillis();
 
@@ -516,58 +516,54 @@ public final class Driver {
         return APP_VERSION;
     }
 
-
     @Api("获取启动时间戳")
     public static long getBootTime() {
         return BOOT_TIME;
     }
-
 
     @Api("是否正在监听消息")
     public static boolean isEnable() {
         return enable;
     }
 
-
     @Api("否是真的登录账号")
     public static boolean isDryRun() {
         return dryRun;
     }
-
 
     @Api("否是进入调试模式")
     public static boolean isDebug() {
         return debug;
     }
 
-
     @Api("获取运行目录 - 不是插件私有目录")
     public static String getRootFolder() {
         return FOLDER_ROOT.getAbsolutePath();
     }
-
 
     @Api("获取配置目录 - 不是插件私有目录")
     public static String getConfigFolder() {
         return FOLDER_CONFIG.getAbsolutePath();
     }
 
-
     @Api("获取数据目录 - 不是插件私有目录")
     public static String getModuleFolder() {
         return FOLDER_MODULE.getAbsolutePath();
     }
-
 
     @Api("获取日志目录 - 不是插件私有目录")
     public static String getLoggerFolder() {
         return FOLDER_LOGGER.getAbsolutePath();
     }
 
-
     @Api("获取模块实例")
     public static <T extends AbstractEventHandler> T getPlugin(Class<T> clazz) {
         return systemd.getPlugin(clazz);
+    }
+
+    @Api("获取模块实例")
+    public static <T extends AbstractEventHandler> T getHandler(Class<T> clazz) {
+        return getPlugin(clazz);
     }
 
     @Api("提交定时任务")
@@ -597,113 +593,93 @@ public final class Driver {
         return systemd.getNickName(user);
     }
 
-
     @Api("按照配置的映射表获取ID")
     public static String getNickName(long user) {
         return systemd.getNickName(user);
     }
-
 
     @Api("按照配置的映射表获取ID")
     public static String getFormattedNickName(User user) {
         return getNickName(user) + "(" + user.getId() + ")";
     }
 
-
     @Api("按照配置的映射表获取ID")
     public static String getFormattedNickName(long user) {
         return getNickName(user) + "(" + user + ")";
     }
-
 
     @Api("格式化群组信息")
     public static String getGroupInfo(Group group) {
         return group.getName() + "(" + group.getId() + ") " + group.getMembers().size() + " -> " + group.getOwner().getNameCard() + "(" + group.getOwner().getId() + ")";
     }
 
-
     @Api("获取BOT自身QQ号")
     public static long getBotID() {
         return systemd.getBotID();
     }
-
 
     @Api("列出所有好友")
     public static ContactList<Friend> getFriends() {
         return systemd.getFriends();
     }
 
-
     @Api("列出所有群组")
     public static ContactList<Group> getGroups() {
         return systemd.getGroups();
     }
-
 
     @Api("根据ID获取陌生人")
     public static Stranger getStranger(long id) {
         return systemd.getStranger(id);
     }
 
-
     @Api("根据ID获取陌生人")
     public static Stranger getStrangerOrFail(long id) {
         return systemd.getStrangerOrFail(id);
     }
-
 
     @Api("根据ID获取好友")
     public static Friend getFriend(long id) {
         return systemd.getFriend(id);
     }
 
-
     @Api("根据ID获取好友")
     public static Friend getFriendOrFail(long id) {
         return systemd.getFriendOrFail(id);
     }
-
 
     @Api("根据ID获取群组")
     public static Group getGroup(long id) {
         return systemd.getGroup(id);
     }
 
-
     @Api("根据ID获取群组")
     public static Group getGroupOrFail(long id) {
         return systemd.getGroupOrFail(id);
     }
-
 
     @Api("根据ID获取群组")
     public static Member getMemberOrFail(long group, long member) {
         return getGroupOrFail(group).getOrFail(member);
     }
 
-
     @Api("获取图片的URL")
     public static String getImageURL(Image image) {
         return systemd.getImageURL(image);
     }
-
 
     @Api("获取图片的URL")
     public static String getImageURL(FlashImage flashImage) {
         return getImageURL(flashImage.getImage());
     }
 
-
     // == Systemd仅转发原生方法 Driver负责二次封装
-
 
     private static void sendContactMessage(Contact contact, Message message) {
         systemd.sendMessage(contact, message);
     }
 
-
     // ====
-
 
     @Api("发送私聊消息")
     public static void sendMessage(User user, Message message) {
@@ -737,9 +713,7 @@ public final class Driver {
         sendUserMessage(id, new PlainText(message));
     }
 
-
     // ====
-
 
     @Api("发送群组消息")
     public static void sendMessage(Group group, Message message) {
@@ -771,9 +745,7 @@ public final class Driver {
         sendGroupMessage(group, new PlainText(message));
     }
 
-
     // ====
-
 
     @Api("发送群组消息")
     public static void sendAtMessage(Group group, Member member, Message message) {
@@ -809,6 +781,4 @@ public final class Driver {
         sendAtMessage(groupOrFail, memberOrFail, new PlainText(message));
     }
 
-
 }
-

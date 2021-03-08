@@ -34,4 +34,9 @@ public class DemoRunner extends EventHandlerRunner {
     public void shut() {
         System.out.println("关闭" + this.getClass().getName());
     }
+
+    public void demo() {
+
+    }
+
 }

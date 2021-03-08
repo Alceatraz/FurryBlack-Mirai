@@ -1035,7 +1035,7 @@ public final class Systemd {
 
             String content = event.getMessage().contentToString();
 
-            if (isCommand(content)) {
+            if (this.isCommand(content)) {
 
                 Command command = new Command(content.substring(1));
 
@@ -1095,7 +1095,7 @@ public final class Systemd {
 
             String content = event.getMessage().contentToString();
 
-            if (isCommand(content)) {
+            if (this.isCommand(content)) {
                 Command command = new Command(content.substring(1));
                 switch (command.getCommandName()) {
                     case "?":
@@ -1315,18 +1315,18 @@ public final class Systemd {
     }
 
     @Api("提交定时任务")
-    public ScheduledFuture<?> schedule(Runnable runnable , long delay , TimeUnit unit){
-        return SCHEDULERS_POOL.schedule(runnable,delay,unit);
+    public ScheduledFuture<?> schedule(Runnable runnable, long delay, TimeUnit unit) {
+        return SCHEDULERS_POOL.schedule(runnable, delay, unit);
     }
 
     @Api("提交定时任务")
-    public ScheduledFuture<?> scheduleAtFixedRate(Runnable runnable , long initialDelay , long period, TimeUnit unit){
-        return SCHEDULERS_POOL.scheduleAtFixedRate(runnable,initialDelay,period,unit);
+    public ScheduledFuture<?> scheduleAtFixedRate(Runnable runnable, long initialDelay, long period, TimeUnit unit) {
+        return SCHEDULERS_POOL.scheduleAtFixedRate(runnable, initialDelay, period, unit);
     }
 
     @Api("提交定时任务")
-    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable runnable , long initialDelay , long delay, TimeUnit unit){
-       return  SCHEDULERS_POOL.scheduleWithFixedDelay(runnable,initialDelay,delay,unit);
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable runnable, long initialDelay, long delay, TimeUnit unit) {
+        return SCHEDULERS_POOL.scheduleWithFixedDelay(runnable, initialDelay, delay, unit);
     }
 
     // =========================================================================

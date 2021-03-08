@@ -2,6 +2,7 @@ package studio.blacktech.furryblackplus.demo;
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
+import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.core.annotation.Monitor;
 import studio.blacktech.furryblackplus.core.interfaces.EventHandlerMonitor;
 
@@ -25,6 +26,8 @@ public class DemoMonitor extends EventHandlerMonitor {
     @Override
     public void init() {
         System.out.println("加载" + this.getClass().getName());
+        DemoRunner demoRunner = Driver.getPlugin(DemoRunner.class);
+        demoRunner.demo();
     }
 
     @Override
