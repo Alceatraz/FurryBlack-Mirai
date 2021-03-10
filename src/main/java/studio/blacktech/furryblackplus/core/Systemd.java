@@ -28,7 +28,6 @@ import studio.blacktech.furryblackplus.core.annotation.Executor;
 import studio.blacktech.furryblackplus.core.annotation.Filter;
 import studio.blacktech.furryblackplus.core.annotation.Monitor;
 import studio.blacktech.furryblackplus.core.annotation.Runner;
-import studio.blacktech.furryblackplus.core.bridge.MiraiBridge;
 import studio.blacktech.furryblackplus.core.exception.BotException;
 import studio.blacktech.furryblackplus.core.exception.initlization.FirstBootException;
 import studio.blacktech.furryblackplus.core.exception.initlization.InitException;
@@ -272,7 +271,7 @@ public final class Systemd {
 
         String prefix = config.getProperty(CONF_BOT_COMMAND_PREFIX);
 
-        if (prefix == null || prefix.equals("") || prefix.matches("\\s")) {
+        if (prefix == null || prefix.isEmpty() || prefix.isBlank()) {
 
             logger.warning("指定的命令前缀不可用 将自动设置为默认值: /");
 
@@ -582,7 +581,6 @@ public final class Systemd {
 
         configurationBuilder.addScanners(new SubTypesScanner());
         Reflections reflections = new Reflections(configurationBuilder);
-
 
         // ==========================================================================================================================
         // 分析扫描结果
@@ -940,6 +938,35 @@ public final class Systemd {
         // ==========================================================================================================================
         // 关闭模块
 
+        logger.hint("关闭执行器");
+        for (Map.Entry<String, EventHandlerExecutor> entry : EVENT_EXECUTOR.entrySet()) {
+            try {
+                entry.getValue().shut();
+                logger.info("关闭执行器成功 " + entry.getKey() + " -> " + entry.getValue().getClass().getName());
+            } catch (Exception exception) {
+                logger.error("关闭执行器失败 " + entry.getValue().getClass().getName(), exception);
+            }
+        }
+
+        logger.hint("关闭过滤器");
+        for (Map.Entry<String, EventHandlerFilter> entry : EVENT_FILTER.entrySet()) {
+            try {
+                entry.getValue().shut();
+                logger.info("关闭过滤器成功 " + entry.getKey() + " -> " + entry.getValue().getClass().getName());
+            } catch (Exception exception) {
+                logger.error("关闭过滤器失败 " + entry.getValue().getClass().getName(), exception);
+            }
+        }
+
+        logger.hint("关闭监听器");
+        for (Map.Entry<String, EventHandlerMonitor> entry : EVENT_MONITOR.entrySet()) {
+            try {
+                entry.getValue().shut();
+                logger.info("关闭监听器成功 " + entry.getKey() + " -> " + entry.getValue().getClass().getName());
+            } catch (Exception exception) {
+                logger.error("关闭定时器失败 " + entry.getValue().getClass().getName(), exception);
+            }
+        }
 
         logger.hint("关闭定时器");
         for (Map.Entry<String, EventHandlerRunner> entry : EVENT_RUNNER.entrySet()) {
@@ -950,7 +977,6 @@ public final class Systemd {
                 logger.error("关闭定时器失败 " + entry.getValue().getClass().getName(), exception);
             }
         }
-
 
         logger.hint("关闭监听器工作线程");
         try {
@@ -978,36 +1004,6 @@ public final class Systemd {
         } catch (InterruptedException exception) {
             logger.error("线程池关闭异常 强制关闭", exception);
             SCHEDULERS_POOL.shutdownNow();
-        }
-
-        logger.hint("关闭监听器");
-        for (Map.Entry<String, EventHandlerMonitor> entry : EVENT_MONITOR.entrySet()) {
-            try {
-                entry.getValue().shut();
-                logger.info("关闭监听器成功 " + entry.getKey() + " -> " + entry.getValue().getClass().getName());
-            } catch (Exception exception) {
-                logger.error("关闭定时器失败 " + entry.getValue().getClass().getName(), exception);
-            }
-        }
-
-        logger.hint("关闭过滤器");
-        for (Map.Entry<String, EventHandlerFilter> entry : EVENT_FILTER.entrySet()) {
-            try {
-                entry.getValue().shut();
-                logger.info("关闭过滤器成功 " + entry.getKey() + " -> " + entry.getValue().getClass().getName());
-            } catch (Exception exception) {
-                logger.error("关闭过滤器失败 " + entry.getValue().getClass().getName(), exception);
-            }
-        }
-
-        logger.hint("关闭执行器");
-        for (Map.Entry<String, EventHandlerExecutor> entry : EVENT_EXECUTOR.entrySet()) {
-            try {
-                entry.getValue().shut();
-                logger.info("关闭执行器成功 " + entry.getKey() + " -> " + entry.getValue().getClass().getName());
-            } catch (Exception exception) {
-                logger.error("关闭执行器失败 " + entry.getValue().getClass().getName(), exception);
-            }
         }
 
     }
@@ -1291,9 +1287,10 @@ public final class Systemd {
 
     @Api("获取模块实例")
     @SuppressWarnings("unchecked")
-    public <T extends AbstractEventHandler> T getPlugin(Class<T> clazz) {
-        for (AbstractEventHandler value : MODULES.values()) if (clazz.isInstance(value)) return (T) value;
-        throw new IllegalArgumentException("不存在此模块");
+    public <T extends EventHandlerRunner> T getRunner(Class<T> clazz) {
+        List<EventHandlerRunner> collect = EVENT_RUNNER.values().stream().filter(clazz::isInstance).collect(Collectors.toUnmodifiableList());
+        if (collect.size() == 1) return (T) collect.get(0);
+        throw new IllegalArgumentException("No such runner exist");
     }
 
 
@@ -1306,12 +1303,12 @@ public final class Systemd {
 
     @Api("以Mirai阻塞")
     public void joinBot() {
-        MiraiBridge.join(bot);
+        bot.join();
     }
 
     @Api("关闭Bot")
     public void shutBot() {
-        MiraiBridge.shut(bot);
+        bot.close();
     }
 
     @Api("提交定时任务")

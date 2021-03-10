@@ -3,16 +3,15 @@ package studio.blacktech.furryblackplus.core.interfaces;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import studio.blacktech.furryblackplus.core.annotation.Api;
-import studio.blacktech.furryblackplus.demo.DemoFilter;
 
 
-@Api(value = "具体使用方法请见示例", see = DemoFilter.class)
+@Api("过滤器父类")
 public abstract class EventHandlerFilter extends AbstractEventHandler {
 
     public final FilterInfo INFO;
 
     public EventHandlerFilter(FilterInfo info) {
-        super(info);
+        super(info.ARTIFICIAL);
         this.INFO = info;
     }
 
@@ -22,7 +21,7 @@ public abstract class EventHandlerFilter extends AbstractEventHandler {
     @Api("生命周期 过滤群聊消息")
     public abstract boolean handleGroupMessage(GroupMessageEvent message);
 
-    public static class FilterInfo extends ModuleInfo {
+    public final static class FilterInfo extends ModuleInfo {
         public FilterInfo(String name, String artificial, String description, String[] privacy) {
             super(name, artificial, description, privacy);
         }

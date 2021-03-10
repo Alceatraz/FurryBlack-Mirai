@@ -2,30 +2,23 @@ package studio.blacktech.furryblackplus.demo;
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
-import studio.blacktech.furryblackplus.core.annotation.Executor;
-import studio.blacktech.furryblackplus.core.interfaces.EventHandlerExecutor;
-import studio.blacktech.furryblackplus.core.utilties.Command;
+import studio.blacktech.furryblackplus.core.annotation.Filter;
+import studio.blacktech.furryblackplus.core.interfaces.EventHandlerFilter;
 
 
-@Executor(
-    artificial = "Executor_Demo",
+@Filter(
+    artificial = "Filter_Demo",
     name = "示例",
-    description = "示例执行器",
+    description = "示例过滤器",
     privacy = {
         "无"
-    },
-    command = "demo",
-    usage = {
-        "/demo - 示例执行器"
     }
 )
-public class DemoExecutor extends EventHandlerExecutor {
+public class DemoFilter extends EventHandlerFilter {
 
-
-    public DemoExecutor(ExecutorInfo INFO) {
+    public DemoFilter(FilterInfo INFO) {
         super(INFO);
     }
-
 
     @Override
     public void init() {
@@ -43,13 +36,15 @@ public class DemoExecutor extends EventHandlerExecutor {
     }
 
     @Override
-    public void handleUsersMessage(UserMessageEvent event, Command command) {
+    public boolean handleUsersMessage(UserMessageEvent event) {
         System.out.println("消息" + this.getClass().getName());
+        return false;
     }
 
     @Override
-    public void handleGroupMessage(GroupMessageEvent event, Command command) {
+    public boolean handleGroupMessage(GroupMessageEvent event) {
         System.out.println("消息" + this.getClass().getName());
+        return false;
     }
 
 

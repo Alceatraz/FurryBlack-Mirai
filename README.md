@@ -8,48 +8,52 @@
 
 - 白熊机器人：指BTS为FurryBlack赋予的人物形象；
 - FurryBlack框架：指FurryBlack开源框架，分为JCQ和Mirai版；
+- FurryBlack扩展：指基于FurryBlack框架编写的插件，
 - FurryBlack机器人：指由BTS运营的基于FurryBlack框架的机器人。
 
 ## LICENSE
 
-- 本项目使用BTS协议开源，请认真阅读并理解LICENSE；
-- 你除了查看代码外的一切行为比如明确注明本框架的存在，不得扭曲、隐藏、弱化FurryBlack和Mirai的本质；
-- 作为使用、运营着者：你不被允许修改任何代码，在你的运行实体中，Info功能必须表明技术来自于FurryBlack和Mirai；
-- 作为开发、二次开发者：你被允许修改代码，必须在README中明确声明：  
-  `https://github.com/mamoe/mirai`  
-  `https://github.com/Alceatraz/FurryBlack-Mirai`
-  且Info功能必须明确表明由FurryBlack二次开发，以及Mirai的存在；
-- 白熊机器人和FurryBlack包含著作权，你不得使用，但：
-- 在你的使用、运营、开发、二次开发的过程中，允许以CC4.0 BY NC ND 协议使用，且仅可用于介绍FurryBlack
-
-## 关于PR
-
-FurryBlack和全功能框架的最大区别在于，极度强化文本处理，所以发展方向并不符合大众口味，建议Fork。
-
-## 软件架构
-
-项目继承FurryBlackJCQ的设计，但是Mirai是一个库框架而非宿主，所以FurryBlackPlus有main方法。
-
-- 暂时不考虑用kotlin写
-- Java更新到11
-- Mirai的Event比CoolQ多，而且是类似BukkitAPI的根据参数选择性注册，Mirai自身包含线程模型回调注册的Handler，而非被动库
-- Mirai的Message是工具式的而非String，但是FurryBlack极度强化文本处理，所以使用了toContentString按照一半文本处理
-- 随着QQ改版，消息事件变成了私聊和群组，对应的事件是UserMessageEvent和GroupMessageEvent，所以插件列表设计改为了USERS和GROUP
-- Mirai的封装比Jcq高级，优雅的继承方便的实现了统一处理事件（即? extends XXX)
-- 强化后的插件注册机制，使用注解携带信息，而不是JCQ版的笨拙final String
-- 全面使用面向对象，CoolQ是32位的，Mirai则可以64位，而且完全自行编写完全不需要考虑任何性能与内存问题
-- 全面使用parallelStream，提升过滤器效率
-- Mirai可以自行编写所有代码，不再需要/admin功能，所有管理命令都可从shell执行
-- 抛弃了所有统计功能
+- 见LICENSE
 
 ## 如何开发
 
-- `ComponentHandlerFilter`注解用于过滤器，类需要继承自`EventHandlerFilter`
-- `ComponentHandlerExecutor`注解用于执行器，类需要继承自`EventHandlerExecutor`
-- 除非你知道你在干什么，不然绝对不要注册Mirai的EventHandler
-- 发送消息务必使用Driver中的方法，而不是直接调用Contract对象，实现统一管理
+框架的功能扩充使用了插件系统，用户添加的功能为模块，有四种模块类型，框架使用扫描和反射的方法统一进行生命周期管理，`studio.blacktech.furryblackplus.demo`包含示例模块代码，模块必须继承对应的模块类并填写注解。包扫描是以子类为基准进行的扫描而非注解，设计目的是防止出现无实际代码的模块。
+
+### 模块用途
+
+- 监视器：任何消息都会触发，在线程池中执行；
+- 过滤器：过滤用户消息，可以阻止某条消息；
+- 执行器：功能的核心，用于处理用户的命令；
+- 定时器：通用模块，用于承载基础业务；
+
+### 启停顺序
+
+- 加载顺序为：机器人初始化，定时器，监听器，过滤器，执行器；
+- 启动顺序为：机器人登录，定时器，监听器，过滤器，执行器，开始接收消息；
+- 关闭顺序为：机器人登出，关闭消息接收，执行器，过滤器，监听器，定时器；
+
+### 线程模型
+
+- 主线程：启动完成后，以Mirai.bot阻塞，无限等待；
+- 控制台：控制台为独立线程；
+- 监听器池：所有的监听器执行，均由线程池执行`ThreadPoolExecutor`；
+- 计划任务：框架提供了统一的定时任务线程池`ScheduledExecutorService`；
+
+### 实例获取
+
+框架禁止模块互相获取实例，强约束以保证模块的代码质量。但有例外：定时器Runner的设计目的是为了提供基础公代码，比如连接数据库、提供API接口等，则涉及到模块之间的调用。想要从IoC容器中获取模块实例必须使用class获取，禁止名称获取，其设计目的是禁止获取无代码的实例，保护其他模块不被篡改。 `Driver.getRunner(DemoRunner.class)`如果调用的代码不是与`DemoRunner.class`
+一同编译，即使是同样的类名，也无法获取相同的class。
 
 ## CHANGELOG
+
+### 0.5.0
+
+- 移除Kotlin
+- 调整项目结构
+- 只允许获取Runner模块
+- 提取Demo到test
+- 更新README文档
+- 提取LICENSE
 
 ### 0.4.21
 

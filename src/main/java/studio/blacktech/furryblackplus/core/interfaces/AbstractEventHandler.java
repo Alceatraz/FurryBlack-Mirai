@@ -25,8 +25,6 @@ import java.util.stream.Collectors;
 @Api("基础模块类")
 public abstract class AbstractEventHandler {
 
-    public final ModuleInfo INFO;
-
     @Api("模块内建的插件目录对象") protected final File FOLDER_ROOT;
     @Api("模块内建的配置目录对象") protected final File FOLDER_CONF;
     @Api("模块内建的数据目录对象") protected final File FOLDER_DATA;
@@ -44,11 +42,10 @@ public abstract class AbstractEventHandler {
     @Api("模块标志位表示是否初始化过配置文件") protected boolean NEW_CONFIG = false;
 
 
-    public AbstractEventHandler(ModuleInfo INFO) {
-        this.INFO = INFO;
+    public AbstractEventHandler(String artificial) {
         this.logger = new LoggerX(this.getClass());
         this.CONFIG = new Properties();
-        this.FOLDER_ROOT = Paths.get(Driver.getModuleFolder(), this.INFO.ARTIFICIAL).toFile();
+        this.FOLDER_ROOT = Paths.get(Driver.getModuleFolder(), artificial).toFile();
         this.FOLDER_CONF = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "conf").toFile();
         this.FOLDER_DATA = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "data").toFile();
         this.FOLDER_LOGS = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "logs").toFile();
@@ -67,34 +64,34 @@ public abstract class AbstractEventHandler {
 
 
     @Api("初始化插件总目录")
-    public void initRootFolder() {
+    protected void initRootFolder() {
         initFolder(FOLDER_ROOT);
         INIT_ROOT = true;
     }
 
     @Api("初始化插件配置文件目录")
-    public void initConfFolder() {
+    protected void initConfFolder() {
         if (!INIT_ROOT) initRootFolder();
         initFolder(FOLDER_CONF);
         INIT_CONF = true;
     }
 
     @Api("初始化插件数据目录")
-    public void initDataFolder() {
+    protected void initDataFolder() {
         if (!INIT_ROOT) initRootFolder();
         initFolder(FOLDER_DATA);
         INIT_DATA = true;
     }
 
     @Api("初始化插件日志目录")
-    public void initLogsFolder() {
+    protected void initLogsFolder() {
         if (!INIT_ROOT) initRootFolder();
         initFolder(FOLDER_LOGS);
         INIT_LOGS = true;
     }
 
     @Api("初始化插件配置下的目录")
-    public File initConfFolder(String folderName) {
+    protected File initConfFolder(String folderName) {
         if (!INIT_CONF) initConfFolder();
         File file = initFolder(Paths.get(FOLDER_CONF.getAbsolutePath(), folderName).toFile());
         INIT_CONF = true;
@@ -102,7 +99,7 @@ public abstract class AbstractEventHandler {
     }
 
     @Api("初始化插件数据下的目录")
-    public File initDataFolder(String folderName) {
+    protected File initDataFolder(String folderName) {
         if (!INIT_DATA) initDataFolder();
         File file = initFolder(Paths.get(FOLDER_DATA.getAbsolutePath(), folderName).toFile());
         INIT_DATA = true;
@@ -110,7 +107,7 @@ public abstract class AbstractEventHandler {
     }
 
     @Api("初始化插件数据下的目录")
-    public File initLogsFolder(String folderName) {
+    protected File initLogsFolder(String folderName) {
         if (!INIT_LOGS) initLogsFolder();
         File file = initFolder(Paths.get(FOLDER_LOGS.getAbsolutePath(), folderName).toFile());
         INIT_LOGS = true;
@@ -118,25 +115,25 @@ public abstract class AbstractEventHandler {
     }
 
     @Api("初始化配置文件夹下的文件")
-    public File initConfFile(String fileName) {
+    protected File initConfFile(String fileName) {
         if (!INIT_CONF) initConfFolder();
         return initFile(Paths.get(FOLDER_CONF.getAbsolutePath(), fileName));
     }
 
     @Api("初始化数据文件夹下的文件")
-    public File initDataFile(String fileName) {
+    protected File initDataFile(String fileName) {
         if (!INIT_DATA) initDataFolder();
         return initFile(Paths.get(FOLDER_DATA.getAbsolutePath(), fileName));
     }
 
     @Api("初始化日志文件夹下的文件")
-    public File initLogsFile(String fileName) {
+    protected File initLogsFile(String fileName) {
         if (!INIT_LOGS) initLogsFolder();
         return initFile(Paths.get(FOLDER_LOGS.getAbsolutePath(), fileName));
     }
 
     @Api("初始化默认配置文件")
-    public void initConfiguration() {
+    protected void initConfiguration() {
         if (!FILE_CONFIG.exists()) {
             logger.seek("配置文件不存在 " + FILE_CONFIG.getAbsolutePath());
             try {
@@ -248,7 +245,8 @@ public abstract class AbstractEventHandler {
         return file;
     }
 
-    public static class ModuleInfo {
+
+    protected static class ModuleInfo {
 
         public final String NAME;
         public final String ARTIFICIAL;

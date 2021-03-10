@@ -21,7 +21,7 @@ import org.jline.widget.AutopairWidgets;
 import studio.blacktech.furryblackplus.core.Systemd;
 import studio.blacktech.furryblackplus.core.annotation.Api;
 import studio.blacktech.furryblackplus.core.exception.initlization.InitException;
-import studio.blacktech.furryblackplus.core.interfaces.AbstractEventHandler;
+import studio.blacktech.furryblackplus.core.interfaces.EventHandlerRunner;
 import studio.blacktech.furryblackplus.core.utilties.Command;
 import studio.blacktech.furryblackplus.core.utilties.DateTool;
 import studio.blacktech.furryblackplus.core.utilties.LoggerX;
@@ -36,6 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -55,8 +56,12 @@ import java.util.stream.Collectors;
 public final class Driver {
 
     static {
+
         System.setProperty("mirai.no-desktop", "");
+
+        Locale.setDefault(Locale.SIMPLIFIED_CHINESE);
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+
     }
 
     // ==========================================================================================================================================================
@@ -65,7 +70,7 @@ public final class Driver {
     //
     // ==========================================================================================================================================================
 
-    private final static String APP_VERSION = "0.4.21";
+    private final static String APP_VERSION = "0.5.0";
 
     private final static long BOOT_TIME = System.currentTimeMillis();
 
@@ -557,13 +562,8 @@ public final class Driver {
     }
 
     @Api("获取模块实例")
-    public static <T extends AbstractEventHandler> T getPlugin(Class<T> clazz) {
-        return systemd.getPlugin(clazz);
-    }
-
-    @Api("获取模块实例")
-    public static <T extends AbstractEventHandler> T getHandler(Class<T> clazz) {
-        return getPlugin(clazz);
+    public static <T extends EventHandlerRunner> T getRunner(Class<T> clazz) {
+        return systemd.getRunner(clazz);
     }
 
     @Api("提交定时任务")

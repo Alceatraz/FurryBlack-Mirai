@@ -2,29 +2,30 @@ package studio.blacktech.furryblackplus.demo;
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
-import studio.blacktech.furryblackplus.core.annotation.Filter;
-import studio.blacktech.furryblackplus.core.interfaces.EventHandlerFilter;
+import studio.blacktech.furryblackplus.Driver;
+import studio.blacktech.furryblackplus.core.annotation.Monitor;
+import studio.blacktech.furryblackplus.core.interfaces.EventHandlerMonitor;
 
 
-@Filter(
-    artificial = "Filter_Demo",
+@Monitor(
+    artificial = "Monitor_Demo",
     name = "示例",
-    description = "示例过滤器",
+    description = "示例监视器",
     privacy = {
         "无"
     }
 )
-public class DemoFilter extends EventHandlerFilter {
+public class DemoMonitor extends EventHandlerMonitor {
 
-
-    public DemoFilter(FilterInfo INFO) {
+    public DemoMonitor(MonitorInfo INFO) {
         super(INFO);
     }
-
 
     @Override
     public void init() {
         System.out.println("加载" + this.getClass().getName());
+        DemoRunner demoRunner = Driver.getRunner(DemoRunner.class);
+        demoRunner.demo();
     }
 
     @Override
@@ -38,16 +39,13 @@ public class DemoFilter extends EventHandlerFilter {
     }
 
     @Override
-    public boolean handleUsersMessage(UserMessageEvent event) {
+    public void handleUsersMessage(UserMessageEvent event) {
         System.out.println("消息" + this.getClass().getName());
-        return false;
     }
 
     @Override
-    public boolean handleGroupMessage(GroupMessageEvent event) {
+    public void handleGroupMessage(GroupMessageEvent event) {
         System.out.println("消息" + this.getClass().getName());
-        return false;
     }
-
 
 }

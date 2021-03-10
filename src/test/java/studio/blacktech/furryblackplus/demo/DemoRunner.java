@@ -14,11 +14,9 @@ import studio.blacktech.furryblackplus.core.interfaces.EventHandlerRunner;
 )
 public class DemoRunner extends EventHandlerRunner {
 
-
     public DemoRunner(RunnerInfo INFO) {
         super(INFO);
     }
-
 
     @Override
     public void init() {

@@ -1,8 +1,6 @@
 package studio.blacktech.furryblackplus.core.annotation;
 
 
-import studio.blacktech.furryblackplus.demo.DemoFilter;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,7 +11,6 @@ import java.lang.annotation.Target;
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Api(value = "具体使用方法请见示例", see = DemoFilter.class)
 public @interface Filter {
 
     /**
