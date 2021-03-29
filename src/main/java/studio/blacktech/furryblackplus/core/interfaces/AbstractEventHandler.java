@@ -31,7 +31,7 @@ public abstract class AbstractEventHandler {
     @Api("模块内建的日志目录对象") protected final File FOLDER_LOGS;
     @Api("模块内建的配置文件对象") protected final File FILE_CONFIG;
 
-    @Api("模块内建的LoggerX实例") protected LoggerX logger;
+    @Api("模块内建的LoggerX实例") protected final LoggerX logger;
 
     @Api("模块内建的config.properties实例") protected final Properties CONFIG;
 

@@ -6,6 +6,7 @@ import net.mamoe.mirai.contact.ContactList;
 import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
+import net.mamoe.mirai.contact.NormalMember;
 import net.mamoe.mirai.contact.Stranger;
 import net.mamoe.mirai.contact.User;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
@@ -70,7 +71,7 @@ public final class Driver {
     //
     // ==========================================================================================================================================================
 
-    private final static String APP_VERSION = "0.5.0";
+    private final static String APP_VERSION = "0.5.1";
 
     private final static long BOOT_TIME = System.currentTimeMillis();
 
@@ -658,8 +659,8 @@ public final class Driver {
         return systemd.getGroupOrFail(id);
     }
 
-    @Api("根据ID获取群组")
-    public static Member getMemberOrFail(long group, long member) {
+    @Api("根据ID获取成员")
+    public static NormalMember getMemberOrFail(long group, long member) {
         return getGroupOrFail(group).getOrFail(member);
     }
 

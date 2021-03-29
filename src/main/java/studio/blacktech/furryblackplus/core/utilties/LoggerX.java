@@ -24,6 +24,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 
+@SuppressWarnings("unused")
+
 @Api("日志工具 为了兼容Mirai继承了PlatformLogger 同时添加了新的级别 seek hint")
 public final class LoggerX extends PlatformLogger {
 

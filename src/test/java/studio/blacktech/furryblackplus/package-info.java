@@ -1,2 +1,1 @@
-
 package studio.blacktech.furryblackplus;
