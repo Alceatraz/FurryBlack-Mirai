@@ -1259,9 +1259,8 @@ public final class Systemd {
     // ==========================================================================================================================================================
 
 
-    @Api
-    public List<String> listAllPlugin() {
-        return MODULES.keySet().stream().collect(Collectors.toUnmodifiableList());
+    public Set<String> listAllPlugin() {
+        return MODULES.keySet();
     }
 
 
