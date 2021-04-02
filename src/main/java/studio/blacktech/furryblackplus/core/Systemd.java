@@ -257,8 +257,8 @@ public final class Systemd {
 
         Properties config = new Properties();
 
-        try {
-            config.load(new FileInputStream(FILE_CONFIG));
+        try (FileInputStream inStream = new FileInputStream(FILE_CONFIG)) {
+            config.load(inStream);
         } catch (IOException exception) {
             logger.error("核心配置文件读取错误 即将关闭 " + FILE_CONFIG.getAbsolutePath());
             throw new InitException("核心配置文件读取错误 " + FILE_CONFIG.getAbsolutePath(), exception);
@@ -512,8 +512,8 @@ public final class Systemd {
         // 传入日志
 
 
-        configuration.setBotLoggerSupplier(bot -> new LoggerX("MiraiBot"));
-        configuration.setNetworkLoggerSupplier(bot -> new LoggerX("MiraiNet"));
+        configuration.setBotLoggerSupplier(botInstance -> new LoggerX("MiraiBot"));
+        configuration.setNetworkLoggerSupplier(botInstance -> new LoggerX("MiraiNet"));
 
 
         // ==========================================================================================================================
@@ -819,9 +819,6 @@ public final class Systemd {
         GlobalEventChannel.INSTANCE.subscribeAlways(BotInvitedJoinGroupRequestEvent.class, this::handleInvitedRequest);
 
 
-        //
-
-
     }
 
 
@@ -1039,8 +1036,6 @@ public final class Systemd {
 
                     case "?":
                     case "help":
-                        // 🚧 路障 施工中
-                        // event.getSender().sendMessage("\uD83D\uDEA7 暂不可用");
                         if (command.hasCommandBody()) {
                             if (EVENT_EXECUTOR_USERS.containsKey(command.getParameterSegment(0))) {
                                 EventHandlerExecutor executor = EVENT_EXECUTOR_USERS.get(command.getParameterSegment(0));

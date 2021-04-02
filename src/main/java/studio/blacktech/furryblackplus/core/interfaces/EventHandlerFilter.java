@@ -10,7 +10,7 @@ public abstract class EventHandlerFilter extends AbstractEventHandler {
 
     public final FilterInfo INFO;
 
-    public EventHandlerFilter(FilterInfo info) {
+    protected EventHandlerFilter(FilterInfo info) {
         super(info.ARTIFICIAL);
         this.INFO = info;
     }

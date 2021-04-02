@@ -10,7 +10,7 @@ public abstract class EventHandlerMonitor extends AbstractEventHandler {
 
     public final MonitorInfo INFO;
 
-    public EventHandlerMonitor(MonitorInfo info) {
+    protected EventHandlerMonitor(MonitorInfo info) {
         super(info.ARTIFICIAL);
         this.INFO = info;
     }

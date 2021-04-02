@@ -315,7 +315,8 @@ public final class LoggerX extends PlatformLogger {
             writer.append(message);
             writer.append("\r\n");
             writer.flush();
-        } catch (IOException ignore) {
+        } catch (IOException exception) {
+            System.err.println("Writer log failed \n" + extractTrace(exception));
         }
     }
 

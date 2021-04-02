@@ -71,9 +71,9 @@ public final class Driver {
     //
     // ==========================================================================================================================================================
 
-    private final static String APP_VERSION = "0.5.2";
+    private static final String APP_VERSION = "0.5.3";
 
-    private final static long BOOT_TIME = System.currentTimeMillis();
+    private static final long BOOT_TIME = System.currentTimeMillis();
 
     private static boolean enable = false;
     private static boolean dryRun = false;
@@ -81,6 +81,8 @@ public final class Driver {
 
     private static boolean debug = false;
     private static boolean signal = true;
+
+    private static boolean drop = false;
 
     private static LoggerX logger;
     private static Systemd systemd;
@@ -161,9 +163,9 @@ public final class Driver {
 
             System.out.println("[FurryBlack][INIT]初始化目录");
 
-            if (!FOLDER_CONFIG.exists()) if (!FOLDER_CONFIG.mkdirs()) throw new InitException("无法创建文件夹 " + FOLDER_CONFIG.getAbsolutePath());
-            if (!FOLDER_MODULE.exists()) if (!FOLDER_MODULE.mkdirs()) throw new InitException("无法创建文件夹 " + FOLDER_MODULE.getAbsolutePath());
-            if (!FOLDER_LOGGER.exists()) if (!FOLDER_LOGGER.mkdirs()) throw new InitException("无法创建文件夹 " + FOLDER_LOGGER.getAbsolutePath());
+            if (!FOLDER_CONFIG.exists() && !FOLDER_CONFIG.mkdirs()) throw new InitException("无法创建文件夹 " + FOLDER_CONFIG.getAbsolutePath());
+            if (!FOLDER_MODULE.exists() && !FOLDER_MODULE.mkdirs()) throw new InitException("无法创建文件夹 " + FOLDER_MODULE.getAbsolutePath());
+            if (!FOLDER_LOGGER.exists() && !FOLDER_LOGGER.mkdirs()) throw new InitException("无法创建文件夹 " + FOLDER_LOGGER.getAbsolutePath());
 
             System.out.println("[FurryBlack][INIT]初始化检查");
 
@@ -231,7 +233,7 @@ public final class Driver {
 
         // =====================================================================
 
-        logger.hint("注册信号回调");
+        logger.hint("注册关闭信号回调");
 
         Thread mainThread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -244,9 +246,10 @@ public final class Driver {
             logger.hint("等待主线程");
             try {
                 mainThread.join();
-            } catch (InterruptedException exception) {
-                exception.printStackTrace();
+            } catch (InterruptedException ignoring) {
+                logger.error("关闭信号回调被打断", ignoring);
             }
+            logger.info("关闭信号回调结束");
         }));
 
         // =====================================================================
@@ -303,6 +306,9 @@ public final class Driver {
                 if (temp == null || temp.equals("")) continue;
                 Command command = new Command(temp);
                 switch (command.getCommandName()) {
+
+                    case "drop":
+                        drop = true;
 
                     case "stop":
                     case "quit":
@@ -540,6 +546,11 @@ public final class Driver {
     @Api("否是进入调试模式")
     public static boolean isDebug() {
         return debug;
+    }
+
+    @Api("是否进入抛弃模式")
+    public static boolean isDrop() {
+        return drop;
     }
 
     @Api("获取运行目录 - 不是插件私有目录")

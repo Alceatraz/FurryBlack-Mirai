@@ -4,7 +4,6 @@ package studio.blacktech.furryblackplus.core.utilties;
 import studio.blacktech.furryblackplus.core.annotation.Api;
 
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -12,6 +11,9 @@ import java.util.TimeZone;
 
 @Api("日期工具类")
 public final class DateTool {
+
+
+    private DateTool() { }
 
 
     @Api("格式化日期")

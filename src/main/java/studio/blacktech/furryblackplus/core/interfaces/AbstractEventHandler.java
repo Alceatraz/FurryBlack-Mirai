@@ -42,7 +42,7 @@ public abstract class AbstractEventHandler {
     @Api("模块标志位表示是否初始化过配置文件") protected boolean NEW_CONFIG = false;
 
 
-    public AbstractEventHandler(String artificial) {
+    protected AbstractEventHandler(String artificial) {
         this.logger = new LoggerX(this.getClass());
         this.CONFIG = new Properties();
         this.FOLDER_ROOT = Paths.get(Driver.getModuleFolder(), artificial).toFile();
@@ -147,8 +147,8 @@ public abstract class AbstractEventHandler {
 
     @Api("加载默认配置文件")
     protected void loadConfig() {
-        try {
-            CONFIG.load(new FileInputStream(FILE_CONFIG));
+        try (FileInputStream inStream = new FileInputStream(FILE_CONFIG)) {
+            CONFIG.load(inStream);
         } catch (IOException exception) {
             throw new IllegalArgumentException("加载配置错误", exception);
         }
@@ -161,8 +161,8 @@ public abstract class AbstractEventHandler {
 
     @Api("保存默认配置文件")
     protected void saveConfig(String comments) {
-        try {
-            CONFIG.store(new FileOutputStream(FILE_CONFIG), comments);
+        try (FileOutputStream outputStream = new FileOutputStream(FILE_CONFIG)) {
+            CONFIG.store(outputStream, comments);
         } catch (IOException exception) {
             throw new IllegalArgumentException("保存配置错误", exception);
         }

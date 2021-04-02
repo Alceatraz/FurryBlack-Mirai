@@ -93,7 +93,7 @@ public final class Command {
 
         // 对拆分后的命令分析 提取选项和开关
 
-        List<String> commandParameters = new LinkedList<>();
+        List<String> commandParameterList = new LinkedList<>();
 
         for (String slice : commandBodySlice) {
             if (slice.startsWith("--")) {
@@ -105,11 +105,11 @@ public final class Command {
                     commandOptions.put(slice, null); // --XXX 开关
                 }
             } else {
-                commandParameters.add(slice); // 提取所有其他内容为参数列表
+                commandParameterList.add(slice); // 提取所有其他内容为参数列表
             }
         }
 
-        this.commandParameters = commandParameters.toArray(new String[0]);
+        this.commandParameters = commandParameterList.toArray(new String[0]);
         this.commandParameterLength = this.commandParameters.length;
     }
 

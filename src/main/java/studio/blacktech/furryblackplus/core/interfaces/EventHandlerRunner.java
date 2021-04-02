@@ -9,7 +9,7 @@ public abstract class EventHandlerRunner extends AbstractEventHandler {
 
     public final RunnerInfo INFO;
 
-    public EventHandlerRunner(RunnerInfo info) {
+    protected EventHandlerRunner(RunnerInfo info) {
         super(info.ARTIFICIAL);
         this.INFO = info;
     }
