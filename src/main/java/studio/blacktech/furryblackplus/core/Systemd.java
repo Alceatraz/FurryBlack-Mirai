@@ -13,6 +13,8 @@ import net.mamoe.mirai.contact.User;
 import net.mamoe.mirai.event.GlobalEventChannel;
 import net.mamoe.mirai.event.events.BotInvitedJoinGroupRequestEvent;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.MemberJoinEvent;
+import net.mamoe.mirai.event.events.MemberLeaveEvent;
 import net.mamoe.mirai.event.events.NewFriendRequestEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import net.mamoe.mirai.message.data.Image;
@@ -815,9 +817,34 @@ public final class Systemd {
 
         GlobalEventChannel.INSTANCE.subscribeAlways(UserMessageEvent.class, this::handleUsersMessage);
         GlobalEventChannel.INSTANCE.subscribeAlways(GroupMessageEvent.class, this::handleGroupMessage);
-        GlobalEventChannel.INSTANCE.subscribeAlways(NewFriendRequestEvent.class, this::handleFriendRequest);
-        GlobalEventChannel.INSTANCE.subscribeAlways(BotInvitedJoinGroupRequestEvent.class, this::handleInvitedRequest);
 
+        GlobalEventChannel.INSTANCE.subscribeAlways(NewFriendRequestEvent.class, event -> {
+            logger.hint("BOT被添加好友 " + event.getFromNick() + "(" + event.getFromId() + ")");
+            event.accept();
+        });
+
+        GlobalEventChannel.INSTANCE.subscribeAlways(BotInvitedJoinGroupRequestEvent.class, event -> {
+            logger.hint("BOT被邀请入群 " + event.getGroupName() + "(" + event.getGroupId() + ") 邀请人 " + event.getInvitorNick() + "(" + event.getInvitorId() + ")");
+            event.accept();
+        });
+
+        GlobalEventChannel.INSTANCE.subscribeAlways(MemberJoinEvent.class, event -> {
+            String user = event.getUser().getNick() + "(" + event.getUser().getId() + ")";
+            if (event instanceof MemberJoinEvent.Active) {
+                logger.hint("用户申请加群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
+            } else if (event instanceof MemberJoinEvent.Invite) {
+                logger.hint("用户受邀进群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
+            }
+        });
+
+        GlobalEventChannel.INSTANCE.subscribeAlways(MemberLeaveEvent.class, event -> {
+            String user = event.getUser().getNick() + "(" + event.getUser().getId() + ")";
+            if (event instanceof MemberLeaveEvent.Quit) {
+                logger.hint("用户主动退群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
+            } else if (event instanceof MemberLeaveEvent.Kick) {
+                logger.hint("用户被踢出群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
+            }
+        });
 
     }
 
@@ -1148,18 +1175,6 @@ public final class Systemd {
     }
 
 
-    private void handleFriendRequest(NewFriendRequestEvent event) {
-        logger.hint("BOT被添加好友 " + event.getFromNick() + "(" + event.getFromId() + ")");
-        event.accept();
-    }
-
-
-    private void handleInvitedRequest(BotInvitedJoinGroupRequestEvent event) {
-        logger.hint("BOT被邀请入群 " + event.getGroupName() + "(" + event.getGroupId() + ") 邀请人 " + event.getInvitorNick() + "(" + event.getInvitorId() + ")");
-        event.accept();
-    }
-
-
     // ==========================================================================================================================================================
     //
     // 工具
@@ -1254,12 +1269,13 @@ public final class Systemd {
     // ==========================================================================================================================================================
 
 
+    @Api("列出模块")
     public Set<String> listAllPlugin() {
         return MODULES.keySet();
     }
 
 
-    @Api
+    @Api("按名称重载模块")
     public void reloadPlugin(String name) {
         if (!MODULES.containsKey(name)) {
             logger.warning("不存在此模块 -> " + name);
