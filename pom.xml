@@ -9,12 +9,12 @@
 
     <name>FurryBlack-Mirai-Core</name>
 
-    <version>0.5.5-M</version>
+    <version>0.5.6</version>
 
     <packaging>jar</packaging>
 
     <properties>
-        <mirai.version>2.6-M2</mirai.version>
+        <mirai.version>2.6.0</mirai.version>
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.source>11</maven.compiler.source>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -23,24 +23,12 @@
 
     <repositories>
         <repository>
-            <id>jcenter</id>
-            <url>https://jcenter.bintray.com/</url>
-        </repository>
-        <repository>
             <id>central</id>
             <url>https://repo1.maven.org/maven2/</url>
         </repository>
         <repository>
-            <id>kotlin-x</id>
-            <url>https://kotlin.bintray.com/kotlinx</url>
-        </repository>
-        <repository>
-            <id>kotlin-eap</id>
-            <url>https://dl.bintray.com/kotlin/kotlin-eap</url>
-        </repository>
-        <repository>
-            <id>google</id>
-            <url>https://maven.google.com</url>
+            <id>jcenter</id>
+            <url>https://jcenter.bintray.com/</url>
         </repository>
     </repositories>
 
@@ -51,7 +39,6 @@
             <groupId>net.mamoe</groupId>
             <artifactId>mirai-core-api-jvm</artifactId>
             <version>${mirai.version}</version>
-            <scope>compile</scope>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/net.mamoe/mirai-core-jvm -->
@@ -59,7 +46,6 @@
             <groupId>net.mamoe</groupId>
             <artifactId>mirai-core-jvm</artifactId>
             <version>${mirai.version}</version>
-            <scope>runtime</scope>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.jline/jline -->
@@ -105,6 +91,19 @@
                             <overWriteIfNewer>true</overWriteIfNewer>
                             <overWriteReleases>true</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
+                            <excludeArtifactIds>
+                                apiguardian-api,
+                                junit-jupiter-api,
+                                junit-jupiter-engine,
+                                junit-platform-commons,
+                                junit-platform-engine,
+                                kotlin-test,
+                                kotlin-test-annotations-common,
+                                kotlin-test-common,
+                                kotlin-test-junit5,
+                                opentest4j,
+                                slf4j-api
+                            </excludeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
