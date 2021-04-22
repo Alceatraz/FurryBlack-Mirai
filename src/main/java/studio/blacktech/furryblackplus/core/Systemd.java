@@ -1208,15 +1208,16 @@ public final class Systemd {
 
 
     private File initFile(File file) throws InitException {
-        if (!file.exists()) {
-            try {
-                //noinspection ResultOfMethodCallIgnored
-                file.createNewFile();
+        try {
+            if (file.createNewFile()) {
                 logger.hint("创建新的文件 " + file.getAbsolutePath());
-            } catch (IOException exception) {
-                throw new InitException("文件创建失败 " + file.getAbsolutePath(), exception);
+            } else {
+                logger.hint("文件已经存在 " + file.getAbsolutePath());
             }
+        } catch (IOException exception) {
+            throw new InitException("文件创建失败 " + file.getAbsolutePath(), exception);
         }
+
         if (!file.exists()) throw new InitException("文件不存在 " + file.getAbsolutePath());
         if (!file.canRead()) throw new InitException("文件无权读取 " + file.getAbsolutePath());
         return file;

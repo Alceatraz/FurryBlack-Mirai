@@ -139,7 +139,7 @@ public abstract class AbstractEventHandler {
             try {
                 initFile(FILE_CONFIG);
             } catch (Exception exception) {
-                throw new IllegalArgumentException("初始化配置错误", exception);
+                throw new RuntimeException("初始化配置错误", exception);
             }
             NEW_CONFIG = true;
         }
@@ -150,7 +150,7 @@ public abstract class AbstractEventHandler {
         try (FileInputStream inStream = new FileInputStream(FILE_CONFIG)) {
             CONFIG.load(inStream);
         } catch (IOException exception) {
-            throw new IllegalArgumentException("加载配置错误", exception);
+            throw new RuntimeException("加载配置错误", exception);
         }
     }
 
@@ -164,7 +164,7 @@ public abstract class AbstractEventHandler {
         try (FileOutputStream outputStream = new FileOutputStream(FILE_CONFIG)) {
             CONFIG.store(outputStream, comments);
         } catch (IOException exception) {
-            throw new IllegalArgumentException("保存配置错误", exception);
+            throw new RuntimeException("保存配置错误", exception);
         }
     }
 
@@ -190,18 +190,16 @@ public abstract class AbstractEventHandler {
             inputStreamReader.close();
             fileInputStream.close();
             if (keepComment) return temp;
-            // @formatter:off
             return temp
-               .parallelStream()
-               .filter(item-> item.length()>0)
-               .filter(item -> item.charAt(0) != '#')
-               .map(item -> item.contains("#") ?
-                            item.substring(0, item.indexOf("#")).stripTrailing() :
-                            item)
-               .collect(Collectors.toList());
-            // @formatter:on
-        } catch (Exception exception) {
-            throw new IllegalArgumentException(exception);
+                       .stream()
+                       .filter(item -> item.length() > 0)
+                       .filter(item -> item.charAt(0) != '#')
+                       .map(item -> item.contains("#") ?
+                                        item.substring(0, item.indexOf("#")).stripTrailing() :
+                                        item)
+                       .collect(Collectors.toList());
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
         }
     }
 
@@ -215,9 +213,11 @@ public abstract class AbstractEventHandler {
         if (file.exists()) {
             if (!file.isDirectory()) throw new IllegalArgumentException("文件夹被文件占位 -> " + file.getAbsolutePath());
         } else {
-            logger.seek("创建目录 -> " + file.getAbsolutePath());
-            //noinspection ResultOfMethodCallIgnored
-            file.mkdirs();
+            if (file.mkdirs()) {
+                logger.seek("创建新目录 -> " + file.getAbsolutePath());
+            } else {
+                logger.seek("目录已存在 -> " + file.getAbsolutePath());
+            }
         }
         return file;
     }
@@ -229,16 +229,14 @@ public abstract class AbstractEventHandler {
 
     @Api("初始化文件")
     protected File initFile(File file) {
-        if (!file.exists()) {
-            try {
-                if (file.createNewFile()) {
-                    logger.seek("创建文件 -> " + file.getAbsolutePath());
-                } else {
-                    throw new IllegalArgumentException("文件名被占用 -> " + file.getAbsolutePath());
-                }
-            } catch (IOException exception) {
-                throw new IllegalArgumentException("创建文件失败 -> " + file.getAbsolutePath(), exception);
+        try {
+            if (file.createNewFile()) {
+                logger.seek("创建新文件 -> " + file.getAbsolutePath());
+            } else {
+                logger.seek("文件已存在 -> " + file.getAbsolutePath());
             }
+        } catch (IOException exception) {
+            throw new RuntimeException("创建文件失败 -> " + file.getAbsolutePath(), exception);
         }
         if (!file.canRead()) throw new IllegalArgumentException("文件无权读取 -> " + file.getAbsolutePath());
         if (!file.canWrite()) throw new IllegalArgumentException("文件无权写入 -> " + file.getAbsolutePath());

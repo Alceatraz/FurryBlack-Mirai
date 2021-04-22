@@ -27,6 +27,10 @@ public @interface Api {
 
     String value() default "";
 
-    Class<?>[] see() default Object.class;
+    String[] usage() default {};
+
+    String[] attention() default {};
+
+    Class<?>[] relativeClass() default {};
 
 }
