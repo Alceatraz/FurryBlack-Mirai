@@ -12,7 +12,7 @@ import net.mamoe.mirai.message.data.SingleMessage;
 import net.mamoe.mirai.utils.PlatformLogger;
 import studio.blacktech.furryblackplus.core.annotation.Api;
 import studio.blacktech.furryblackplus.core.exception.BotException;
-import studio.blacktech.furryblackplus.core.exception.initlization.InitLockedException;
+import studio.blacktech.furryblackplus.core.exception.initlization.BootLockedException;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,60 +30,83 @@ import java.util.List;
 @Api("日志工具 为了兼容Mirai继承了PlatformLogger 同时添加了新的级别 seek hint")
 public final class LoggerX extends PlatformLogger {
 
+    public static final List<String> LEVELS = Arrays.asList("MUTE", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "ALL");
+
 
     private static boolean INIT_LOCK = false;
     private static File FILE_LOGGER;
     private final String name;
-
 
     public LoggerX(String name) {
         super(name);
         this.name = name;
     }
 
-
     public LoggerX(Class<?> clazz) {
         super(clazz.getSimpleName());
         this.name = clazz.getSimpleName();
     }
 
-
     public static void init(File file) throws BotException {
-        if (INIT_LOCK) {
-            throw new InitLockedException();
-        }
+        if (INIT_LOCK) throw new BootLockedException();
         INIT_LOCK = true;
         FILE_LOGGER = file;
     }
 
 
-    public static void setPrintLevel(int i) {
+    public enum LEVEL {
+        MUTE(0),
+        ERROR(1),
+        WARN(2),
+        HINT(3),
+        SEEK(4),
+        INFO(5),
+        DEBUG(6),
+        VERBOSE(7),
+        ALL(Integer.MAX_VALUE);
+
+        private final int level;
+
+        LEVEL(int level) {
+            this.level = level;
+        }
+
+        public int getLevel() {
+            return level;
+        }
+
+    }
+
+    public static boolean setPrintLevel(String level) {
+        LEVEL loggerLevel;
+        try {
+            loggerLevel = LEVEL.valueOf(level);
+        } catch (Exception exception) {
+            return false;
+        }
+        setPrintLevel(loggerLevel);
+        return true;
+    }
+
+    public static void setPrintLevel(LEVEL level) {
+        int i = level.getLevel();
         PRINT_ERROR = 0 < i;
         PRINT_WARN = 1 < i;
         PRINT_HINT = 2 < i;
         PRINT_SEEK = 3 < i;
         PRINT_INFO = 4 < i;
         PRINT_DEBUG = 5 < i;
-        PRINT_VERB = 6 < i;
+        PRINT_VERBOSE = 6 < i;
     }
-
-    public static final int LEVEL_MUTE = 0;
-    public static final int LEVEL_ERROR = 1;
-    public static final int LEVEL_WARN = 2;
-    public static final int LEVEL_HINT = 3;
-    public static final int LEVEL_SEEK = 4;
-    public static final int LEVEL_INFO = 5;
-    public static final int LEVEL_DEBUG = 6;
-    public static final int LEVEL_VERB = 7;
 
 
     private static boolean PRINT_ERROR = true;
     private static boolean PRINT_WARN = true;
     private static boolean PRINT_HINT = true;
-    private static boolean PRINT_INFO = true;
     private static boolean PRINT_SEEK = true;
+    private static boolean PRINT_INFO = true;
     private static boolean PRINT_DEBUG = true;
-    private static boolean PRINT_VERB = true;
+    private static boolean PRINT_VERBOSE = true;
 
     // ==================================================================================================
     //
@@ -90,18 +114,30 @@ public final class LoggerX extends PlatformLogger {
     // ==================================================================================================
 
 
-    @Override
-    public void error0(String message) {
-        String result = "[" + DateTool.datetime() + "][EXCE][" + name + "]" + message;
-        if (PRINT_ERROR) LoggerX.printStd(Color.RED + result + Color.RESET);
+    public void bypass(String message) {
+        String result = "[" + DateTool.datetime() + "][BYPS][" + name + "]" + message;
+        System.out.println(result);
+        LoggerX.writeLog(result);
+    }
+
+    public void bypass(String message, Throwable throwable) {
+        String result = "[" + DateTool.datetime() + "][BYPS][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        System.out.println(result);
         LoggerX.writeLog(result);
     }
 
 
     @Override
+    public void error0(String message) {
+        String result = "[" + DateTool.datetime() + "][EXCE][" + name + "]" + message;
+        if (PRINT_ERROR) System.out.println(Color.RED + result + Color.RESET);
+        LoggerX.writeLog(result);
+    }
+
+    @Override
     public void error0(String message, Throwable throwable) {
         String result = "[" + DateTool.datetime() + "][EXCE][" + name + "]" + message + "\r\n" + extractTrace(throwable);
-        if (PRINT_ERROR) LoggerX.printStd(Color.RED + result + Color.RESET);
+        if (PRINT_ERROR) System.out.println(Color.RED + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
@@ -109,43 +145,47 @@ public final class LoggerX extends PlatformLogger {
     @Override
     public void warning0(String message) {
         String result = "[" + DateTool.datetime() + "][WARN][" + name + "]" + message;
-        if (PRINT_WARN) LoggerX.printStd(Color.LIGHT_YELLOW + result + Color.RESET);
+        if (PRINT_WARN) System.out.println(Color.LIGHT_YELLOW + result + Color.RESET);
         LoggerX.writeLog(result);
     }
-
 
     @Override
     public void warning0(String message, Throwable throwable) {
         String result = "[" + DateTool.datetime() + "][WARN][" + name + "]" + message + "\r\n" + extractTrace(throwable);
-        if (PRINT_WARN) LoggerX.printStd(Color.LIGHT_YELLOW + result + Color.RESET);
+        if (PRINT_WARN) System.out.println(Color.LIGHT_YELLOW + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
 
     public void hint(String message) {
         String result = "[" + DateTool.datetime() + "][HINT][" + name + "]" + message;
-        if (PRINT_HINT) LoggerX.printStd(Color.LIGHT_CYAN + result + Color.RESET);
+        if (PRINT_HINT) System.out.println(Color.LIGHT_CYAN + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
-
     public void hint(String message, Throwable throwable) {
         String result = "[" + DateTool.datetime() + "][HINT][" + name + "]" + message + "\r\n" + extractTrace(throwable);
-        if (PRINT_HINT) LoggerX.printStd(Color.LIGHT_CYAN + result + Color.RESET);
+        if (PRINT_HINT) System.out.println(Color.LIGHT_CYAN + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
 
     public void seek(String message) {
         String result = "[" + DateTool.datetime() + "][SEEK][" + name + "]" + message;
-        if (PRINT_SEEK) LoggerX.printStd(Color.LIGHT_GREEN + result + Color.RESET);
+        if (PRINT_SEEK) System.out.println(Color.LIGHT_GREEN + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
+    public String seek(String message, String value) {
+        String result = "[" + DateTool.datetime() + "][SEEK][" + name + "]" + message + " `" + value + "`";
+        if (PRINT_SEEK) System.out.println(Color.LIGHT_GREEN + result + Color.RESET);
+        LoggerX.writeLog(result);
+        return value;
+    }
 
     public void seek(String message, Throwable throwable) {
         String result = "[" + DateTool.datetime() + "][SEEK][" + name + "]" + message + "\r\n" + extractTrace(throwable);
-        if (PRINT_SEEK) LoggerX.printStd(Color.LIGHT_GREEN + result + Color.RESET);
+        if (PRINT_SEEK) System.out.println(Color.LIGHT_GREEN + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
@@ -153,15 +193,14 @@ public final class LoggerX extends PlatformLogger {
     @Override
     public void info0(String message) {
         String result = "[" + DateTool.datetime() + "][INFO][" + name + "]" + message;
-        if (PRINT_INFO) LoggerX.printStd(result);
+        if (PRINT_INFO) System.out.println(result);
         LoggerX.writeLog(result);
     }
-
 
     @Override
     public void info0(String message, Throwable throwable) {
         String result = "[" + DateTool.datetime() + "][INFO][" + name + "]" + message + "\r\n" + extractTrace(throwable);
-        if (PRINT_INFO) LoggerX.printStd(result);
+        if (PRINT_INFO) System.out.println(result);
         LoggerX.writeLog(result);
     }
 
@@ -169,15 +208,14 @@ public final class LoggerX extends PlatformLogger {
     @Override
     public void debug0(String message) {
         String result = "[" + DateTool.datetime() + "][DEBG][" + name + "]" + message;
-        if (PRINT_DEBUG) LoggerX.printStd(Color.GRAY + result + Color.RESET);
+        if (PRINT_DEBUG) System.out.println(Color.GRAY + result + Color.RESET);
         LoggerX.writeLog(result);
     }
-
 
     @Override
     public void debug0(String message, Throwable throwable) {
         String result = "[" + DateTool.datetime() + "][DEBG][" + name + "]" + message + "\r\n" + extractTrace(throwable);
-        if (PRINT_DEBUG) LoggerX.printStd(Color.GRAY + result + Color.RESET);
+        if (PRINT_DEBUG) System.out.println(Color.GRAY + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
@@ -185,15 +223,14 @@ public final class LoggerX extends PlatformLogger {
     @Override
     public void verbose0(String message) {
         String result = "[" + DateTool.datetime() + "][VERB][" + name + "]" + message;
-        if (PRINT_VERB) LoggerX.printStd(Color.GRAY + result + Color.RESET);
+        if (PRINT_VERBOSE) System.out.println(Color.GRAY + result + Color.RESET);
         LoggerX.writeLog(result);
     }
-
 
     @Override
     public void verbose0(String message, Throwable throwable) {
         String result = "[" + DateTool.datetime() + "][VERB][" + name + "]" + message + "\r\n" + extractTrace(throwable);
-        if (PRINT_VERB) LoggerX.printStd(Color.GRAY + result + Color.RESET);
+        if (PRINT_VERBOSE) System.out.println(Color.GRAY + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
@@ -277,8 +314,7 @@ public final class LoggerX extends PlatformLogger {
 
         String result = builder.toString();
 
-
-        LoggerX.printStd(Color.LIGHT_PURPLE + "信息已转储 -> " + TIME_CODE + Color.RESET);
+        System.out.println(Color.LIGHT_PURPLE + "信息已转储 -> " + TIME_CODE + Color.RESET);
         LoggerX.writeLog(TIME_CODE + "\r\n" + result);
 
     }
@@ -298,17 +334,6 @@ public final class LoggerX extends PlatformLogger {
         return stringWriter.toString();
 
     }
-
-
-    private static synchronized void printStd(String message) {
-        System.out.println(message);
-    }
-
-
-    private static synchronized void printErr(String message) {
-        System.err.println(message);
-    }
-
 
     private static synchronized void writeLog(String message) {
         try (FileWriter writer = new FileWriter(FILE_LOGGER, StandardCharsets.UTF_8, true)) {

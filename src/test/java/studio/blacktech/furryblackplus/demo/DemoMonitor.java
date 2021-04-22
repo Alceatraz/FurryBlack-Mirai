@@ -22,7 +22,7 @@ public class DemoMonitor extends EventHandlerMonitor {
     }
 
     @Override
-    public void init() {
+    public void load() {
         System.out.println("加载" + this.getClass().getName());
         DemoRunner demoRunner = Driver.getRunner(DemoRunner.class);
         demoRunner.demo();

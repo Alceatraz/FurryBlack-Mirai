@@ -4,7 +4,7 @@ package studio.blacktech.furryblackplus.core.interfaces;
 import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.core.annotation.Api;
 import studio.blacktech.furryblackplus.core.exception.BotException;
-import studio.blacktech.furryblackplus.core.exception.initlization.InitException;
+import studio.blacktech.furryblackplus.core.exception.initlization.BootException;
 import studio.blacktech.furryblackplus.core.utilties.LoggerX;
 
 import java.io.BufferedReader;
@@ -54,7 +54,7 @@ public abstract class AbstractEventHandler {
 
 
     @Api("生命周期 初始化时")
-    public abstract void init() throws InitException;
+    public abstract void load() throws BootException;
 
     @Api("生命周期 启动时")
     public abstract void boot() throws BotException;
@@ -213,11 +213,7 @@ public abstract class AbstractEventHandler {
         if (file.exists()) {
             if (!file.isDirectory()) throw new IllegalArgumentException("文件夹被文件占位 -> " + file.getAbsolutePath());
         } else {
-            if (file.mkdirs()) {
-                logger.seek("创建新目录 -> " + file.getAbsolutePath());
-            } else {
-                logger.seek("目录已存在 -> " + file.getAbsolutePath());
-            }
+            if (file.mkdirs()) logger.seek("创建新目录 -> " + file.getAbsolutePath());
         }
         return file;
     }
@@ -230,11 +226,7 @@ public abstract class AbstractEventHandler {
     @Api("初始化文件")
     protected File initFile(File file) {
         try {
-            if (file.createNewFile()) {
-                logger.seek("创建新文件 -> " + file.getAbsolutePath());
-            } else {
-                logger.seek("文件已存在 -> " + file.getAbsolutePath());
-            }
+            if (file.createNewFile()) logger.seek("创建新文件 -> " + file.getAbsolutePath());
         } catch (IOException exception) {
             throw new RuntimeException("创建文件失败 -> " + file.getAbsolutePath(), exception);
         }

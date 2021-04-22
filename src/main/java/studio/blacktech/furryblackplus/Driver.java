@@ -21,7 +21,7 @@ import org.jline.reader.LineReaderBuilder;
 import org.jline.widget.AutopairWidgets;
 import studio.blacktech.furryblackplus.core.Systemd;
 import studio.blacktech.furryblackplus.core.annotation.Api;
-import studio.blacktech.furryblackplus.core.exception.initlization.InitException;
+import studio.blacktech.furryblackplus.core.exception.initlization.BootException;
 import studio.blacktech.furryblackplus.core.interfaces.EventHandlerRunner;
 import studio.blacktech.furryblackplus.core.utilties.Command;
 import studio.blacktech.furryblackplus.core.utilties.DateTool;
@@ -32,10 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -56,6 +53,7 @@ import java.util.stream.Collectors;
 @Api("项目开源地址https://github.com/Alceatraz/FurryBlack-Mirai")
 public final class Driver {
 
+
     static {
 
         System.setProperty("mirai.no-desktop", "");
@@ -65,27 +63,34 @@ public final class Driver {
 
     }
 
+
+    public static final String APP_VERSION = "0.6.0";
+
+
     // ==========================================================================================================================================================
     //
     // 私有变量
     //
     // ==========================================================================================================================================================
 
-    private static final String APP_VERSION = "0.5.7";
 
     private static final long BOOT_TIME = System.currentTimeMillis();
 
-    private static boolean enable = false;
-    private static boolean dryRun = false;
-    private static boolean reader = false;
+    private static final LoggerX logger = new LoggerX(Driver.class);
 
-    private static boolean debug = false;
-    private static boolean signal = true;
-
-    private static boolean drop = false;
-
-    private static LoggerX logger;
     private static Systemd systemd;
+
+
+    private static volatile boolean debug;
+
+    private static volatile boolean noLogin = false;
+    private static volatile boolean noJline = false;
+
+    private static volatile boolean enable = false;
+
+    private static volatile boolean shutBySignal = true;
+    private static volatile boolean shutModeDrop = false;
+
 
     private static Thread consoleThread;
 
@@ -104,50 +109,65 @@ public final class Driver {
 
     public static void main(String[] args) {
 
-        System.out.println("[FurryBlack][BOOT]FurryBlackPlus Mirai - ver " + APP_VERSION + " " + DateTool.formatTime("yyyy-MM-dd HH:mm:ss", BOOT_TIME));
+        System.out.println("[FurryBlack][MAIN]FurryBlackPlus Mirai - ver " + APP_VERSION + " " + DateTool.formatTime("yyyy-MM-dd HH:mm:ss", BOOT_TIME));
 
         // =====================================================================
         // 初始化命令行参数
 
         List<String> parameters = Arrays.asList(args);
 
-        // debug
+        // =====================================================================
+        // debug 模式
         debug = parameters.contains("--debug");
         if (debug) {
-            System.out.println("[FurryBlack][ARGS]启动调试模式");
+            System.out.println("[FurryBlack][ARGS]调试模式");
         } else {
-            System.out.println("[FurryBlack][ARGS]启动生产模式");
+            System.out.println("[FurryBlack][ARGS]生产模式");
         }
 
-
         // =====================================================================
-        // jLine 设置
-        reader = parameters.contains("--no-jline");
-        if (reader) {
-            System.out.println("[FurryBlack][ARGS]使用精简控制台");
-        } else {
-            System.out.println("[FurryBlack][ARGS]使用完整控制台");
-        }
-
-
-        // =====================================================================
-        // Dry Run 测试
-        dryRun = parameters.contains("--dry-run");
-        if (dryRun) {
+        // Dry Run 模式
+        noLogin = parameters.contains("--no-login");
+        if (noLogin) {
             System.out.println("[FurryBlack][ARGS]模拟运行模式");
         } else {
             System.out.println("[FurryBlack][ARGS]真实运行模式");
         }
 
+        // =====================================================================
+        // 控制台设置
+        boolean noConsole = parameters.contains("--no-console");
+
+        if (noConsole) {
+            System.out.println("[FurryBlack][ARGS]关闭控制台");
+        } else {
+
+            // =====================================================================
+            // jLine 设置
+            noJline = parameters.contains("--no-jline");
+            if (noJline) {
+                System.out.println("[FurryBlack][ARGS]精简控制台");
+            } else {
+                System.out.println("[FurryBlack][ARGS]完整控制台");
+            }
+
+        }
 
         // =====================================================================
+        // 日志级别 设置
+        String level = System.getProperty("furryblack.logger.level");
+        if (level != null) {
+            if (LoggerX.LEVELS.contains(level)) {
+                System.out.println("[FurryBlack][PROP]目标日志级别" + level);
+            } else {
+                System.out.println("[FurryBlack][PROP]不存在此目标日志级别" + level + ", 可用值为 MUTE ERROR WARN HINT SEEK INFO DEBUG VERBOSE");
+            }
+        }
 
+        // =====================================================================
+        // 初始化目录
 
         try {
-
-
-            // =========================================================================================================
-            // 初始化文件
 
             System.out.println("[FurryBlack][INIT]初始化路径");
 
@@ -159,109 +179,88 @@ public final class Driver {
             FOLDER_MODULE = Paths.get(userDir, "module").toFile();
             FOLDER_LOGGER = Paths.get(userDir, "logger").toFile();
 
-            File FILE_LOGGER = Paths.get(FOLDER_LOGGER.getAbsolutePath(), DateTool.formatTime("yyyy_MM_dd_HH_mm_ss", BOOT_TIME) + ".txt").toFile();
+            File loggerFile = Paths.get(FOLDER_LOGGER.getAbsolutePath(), DateTool.formatTime("yyyy_MM_dd_HH_mm_ss", BOOT_TIME) + ".txt").toFile();
 
             System.out.println("[FurryBlack][INIT]初始化目录");
 
-            if (!FOLDER_CONFIG.exists() && !FOLDER_CONFIG.mkdirs()) throw new InitException("无法创建文件夹 " + FOLDER_CONFIG.getAbsolutePath());
-            if (!FOLDER_MODULE.exists() && !FOLDER_MODULE.mkdirs()) throw new InitException("无法创建文件夹 " + FOLDER_MODULE.getAbsolutePath());
-            if (!FOLDER_LOGGER.exists() && !FOLDER_LOGGER.mkdirs()) throw new InitException("无法创建文件夹 " + FOLDER_LOGGER.getAbsolutePath());
+            if (!FOLDER_CONFIG.exists() && !FOLDER_CONFIG.mkdirs()) throw new BootException("无法创建文件夹 " + FOLDER_CONFIG.getAbsolutePath());
+            if (!FOLDER_MODULE.exists() && !FOLDER_MODULE.mkdirs()) throw new BootException("无法创建文件夹 " + FOLDER_MODULE.getAbsolutePath());
+            if (!FOLDER_LOGGER.exists() && !FOLDER_LOGGER.mkdirs()) throw new BootException("无法创建文件夹 " + FOLDER_LOGGER.getAbsolutePath());
 
             System.out.println("[FurryBlack][INIT]初始化检查");
 
-            if (!FOLDER_CONFIG.isDirectory()) throw new InitException("文件夹被文件占位 " + FOLDER_CONFIG.getAbsolutePath());
-            if (!FOLDER_MODULE.isDirectory()) throw new InitException("文件夹被文件占位 " + FOLDER_MODULE.getAbsolutePath());
-            if (!FOLDER_LOGGER.isDirectory()) throw new InitException("文件夹被文件占位 " + FOLDER_LOGGER.getAbsolutePath());
-
-            // =========================================================================================================
-            // 初始化LoggerX
+            if (!FOLDER_CONFIG.isDirectory()) throw new BootException("文件夹被文件占位 " + FOLDER_CONFIG.getAbsolutePath());
+            if (!FOLDER_MODULE.isDirectory()) throw new BootException("文件夹被文件占位 " + FOLDER_MODULE.getAbsolutePath());
+            if (!FOLDER_LOGGER.isDirectory()) throw new BootException("文件夹被文件占位 " + FOLDER_LOGGER.getAbsolutePath());
 
             System.out.println("[FurryBlack][INIT]创建日志文件");
 
-            if (!FILE_LOGGER.createNewFile()) throw new InitException("日志文件创建失败 " + FILE_LOGGER.getAbsolutePath());
-            if (!FILE_LOGGER.exists()) throw new InitException("日志文件不存在 " + FILE_LOGGER.getAbsolutePath());
-            if (!FILE_LOGGER.canWrite()) throw new InitException("日志文件没有写权限 " + FILE_LOGGER.getAbsolutePath());
+            if (!loggerFile.createNewFile()) throw new BootException("日志文件创建失败 " + loggerFile.getAbsolutePath());
+            if (!loggerFile.exists()) throw new BootException("日志文件不存在 " + loggerFile.getAbsolutePath());
+            if (!loggerFile.canWrite()) throw new BootException("日志文件没有写权限 " + loggerFile.getAbsolutePath());
 
-            LoggerX.init(FILE_LOGGER);
-
-            logger = new LoggerX(Driver.class);
+            LoggerX.init(loggerFile);
 
             System.out.println("[FurryBlack][INIT]日志系统初始化完成");
-
-            logger.hint("切换至完整日志模式");
 
             logger.info("应用工作目录 " + FOLDER_ROOT.getAbsolutePath());
             logger.info("核心日志目录 " + FOLDER_LOGGER.getAbsolutePath());
             logger.info("模块数据目录 " + FOLDER_MODULE.getAbsolutePath());
-            logger.info("当前日志文件 " + FILE_LOGGER.getAbsolutePath());
+            logger.info("当前日志文件 " + loggerFile.getAbsolutePath());
+
+            systemd = new Systemd(FOLDER_CONFIG);
 
         } catch (Exception exception) {
-            System.err.println("[FurryBlack][FATAL]核心系统初始化发生异常 终止启动");
-            exception.printStackTrace();
-            System.exit(-1);
+            throw new RuntimeException("[FurryBlack][FATAL]核心系统初始化发生异常 终止启动", exception);
         }
 
-        // =============================================================================================================
-
-        logger.hint("实例化路由系统");
-        try {
-            systemd = new Systemd();
-        } catch (Exception exception) {
-            logger.error("实例化路由系统发生异常 终止启动", exception);
-            System.exit(-1);
-        }
 
         // =====================================================================
 
-        logger.hint("初始化路由系统");
-        try {
-            systemd.init(FOLDER_CONFIG);
-        } catch (Exception exception) {
-            logger.error("初始化路由系统发生异常 终止启动", exception);
-            System.exit(-1);
-        }
-
-        // =====================================================================
-
-        logger.hint("启动路由系统");
+        logger.hint("启动机器人...");
         try {
             systemd.boot();
         } catch (Exception exception) {
             logger.error("启动路由系统发生异常 终止启动", exception);
             System.exit(-1);
         }
+        logger.hint("机器人已启动");
 
         // =====================================================================
 
-        logger.hint("注册关闭信号回调");
+        logger.info("注册关闭回调");
 
         Thread mainThread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (!signal) return;
-            logger.hint("接收到关闭信号");
-            logger.hint("关闭控制台");
+            if (!shutBySignal) return;
+            logger.info("接收到关闭信号");
+            logger.info("关闭控制台");
             consoleThread.interrupt();
-            logger.hint("关闭机器人");
+            logger.info("关闭机器人");
             systemd.shutBot();
-            logger.hint("等待主线程");
+            logger.info("等待主线程");
             try {
                 mainThread.join();
             } catch (InterruptedException ignoring) {
                 logger.error("关闭信号回调被打断", ignoring);
             }
-            logger.info("关闭信号回调结束");
+            logger.info("回调结束");
         }));
 
         // =====================================================================
 
-        logger.hint("启动控制台");
+        if (!noConsole) {
+            logger.info("启动终端线程");
+            consoleThread = new Thread(Driver::console);
+            consoleThread.start();
+        }
 
-        consoleThread = new Thread(Driver::console);
-        consoleThread.start();
 
         // =====================================================================
 
-        logger.hint("开始监听消息");
+        logger.hint("系统启动完成 耗时" + DateTool.duration(System.currentTimeMillis() - BOOT_TIME));
+        LoggerX.setPrintLevel(level);
+
         enable = true;
 
         // =====================================================================
@@ -271,21 +270,24 @@ public final class Driver {
         // =====================================================================
 
         enable = false;
-        logger.hint("机器人已被关闭 执行关闭流程");
+
+        LoggerX.setPrintLevel(LoggerX.LEVEL.ALL);
+        logger.info("执行关闭流程");
+
 
         // =====================================================================
 
         logger.hint("关闭路由系统");
+
         try {
             systemd.shut();
         } catch (Exception exception) {
             logger.error("关闭路由系统关闭异常", exception);
-            System.out.println("[FurryBlack][SHUT] Exception Exit, Check it!");
-            System.exit(1);
         }
 
-        System.out.println("[FurryBlack][SHUT] Normal Exit, Bye.");
-        System.exit(0);
+        logger.hint("关闭核心系统");
+
+        System.out.println("[FurryBlack][MAIN]FurryBlackPlus closed, Bye.");
 
     }
 
@@ -296,6 +298,7 @@ public final class Driver {
     //
     // ==========================================================================================================================================================
 
+    private static boolean firstPrompt = true;
 
     private static void console() {
         Console console = new Console();
@@ -303,17 +306,17 @@ public final class Driver {
         while (true) {
             try {
                 String temp = console.read("[console]$ ");
-                if (temp == null || temp.equals("")) continue;
+                if (temp == null || temp.isEmpty() || temp.isBlank()) continue;
                 Command command = new Command(temp);
                 switch (command.getCommandName()) {
 
                     case "drop":
-                        drop = true;
+                        shutModeDrop = true;
 
                     case "stop":
                     case "quit":
                     case "exit":
-                        signal = false;
+                        shutBySignal = false;
                         systemd.shutBot();
                         break console;
 
@@ -328,7 +331,9 @@ public final class Driver {
                         break;
 
                     case "debug":
-                        debug = !debug;
+                        synchronized (Driver.class) {
+                            debug = !debug;
+                        }
                         System.out.println(debug ? "Enable DEBUG" : "Disable DEBUG");
                         break;
 
@@ -344,21 +349,21 @@ public final class Driver {
 
                     case "level":
                         if (command.hasCommandBody()) {
-                            int level = Integer.parseInt(command.getParameterSegment(0));
-                            if (level < 0) {
-                                level = 0;
-                            } else if (level > 7) {
-                                level = 7;
+                            String level = command.getParameterSegment(0);
+                            if (LoggerX.setPrintLevel(level)) {
+                                logger.bypass("日志级别调整为 " + level);
+                            } else {
+                                logger.bypass("修改日志级别失败：不存在此级别，可用值为 MUTE ERROR WARN HINT SEEK INFO DEBUG VERBOSE");
                             }
-                            LoggerX.setPrintLevel(level);
                         } else {
-                            logger.error("1 错误 红色 Error");
-                            logger.warning("2 警告 黄色 Warning");
-                            logger.hint("3 提示 青色 Hint");
-                            logger.seek("4 探索 绿色 Seek");
-                            logger.info("5 信息 白色 Info ");
-                            logger.debug("6 调试 灰色 Debug");
-                            logger.verbose("7 详情 灰色 Verbose");
+                            logger.bypass("可用值为 MUTE ERROR WARN HINT SEEK INFO DEBUG VERBOSE ALL");
+                            logger.error("[EXCE]错误 红色 ERROR");
+                            logger.warning("[WARN]警告 黄色 WARN");
+                            logger.hint("[HINT]提示 青色 HINT");
+                            logger.seek("[SEEK]配置 绿色 SEEK");
+                            logger.info("[INFO]信息 白色 INFO");
+                            logger.debug("[DEBG]调试 灰色 DEBUG");
+                            logger.verbose("[VERB]详情 灰色 VERBOSE");
                         }
                         break;
 
@@ -457,20 +462,15 @@ public final class Driver {
                         for (String name : command.getParameterSegment()) systemd.reloadPlugin(name);
                         break;
 
+                    case "gc":
                     case "stat":
+                    case "stats":
                     case "status":
-                        long time = System.currentTimeMillis();
-                        int second = Math.toIntExact((time - BOOT_TIME) / 1000);
-                        int days = second / 86400;
-                        second = second % 86400;
-                        Calendar instance = Calendar.getInstance();
-                        instance.set(Calendar.SECOND, second);
-                        DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
                         long totalMemory = Runtime.getRuntime().totalMemory() / 1024;
                         long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
                         long maxMemory = Runtime.getRuntime().maxMemory() / 1024;
                         System.out.println("消息事件: " + (enable ? "启用" : "关闭"));
-                        System.out.println("运行时间: " + days + " - " + dateFormat.format(instance.getTime()));
+                        System.out.println("运行时间: " + DateTool.duration(System.currentTimeMillis() - BOOT_TIME));
                         System.out.println("内存占用: " + (totalMemory - freeMemory) + "KB/" + totalMemory + "KB/" + maxMemory + "KB(" + (maxMemory / 1024) + "MB)");
                         break;
 
@@ -483,7 +483,6 @@ public final class Driver {
                 logger.error("命令导致了异常", exception);
             }
         }
-        logger.hint("控制台已关闭");
     }
 
     private static class Console {
@@ -492,7 +491,7 @@ public final class Driver {
         private BufferedReader bufferedReader;
 
         public Console() {
-            if (reader) {
+            if (noJline) {
                 bufferedReader = new BufferedReader(new InputStreamReader(System.in));
             } else {
                 jlineReader = LineReaderBuilder.builder().build();
@@ -503,15 +502,25 @@ public final class Driver {
         }
 
         public String read(String prompt) {
-            if (reader) {
-                System.out.print(prompt);
+
+            if (noJline) {
+                if (firstPrompt) {
+                    firstPrompt = false;
+                } else {
+                    System.out.print(prompt);
+                }
                 try {
                     return bufferedReader.readLine();
                 } catch (IOException exception) {
-                    return "";
+                    return null;
                 }
             } else {
-                return jlineReader.readLine(prompt);
+                if (firstPrompt) {
+                    firstPrompt = false;
+                    return jlineReader.readLine("");
+                } else {
+                    return jlineReader.readLine(prompt);
+                }
             }
         }
     }
@@ -539,8 +548,8 @@ public final class Driver {
     }
 
     @Api("否是真的登录账号")
-    public static boolean isDryRun() {
-        return dryRun;
+    public static boolean isNoLogin() {
+        return noLogin;
     }
 
     @Api("否是进入调试模式")
@@ -549,8 +558,8 @@ public final class Driver {
     }
 
     @Api("是否进入抛弃模式")
-    public static boolean isDrop() {
-        return drop;
+    public static boolean isShutModeDrop() {
+        return shutModeDrop;
     }
 
     @Api("获取运行目录 - 不是插件私有目录")

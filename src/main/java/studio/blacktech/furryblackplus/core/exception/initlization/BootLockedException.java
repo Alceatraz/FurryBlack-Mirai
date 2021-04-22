@@ -5,22 +5,23 @@ import studio.blacktech.furryblackplus.core.annotation.Api;
 
 
 @SuppressWarnings("unused")
-@Api("防止多次初始化的锁")
-public class InitLockedException extends InitException {
 
-    public InitLockedException() {
+@Api("防止多次初始化的锁")
+public class BootLockedException extends BootException {
+
+    public BootLockedException() {
         super();
     }
 
-    public InitLockedException(String message) {
+    public BootLockedException(String message) {
         super(message);
     }
 
-    public InitLockedException(String message, Throwable cause) {
+    public BootLockedException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public InitLockedException(Throwable cause) {
+    public BootLockedException(Throwable cause) {
         super(cause);
     }
 

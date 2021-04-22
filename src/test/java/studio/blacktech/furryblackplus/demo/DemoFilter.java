@@ -21,7 +21,7 @@ public class DemoFilter extends EventHandlerFilter {
     }
 
     @Override
-    public void init() {
+    public void load() {
         System.out.println("加载" + this.getClass().getName());
     }
 

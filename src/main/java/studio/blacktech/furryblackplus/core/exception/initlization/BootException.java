@@ -6,29 +6,30 @@ import studio.blacktech.furryblackplus.core.exception.BotException;
 
 
 @SuppressWarnings("unused")
-@Api("初始化时的异常 只在init()阶段抛出")
-public class InitException extends BotException {
+
+@Api("启动过程发生的异常")
+public class BootException extends BotException {
 
 
     private static final long serialVersionUID = 1L;
 
 
-    public InitException() {
+    public BootException() {
         super();
     }
 
 
-    public InitException(String message) {
+    public BootException(String message) {
         super(message);
     }
 
 
-    public InitException(String message, Throwable cause) {
+    public BootException(String message, Throwable cause) {
         super(message, cause);
     }
 
 
-    public InitException(Throwable cause) {
+    public BootException(Throwable cause) {
         super(cause);
     }
 

@@ -11,6 +11,7 @@ import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Stranger;
 import net.mamoe.mirai.contact.User;
 import net.mamoe.mirai.event.GlobalEventChannel;
+import net.mamoe.mirai.event.Listener;
 import net.mamoe.mirai.event.events.BotInvitedJoinGroupRequestEvent;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.MemberJoinEvent;
@@ -31,9 +32,8 @@ import studio.blacktech.furryblackplus.core.annotation.Filter;
 import studio.blacktech.furryblackplus.core.annotation.Monitor;
 import studio.blacktech.furryblackplus.core.annotation.Runner;
 import studio.blacktech.furryblackplus.core.exception.BotException;
+import studio.blacktech.furryblackplus.core.exception.initlization.BootException;
 import studio.blacktech.furryblackplus.core.exception.initlization.FirstBootException;
-import studio.blacktech.furryblackplus.core.exception.initlization.InitException;
-import studio.blacktech.furryblackplus.core.exception.initlization.InitLockedException;
 import studio.blacktech.furryblackplus.core.exception.initlization.MisConfigException;
 import studio.blacktech.furryblackplus.core.interfaces.AbstractEventHandler;
 import studio.blacktech.furryblackplus.core.interfaces.EventHandlerExecutor;
@@ -156,14 +156,21 @@ public final class Systemd {
 
     private final LoggerX logger = new LoggerX(this.getClass());
 
+    private final File FOLDER_CONFIG;
+
+
+    private static volatile boolean INSTANCE_LOCK = false;
+
+
+    //
+
+
     private Bot bot;
 
     private char COMMAND_PREFIX = '/';
     private Pattern COMMAND_PATTERN;
 
-
     private Map<Long, String> NICKNAME;
-
 
     private String MESSAGE_INFO;
     private String MESSAGE_EULA;
@@ -193,16 +200,24 @@ public final class Systemd {
     private Map<String, EventHandlerExecutor> EVENT_EXECUTOR_GROUP; // 群聊执行器注册
 
 
+    private Listener<UserMessageEvent> userMessageEventListener;
+    private Listener<GroupMessageEvent> groupMessageEventListener;
+    private Listener<MemberJoinEvent> memberJoinEventListener;
+    private Listener<MemberLeaveEvent> memberLeaveEventListener;
+    private Listener<NewFriendRequestEvent> newFriendRequestEventListener;
+    private Listener<BotInvitedJoinGroupRequestEvent> botInvitedJoinGroupRequestEventListener;
+
+
     // ==========================================================================================================================
     // 对象控制
     // 🔫 🧦 ❌ ✔️ ⭕ 🚧 🀄
 
-    private static volatile boolean INSTANCE_LOCK = false;
 
-    public Systemd() throws BotException {
+    public Systemd(File folder) {
         synchronized (Systemd.class) {
-            if (INSTANCE_LOCK) throw new InitLockedException();
+            if (INSTANCE_LOCK) System.exit(0);
             INSTANCE_LOCK = true;
+            FOLDER_CONFIG = folder;
         }
     }
 
@@ -214,14 +229,14 @@ public final class Systemd {
     // ==========================================================================================================================================================
 
 
-    public void init(File FOLDER_CONFIG) throws InitException {
+    public void boot() throws BootException {
 
 
         // ==========================================================================================================================
         // 初始化配置文件
 
 
-        logger.hint("初始化Systemd配置文件");
+        logger.info("初始化配置文件");
 
 
         File FILE_CONFIG = Paths.get(FOLDER_CONFIG.getAbsolutePath(), "application.properties").toFile();
@@ -249,12 +264,14 @@ public final class Systemd {
             throw new FirstBootException("检测到初次启动 需要填写必要的配置 -> " + FILE_CONFIG.getAbsolutePath());
         }
 
-        if (!FILE_CONFIG.isFile()) throw new InitException("配置文件不是文件 -> " + FILE_CONFIG.getAbsolutePath());
-        if (!FILE_CONFIG.canRead()) throw new InitException("配置文件无权读取 -> " + FILE_CONFIG.getAbsolutePath());
+        if (!FILE_CONFIG.isFile()) throw new BootException("配置文件不是文件 -> " + FILE_CONFIG.getAbsolutePath());
+        if (!FILE_CONFIG.canRead()) throw new BootException("配置文件无权读取 -> " + FILE_CONFIG.getAbsolutePath());
 
 
         // ==========================================================================================================================
         // 加载配置
+
+        logger.info("加载配置文件");
 
 
         Properties config = new Properties();
@@ -263,48 +280,35 @@ public final class Systemd {
             config.load(inStream);
         } catch (IOException exception) {
             logger.error("核心配置文件读取错误 即将关闭 " + FILE_CONFIG.getAbsolutePath());
-            throw new InitException("核心配置文件读取错误 " + FILE_CONFIG.getAbsolutePath(), exception);
+            throw new BootException("核心配置文件读取错误 " + FILE_CONFIG.getAbsolutePath(), exception);
         }
 
 
         // ==========================================================================================================================
         // 读取配置
 
+        logger.hint("初始化命令过滤器");
 
         String prefix = config.getProperty(CONF_BOT_COMMAND_PREFIX);
 
-        if (prefix == null || prefix.isEmpty() || prefix.isBlank()) {
-
+        if (prefix == null || prefix.isEmpty() || prefix.isBlank() || prefix.length() != 1) {
             logger.warning("指定的命令前缀不可用 将自动设置为默认值: /");
-
         } else {
-
-            int length = prefix.length();
-
-            switch (length) {
-                case 1:
-                    COMMAND_PREFIX = prefix.charAt(0);
-                    break;
-                case 3:
-                    COMMAND_PREFIX = prefix.charAt(1);
-                    break;
-                default:
-                    logger.warning("指定的命令前缀不可用 将自动设置为默认值: /");
-
-            }
-
-            logger.seek("命令前缀 " + COMMAND_PREFIX);
-
-            COMMAND_PATTERN = Pattern.compile("^" + COMMAND_PREFIX + "[a-z]{3,8}");
-
+            COMMAND_PREFIX = prefix.charAt(0);
         }
 
+        String regex = "^" + COMMAND_PREFIX + "[a-z]{3,8}";
+
+        logger.seek("识别前缀 " + COMMAND_PREFIX);
+        logger.info("识别正则 " + regex);
+
+        COMMAND_PATTERN = Pattern.compile(regex);
 
         // ==========================================================================================================================
         // 读取模板
 
 
-        logger.hint("初始化预生成消息");
+        logger.hint("初始化内置消息");
 
         File FILE_EULA = Paths.get(Driver.getConfigFolder(), "message_eula.txt").toFile();
         File FILE_INFO = Paths.get(Driver.getConfigFolder(), "message_info.txt").toFile();
@@ -368,7 +372,7 @@ public final class Systemd {
             }
 
         } catch (Exception exception) {
-            throw new InitException("昵称映射表读取失败", exception);
+            throw new BootException("昵称映射表读取失败", exception);
         }
 
 
@@ -377,6 +381,7 @@ public final class Systemd {
 
 
         logger.hint("加载机器人配置");
+
         BotConfiguration configuration = new BotConfiguration();
 
         File cacheFolder = Paths.get(FOLDER_CONFIG.getAbsolutePath(), "cache").toFile();
@@ -388,7 +393,8 @@ public final class Systemd {
         // 读取账号配置
 
 
-        long ACCOUNT_QQ = parseLong(config.getProperty(CONF_ACCOUNT_ID));
+        String accountConfig = config.getProperty(CONF_ACCOUNT_ID);
+        long ACCOUNT_QQ = parseLong(accountConfig);
 
         logger.seek("QQ账号 " + ACCOUNT_QQ);
 
@@ -400,12 +406,13 @@ public final class Systemd {
             ACCOUNT_PW = ACCOUNT_PW.substring(1, length - 1);
         }
 
-        length = ACCOUNT_PW.length();
+        length = accountConfig.length();
 
         if (Driver.isDebug()) {
-            logger.warning("QQ密码 " + ACCOUNT_PW + "关闭调试模式以给此条日志打码");
+            logger.seek("QQ密码 " + ACCOUNT_PW);
+            logger.warning("关闭调试模式以给此条日志打码");
         } else {
-            String shadow_ACCOUNT_PW = ACCOUNT_PW.charAt(0) + "*".repeat(length - 2) + ACCOUNT_PW.charAt(length - 1);
+            String shadow_ACCOUNT_PW = ACCOUNT_PW.charAt(0) + "*".repeat(length - 1) ;
             logger.seek("QQ密码 " + shadow_ACCOUNT_PW);
         }
 
@@ -522,7 +529,7 @@ public final class Systemd {
         // 创建机器人
 
 
-        logger.hint("初始化机器人");
+        logger.info("初始化机器人");
         bot = BotFactory.INSTANCE.newBot(ACCOUNT_QQ, ACCOUNT_PW, configuration);
 
 
@@ -530,7 +537,7 @@ public final class Systemd {
 
 
         // ==========================================================================================================================
-        // 初始化注册
+        // 注册模块
 
 
         MODULES = new LinkedHashMap<>();
@@ -551,20 +558,26 @@ public final class Systemd {
 
         int poolSize = parseInteger(config.getProperty(CONF_CPU_THREADS));
 
-        logger.seek("监听器线程池设置为" + poolSize + "线程");
+        logger.seek("处理器线程数配置 " + poolSize);
+
+
+        logger.info("创建监听处理线程池");
 
         MONITOR_SERVICE = (ThreadPoolExecutor) Executors.newFixedThreadPool(poolSize);
+
+        logger.info("创建定时任务线程池");
+
         SCHEDULERS_POOL = Executors.newScheduledThreadPool(poolSize);
+
 
         // ==========================================================================================================================
         // 扫描模块
 
-
-        logger.hint("开始模块扫描");
+        logger.hint("扫描所有插件");
 
         String RAW_PACKAGE_PREFIX = config.getProperty(CONF_BOT_PACKAGE_PREFIX);
 
-        logger.seek("模块扫描路径 " + RAW_PACKAGE_PREFIX);
+        logger.seek("扫描路径配置 " + RAW_PACKAGE_PREFIX);
 
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
 
@@ -581,11 +594,14 @@ public final class Systemd {
             logger.info("添加扫描路径 " + trim);
         }
 
+
+        logger.info("开始模块扫描");
+
         configurationBuilder.addScanners(new SubTypesScanner());
         Reflections reflections = new Reflections(configurationBuilder);
 
-        // ==========================================================================================================================
-        // 分析扫描结果
+
+        logger.info("分析扫描结果");
 
         Set<Class<? extends EventHandlerRunner>> RUNNERS = new HashSet<>();
         Set<Class<? extends EventHandlerMonitor>> MONITORS = new HashSet<>();
@@ -666,15 +682,15 @@ public final class Systemd {
                 );
                 if (MODULES.containsKey(info.ARTIFICIAL)) {
                     AbstractEventHandler handler = MODULES.get(info.ARTIFICIAL);
-                    throw new InitException("注册监听器失败 " + clazz.getName() + " 同名已存在 -> " + handler.getClass().getName());
+                    throw new BootException("注册监听器失败 " + clazz.getName() + " 同名已存在 -> " + handler.getClass().getName());
                 }
                 EventHandlerRunner instance = clazz.getConstructor(EventHandlerRunner.RunnerInfo.class).newInstance(info);
-                instance.init();
+                instance.load();
                 logger.info("注册定时器 " + info.ARTIFICIAL + " - " + clazz.getName());
                 MODULES.put(info.ARTIFICIAL, instance);
                 EVENT_RUNNER.put(info.ARTIFICIAL, instance);
             } catch (Exception exception) {
-                throw new InitException("定时器初始化失败 " + clazz.getName(), exception);
+                throw new BootException("定时器初始化失败 " + clazz.getName(), exception);
             }
         }
 
@@ -703,17 +719,17 @@ public final class Systemd {
                 );
                 if (MODULES.containsKey(info.ARTIFICIAL)) {
                     AbstractEventHandler handler = MODULES.get(info.ARTIFICIAL);
-                    throw new InitException("注册监听器失败 " + clazz.getName() + " 同名已存在 -> " + handler.getClass().getName());
+                    throw new BootException("注册监听器失败 " + clazz.getName() + " 同名已存在 -> " + handler.getClass().getName());
                 }
                 EventHandlerMonitor instance = clazz.getConstructor(EventHandlerMonitor.MonitorInfo.class).newInstance(info);
-                instance.init();
+                instance.load();
                 logger.info("注册定时器 " + info.ARTIFICIAL + " - " + clazz.getName());
                 MODULES.put(info.ARTIFICIAL, instance);
                 EVENT_MONITOR.put(info.ARTIFICIAL, instance);
                 if (annotation.users()) EVENT_MONITOR_USERS.add(instance);
                 if (annotation.group()) EVENT_MONITOR_GROUP.add(instance);
             } catch (Exception exception) {
-                throw new InitException("监听器初始化失败 " + clazz.getName(), exception);
+                throw new BootException("监听器初始化失败 " + clazz.getName(), exception);
             }
         }
 
@@ -722,7 +738,7 @@ public final class Systemd {
         // 注册过滤器
 
 
-        logger.hint("初始化过滤器链");
+        logger.hint("初始化过滤器");
         for (Class<? extends EventHandlerFilter> clazz : FILTERS) {
             try {
                 if (!clazz.isAnnotationPresent(Filter.class)) {
@@ -742,17 +758,17 @@ public final class Systemd {
                 );
                 if (MODULES.containsKey(info.ARTIFICIAL)) {
                     AbstractEventHandler handler = MODULES.get(info.ARTIFICIAL);
-                    throw new InitException("注册过滤器失败 " + clazz.getName() + " 同名已存在 -> " + handler.getClass().getName());
+                    throw new BootException("注册过滤器失败 " + clazz.getName() + " 同名已存在 -> " + handler.getClass().getName());
                 }
                 EventHandlerFilter instance = clazz.getConstructor(EventHandlerFilter.FilterInfo.class).newInstance(info);
-                instance.init();
+                instance.load();
                 logger.info("注册过滤器 " + info.ARTIFICIAL + " - " + clazz.getName());
                 MODULES.put(info.ARTIFICIAL, instance);
                 EVENT_FILTER.put(info.ARTIFICIAL, instance);
                 if (annotation.users()) EVENT_FILTER_USERS.add(instance);
                 if (annotation.group()) EVENT_FILTER_GROUP.add(instance);
             } catch (Exception exception) {
-                throw new InitException("过滤器初始化失败 " + clazz.getName(), exception);
+                throw new BootException("过滤器初始化失败 " + clazz.getName(), exception);
             }
         }
 
@@ -761,7 +777,7 @@ public final class Systemd {
         // 初始化执行器
 
 
-        logger.hint("初始化执行器链");
+        logger.hint("初始化执行器");
 
         for (Class<? extends EventHandlerExecutor> clazz : EXECUTORS) {
             try {
@@ -784,21 +800,21 @@ public final class Systemd {
                 );
                 if (MODULES.containsKey(info.ARTIFICIAL)) {
                     AbstractEventHandler handler = MODULES.get(info.ARTIFICIAL);
-                    throw new InitException("注册过滤器失败 " + clazz.getName() + " 同名已存在 -> " + handler.getClass().getName());
+                    throw new BootException("注册过滤器失败 " + clazz.getName() + " 同名已存在 -> " + handler.getClass().getName());
                 }
                 if (EVENT_EXECUTOR.containsKey(info.ARTIFICIAL)) {
                     EventHandlerExecutor handler = EVENT_EXECUTOR.get(info.ARTIFICIAL);
-                    throw new InitException("注册执行器失败 " + info.COMMAND + " " + clazz.getName() + " 命令已存在 -> " + handler.getClass().getName());
+                    throw new BootException("注册执行器失败 " + info.COMMAND + " " + clazz.getName() + " 命令已存在 -> " + handler.getClass().getName());
                 }
                 EventHandlerExecutor instance = clazz.getConstructor(EventHandlerExecutor.ExecutorInfo.class).newInstance(info);
-                instance.init();
+                instance.load();
                 logger.info("注册入执行链 " + info.ARTIFICIAL + " - " + info.COMMAND + " > " + clazz.getName());
                 MODULES.put(info.ARTIFICIAL, instance);
                 EVENT_EXECUTOR.put(info.ARTIFICIAL, instance);
                 if (annotation.users()) EVENT_EXECUTOR_USERS.put(info.COMMAND, instance);
                 if (annotation.group()) EVENT_EXECUTOR_GROUP.put(info.COMMAND, instance);
             } catch (Exception exception) {
-                throw new InitException("执行器初始化失败 " + clazz.getName(), exception);
+                throw new BootException("执行器初始化失败 " + clazz.getName(), exception);
             }
         }
 
@@ -811,62 +827,14 @@ public final class Systemd {
         MESSAGE_LIST_GROUP = generateListMessage(EVENT_EXECUTOR_GROUP.entrySet());
 
 
-        // =============================================================================================================
-        // 注册消息路由
-
-
-        GlobalEventChannel.INSTANCE.subscribeAlways(UserMessageEvent.class, this::handleUsersMessage);
-        GlobalEventChannel.INSTANCE.subscribeAlways(GroupMessageEvent.class, this::handleGroupMessage);
-
-        GlobalEventChannel.INSTANCE.subscribeAlways(NewFriendRequestEvent.class, event -> {
-            logger.hint("BOT被添加好友 " + event.getFromNick() + "(" + event.getFromId() + ")");
-            event.accept();
-        });
-
-        GlobalEventChannel.INSTANCE.subscribeAlways(BotInvitedJoinGroupRequestEvent.class, event -> {
-            logger.hint("BOT被邀请入群 " + event.getGroupName() + "(" + event.getGroupId() + ") 邀请人 " + event.getInvitorNick() + "(" + event.getInvitorId() + ")");
-            event.accept();
-        });
-
-        GlobalEventChannel.INSTANCE.subscribeAlways(MemberJoinEvent.class, event -> {
-            String user = event.getUser().getNick() + "(" + event.getUser().getId() + ")";
-            if (event instanceof MemberJoinEvent.Active) {
-                logger.hint("用户申请加群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
-            } else if (event instanceof MemberJoinEvent.Invite) {
-                logger.hint("用户受邀进群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
-            }
-        });
-
-        GlobalEventChannel.INSTANCE.subscribeAlways(MemberLeaveEvent.class, event -> {
-            String user = event.getUser().getNick() + "(" + event.getUser().getId() + ")";
-            if (event instanceof MemberLeaveEvent.Quit) {
-                logger.hint("用户主动退群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
-            } else if (event instanceof MemberLeaveEvent.Kick) {
-                logger.hint("用户被踢出群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
-            }
-        });
-
-    }
-
-
-    // ==========================================================================================================================================================
-    //
-    // 启动
-    //
-    // ==========================================================================================================================================================
-
-
-    public void boot() throws BotException {
-
-
         // ==========================================================================================================================
         // 登录QQ
 
 
-        if (Driver.isDryRun()) {
-            logger.warning("指定了--dry-run参数 跳过真实登录");
+        if (Driver.isNoLogin()) {
+            logger.warning("指定了--no-login参数 跳过登录");
         } else {
-            logger.hint("开始登录");
+            logger.hint("登录");
             bot.login();
         }
 
@@ -883,7 +851,7 @@ public final class Systemd {
                 entry.getValue().boot();
                 logger.info("启动定时器成功 " + k + " -> " + v.getClass().getName());
             } catch (Exception exception) {
-                throw new BotException("启动定时器失败 " + v.getClass().getName(), exception);
+                throw new BootException("启动定时器失败 " + v.getClass().getName(), exception);
             }
         }
 
@@ -896,7 +864,7 @@ public final class Systemd {
                 entry.getValue().boot();
                 logger.info("启动监听器成功 " + k + " -> " + v.getClass().getName());
             } catch (Exception exception) {
-                throw new BotException("启动监听器失败 " + v.getClass().getName(), exception);
+                throw new BootException("启动监听器失败 " + v.getClass().getName(), exception);
             }
         }
 
@@ -909,7 +877,7 @@ public final class Systemd {
                 entry.getValue().boot();
                 logger.info("启动过滤器成功 " + k + " -> " + v.getClass().getName());
             } catch (Exception exception) {
-                throw new BotException("启动过滤器失败 " + v.getClass().getName(), exception);
+                throw new BootException("启动过滤器失败 " + v.getClass().getName(), exception);
             }
         }
 
@@ -922,7 +890,7 @@ public final class Systemd {
                 entry.getValue().boot();
                 logger.info("启动执行器成功 " + k + " -> " + v.getClass().getName());
             } catch (Exception exception) {
-                throw new BotException("启动执行器失败 " + v.getClass().getName(), exception);
+                throw new BootException("启动执行器失败 " + v.getClass().getName(), exception);
             }
         }
 
@@ -931,9 +899,11 @@ public final class Systemd {
         // 列出所有好友和群组
 
 
-        if (!Driver.isDryRun()) {
+        if (!Driver.isNoLogin()) {
 
-            logger.hint("机器人昵称 " + bot.getNick());
+            logger.seek("机器人账号 " + bot.getId());
+            logger.seek("机器人昵称 " + bot.getNick());
+            logger.seek("机器人头像 " + bot.getAvatarUrl());
 
             logger.hint("所有好友");
             bot.getFriends().forEach(item -> logger.info(Driver.getFormattedNickName(item)));
@@ -942,6 +912,47 @@ public final class Systemd {
             bot.getGroups().forEach(item -> logger.info(Driver.getGroupInfo(item)));
 
         }
+
+
+        // =============================================================================================================
+        // 注册监听
+
+
+        logger.hint("注册机器人事件监听");
+
+
+        userMessageEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(UserMessageEvent.class, this::handleUsersMessage);
+        groupMessageEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(GroupMessageEvent.class, this::handleGroupMessage);
+
+
+        newFriendRequestEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(NewFriendRequestEvent.class, event -> {
+            logger.hint("BOT被添加好友 " + event.getFromNick() + "(" + event.getFromId() + ")");
+            event.accept();
+        });
+
+        botInvitedJoinGroupRequestEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(BotInvitedJoinGroupRequestEvent.class, event -> {
+            logger.hint("BOT被邀请入群 " + event.getGroupName() + "(" + event.getGroupId() + ") 邀请人 " + event.getInvitorNick() + "(" + event.getInvitorId() + ")");
+            event.accept();
+        });
+
+
+        memberJoinEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(MemberJoinEvent.class, event -> {
+            String user = event.getUser().getNick() + "(" + event.getUser().getId() + ")";
+            if (event instanceof MemberJoinEvent.Active) {
+                logger.hint("用户申请加群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
+            } else if (event instanceof MemberJoinEvent.Invite) {
+                logger.hint("用户受邀进群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
+            }
+        });
+
+        memberLeaveEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(MemberLeaveEvent.class, event -> {
+            String user = event.getUser().getNick() + "(" + event.getUser().getId() + ")";
+            if (event instanceof MemberLeaveEvent.Quit) {
+                logger.hint("用户主动退群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
+            } else if (event instanceof MemberLeaveEvent.Kick) {
+                logger.hint("用户被踢出群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
+            }
+        });
 
     }
 
@@ -953,10 +964,15 @@ public final class Systemd {
     // ==========================================================================================================================================================
 
 
-    /**
-     * 即使发生异常也应该继续执行下一个
-     */
     public void shut() {
+
+
+        userMessageEventListener.complete();
+        groupMessageEventListener.complete();
+        memberJoinEventListener.complete();
+        memberLeaveEventListener.complete();
+        newFriendRequestEventListener.complete();
+        botInvitedJoinGroupRequestEventListener.complete();
 
 
         // ==========================================================================================================================
@@ -1002,32 +1018,20 @@ public final class Systemd {
             }
         }
 
-        logger.hint("关闭监听器工作线程");
-        try {
-            MONITOR_SERVICE.shutdown();
-            boolean res = MONITOR_SERVICE.awaitTermination(3600, TimeUnit.SECONDS);
-            if (res) {
-                logger.info("线程池正常退出");
-            } else {
-                logger.info("线程池超时退出");
-            }
-        } catch (InterruptedException exception) {
-            logger.error("线程池关闭异常 强制关闭", exception);
+        if (Driver.isShutModeDrop()) {
+            logger.info("强制关闭监听器工作线程");
             MONITOR_SERVICE.shutdownNow();
+        } else {
+            logger.info("关闭监听器工作线程");
+            MONITOR_SERVICE.shutdown();
         }
 
-        logger.hint("关闭计划任务线程池");
-        try {
-            SCHEDULERS_POOL.shutdown();
-            boolean res = SCHEDULERS_POOL.awaitTermination(3600, TimeUnit.SECONDS);
-            if (res) {
-                logger.info("线程池正常退出");
-            } else {
-                logger.info("线程池超时退出");
-            }
-        } catch (InterruptedException exception) {
-            logger.error("线程池关闭异常 强制关闭", exception);
+        if (Driver.isShutModeDrop()) {
+            logger.info("强制关闭计划任务线程池");
             SCHEDULERS_POOL.shutdownNow();
+        } else {
+            logger.info("关闭计划任务线程池");
+            SCHEDULERS_POOL.shutdown();
         }
 
     }
@@ -1048,10 +1052,7 @@ public final class Systemd {
 
             MONITOR_SERVICE.submit(() -> EVENT_MONITOR_USERS.forEach(item -> item.handleUsersMessage(event)));
 
-            if (EVENT_FILTER_USERS.parallelStream().anyMatch(item -> item.handleUsersMessage(event))) {
-                logger.hint("用户消息被拦截 " + event.getSender().getId() + " ->" + event.getMessage());
-                return;
-            }
+            if (EVENT_FILTER_USERS.parallelStream().anyMatch(item -> item.handleUsersMessage(event))) return;
 
             String content = event.getMessage().contentToString();
 
@@ -1106,10 +1107,7 @@ public final class Systemd {
 
             MONITOR_SERVICE.submit(() -> EVENT_MONITOR_GROUP.forEach(item -> item.handleGroupMessage(event)));
 
-            if (EVENT_FILTER_GROUP.stream().anyMatch(item -> item.handleGroupMessage(event))) {
-                logger.hint("群组消息被拦截 " + event.getSender().getId() + " ->" + event.getMessage());
-                return;
-            }
+            if (EVENT_FILTER_GROUP.stream().anyMatch(item -> item.handleGroupMessage(event))) return;
 
             String content = event.getMessage().contentToString();
 
@@ -1207,24 +1205,20 @@ public final class Systemd {
     }
 
 
-    private File initFile(File file) throws InitException {
+    private File initFile(File file) throws BootException {
         try {
-            if (file.createNewFile()) {
-                logger.hint("创建新的文件 " + file.getAbsolutePath());
-            } else {
-                logger.hint("文件已经存在 " + file.getAbsolutePath());
-            }
+            if (file.createNewFile()) logger.hint("创建新的文件 " + file.getAbsolutePath());
         } catch (IOException exception) {
-            throw new InitException("文件创建失败 " + file.getAbsolutePath(), exception);
+            throw new BootException("文件创建失败 " + file.getAbsolutePath(), exception);
         }
 
-        if (!file.exists()) throw new InitException("文件不存在 " + file.getAbsolutePath());
-        if (!file.canRead()) throw new InitException("文件无权读取 " + file.getAbsolutePath());
+        if (!file.exists()) throw new BootException("文件不存在 " + file.getAbsolutePath());
+        if (!file.canRead()) throw new BootException("文件无权读取 " + file.getAbsolutePath());
         return file;
     }
 
 
-    private String readFile(File file) throws InitException {
+    private String readFile(File file) throws BootException {
 
         initFile(file);
 
@@ -1239,9 +1233,9 @@ public final class Systemd {
             return builder.toString();
 
         } catch (FileNotFoundException exception) {
-            throw new InitException("文件不存在 " + file.getAbsolutePath(), exception);
+            throw new BootException("文件不存在 " + file.getAbsolutePath(), exception);
         } catch (IOException exception) {
-            throw new InitException("文件读取失败 " + file.getAbsolutePath(), exception);
+            throw new BootException("文件读取失败 " + file.getAbsolutePath(), exception);
         }
     }
 
@@ -1287,7 +1281,7 @@ public final class Systemd {
             logger.info("停止 " + name);
             instance.shut();
             logger.info("加载 " + name);
-            instance.init();
+            instance.load();
             logger.info("启动 " + name);
             instance.boot();
         } catch (BotException exception) {

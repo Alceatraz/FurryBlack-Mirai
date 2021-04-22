@@ -19,7 +19,7 @@ public class DemoRunner extends EventHandlerRunner {
     }
 
     @Override
-    public void init() {
+    public void load() {
         System.out.println("加载" + this.getClass().getName());
     }
 

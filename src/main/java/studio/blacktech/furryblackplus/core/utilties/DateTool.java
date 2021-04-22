@@ -103,18 +103,7 @@ public final class DateTool {
 
     @Api("格式化时间间隔")
     public static String duration(long time) {
-        long ss = time;
-        long dd = ss / 86400;
-        ss = ss % 86400;
-        long hh = ss / 3600;
-        ss = ss % 3600;
-        long mm = ss / 60;
-        ss = ss % 60;
-        return dd + " - " + String.format("%02d", hh) + ":" + String.format("%02d", mm) + ":" + String.format("%02d", ss);
-    }
 
-    @Api("格式化时间间隔")
-    public static String durationMille(long time) {
         long ms = time;
         long dd = ms / 86400000;
         ms = ms % 86400000;
@@ -124,7 +113,66 @@ public final class DateTool {
         ms = ms % 60000;
         long ss = ms / 1000;
         ms = ms % 1000;
-        return dd + " - " + String.format("%02d", hh) + ":" + String.format("%02d", mm) + ":" + String.format("%02d", ss) + "." + String.format("%03d", ms);
+        StringBuilder builder = new StringBuilder();
+
+        boolean contains = false;
+
+        if (dd > 0) {
+            contains = true;
+            builder.append(dd);
+            builder.append(" - ");
+        }
+
+        if (hh > 0) {
+            contains = true;
+            if (builder.length() == 0) {
+                builder.append(hh);
+            } else {
+                builder.append(String.format("%02d", hh));
+            }
+            builder.append(":");
+        } else if (contains) {
+            builder.append("00:");
+        }
+
+        if (mm > 0) {
+            contains = true;
+            if (builder.length() == 0) {
+                builder.append(mm);
+            } else {
+                builder.append(String.format("%02d", mm));
+            }
+            builder.append(":");
+        } else if (contains) {
+            builder.append("00:");
+        }
+
+        if (ss > 0) {
+            contains = true;
+            if (builder.length() == 0) {
+                builder.append(ss);
+            } else {
+                builder.append(String.format("%02d", ss));
+            }
+        } else if (contains) {
+            builder.append("00");
+        }
+
+        if (ms > 0) {
+            contains = true;
+            builder.append(".");
+            if (builder.length() == 0) {
+                builder.append(ms);
+            } else {
+                builder.append(String.format("%03d", ms));
+            }
+        }
+
+        if (contains) {
+            return builder.toString();
+        } else {
+            return "0.000";
+        }
     }
 
     // ================================================================

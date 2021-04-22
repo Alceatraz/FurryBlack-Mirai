@@ -6,7 +6,7 @@ import studio.blacktech.furryblackplus.core.annotation.Api;
 
 @SuppressWarnings("unused")
 @Api("配置错误")
-public class MisConfigException extends InitException {
+public class MisConfigException extends BootException {
 
     public MisConfigException() {
         super();
