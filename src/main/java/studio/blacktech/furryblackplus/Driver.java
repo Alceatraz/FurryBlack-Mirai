@@ -437,6 +437,10 @@ public final class Driver {
                             case "usr":
                             case "user":
                             case "users":
+                            case "f":
+                            case "fri":
+                            case "friend":
+                            case "friends":
                                 long user = Long.parseLong(command.getParameterSegment(1));
                                 Driver.sendUserMessage(user, command.join(2));
                                 break;
@@ -448,9 +452,9 @@ public final class Driver {
                                 Driver.sendGroupMessage(group, command.join(2));
                                 break;
                             default:
-                                group = Long.parseLong(command.getParameterSegment(1));
-                                user = Long.parseLong(command.getParameterSegment(2));
-                                Driver.sendAtMessage(group, user, command.join(3));
+                                group = Long.parseLong(command.getParameterSegment(0));
+                                user = Long.parseLong(command.getParameterSegment(1));
+                                Driver.sendAtMessage(group, user, command.join(2));
                         }
                         break;
 
