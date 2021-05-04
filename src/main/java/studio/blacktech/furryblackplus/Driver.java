@@ -337,6 +337,14 @@ public final class Driver {
                         System.out.println(debug ? "Enable DEBUG" : "Disable DEBUG");
                         break;
 
+                    case "module":
+                        systemd.listAllPlugin().forEach(System.out::println);
+                        break;
+
+                    case "reload":
+                        for (String name : command.getParameterSegment()) systemd.reloadPlugin(name);
+                        break;
+
                     case "enable":
                         enable = true;
                         System.out.println("启动事件响应");
@@ -456,14 +464,6 @@ public final class Driver {
                                 user = Long.parseLong(command.getParameterSegment(1));
                                 Driver.sendAtMessage(group, user, command.join(2));
                         }
-                        break;
-
-                    case "module":
-                        systemd.listAllPlugin().forEach(System.out::println);
-                        break;
-
-                    case "reload":
-                        for (String name : command.getParameterSegment()) systemd.reloadPlugin(name);
                         break;
 
                     case "gc":
