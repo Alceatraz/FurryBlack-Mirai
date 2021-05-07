@@ -64,7 +64,7 @@ public final class Driver {
     }
 
 
-    public static final String APP_VERSION = "0.6.0";
+    public static final String APP_VERSION = "0.6.3";
 
 
     // ==========================================================================================================================================================
