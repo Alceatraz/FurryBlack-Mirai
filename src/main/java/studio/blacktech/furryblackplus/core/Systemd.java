@@ -8,8 +8,9 @@ import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.ContactList;
 import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.contact.NormalMember;
 import net.mamoe.mirai.contact.Stranger;
-import net.mamoe.mirai.contact.User;
+import net.mamoe.mirai.data.UserProfile;
 import net.mamoe.mirai.event.GlobalEventChannel;
 import net.mamoe.mirai.event.Listener;
 import net.mamoe.mirai.event.events.BotInvitedJoinGroupRequestEvent;
@@ -170,7 +171,8 @@ public final class Systemd {
     private char COMMAND_PREFIX = '/';
     private Pattern COMMAND_PATTERN;
 
-    private Map<Long, String> NICKNAME;
+    private Map<Long, String> NICKNAME_GLOBAL;
+    private Map<Long, Map<Long, String>> NICKNAME_GROUPS;
 
     private String MESSAGE_INFO;
     private String MESSAGE_EULA;
@@ -341,7 +343,8 @@ public final class Systemd {
         // 加载常用昵称
 
 
-        NICKNAME = new HashMap<>();
+        NICKNAME_GLOBAL = new HashMap<>();
+        NICKNAME_GROUPS = new HashMap<>();
 
 
         File commonNick = initFile(Paths.get(Driver.getConfigFolder(), "nickname.txt").toFile());
@@ -350,6 +353,8 @@ public final class Systemd {
             FileReader fileReader = new FileReader(commonNick);
             BufferedReader bufferedReader = new BufferedReader(fileReader)
         ) {
+
+            // 1234.1234:nick
 
             String line;
             while ((line = bufferedReader.readLine()) != null) {
@@ -366,8 +371,53 @@ public final class Systemd {
                     continue;
                 }
 
-                long userID = Long.parseLong(temp1[0]);
-                NICKNAME.put(userID, temp1[1].trim());
+                if (!temp1[0].contains("\\.")) {
+                    logger.warning("配置无效 " + line);
+                    continue;
+                }
+
+                String nick = temp1[1].trim();
+
+                String[] temp2 = temp1[0].split("\\.");
+
+                long groupId;
+                long userId;
+
+                try {
+                    userId = Long.parseLong(temp2[1]);
+                } catch (NumberFormatException exception) {
+                    logger.warning("配置无效 " + line);
+                    continue;
+                }
+
+                if (temp2[0].equals("\\*")) {
+
+                    NICKNAME_GLOBAL.put(userId, nick);
+
+                    logger.seek("添加全局昵称 " + userId, nick);
+
+                } else {
+
+                    try {
+                        groupId = Long.parseLong(temp2[0]);
+                    } catch (NumberFormatException exception) {
+                        logger.warning("配置无效 " + line);
+                        continue;
+                    }
+
+                    Map<Long, String> groupNicks;
+
+                    if (NICKNAME_GROUPS.containsKey(groupId)) {
+                        groupNicks = NICKNAME_GROUPS.get(groupId);
+                    } else {
+                        NICKNAME_GROUPS.put(groupId, groupNicks = new HashMap<>());
+                    }
+
+                    groupNicks.put(userId, nick);
+
+                    logger.seek("添加群内昵称 " + groupId + "." + userId, nick);
+                }
+
 
             }
 
@@ -412,7 +462,7 @@ public final class Systemd {
             logger.seek("QQ密码 " + ACCOUNT_PW);
             logger.warning("关闭调试模式以给此条日志打码");
         } else {
-            String shadow_ACCOUNT_PW = ACCOUNT_PW.charAt(0) + "*".repeat(length - 1) ;
+            String shadow_ACCOUNT_PW = ACCOUNT_PW.charAt(0) + "*".repeat(length - 1);
             logger.seek("QQ密码 " + shadow_ACCOUNT_PW);
         }
 
@@ -1389,26 +1439,49 @@ public final class Systemd {
         return Mirai.getInstance().queryImageUrl(bot, image);
     }
 
-    @Api("按照配置的映射表获取ID")
-    public String getUserProfile(long user) {
-        return Mirai.getInstance().queryProfile(bot, user).getNickname();
+    @Api("获取用户名片")
+    public UserProfile getUserProfile(long user) {
+        return Mirai.getInstance().queryProfile(bot, user);
     }
 
-    @Api("按照配置的映射表获取ID")
-    public String getNickName(User user) {
-        if (NICKNAME.containsKey(user.getId())) {
-            return NICKNAME.get(user.getId());
+    @Api("获取预设昵称")
+    public String getMappedNickName(long groupId, long userId) {
+        if (NICKNAME_GROUPS.containsKey(groupId)) {
+            Map<Long, String> groupNicks = NICKNAME_GROUPS.get(groupId);
+            if (groupNicks.containsKey(userId)) {
+                return groupNicks.get(userId);
+            }
+        }
+        if (NICKNAME_GLOBAL.containsKey(userId)) {
+            return NICKNAME_GLOBAL.get(userId);
+        }
+        NormalMember member = bot.getGroupOrFail(groupId).getOrFail(userId);
+        String nameCard = member.getNameCard();
+        if (!nameCard.isEmpty() && !nameCard.isBlank()) {
+            return nameCard;
         } else {
-            return user.getNick(); // User包含了nick强行使用重载方法是一种浪费
+            return getUserProfile(userId).getNickname();
         }
     }
 
-    @Api("按照配置的映射表获取ID")
-    public String getNickName(long user) {
-        if (NICKNAME.containsKey(user)) {
-            return NICKNAME.get(user);
+    @Api("获取预设昵称")
+    public String getMappedNickName(GroupMessageEvent event) {
+        long groupId = event.getGroup().getId();
+        long userId = event.getSender().getId();
+        if (NICKNAME_GROUPS.containsKey(groupId)) {
+            Map<Long, String> groupNicks = NICKNAME_GROUPS.get(groupId);
+            if (groupNicks.containsKey(userId)) {
+                return groupNicks.get(userId);
+            }
+        }
+        if (NICKNAME_GLOBAL.containsKey(userId)) {
+            return NICKNAME_GLOBAL.get(userId);
+        }
+        String nameCard = event.getSender().getNameCard();
+        if (!nameCard.isEmpty()) {
+            return nameCard;
         } else {
-            return Mirai.getInstance().queryProfile(bot, user).getNickname();
+            return event.getSender().getNick();
         }
     }
 

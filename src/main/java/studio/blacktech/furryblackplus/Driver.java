@@ -9,6 +9,7 @@ import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.contact.NormalMember;
 import net.mamoe.mirai.contact.Stranger;
 import net.mamoe.mirai.contact.User;
+import net.mamoe.mirai.data.UserProfile;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import net.mamoe.mirai.message.data.At;
@@ -64,7 +65,7 @@ public final class Driver {
     }
 
 
-    public static final String APP_VERSION = "0.6.3";
+    public static final String APP_VERSION = "0.6.4";
 
 
     // ==========================================================================================================================================================
@@ -612,25 +613,34 @@ public final class Driver {
     //
     // ==========================================================================================================================================================
 
-
-    @Api("按照配置的映射表获取ID")
-    public static String getNickName(User user) {
-        return systemd.getNickName(user);
+    @Api("获取用户信息")
+    public static UserProfile getUserProfile(long user) {
+        return systemd.getUserProfile(user);
     }
 
-    @Api("按照配置的映射表获取ID")
+    @Api("获取用户昵称")
     public static String getNickName(long user) {
-        return systemd.getNickName(user);
+        return getUserProfile(user).getNickname();
     }
 
-    @Api("按照配置的映射表获取ID")
+    @Api("获取用户格式化名")
     public static String getFormattedNickName(User user) {
-        return getNickName(user) + "(" + user.getId() + ")";
+        return user.getNick() + "(" + user.getId() + ")";
     }
 
-    @Api("按照配置的映射表获取ID")
+    @Api("获取用户格式化名")
     public static String getFormattedNickName(long user) {
         return getNickName(user) + "(" + user + ")";
+    }
+
+    @Api("获取预设昵称")
+    public String getMappedNickName(GroupMessageEvent event) {
+        return systemd.getMappedNickName(event);
+    }
+
+    @Api("获取预设昵称")
+    public String getMappedNickName(long groupId, long userId) {
+        return systemd.getMappedNickName(groupId, userId);
     }
 
     @Api("格式化群组信息")
