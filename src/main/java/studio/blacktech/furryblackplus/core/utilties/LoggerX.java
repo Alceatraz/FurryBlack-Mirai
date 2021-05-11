@@ -20,14 +20,16 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 
 @SuppressWarnings("unused")
 
-@Api("日志工具 为了兼容Mirai继承了PlatformLogger 同时添加了新的级别 seek hint")
+@Api("日志工具")
 public final class LoggerX extends PlatformLogger {
 
     public static final List<String> LEVELS = Arrays.asList("MUTE", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "ALL");
@@ -108,20 +110,108 @@ public final class LoggerX extends PlatformLogger {
     private static boolean PRINT_DEBUG = true;
     private static boolean PRINT_VERBOSE = true;
 
+
     // ==================================================================================================
     //
     //
+    // ==================================================================================================
+
+
+    private static final DateTimeFormatter DATETIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
+    private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault());
+    private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
+
+
+    @Api("格式化日期")
+    public static String date() {
+        return DATE.format(Instant.now());
+    }
+
+    @Api("格式化日期")
+    public static String date(Instant instant) {
+        return DATE.format(instant);
+    }
+
+    @Api("格式化日期")
+    public static String date(long timeStamp) {
+        return DATE.format(Instant.ofEpochMilli(timeStamp));
+    }
+
+
+    @Api("格式化时间")
+    public static String time() {
+        return TIME.format(Instant.now());
+    }
+
+    @Api("格式化时间")
+    public static String time(Instant instant) {
+        return DATE.format(instant);
+    }
+
+    @Api("格式化时间")
+    public static String time(long timeStamp) {
+        return TIME.format(Instant.ofEpochMilli(timeStamp));
+    }
+
+
+    @Api("格式化日期时间")
+    public static String datetime() {
+        return DATETIME.format(Instant.now());
+    }
+
+    @Api("格式化日期时间")
+    public static String datetime(Instant instant) {
+        return DATETIME.format(instant);
+    }
+
+    @Api("格式化日期时间")
+    public static String datetime(long timeStamp) {
+        return DATETIME.format(Instant.ofEpochMilli(timeStamp));
+    }
+
+
+    @Api("自定义格式化")
+    public static String format(String pattern) {
+        return DateTimeFormatter.ofPattern(pattern).withZone(ZoneId.systemDefault()).format(Instant.now());
+    }
+
+    @Api("自定义格式化")
+    public static String format(String pattern, ZoneId zone) {
+        return DateTimeFormatter.ofPattern(pattern).withZone(zone).format(Instant.now());
+    }
+
+    @Api("自定义格式化")
+    public static String format(String pattern, Instant instant) {
+        return DateTimeFormatter.ofPattern(pattern).withZone(ZoneId.systemDefault()).format(instant);
+    }
+
+    @Api("自定义格式化")
+    public static String format(String pattern, ZoneId zone, Instant instant) {
+        return DateTimeFormatter.ofPattern(pattern).withZone(zone).format(instant);
+    }
+
+    @Api("自定义格式化")
+    public static String format(String pattern, long timeStamp) {
+        return DateTimeFormatter.ofPattern(pattern).withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(timeStamp));
+    }
+
+    @Api("自定义格式化")
+    public static String format(String pattern, ZoneId zone, long timeStamp) {
+        return DateTimeFormatter.ofPattern(pattern).withZone(zone).format(Instant.ofEpochMilli(timeStamp));
+    }
+
+
     // ==================================================================================================
 
 
     public void bypass(String message) {
-        String result = "[" + DateTool.datetime() + "][BYPS][" + name + "]" + message;
+        String result = "[" + datetime() + "][BYPS][" + name + "]" + message;
         System.out.println(result);
         LoggerX.writeLog(result);
     }
 
     public void bypass(String message, Throwable throwable) {
-        String result = "[" + DateTool.datetime() + "][BYPS][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + datetime() + "][BYPS][" + name + "]" + message + "\r\n" + extractTrace(throwable);
         System.out.println(result);
         LoggerX.writeLog(result);
     }
@@ -129,14 +219,14 @@ public final class LoggerX extends PlatformLogger {
 
     @Override
     public void error0(String message) {
-        String result = "[" + DateTool.datetime() + "][EXCE][" + name + "]" + message;
+        String result = "[" + datetime() + "][EXCE][" + name + "]" + message;
         if (PRINT_ERROR) System.out.println(Color.RED + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
     @Override
     public void error0(String message, Throwable throwable) {
-        String result = "[" + DateTool.datetime() + "][EXCE][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + datetime() + "][EXCE][" + name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_ERROR) System.out.println(Color.RED + result + Color.RESET);
         LoggerX.writeLog(result);
     }
@@ -144,47 +234,47 @@ public final class LoggerX extends PlatformLogger {
 
     @Override
     public void warning0(String message) {
-        String result = "[" + DateTool.datetime() + "][WARN][" + name + "]" + message;
+        String result = "[" + datetime() + "][WARN][" + name + "]" + message;
         if (PRINT_WARN) System.out.println(Color.LIGHT_YELLOW + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
     @Override
     public void warning0(String message, Throwable throwable) {
-        String result = "[" + DateTool.datetime() + "][WARN][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + datetime() + "][WARN][" + name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_WARN) System.out.println(Color.LIGHT_YELLOW + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
 
     public void hint(String message) {
-        String result = "[" + DateTool.datetime() + "][HINT][" + name + "]" + message;
+        String result = "[" + datetime() + "][HINT][" + name + "]" + message;
         if (PRINT_HINT) System.out.println(Color.LIGHT_CYAN + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
     public void hint(String message, Throwable throwable) {
-        String result = "[" + DateTool.datetime() + "][HINT][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + datetime() + "][HINT][" + name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_HINT) System.out.println(Color.LIGHT_CYAN + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
 
     public void seek(String message) {
-        String result = "[" + DateTool.datetime() + "][SEEK][" + name + "]" + message;
+        String result = "[" + datetime() + "][SEEK][" + name + "]" + message;
         if (PRINT_SEEK) System.out.println(Color.LIGHT_GREEN + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
     public String seek(String message, String value) {
-        String result = "[" + DateTool.datetime() + "][SEEK][" + name + "]" + message + " `" + value + "`";
+        String result = "[" + datetime() + "][SEEK][" + name + "]" + message + " `" + value + "`";
         if (PRINT_SEEK) System.out.println(Color.LIGHT_GREEN + result + Color.RESET);
         LoggerX.writeLog(result);
         return value;
     }
 
     public void seek(String message, Throwable throwable) {
-        String result = "[" + DateTool.datetime() + "][SEEK][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + datetime() + "][SEEK][" + name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_SEEK) System.out.println(Color.LIGHT_GREEN + result + Color.RESET);
         LoggerX.writeLog(result);
     }
@@ -192,14 +282,14 @@ public final class LoggerX extends PlatformLogger {
 
     @Override
     public void info0(String message) {
-        String result = "[" + DateTool.datetime() + "][INFO][" + name + "]" + message;
+        String result = "[" + datetime() + "][INFO][" + name + "]" + message;
         if (PRINT_INFO) System.out.println(result);
         LoggerX.writeLog(result);
     }
 
     @Override
     public void info0(String message, Throwable throwable) {
-        String result = "[" + DateTool.datetime() + "][INFO][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + datetime() + "][INFO][" + name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_INFO) System.out.println(result);
         LoggerX.writeLog(result);
     }
@@ -207,14 +297,14 @@ public final class LoggerX extends PlatformLogger {
 
     @Override
     public void debug0(String message) {
-        String result = "[" + DateTool.datetime() + "][DEBG][" + name + "]" + message;
+        String result = "[" + datetime() + "][DEBG][" + name + "]" + message;
         if (PRINT_DEBUG) System.out.println(Color.GRAY + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
     @Override
     public void debug0(String message, Throwable throwable) {
-        String result = "[" + DateTool.datetime() + "][DEBG][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + datetime() + "][DEBG][" + name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_DEBUG) System.out.println(Color.GRAY + result + Color.RESET);
         LoggerX.writeLog(result);
     }
@@ -222,22 +312,19 @@ public final class LoggerX extends PlatformLogger {
 
     @Override
     public void verbose0(String message) {
-        String result = "[" + DateTool.datetime() + "][VERB][" + name + "]" + message;
+        String result = "[" + datetime() + "][VERB][" + name + "]" + message;
         if (PRINT_VERBOSE) System.out.println(Color.GRAY + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
     @Override
     public void verbose0(String message, Throwable throwable) {
-        String result = "[" + DateTool.datetime() + "][VERB][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + datetime() + "][VERB][" + name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_VERBOSE) System.out.println(Color.GRAY + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
 
-    // ==================================================================================================
-    //
-    //
     // ==================================================================================================
 
 
@@ -248,7 +335,7 @@ public final class LoggerX extends PlatformLogger {
         StringBuilder builder = new StringBuilder();
 
         builder.append("[");
-        builder.append(DateTool.datetime());
+        builder.append(datetime());
         builder.append("][DUMP][");
         builder.append(name);
         builder.append("]");
@@ -321,9 +408,6 @@ public final class LoggerX extends PlatformLogger {
 
 
     // ==================================================================================================
-    //
-    //
-    // ==================================================================================================
 
 
     public static String extractTrace(Throwable throwable) {
@@ -347,9 +431,6 @@ public final class LoggerX extends PlatformLogger {
 
 
     // ==================================================================================================
-    //
-    //
-    // ==================================================================================================
 
 
     public static String unicode(String raw) {
@@ -362,12 +443,7 @@ public final class LoggerX extends PlatformLogger {
     }
 
 
-    public static String[] unicodeid(String raw) {
-        List<String> tmp = new LinkedList<>();
-        for (int i = 0; i < raw.length(); i++) tmp.add(Integer.toHexString(raw.charAt(i) & 0xffff));
-        String[] res = new String[tmp.size()];
-        tmp.toArray(res);
-        return res;
-    }
+    // ==================================================================================================
+
 
 }

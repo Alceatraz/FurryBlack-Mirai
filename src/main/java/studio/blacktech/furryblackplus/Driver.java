@@ -25,14 +25,17 @@ import studio.blacktech.furryblackplus.core.annotation.Api;
 import studio.blacktech.furryblackplus.core.exception.initlization.BootException;
 import studio.blacktech.furryblackplus.core.interfaces.EventHandlerRunner;
 import studio.blacktech.furryblackplus.core.utilties.Command;
-import studio.blacktech.furryblackplus.core.utilties.DateTool;
 import studio.blacktech.furryblackplus.core.utilties.LoggerX;
+import studio.blacktech.furryblackplus.core.utilties.TimeTool;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -55,9 +58,16 @@ import java.util.stream.Collectors;
 public final class Driver {
 
 
+    @Api("原始系统时区") public static final ZoneId SYSTEM_ZONEID;
+    @Api("原始系统偏差") public static final ZoneOffset SYSTEM_OFFSET;
+
+
     static {
 
         System.setProperty("mirai.no-desktop", "");
+
+        SYSTEM_ZONEID = ZoneId.systemDefault();
+        SYSTEM_OFFSET = ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now());
 
         Locale.setDefault(Locale.SIMPLIFIED_CHINESE);
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
@@ -110,7 +120,7 @@ public final class Driver {
 
     public static void main(String[] args) {
 
-        System.out.println("[FurryBlack][MAIN]FurryBlackPlus Mirai - ver " + APP_VERSION + " " + DateTool.formatTime("yyyy-MM-dd HH:mm:ss", BOOT_TIME));
+        System.out.println("[FurryBlack][MAIN]FurryBlackPlus Mirai - ver " + APP_VERSION + " " + LoggerX.datetime(BOOT_TIME));
 
         // =====================================================================
         // 初始化命令行参数
@@ -180,7 +190,7 @@ public final class Driver {
             FOLDER_MODULE = Paths.get(userDir, "module").toFile();
             FOLDER_LOGGER = Paths.get(userDir, "logger").toFile();
 
-            File loggerFile = Paths.get(FOLDER_LOGGER.getAbsolutePath(), DateTool.formatTime("yyyy_MM_dd_HH_mm_ss", BOOT_TIME) + ".txt").toFile();
+            File loggerFile = Paths.get(FOLDER_LOGGER.getAbsolutePath(), LoggerX.format("yyyy_MM_dd_HH_mm_ss", BOOT_TIME) + ".txt").toFile();
 
             System.out.println("[FurryBlack][INIT]初始化目录");
 
@@ -259,7 +269,7 @@ public final class Driver {
 
         // =====================================================================
 
-        logger.hint("系统启动完成 耗时" + DateTool.duration(System.currentTimeMillis() - BOOT_TIME));
+        logger.hint("系统启动完成 耗时" + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME));
         LoggerX.setPrintLevel(level);
 
         enable = true;
@@ -475,7 +485,7 @@ public final class Driver {
                         long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
                         long maxMemory = Runtime.getRuntime().maxMemory() / 1024;
                         System.out.println("消息事件: " + (enable ? "启用" : "关闭"));
-                        System.out.println("运行时间: " + DateTool.duration(System.currentTimeMillis() - BOOT_TIME));
+                        System.out.println("运行时间: " + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME));
                         System.out.println("内存占用: " + (totalMemory - freeMemory) + "KB/" + totalMemory + "KB/" + maxMemory + "KB(" + (maxMemory / 1024) + "MB)");
                         break;
 
@@ -603,8 +613,13 @@ public final class Driver {
     }
 
     @Api("提交定时任务")
-    public static ScheduledFuture<?> scheduleWithFixedDelay(Runnable runnable, long initialDelay, long delay, TimeUnit unit) {
-        return systemd.scheduleWithFixedDelay(runnable, initialDelay, delay, unit);
+    public static ScheduledFuture<?> scheduleAtNextDayFixedRate(Runnable runnable, long period, TimeUnit unit) {
+        return systemd.scheduleAtFixedRate(runnable, TimeTool.nextDayDuration(), period, unit);
+    }
+
+    @Api("提交定时任务")
+    public static ScheduledFuture<?> scheduleWithNextDayFixedDelay(Runnable runnable, long delay, TimeUnit unit) {
+        return systemd.scheduleWithFixedDelay(runnable, TimeTool.nextDayDuration(), delay, unit);
     }
 
     // ==========================================================================================================================================================
