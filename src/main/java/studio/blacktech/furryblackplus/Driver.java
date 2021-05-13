@@ -19,6 +19,9 @@ import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.PlainText;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.impl.completer.AggregateCompleter;
+import org.jline.reader.impl.completer.ArgumentCompleter;
+import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.widget.AutopairWidgets;
 import studio.blacktech.furryblackplus.core.Systemd;
 import studio.blacktech.furryblackplus.core.annotation.Api;
@@ -318,7 +321,7 @@ public final class Driver {
             try {
                 String temp = console.read("[console]$ ");
                 if (temp == null || temp.isEmpty() || temp.isBlank()) continue;
-                Command command = new Command(temp);
+                Command command = new Command(temp.trim());
                 switch (command.getCommandName()) {
 
                     case "drop":
@@ -353,7 +356,7 @@ public final class Driver {
                         break;
 
                     case "reload":
-                        for (String name : command.getParameterSegment()) systemd.reloadPlugin(name);
+                        for (String name : Arrays.stream(command.getParameterSegment()).collect(Collectors.toSet())) systemd.reloadPlugin(name);
                         break;
 
                     case "enable":
@@ -509,7 +512,17 @@ public final class Driver {
             if (noJline) {
                 bufferedReader = new BufferedReader(new InputStreamReader(System.in));
             } else {
-                jlineReader = LineReaderBuilder.builder().build();
+                jlineReader = LineReaderBuilder.builder().completer(new AggregateCompleter(
+                    new ArgumentCompleter(new StringsCompleter("?", "help", "drop", "stop", "exit", "quit", "gc", "stat", "stats", "status", "enable", "disable", "level", "debug", "module")),
+                    new ArgumentCompleter(
+                        new StringsCompleter("list", "send"),
+                        new StringsCompleter("u", "usr", "user", "users", "f", "fri", "friend", "friends", "g", "grp", "group", "groups")
+                    ),
+                    new ArgumentCompleter(
+                        new StringsCompleter("reload"),
+                        new StringsCompleter(systemd.listAllPlugin())
+                    )
+                )).build();
                 AutopairWidgets autopairWidgets = new AutopairWidgets(jlineReader);
                 autopairWidgets.enable();
                 assert jlineReader != null;
