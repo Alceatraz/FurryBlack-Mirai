@@ -532,6 +532,7 @@ public final class Systemd {
 
         }
 
+
         configuration.fileBasedDeviceInfo(deviceInfo.getAbsolutePath());
 
 
@@ -1457,10 +1458,10 @@ public final class Systemd {
         }
         NormalMember member = bot.getGroupOrFail(groupId).getOrFail(userId);
         String nameCard = member.getNameCard();
-        if (!nameCard.isEmpty() && !nameCard.isBlank()) {
-            return nameCard;
-        } else {
+        if (nameCard.isBlank()) {
             return getUserProfile(userId).getNickname();
+        } else {
+            return nameCard;
         }
     }
 
@@ -1478,10 +1479,10 @@ public final class Systemd {
             return NICKNAME_GLOBAL.get(userId);
         }
         String nameCard = event.getSender().getNameCard();
-        if (!nameCard.isEmpty()) {
-            return nameCard;
-        } else {
+        if (nameCard.isBlank()) {
             return event.getSender().getNick();
+        } else {
+            return nameCard;
         }
     }
 

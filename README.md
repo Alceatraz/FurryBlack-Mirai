@@ -46,6 +46,10 @@
 
 ## CHANGELOG
 
+### 0.6.7
+
+- 修复String.isEmpty
+
 ### 0.6.6
 
 - 更新jline

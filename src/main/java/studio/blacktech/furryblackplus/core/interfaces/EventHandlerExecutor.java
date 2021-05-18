@@ -30,7 +30,7 @@ public abstract class EventHandlerExecutor extends AbstractEventHandler {
 
         public ExecutorInfo(String name, String artificial, String description, String[] privacy, String command, String[] usage) {
             super(name, artificial, description, privacy);
-            if (command.equals("")) throw new IllegalArgumentException("无效的模块命令`command`");
+            if (command.isBlank()) throw new IllegalArgumentException("无效的模块命令`command`");
             this.COMMAND = command;
             this.USAGE = usage;
             StringBuilder builder = new StringBuilder();

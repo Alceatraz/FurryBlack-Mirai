@@ -244,9 +244,9 @@ public abstract class AbstractEventHandler {
         public final String[] PRIVACY;
 
         public ModuleInfo(String name, String artificial, String description, String[] privacy) {
-            if (name.equals("")) throw new IllegalArgumentException("无效的模块名称`name`");
-            if (artificial.equals("")) throw new IllegalArgumentException("无效的模块全名`artificial`");
-            if (description.equals("")) throw new IllegalArgumentException("无效的模块介绍`description`");
+            if (name.isBlank()) throw new IllegalArgumentException("无效的模块名称`name`");
+            if (artificial.isBlank()) throw new IllegalArgumentException("无效的模块全名`artificial`");
+            if (description.isBlank()) throw new IllegalArgumentException("无效的模块介绍`description`");
             this.NAME = name;
             this.ARTIFICIAL = artificial;
             this.DESCRIPTION = description;
