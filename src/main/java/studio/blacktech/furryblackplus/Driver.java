@@ -43,6 +43,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -78,7 +80,7 @@ public final class Driver {
     }
 
 
-    public static final String APP_VERSION = "0.6.7";
+    public static final String APP_VERSION = "0.7.0";
 
 
     // ==========================================================================================================================================================
@@ -447,7 +449,7 @@ public final class Driver {
                                             default:
 
                                         }
-                                        System.out.println(builder.toString());
+                                        System.out.println(builder);
                                     });
                         }
                         break;
@@ -615,22 +617,47 @@ public final class Driver {
         return systemd.getRunner(clazz);
     }
 
-    @Api("提交定时任务")
-    public static ScheduledFuture<?> schedule(Runnable runnable, long delay, TimeUnit unit) {
-        return systemd.schedule(runnable, delay, unit);
+    @Api("提交异步任务")
+    public static Future<?> submit(Runnable runnable) {
+        return systemd.submit(runnable);
+    }
+
+    @Api("提交异步任务")
+    public static <T> Future<?> submit(Runnable runnable, T t) {
+        return systemd.submit(runnable, t);
+    }
+
+    @Api("提交异步任务")
+    public static Future<?> submit(Callable<?> callable) {
+        return systemd.submit(callable);
     }
 
     @Api("提交定时任务")
+    public static ScheduledFuture<?> schedule(Runnable runnable, long time, TimeUnit timeUnit) {
+        return systemd.schedule(runnable, time, timeUnit);
+    }
+
+    @Api("提交定时任务")
+    public static ScheduledFuture<?> schedule(Callable<?> callable, long delay, TimeUnit unit) {
+        return systemd.schedule(callable, delay, unit);
+    }
+
+    @Api("提交等间隔定时任务")
     public static ScheduledFuture<?> scheduleAtFixedRate(Runnable runnable, long initialDelay, long period, TimeUnit unit) {
         return systemd.scheduleAtFixedRate(runnable, initialDelay, period, unit);
     }
 
-    @Api("提交定时任务")
+    @Api("提交等延迟定时任务")
+    public static ScheduledFuture<?> scheduleWithFixedDelay(Runnable runnable, long initialDelay, long delay, TimeUnit unit) {
+        return systemd.scheduleWithFixedDelay(runnable, initialDelay, delay, unit);
+    }
+
+    @Api("提交明天开始的等间隔定时任务")
     public static ScheduledFuture<?> scheduleAtNextDayFixedRate(Runnable runnable, long period, TimeUnit unit) {
         return systemd.scheduleAtFixedRate(runnable, TimeTool.nextDayDuration(), period, unit);
     }
 
-    @Api("提交定时任务")
+    @Api("提交明天开始的等延迟定时任务")
     public static ScheduledFuture<?> scheduleWithNextDayFixedDelay(Runnable runnable, long delay, TimeUnit unit) {
         return systemd.scheduleWithFixedDelay(runnable, TimeTool.nextDayDuration(), delay, unit);
     }

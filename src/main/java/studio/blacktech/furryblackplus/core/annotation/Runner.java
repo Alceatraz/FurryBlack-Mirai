@@ -33,4 +33,8 @@ public @interface Runner {
      */
     String[] privacy() default {};
 
+    /**
+     * @return 注册顺序 数字越小 越优先启动/最后关闭
+     */
+    int priority() default 100;
 }

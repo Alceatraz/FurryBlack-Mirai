@@ -54,17 +54,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -85,7 +88,8 @@ public final class Systemd {
     private static final String CONF_ACCOUNT_ID = "account.id";
     private static final String CONF_ACCOUNT_PW = "account.pw";
 
-    private static final String CONF_CPU_THREADS = "cpu.threads";
+    private static final String CONF_THREADS_MONITOR = "threads.monitor";
+    private static final String CONF_THREADS_SCHEDULE = "threads.schedule";
 
     private static final String CONF_BOT_DEVICE_TYPE = "bot.device.type";
     private static final String CONF_BOT_DEVICE_INFO = "bot.device.info";
@@ -118,7 +122,9 @@ public final class Systemd {
     "# 功能设置\n" +
     "# =====================================\n" +
     "# 监听器线程池\n" +
-    CONF_CPU_THREADS+ "=4\n"+
+    CONF_THREADS_MONITOR+ "=4\n"+
+    "# 异步任务线程池\n" +
+    CONF_THREADS_SCHEDULE+ "=4\n"+
     "# 命令识别前缀\n" +
     CONF_BOT_COMMAND_PREFIX + "=\"/\"\n" +
     "# 插件扫描路径\n" +
@@ -180,8 +186,8 @@ public final class Systemd {
     private String MESSAGE_LIST_USERS;
     private String MESSAGE_LIST_GROUP;
 
-    private ThreadPoolExecutor MONITOR_SERVICE;
-    private ScheduledExecutorService SCHEDULERS_POOL;
+    private ThreadPoolExecutor MONITOR_PROCESS;
+    private ScheduledThreadPoolExecutor EXECUTOR_SERVICE;
 
     private Map<String, AbstractEventHandler> MODULES; // 所有模块及注册名
 
@@ -200,7 +206,6 @@ public final class Systemd {
 
     private Map<String, EventHandlerExecutor> EVENT_EXECUTOR_USERS; // 私聊执行器注册
     private Map<String, EventHandlerExecutor> EVENT_EXECUTOR_GROUP; // 群聊执行器注册
-
 
     private Listener<UserMessageEvent> userMessageEventListener;
     private Listener<GroupMessageEvent> groupMessageEventListener;
@@ -245,7 +250,6 @@ public final class Systemd {
 
 
         if (!FILE_CONFIG.exists()) {
-
             try {
                 //noinspection ResultOfMethodCallIgnored
                 FILE_CONFIG.createNewFile();
@@ -607,20 +611,6 @@ public final class Systemd {
         EVENT_EXECUTOR_USERS = new LinkedHashMap<>();
         EVENT_EXECUTOR_GROUP = new LinkedHashMap<>();
 
-        int poolSize = parseInteger(config.getProperty(CONF_CPU_THREADS));
-
-        logger.seek("处理器线程数配置 " + poolSize);
-
-
-        logger.info("创建监听处理线程池");
-
-        MONITOR_SERVICE = (ThreadPoolExecutor) Executors.newFixedThreadPool(poolSize);
-
-        logger.info("创建定时任务线程池");
-
-        SCHEDULERS_POOL = Executors.newScheduledThreadPool(poolSize);
-
-
         // ==========================================================================================================================
         // 扫描模块
 
@@ -652,17 +642,53 @@ public final class Systemd {
         Reflections reflections = new Reflections(configurationBuilder);
 
 
+        // ==========================================================================================================================
+        // 分析扫描结果
+
+
         logger.info("分析扫描结果");
 
-        Set<Class<? extends EventHandlerRunner>> RUNNERS = new HashSet<>();
-        Set<Class<? extends EventHandlerMonitor>> MONITORS = new HashSet<>();
-        Set<Class<? extends EventHandlerFilter>> FILTERS = new HashSet<>();
-        Set<Class<? extends EventHandlerExecutor>> EXECUTORS = new HashSet<>();
+
+        List<Class<? extends EventHandlerRunner>> runnerList = new LinkedList<>();
+        List<Class<? extends EventHandlerMonitor>> monitorList = new LinkedList<>();
+        List<Class<? extends EventHandlerFilter>> filterList = new LinkedList<>();
+        List<Class<? extends EventHandlerExecutor>> executorList = new LinkedList<>();
+
+
+        Map<String, Class<? extends AbstractEventHandler>> modules = new HashMap<>();
+        Map<String, Class<? extends EventHandlerExecutor>> commands = new HashMap<>();
+
+
+        // ==========================================================================================================================
+        // 分析定时器扫描结果
+
 
         try {
-            RUNNERS = reflections.getSubTypesOf(EventHandlerRunner.class);
+
+            Set<Class<? extends EventHandlerRunner>> runners = reflections.getSubTypesOf(EventHandlerRunner.class);
+
+            for (Class<? extends EventHandlerRunner> clazz : runners) {
+                if (clazz.isAnnotationPresent(Runner.class)) {
+                    String artificial = clazz.getAnnotation(Runner.class).artificial();
+                    if (modules.containsKey(artificial)) {
+                        throw new BootException("注册定时器" + clazz.getName() + "失败" + artificial + "已注册为" + modules.get(artificial).getName());
+                    }
+                    modules.put(artificial, clazz);
+                    runnerList.add(clazz);
+                } else {
+                    logger.warning("发现无注解定时器 " + clazz.getName());
+                }
+            }
+
+            runnerList.sort((o1, o2) -> {
+                Runner o1Annotation = o1.getAnnotation(Runner.class);
+                Runner o2Annotation = o2.getAnnotation(Runner.class);
+                return o1Annotation.priority() - o2Annotation.priority();
+            });
+
             logger.hint("扫描到以下定时器");
-            RUNNERS.forEach(item -> logger.info(item.getName()));
+            runnerList.forEach(item -> logger.info(item.getAnnotation(Runner.class).priority() + " - " + item.getName()));
+
         } catch (Exception exception) {
             if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equalsIgnoreCase(exception.getMessage())) {
                 logger.info("没有扫描到任何定时器");
@@ -671,22 +697,86 @@ public final class Systemd {
             }
         }
 
+
+        // ==========================================================================================================================
+        // 分析监听器扫描结果
+
+
         try {
-            MONITORS = reflections.getSubTypesOf(EventHandlerMonitor.class);
-            logger.hint("扫描到以下监视器");
-            MONITORS.forEach(item -> logger.info(item.getName()));
+
+            Set<Class<? extends EventHandlerMonitor>> monitors = reflections.getSubTypesOf(EventHandlerMonitor.class);
+
+            for (Class<? extends EventHandlerMonitor> clazz : monitors) {
+                if (clazz.isAnnotationPresent(Monitor.class)) {
+                    Monitor annotation = clazz.getAnnotation(Monitor.class);
+                    if (!annotation.users() && !annotation.group()) {
+                        logger.warning("发现无用监听器 " + clazz.getName());
+                        continue;
+                    }
+                    String artificial = annotation.artificial();
+                    if (modules.containsKey(artificial)) {
+                        throw new BootException("注册监听器" + clazz.getName() + "失败" + artificial + "模块已注册为" + modules.get(artificial).getName());
+                    }
+                    modules.put(artificial, clazz);
+                    monitorList.add(clazz);
+                } else {
+                    logger.warning("发现无注解监听器 " + clazz.getName());
+                }
+            }
+
+            monitorList.sort((o1, o2) -> {
+                Monitor o1Annotation = o1.getAnnotation(Monitor.class);
+                Monitor o2Annotation = o2.getAnnotation(Monitor.class);
+                return o1Annotation.priority() - o2Annotation.priority();
+            });
+
+            logger.hint("扫描到以下监听器");
+            monitorList.forEach(item -> logger.info(item.getAnnotation(Monitor.class).priority() + " - " + item.getName()));
+
         } catch (Exception exception) {
             if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equalsIgnoreCase(exception.getMessage())) {
-                logger.info("没有扫描到任何监视器");
+                logger.info("没有扫描到任何监听器");
             } else {
-                logger.warning("扫描监视器时发生异常", exception);
+                logger.warning("扫描监听器时发生异常", exception);
             }
         }
 
+
+        // ==========================================================================================================================
+        // 分析过滤器扫描结果
+
+
         try {
-            FILTERS = reflections.getSubTypesOf(EventHandlerFilter.class);
+
+            Set<Class<? extends EventHandlerFilter>> filters = reflections.getSubTypesOf(EventHandlerFilter.class);
+
+            for (Class<? extends EventHandlerFilter> clazz : filters) {
+                if (clazz.isAnnotationPresent(Filter.class)) {
+                    Filter annotation = clazz.getAnnotation(Filter.class);
+                    if (!annotation.users() && !annotation.group()) {
+                        logger.warning("发现无用过滤器 " + clazz.getName());
+                        continue;
+                    }
+                    String artificial = annotation.artificial();
+                    if (modules.containsKey(artificial)) {
+                        throw new BootException("注册过滤器" + clazz.getName() + "失败" + artificial + "模块已注册为" + modules.get(artificial).getName());
+                    }
+                    modules.put(artificial, clazz);
+                    filterList.add(clazz);
+                } else {
+                    logger.warning("发现无注解过滤器 " + clazz.getName());
+                }
+            }
+
+            filterList.sort((o1, o2) -> {
+                Filter o1Annotation = o1.getAnnotation(Filter.class);
+                Filter o2Annotation = o2.getAnnotation(Filter.class);
+                return o1Annotation.priority() - o2Annotation.priority();
+            });
+
             logger.hint("扫描到以下过滤器");
-            FILTERS.forEach(item -> logger.info(item.getName()));
+            filterList.forEach(item -> logger.info(item.getAnnotation(Filter.class).priority() + " - " + item.getName()));
+
         } catch (Exception exception) {
             if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equalsIgnoreCase(exception.getMessage())) {
                 logger.info("没有扫描到任何过滤器");
@@ -695,10 +785,38 @@ public final class Systemd {
             }
         }
 
+
+        // ==========================================================================================================================
+        // 分析执行器扫描结果
+
+
         try {
-            EXECUTORS = reflections.getSubTypesOf(EventHandlerExecutor.class);
+
+            Set<Class<? extends EventHandlerExecutor>> executors = reflections.getSubTypesOf(EventHandlerExecutor.class);
+
+            for (Class<? extends EventHandlerExecutor> clazz : executors) {
+                if (clazz.isAnnotationPresent(Executor.class)) {
+                    Executor annotation = clazz.getAnnotation(Executor.class);
+                    String command = annotation.command();
+                    String artificial = annotation.artificial();
+                    if (modules.containsKey(artificial)) {
+                        throw new BootException("注册执行器" + clazz.getName() + "失败" + artificial + "模块已注册为" + modules.get(artificial).getName());
+                    }
+                    if (commands.containsKey(command)) {
+                        throw new BootException("注册执行器" + clazz.getName() + "失败 " + command + "命令已注册为" + commands.get(command).getName());
+                    }
+                    modules.put(artificial, clazz);
+                    commands.put(command, clazz);
+                    executorList.add(clazz);
+                } else {
+                    logger.warning("发现无注解执行器 " + clazz.getName());
+                }
+
+            }
+
             logger.hint("扫描到以下执行器");
-            EXECUTORS.forEach(item -> logger.info(item.getName()));
+            executorList.forEach(item -> logger.info(item.getName()));
+
         } catch (Exception exception) {
             if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equalsIgnoreCase(exception.getMessage())) {
                 logger.info("没有扫描到任何执行器");
@@ -708,40 +826,36 @@ public final class Systemd {
         }
 
 
-        if (RUNNERS.size() + MONITORS.size() + FILTERS.size() + EXECUTORS.size() == 0) {
+        // ==========================================================================================================================
+
+
+        if (runnerList.size() + monitorList.size() + filterList.size() + executorList.size() == 0) {
             logger.warning("没有扫描到任何模块 请检查扫描路径");
         }
+
+
+        // ==========================================================================================================================
+        // 注册模块
+
+
+        logger.info("注册模块实例");
 
 
         // ==========================================================================================================================
         // 注册定时器
 
 
-        logger.hint("初始化定时器");
-        for (Class<? extends EventHandlerRunner> clazz : RUNNERS) {
+        logger.hint("注册定时器");
+        for (Class<? extends EventHandlerRunner> clazz : runnerList) {
+            Runner annotation = clazz.getAnnotation(Runner.class);
+            EventHandlerRunner.RunnerInfo info = new EventHandlerRunner.RunnerInfo(annotation);
             try {
-                if (!clazz.isAnnotationPresent(Runner.class)) {
-                    logger.warning("发现无注解定时器 " + clazz.getName());
-                    continue;
-                }
-                Runner annotation = clazz.getAnnotation(Runner.class);
-                EventHandlerRunner.RunnerInfo info = new EventHandlerRunner.RunnerInfo(
-                    annotation.name(),
-                    annotation.artificial(),
-                    annotation.description(),
-                    annotation.privacy()
-                );
-                if (MODULES.containsKey(info.ARTIFICIAL)) {
-                    AbstractEventHandler handler = MODULES.get(info.ARTIFICIAL);
-                    throw new BootException("注册监听器失败 " + clazz.getName() + " 同名已存在 -> " + handler.getClass().getName());
-                }
                 EventHandlerRunner instance = clazz.getConstructor(EventHandlerRunner.RunnerInfo.class).newInstance(info);
-                instance.load();
-                logger.info("注册定时器 " + info.ARTIFICIAL + " - " + clazz.getName());
+                logger.info("注册定时器 " + annotation.priority() + " - " + info.ARTIFICIAL + " > " + clazz.getName());
                 MODULES.put(info.ARTIFICIAL, instance);
                 EVENT_RUNNER.put(info.ARTIFICIAL, instance);
             } catch (Exception exception) {
-                throw new BootException("定时器初始化失败 " + clazz.getName(), exception);
+                throw new BootException("定时器注册失败 " + clazz.getName(), exception);
             }
         }
 
@@ -750,37 +864,19 @@ public final class Systemd {
         // 注册监听器
 
 
-        logger.hint("初始化监听器");
-        for (Class<? extends EventHandlerMonitor> clazz : MONITORS) {
+        logger.hint("注册监听器");
+        for (Class<? extends EventHandlerMonitor> clazz : monitorList) {
+            Monitor annotation = clazz.getAnnotation(Monitor.class);
+            EventHandlerMonitor.MonitorInfo info = new EventHandlerMonitor.MonitorInfo(annotation);
             try {
-                if (!clazz.isAnnotationPresent(Monitor.class)) {
-                    logger.warning("发现无注解监听器 " + clazz.getName());
-                    continue;
-                }
-                Monitor annotation = clazz.getAnnotation(Monitor.class);
-                if (!annotation.users() && !annotation.group()) {
-                    logger.warning("发现无用监听器 " + clazz.getName());
-                    continue;
-                }
-                EventHandlerMonitor.MonitorInfo info = new EventHandlerMonitor.MonitorInfo(
-                    annotation.name(),
-                    annotation.artificial(),
-                    annotation.description(),
-                    annotation.privacy()
-                );
-                if (MODULES.containsKey(info.ARTIFICIAL)) {
-                    AbstractEventHandler handler = MODULES.get(info.ARTIFICIAL);
-                    throw new BootException("注册监听器失败 " + clazz.getName() + " 同名已存在 -> " + handler.getClass().getName());
-                }
                 EventHandlerMonitor instance = clazz.getConstructor(EventHandlerMonitor.MonitorInfo.class).newInstance(info);
-                instance.load();
-                logger.info("注册定时器 " + info.ARTIFICIAL + " - " + clazz.getName());
+                logger.info("注册监听器 " + annotation.priority() + " - " + info.ARTIFICIAL + " > " + clazz.getName());
                 MODULES.put(info.ARTIFICIAL, instance);
                 EVENT_MONITOR.put(info.ARTIFICIAL, instance);
                 if (annotation.users()) EVENT_MONITOR_USERS.add(instance);
                 if (annotation.group()) EVENT_MONITOR_GROUP.add(instance);
             } catch (Exception exception) {
-                throw new BootException("监听器初始化失败 " + clazz.getName(), exception);
+                throw new BootException("监听器注册失败 " + clazz.getName(), exception);
             }
         }
 
@@ -789,37 +885,19 @@ public final class Systemd {
         // 注册过滤器
 
 
-        logger.hint("初始化过滤器");
-        for (Class<? extends EventHandlerFilter> clazz : FILTERS) {
+        logger.hint("注册过滤器");
+        for (Class<? extends EventHandlerFilter> clazz : filterList) {
             try {
-                if (!clazz.isAnnotationPresent(Filter.class)) {
-                    logger.warning("发现无注解过滤器 " + clazz.getName());
-                    continue;
-                }
                 Filter annotation = clazz.getAnnotation(Filter.class);
-                if (!annotation.users() && !annotation.group()) {
-                    logger.warning("发现无用过滤器 " + clazz.getName());
-                    continue;
-                }
-                EventHandlerFilter.FilterInfo info = new EventHandlerFilter.FilterInfo(
-                    annotation.name(),
-                    annotation.artificial(),
-                    annotation.description(),
-                    annotation.privacy()
-                );
-                if (MODULES.containsKey(info.ARTIFICIAL)) {
-                    AbstractEventHandler handler = MODULES.get(info.ARTIFICIAL);
-                    throw new BootException("注册过滤器失败 " + clazz.getName() + " 同名已存在 -> " + handler.getClass().getName());
-                }
+                EventHandlerFilter.FilterInfo info = new EventHandlerFilter.FilterInfo(annotation);
                 EventHandlerFilter instance = clazz.getConstructor(EventHandlerFilter.FilterInfo.class).newInstance(info);
-                instance.load();
-                logger.info("注册过滤器 " + info.ARTIFICIAL + " - " + clazz.getName());
+                logger.info("注册过滤器 " + annotation.priority() + " - " + info.ARTIFICIAL + " > " + clazz.getName());
                 MODULES.put(info.ARTIFICIAL, instance);
                 EVENT_FILTER.put(info.ARTIFICIAL, instance);
                 if (annotation.users()) EVENT_FILTER_USERS.add(instance);
                 if (annotation.group()) EVENT_FILTER_GROUP.add(instance);
             } catch (Exception exception) {
-                throw new BootException("过滤器初始化失败 " + clazz.getName(), exception);
+                throw new BootException("过滤器注册失败 " + clazz.getName(), exception);
             }
         }
 
@@ -828,38 +906,14 @@ public final class Systemd {
         // 初始化执行器
 
 
-        logger.hint("初始化执行器");
+        logger.hint("注册执行器");
 
-        for (Class<? extends EventHandlerExecutor> clazz : EXECUTORS) {
+        for (Class<? extends EventHandlerExecutor> clazz : executorList) {
+            Executor annotation = clazz.getAnnotation(Executor.class);
+            EventHandlerExecutor.ExecutorInfo info = new EventHandlerExecutor.ExecutorInfo(annotation);
             try {
-                if (!clazz.isAnnotationPresent(Executor.class)) {
-                    logger.warning("发现无注解执行器 " + clazz.getName());
-                    continue;
-                }
-                Executor annotation = clazz.getAnnotation(Executor.class);
-                if (!annotation.users() && !annotation.group()) {
-                    logger.warning("发现无用执行器 " + clazz.getName());
-                    continue;
-                }
-                EventHandlerExecutor.ExecutorInfo info = new EventHandlerExecutor.ExecutorInfo(
-                    annotation.name(),
-                    annotation.artificial(),
-                    annotation.description(),
-                    annotation.privacy(),
-                    annotation.command(),
-                    annotation.usage()
-                );
-                if (MODULES.containsKey(info.ARTIFICIAL)) {
-                    AbstractEventHandler handler = MODULES.get(info.ARTIFICIAL);
-                    throw new BootException("注册过滤器失败 " + clazz.getName() + " 同名已存在 -> " + handler.getClass().getName());
-                }
-                if (EVENT_EXECUTOR.containsKey(info.ARTIFICIAL)) {
-                    EventHandlerExecutor handler = EVENT_EXECUTOR.get(info.ARTIFICIAL);
-                    throw new BootException("注册执行器失败 " + info.COMMAND + " " + clazz.getName() + " 命令已存在 -> " + handler.getClass().getName());
-                }
                 EventHandlerExecutor instance = clazz.getConstructor(EventHandlerExecutor.ExecutorInfo.class).newInstance(info);
-                instance.load();
-                logger.info("注册入执行链 " + info.ARTIFICIAL + " - " + info.COMMAND + " > " + clazz.getName());
+                logger.info("注册监听器 " + info.COMMAND + " - " + info.ARTIFICIAL + " > " + clazz.getName());
                 MODULES.put(info.ARTIFICIAL, instance);
                 EVENT_EXECUTOR.put(info.ARTIFICIAL, instance);
                 if (annotation.users()) EVENT_EXECUTOR_USERS.put(info.COMMAND, instance);
@@ -879,6 +933,107 @@ public final class Systemd {
 
 
         // ==========================================================================================================================
+        // 加载模块
+
+
+        logger.hint("加载定时器");
+
+        for (Map.Entry<String, EventHandlerRunner> entry : EVENT_RUNNER.entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            try {
+                entry.getValue().load();
+                logger.info("加载定时器成功 " + k + " -> " + v.getClass().getName());
+            } catch (Exception exception) {
+                throw new BootException("加载定时器失败 " + v.getClass().getName(), exception);
+            }
+        }
+
+
+        logger.hint("加载监听器");
+
+        for (Map.Entry<String, EventHandlerMonitor> entry : EVENT_MONITOR.entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            try {
+                entry.getValue().load();
+                logger.info("加载监听器成功 " + k + " -> " + v.getClass().getName());
+            } catch (Exception exception) {
+                throw new BootException("加载监听器失败 " + v.getClass().getName(), exception);
+            }
+        }
+
+
+        logger.hint("加载过滤器");
+
+        for (Map.Entry<String, EventHandlerFilter> entry : EVENT_FILTER.entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            try {
+                entry.getValue().load();
+                logger.info("启动过滤器成功 " + k + " -> " + v.getClass().getName());
+            } catch (Exception exception) {
+                throw new BootException("加载过滤器失败 " + v.getClass().getName(), exception);
+            }
+        }
+
+
+        logger.hint("加载执行器");
+
+        for (Map.Entry<String, EventHandlerExecutor> entry : EVENT_EXECUTOR.entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            try {
+                entry.getValue().load();
+                logger.info("加载执行器成功 " + k + " -> " + v.getClass().getName());
+            } catch (Exception exception) {
+                throw new BootException("加载执行器失败 " + v.getClass().getName(), exception);
+            }
+        }
+
+
+        // =============================================================================================================
+        // 注册事件监听
+
+
+        logger.hint("注册机器人事件监听");
+
+
+        userMessageEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(UserMessageEvent.class, this::handleUsersMessage);
+        groupMessageEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(GroupMessageEvent.class, this::handleGroupMessage);
+
+
+        newFriendRequestEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(NewFriendRequestEvent.class, event -> {
+            logger.hint("BOT被添加好友 " + event.getFromNick() + "(" + event.getFromId() + ")");
+            event.accept();
+        });
+
+        botInvitedJoinGroupRequestEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(BotInvitedJoinGroupRequestEvent.class, event -> {
+            logger.hint("BOT被邀请入群 " + event.getGroupName() + "(" + event.getGroupId() + ") 邀请人 " + event.getInvitorNick() + "(" + event.getInvitorId() + ")");
+            event.accept();
+        });
+
+
+        memberJoinEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(MemberJoinEvent.class, event -> {
+            String user = event.getUser().getNick() + "(" + event.getUser().getId() + ")";
+            if (event instanceof MemberJoinEvent.Active) {
+                logger.hint("用户申请加群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
+            } else if (event instanceof MemberJoinEvent.Invite) {
+                logger.hint("用户受邀进群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
+            }
+        });
+
+        memberLeaveEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(MemberLeaveEvent.class, event -> {
+            String user = event.getUser().getNick() + "(" + event.getUser().getId() + ")";
+            if (event instanceof MemberLeaveEvent.Quit) {
+                logger.hint("用户主动退群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
+            } else if (event instanceof MemberLeaveEvent.Kick) {
+                logger.hint("用户被踢出群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
+            }
+        });
+
+
+        // ==========================================================================================================================
         // 登录QQ
 
 
@@ -888,6 +1043,23 @@ public final class Systemd {
             logger.hint("登录");
             bot.login();
         }
+
+
+        // ==========================================================================================================================
+        // 启动线程池
+
+
+        int monitorPoolSize = parseInteger(config.getProperty(CONF_THREADS_SCHEDULE));
+        logger.seek("监听线程池配置 " + monitorPoolSize);
+
+        MONITOR_PROCESS = (ThreadPoolExecutor) Executors.newFixedThreadPool(monitorPoolSize);
+
+        //
+
+        int schedulePoolSize = parseInteger(config.getProperty(CONF_THREADS_SCHEDULE));
+        logger.seek("异步线程池配置 " + schedulePoolSize);
+
+        EXECUTOR_SERVICE = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(schedulePoolSize);
 
 
         // ==========================================================================================================================
@@ -965,46 +1137,6 @@ public final class Systemd {
         }
 
 
-        // =============================================================================================================
-        // 注册监听
-
-
-        logger.hint("注册机器人事件监听");
-
-
-        userMessageEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(UserMessageEvent.class, this::handleUsersMessage);
-        groupMessageEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(GroupMessageEvent.class, this::handleGroupMessage);
-
-
-        newFriendRequestEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(NewFriendRequestEvent.class, event -> {
-            logger.hint("BOT被添加好友 " + event.getFromNick() + "(" + event.getFromId() + ")");
-            event.accept();
-        });
-
-        botInvitedJoinGroupRequestEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(BotInvitedJoinGroupRequestEvent.class, event -> {
-            logger.hint("BOT被邀请入群 " + event.getGroupName() + "(" + event.getGroupId() + ") 邀请人 " + event.getInvitorNick() + "(" + event.getInvitorId() + ")");
-            event.accept();
-        });
-
-
-        memberJoinEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(MemberJoinEvent.class, event -> {
-            String user = event.getUser().getNick() + "(" + event.getUser().getId() + ")";
-            if (event instanceof MemberJoinEvent.Active) {
-                logger.hint("用户申请加群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
-            } else if (event instanceof MemberJoinEvent.Invite) {
-                logger.hint("用户受邀进群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
-            }
-        });
-
-        memberLeaveEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(MemberLeaveEvent.class, event -> {
-            String user = event.getUser().getNick() + "(" + event.getUser().getId() + ")";
-            if (event instanceof MemberLeaveEvent.Quit) {
-                logger.hint("用户主动退群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
-            } else if (event instanceof MemberLeaveEvent.Kick) {
-                logger.hint("用户被踢出群 " + user + " → " + event.getGroup().getName() + "(" + event.getGroupId() + ")");
-            }
-        });
-
     }
 
 
@@ -1040,7 +1172,9 @@ public final class Systemd {
         }
 
         logger.hint("关闭过滤器");
-        for (Map.Entry<String, EventHandlerFilter> entry : EVENT_FILTER.entrySet()) {
+        ArrayList<Map.Entry<String, EventHandlerFilter>> reverseFilter = new ArrayList<>(EVENT_FILTER.entrySet());
+        Collections.reverse(reverseFilter);
+        for (Map.Entry<String, EventHandlerFilter> entry : reverseFilter) {
             try {
                 entry.getValue().shut();
                 logger.info("关闭过滤器成功 " + entry.getKey() + " -> " + entry.getValue().getClass().getName());
@@ -1050,7 +1184,9 @@ public final class Systemd {
         }
 
         logger.hint("关闭监听器");
-        for (Map.Entry<String, EventHandlerMonitor> entry : EVENT_MONITOR.entrySet()) {
+        ArrayList<Map.Entry<String, EventHandlerMonitor>> reverseMonitor = new ArrayList<>(EVENT_MONITOR.entrySet());
+        Collections.reverse(reverseMonitor);
+        for (Map.Entry<String, EventHandlerMonitor> entry : reverseMonitor) {
             try {
                 entry.getValue().shut();
                 logger.info("关闭监听器成功 " + entry.getKey() + " -> " + entry.getValue().getClass().getName());
@@ -1060,7 +1196,9 @@ public final class Systemd {
         }
 
         logger.hint("关闭定时器");
-        for (Map.Entry<String, EventHandlerRunner> entry : EVENT_RUNNER.entrySet()) {
+        ArrayList<Map.Entry<String, EventHandlerRunner>> reverseRunner = new ArrayList<>(EVENT_RUNNER.entrySet());
+        Collections.reverse(reverseRunner);
+        for (Map.Entry<String, EventHandlerRunner> entry : reverseRunner) {
             try {
                 entry.getValue().shut();
                 logger.info("关闭定时器成功 " + entry.getKey() + " -> " + entry.getValue().getClass().getName());
@@ -1070,19 +1208,19 @@ public final class Systemd {
         }
 
         if (Driver.isShutModeDrop()) {
-            logger.info("强制关闭监听器工作线程");
-            MONITOR_SERVICE.shutdownNow();
+            logger.info("强制关闭监听器线程池");
+            MONITOR_PROCESS.shutdownNow();
         } else {
-            logger.info("关闭监听器工作线程");
-            MONITOR_SERVICE.shutdown();
+            logger.info("关闭监听器线程池");
+            MONITOR_PROCESS.shutdown();
         }
 
         if (Driver.isShutModeDrop()) {
-            logger.info("强制关闭计划任务线程池");
-            SCHEDULERS_POOL.shutdownNow();
+            logger.info("强制关闭异步任务线程池");
+            EXECUTOR_SERVICE.shutdownNow();
         } else {
-            logger.info("关闭计划任务线程池");
-            SCHEDULERS_POOL.shutdown();
+            logger.info("关闭异步任务线程池");
+            EXECUTOR_SERVICE.shutdown();
         }
 
     }
@@ -1101,7 +1239,7 @@ public final class Systemd {
 
         try {
 
-            MONITOR_SERVICE.submit(() -> EVENT_MONITOR_USERS.forEach(item -> item.handleUsersMessage(event)));
+            MONITOR_PROCESS.submit(() -> EVENT_MONITOR_USERS.forEach(item -> item.handleUsersMessage(event)));
 
             if (EVENT_FILTER_USERS.parallelStream().anyMatch(item -> item.handleUsersMessage(event))) return;
 
@@ -1156,9 +1294,9 @@ public final class Systemd {
 
         try {
 
-            MONITOR_SERVICE.submit(() -> EVENT_MONITOR_GROUP.forEach(item -> item.handleGroupMessage(event)));
+            MONITOR_PROCESS.submit(() -> EVENT_MONITOR_GROUP.forEach(item -> item.handleGroupMessage(event)));
 
-            if (EVENT_FILTER_GROUP.stream().anyMatch(item -> item.handleGroupMessage(event))) return;
+            if (EVENT_FILTER_GROUP.parallelStream().anyMatch(item -> item.handleGroupMessage(event))) return;
 
             String content = event.getMessage().contentToString();
 
@@ -1367,19 +1505,39 @@ public final class Systemd {
         bot.close();
     }
 
+    @Api("提交异步任务")
+    public Future<?> submit(Runnable runnable) {
+        return EXECUTOR_SERVICE.submit(runnable);
+    }
+
+    @Api("提交异步任务")
+    public <T> Future<?> submit(Runnable runnable, T t) {
+        return EXECUTOR_SERVICE.submit(runnable, t);
+    }
+
+    @Api("提交异步任务")
+    public Future<?> submit(Callable<?> callable) {
+        return EXECUTOR_SERVICE.submit(callable);
+    }
+
     @Api("提交定时任务")
-    public ScheduledFuture<?> schedule(Runnable runnable, long delay, TimeUnit unit) {
-        return SCHEDULERS_POOL.schedule(runnable, delay, unit);
+    public ScheduledFuture<?> schedule(Runnable runnable, long time, TimeUnit timeUnit) {
+        return EXECUTOR_SERVICE.schedule(runnable, time, timeUnit);
+    }
+
+    @Api("提交定时任务")
+    public ScheduledFuture<?> schedule(Callable<?> callable, long delay, TimeUnit unit) {
+        return EXECUTOR_SERVICE.schedule(callable, delay, unit);
     }
 
     @Api("提交定时任务")
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable runnable, long initialDelay, long period, TimeUnit unit) {
-        return SCHEDULERS_POOL.scheduleAtFixedRate(runnable, initialDelay, period, unit);
+        return EXECUTOR_SERVICE.scheduleAtFixedRate(runnable, initialDelay, period, unit);
     }
 
     @Api("提交定时任务")
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable runnable, long initialDelay, long delay, TimeUnit unit) {
-        return SCHEDULERS_POOL.scheduleWithFixedDelay(runnable, initialDelay, delay, unit);
+        return EXECUTOR_SERVICE.scheduleWithFixedDelay(runnable, initialDelay, delay, unit);
     }
 
     // =========================================================================

@@ -3,6 +3,7 @@ package studio.blacktech.furryblackplus.core.interfaces;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import studio.blacktech.furryblackplus.core.annotation.Api;
+import studio.blacktech.furryblackplus.core.annotation.Executor;
 import studio.blacktech.furryblackplus.core.utilties.Command;
 
 
@@ -27,6 +28,10 @@ public abstract class EventHandlerExecutor extends AbstractEventHandler {
         public final String COMMAND;
         public final String[] USAGE;
         public final String HELP;
+
+        public ExecutorInfo(Executor annotation) {
+            this(annotation.name(), annotation.artificial(), annotation.description(), annotation.privacy(), annotation.command(), annotation.usage());
+        }
 
         public ExecutorInfo(String name, String artificial, String description, String[] privacy, String command, String[] usage) {
             super(name, artificial, description, privacy);
