@@ -9,7 +9,7 @@
 - 白熊机器人：指BTS为FurryBlack赋予的人物形象；
 - FurryBlack框架：指FurryBlack开源框架，分为JCQ和Mirai版；
 - FurryBlack扩展：指基于FurryBlack框架编写的插件，
-- FurryBlack机器人：指由BTS运营的基于FurryBlack框架的机器人。
+- FurryBlack机器人：指由B`TS运营的基于FurryBlack框架的机器人。
 
 ## LICENSE
 
@@ -45,6 +45,10 @@
 一同编译，即使是同样的类名，也无法获取相同的class。
 
 ## CHANGELOG
+
+### 0.7.1
+
+- 修复了一个严重的BUG
 
 ### 0.7.0
 

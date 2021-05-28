@@ -80,7 +80,7 @@ public final class Driver {
     }
 
 
-    public static final String APP_VERSION = "0.7.0";
+    public static final String APP_VERSION = "0.7.1";
 
 
     // ==========================================================================================================================================================
@@ -253,7 +253,7 @@ public final class Driver {
             logger.info("关闭控制台");
             consoleThread.interrupt();
             logger.info("关闭机器人");
-            systemd.shutBot();
+            systemd.signal();
             logger.info("等待主线程");
             try {
                 mainThread.join();
@@ -281,7 +281,7 @@ public final class Driver {
 
         // =====================================================================
 
-        systemd.joinBot();
+        systemd.await();
 
         // =====================================================================
 
@@ -333,7 +333,7 @@ public final class Driver {
                     case "quit":
                     case "exit":
                         shutBySignal = false;
-                        systemd.shutBot();
+                        systemd.signal();
                         break console;
 
                     case "?":
@@ -689,12 +689,12 @@ public final class Driver {
     }
 
     @Api("获取预设昵称")
-    public String getMappedNickName(GroupMessageEvent event) {
+    public static String getMappedNickName(GroupMessageEvent event) {
         return systemd.getMappedNickName(event);
     }
 
     @Api("获取预设昵称")
-    public String getMappedNickName(long groupId, long userId) {
+    public static String getMappedNickName(long groupId, long userId) {
         return systemd.getMappedNickName(groupId, userId);
     }
 

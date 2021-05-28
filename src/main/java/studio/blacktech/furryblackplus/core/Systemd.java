@@ -70,6 +70,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -1223,6 +1226,11 @@ public final class Systemd {
             EXECUTOR_SERVICE.shutdown();
         }
 
+        logger.info("等待Mirai关闭");
+
+        bot.close();
+        bot.join();
+
     }
 
 
@@ -1369,6 +1377,34 @@ public final class Systemd {
     // ==========================================================================================================================================================
 
 
+    private final Lock lock = new ReentrantLock();
+    private final Condition condition = lock.newCondition();
+
+
+    public void await() {
+        try {
+            lock.lock();
+            try {
+                condition.await();
+            } catch (InterruptedException exception) {
+                exception.printStackTrace();
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+
+    public void signal() {
+        try {
+            lock.lock();
+            condition.signal();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+
     private boolean isCommand(String content) {
         if (content.length() < 3) return false;
         if (content.charAt(0) != COMMAND_PREFIX) return false;
@@ -1494,16 +1530,6 @@ public final class Systemd {
     //
     // ==========================================================================================================================================================
 
-
-    @Api("以Mirai阻塞")
-    public void joinBot() {
-        bot.join();
-    }
-
-    @Api("关闭Bot")
-    public void shutBot() {
-        bot.close();
-    }
 
     @Api("提交异步任务")
     public Future<?> submit(Runnable runnable) {
