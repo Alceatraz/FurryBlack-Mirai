@@ -46,6 +46,10 @@
 
 ## CHANGELOG
 
+### 0.7.3
+
+- 更新Mirai-2.6.5
+
 ### 0.7.2
 
 - 更新GitIgnore
