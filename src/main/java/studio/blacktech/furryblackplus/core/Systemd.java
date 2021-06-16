@@ -1216,6 +1216,15 @@ public final class Systemd {
         } else {
             logger.info("关闭监听器线程池");
             MONITOR_PROCESS.shutdown();
+            try {
+                logger.info("等待监听器线程池关闭");
+                //noinspection ResultOfMethodCallIgnored
+                MONITOR_PROCESS.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+                logger.info("监听器线程池已关闭");
+            } catch (InterruptedException exception) {
+                logger.error("等待关闭监听器线程池错误", exception);
+                MONITOR_PROCESS.shutdownNow();
+            }
         }
 
         if (Driver.isShutModeDrop()) {
@@ -1224,6 +1233,14 @@ public final class Systemd {
         } else {
             logger.info("关闭异步任务线程池");
             EXECUTOR_SERVICE.shutdown();
+            try {
+                logger.info("等待异步任务线程池关闭");
+                //noinspection ResultOfMethodCallIgnored
+                EXECUTOR_SERVICE.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+            } catch (InterruptedException exception) {
+                logger.error("等待关闭异步任务线程池错误", exception);
+                exception.printStackTrace();
+            }
         }
 
         logger.info("等待Mirai关闭");

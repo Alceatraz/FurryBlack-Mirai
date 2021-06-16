@@ -303,6 +303,13 @@ public final class Driver {
 
         logger.hint("关闭核心系统");
 
+        consoleThread.interrupt();
+        try {
+            consoleThread.join();
+        } catch (InterruptedException exception) {
+            exception.printStackTrace();
+        }
+
         System.out.println("[FurryBlack][MAIN]FurryBlackPlus closed, Bye.");
 
     }
@@ -325,6 +332,7 @@ public final class Driver {
                 if (temp == null || temp.isEmpty() || temp.isBlank()) continue;
                 Command command = new Command(temp.trim());
                 switch (command.getCommandName()) {
+
 
                     case "drop":
                         shutModeDrop = true;
@@ -499,6 +507,7 @@ public final class Driver {
                         System.out.println("没有此命令");
                         break;
                 }
+
             } catch (Exception exception) {
                 logger.error("命令导致了异常", exception);
             }
