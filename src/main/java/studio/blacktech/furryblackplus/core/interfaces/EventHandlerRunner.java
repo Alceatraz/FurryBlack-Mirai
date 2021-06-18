@@ -15,7 +15,7 @@ public abstract class EventHandlerRunner extends AbstractEventHandler {
         this.INFO = info;
     }
 
-    public final static class RunnerInfo extends ModuleInfo {
+    public static final class RunnerInfo extends ModuleInfo {
 
         public RunnerInfo(Runner annotation) {
             this(annotation.name(), annotation.artificial(), annotation.description(), annotation.privacy());

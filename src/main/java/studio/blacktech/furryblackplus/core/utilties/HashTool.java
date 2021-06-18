@@ -17,7 +17,8 @@ import java.util.Objects;
 public final class HashTool {
 
 
-    private HashTool() { }
+    private HashTool() {
+    }
 
 
     @Api("md5")
@@ -59,15 +60,9 @@ public final class HashTool {
         } catch (NoSuchAlgorithmException exception) {
             exception.printStackTrace();
         }
-        byte[] digested = Objects.requireNonNull(digest).digest(message);
-        String temp;
-        StringBuilder builder = new StringBuilder();
-        for (byte element : digested) {
-            temp = Integer.toHexString(element & 0xFF);
-            builder.append(temp.length() == 2 ? temp : ("0" + temp));
-        }
-        return builder.toString();
+        return digest(message, digest);
     }
+
 
     @Api("SHA256")
     public static String SHA256(byte[] message) {
@@ -92,14 +87,7 @@ public final class HashTool {
         } catch (NoSuchAlgorithmException exception) {
             exception.printStackTrace();
         }
-        byte[] digested = Objects.requireNonNull(digest).digest(message);
-        String temp;
-        StringBuilder builder = new StringBuilder();
-        for (byte element : digested) {
-            temp = Integer.toHexString(element & 0xFF);
-            builder.append(temp.length() == 2 ? temp : ("0" + temp));
-        }
-        return builder.toString();
+        return digest(message, digest);
     }
 
     @Api("SHA384")
@@ -125,14 +113,7 @@ public final class HashTool {
         } catch (NoSuchAlgorithmException exception) {
             exception.printStackTrace();
         }
-        byte[] digested = Objects.requireNonNull(digest).digest(message);
-        String temp;
-        StringBuilder builder = new StringBuilder();
-        for (byte element : digested) {
-            temp = Integer.toHexString(element & 0xFF);
-            builder.append(temp.length() == 2 ? temp : ("0" + temp));
-        }
-        return builder.toString();
+        return digest(message, digest);
     }
 
     @Api("SHA512")
@@ -148,6 +129,18 @@ public final class HashTool {
     @Api("SHA512")
     public static String SHA512(String message) {
         return SHA512(message.getBytes(StandardCharsets.UTF_8));
+    }
+
+
+    private static String digest(byte[] message, MessageDigest digest) {
+        byte[] digested = Objects.requireNonNull(digest).digest(message);
+        String temp;
+        StringBuilder builder = new StringBuilder();
+        for (byte element : digested) {
+            temp = Integer.toHexString(element & 0xFF);
+            builder.append(temp.length() == 2 ? temp : ("0" + temp));
+        }
+        return builder.toString();
     }
 
 }

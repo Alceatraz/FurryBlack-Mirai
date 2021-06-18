@@ -65,90 +65,90 @@ public abstract class AbstractEventHandler {
 
     @Api("初始化插件总目录")
     protected void initRootFolder() {
-        initFolder(FOLDER_ROOT);
-        INIT_ROOT = true;
+        this.initFolder(this.FOLDER_ROOT);
+        this.INIT_ROOT = true;
     }
 
     @Api("初始化插件配置文件目录")
     protected void initConfFolder() {
-        if (!INIT_ROOT) initRootFolder();
-        initFolder(FOLDER_CONF);
-        INIT_CONF = true;
+        if (!this.INIT_ROOT) this.initRootFolder();
+        this.initFolder(this.FOLDER_CONF);
+        this.INIT_CONF = true;
     }
 
     @Api("初始化插件数据目录")
     protected void initDataFolder() {
-        if (!INIT_ROOT) initRootFolder();
-        initFolder(FOLDER_DATA);
-        INIT_DATA = true;
+        if (!this.INIT_ROOT) this.initRootFolder();
+        this.initFolder(this.FOLDER_DATA);
+        this.INIT_DATA = true;
     }
 
     @Api("初始化插件日志目录")
     protected void initLogsFolder() {
-        if (!INIT_ROOT) initRootFolder();
-        initFolder(FOLDER_LOGS);
-        INIT_LOGS = true;
+        if (!this.INIT_ROOT) this.initRootFolder();
+        this.initFolder(this.FOLDER_LOGS);
+        this.INIT_LOGS = true;
     }
 
     @Api("初始化插件配置下的目录")
     protected File initConfFolder(String folderName) {
-        if (!INIT_CONF) initConfFolder();
-        File file = initFolder(Paths.get(FOLDER_CONF.getAbsolutePath(), folderName).toFile());
-        INIT_CONF = true;
+        if (!this.INIT_CONF) this.initConfFolder();
+        File file = this.initFolder(Paths.get(this.FOLDER_CONF.getAbsolutePath(), folderName).toFile());
+        this.INIT_CONF = true;
         return file;
     }
 
     @Api("初始化插件数据下的目录")
     protected File initDataFolder(String folderName) {
-        if (!INIT_DATA) initDataFolder();
-        File file = initFolder(Paths.get(FOLDER_DATA.getAbsolutePath(), folderName).toFile());
-        INIT_DATA = true;
+        if (!this.INIT_DATA) this.initDataFolder();
+        File file = this.initFolder(Paths.get(this.FOLDER_DATA.getAbsolutePath(), folderName).toFile());
+        this.INIT_DATA = true;
         return file;
     }
 
     @Api("初始化插件数据下的目录")
     protected File initLogsFolder(String folderName) {
-        if (!INIT_LOGS) initLogsFolder();
-        File file = initFolder(Paths.get(FOLDER_LOGS.getAbsolutePath(), folderName).toFile());
-        INIT_LOGS = true;
+        if (!this.INIT_LOGS) this.initLogsFolder();
+        File file = this.initFolder(Paths.get(this.FOLDER_LOGS.getAbsolutePath(), folderName).toFile());
+        this.INIT_LOGS = true;
         return file;
     }
 
     @Api("初始化配置文件夹下的文件")
     protected File initConfFile(String fileName) {
-        if (!INIT_CONF) initConfFolder();
-        return initFile(Paths.get(FOLDER_CONF.getAbsolutePath(), fileName));
+        if (!this.INIT_CONF) this.initConfFolder();
+        return this.initFile(Paths.get(this.FOLDER_CONF.getAbsolutePath(), fileName));
     }
 
     @Api("初始化数据文件夹下的文件")
     protected File initDataFile(String fileName) {
-        if (!INIT_DATA) initDataFolder();
-        return initFile(Paths.get(FOLDER_DATA.getAbsolutePath(), fileName));
+        if (!this.INIT_DATA) this.initDataFolder();
+        return this.initFile(Paths.get(this.FOLDER_DATA.getAbsolutePath(), fileName));
     }
 
     @Api("初始化日志文件夹下的文件")
     protected File initLogsFile(String fileName) {
-        if (!INIT_LOGS) initLogsFolder();
-        return initFile(Paths.get(FOLDER_LOGS.getAbsolutePath(), fileName));
+        if (!this.INIT_LOGS) this.initLogsFolder();
+        return this.initFile(Paths.get(this.FOLDER_LOGS.getAbsolutePath(), fileName));
     }
 
     @Api("初始化默认配置文件")
     protected void initConfiguration() {
-        if (!FILE_CONFIG.exists()) {
-            logger.seek("配置文件不存在 " + FILE_CONFIG.getAbsolutePath());
+        if (!this.FILE_CONFIG.exists()) {
+            this.logger.seek("配置文件不存在 " + this.FILE_CONFIG.getAbsolutePath());
             try {
-                initFile(FILE_CONFIG);
+                this.initFile(this.FILE_CONFIG);
             } catch (Exception exception) {
                 throw new RuntimeException("初始化配置错误", exception);
             }
-            NEW_CONFIG = true;
+            this.NEW_CONFIG = true;
         }
     }
 
     @Api("加载默认配置文件")
     protected void loadConfig() {
-        try (FileInputStream inStream = new FileInputStream(FILE_CONFIG)) {
-            CONFIG.load(inStream);
+        try (FileInputStream inStream = new FileInputStream(this.FILE_CONFIG)) {
+            this.CONFIG.load(inStream);
         } catch (IOException exception) {
             throw new RuntimeException("加载配置错误", exception);
         }
@@ -156,13 +156,13 @@ public abstract class AbstractEventHandler {
 
     @Api("保存默认配置文件")
     protected void saveConfig() {
-        saveConfig(null);
+        this.saveConfig(null);
     }
 
     @Api("保存默认配置文件")
     protected void saveConfig(String comments) {
-        try (FileOutputStream outputStream = new FileOutputStream(FILE_CONFIG)) {
-            CONFIG.store(outputStream, comments);
+        try (FileOutputStream outputStream = new FileOutputStream(this.FILE_CONFIG)) {
+            this.CONFIG.store(outputStream, comments);
         } catch (IOException exception) {
             throw new RuntimeException("保存配置错误", exception);
         }
@@ -170,7 +170,7 @@ public abstract class AbstractEventHandler {
 
     @Api("按行读取文件 删除注释")
     protected List<String> readFile(File file) {
-        return readFile(file, false);
+        return this.readFile(file, false);
     }
 
     @Api("按行读取文件 可选注释")
@@ -205,7 +205,7 @@ public abstract class AbstractEventHandler {
 
     @Api("初始化文件夹")
     protected File initFolder(String folder) {
-        return initFolder(Paths.get(FOLDER_ROOT.getAbsolutePath(), folder).toFile());
+        return this.initFolder(Paths.get(this.FOLDER_ROOT.getAbsolutePath(), folder).toFile());
     }
 
     @Api("初始化文件夹")
@@ -213,20 +213,20 @@ public abstract class AbstractEventHandler {
         if (file.exists()) {
             if (!file.isDirectory()) throw new IllegalArgumentException("文件夹被文件占位 -> " + file.getAbsolutePath());
         } else {
-            if (file.mkdirs()) logger.seek("创建新目录 -> " + file.getAbsolutePath());
+            if (file.mkdirs()) this.logger.seek("创建新目录 -> " + file.getAbsolutePath());
         }
         return file;
     }
 
     @Api("初始化文件")
     protected File initFile(Path path) {
-        return initFile(path.toFile());
+        return this.initFile(path.toFile());
     }
 
     @Api("初始化文件")
     protected File initFile(File file) {
         try {
-            if (file.createNewFile()) logger.seek("创建新文件 -> " + file.getAbsolutePath());
+            if (file.createNewFile()) this.logger.seek("创建新文件 -> " + file.getAbsolutePath());
         } catch (IOException exception) {
             throw new RuntimeException("创建文件失败 -> " + file.getAbsolutePath(), exception);
         }

@@ -22,7 +22,7 @@ public abstract class EventHandlerMonitor extends AbstractEventHandler {
     @Api("生命周期 监听群聊消息")
     public abstract void handleGroupMessage(GroupMessageEvent message);
 
-    public final static class MonitorInfo extends ModuleInfo {
+    public static final class MonitorInfo extends ModuleInfo {
 
         public MonitorInfo(Monitor annotation) {
             this(annotation.name(), annotation.artificial(), annotation.description(), annotation.privacy());

@@ -23,7 +23,7 @@ public abstract class EventHandlerExecutor extends AbstractEventHandler {
     @Api("生命周期 处理群聊命令")
     public abstract void handleGroupMessage(GroupMessageEvent event, Command command);
 
-    public final static class ExecutorInfo extends ModuleInfo {
+    public static final class ExecutorInfo extends ModuleInfo {
 
         public final String COMMAND;
         public final String[] USAGE;
@@ -39,22 +39,22 @@ public abstract class EventHandlerExecutor extends AbstractEventHandler {
             this.COMMAND = command;
             this.USAGE = usage;
             StringBuilder builder = new StringBuilder();
-            builder.append(COMMAND);
+            builder.append(this.COMMAND);
             builder.append(" ");
-            builder.append(NAME);
+            builder.append(this.NAME);
             builder.append("\r\n");
-            builder.append(DESCRIPTION);
+            builder.append(this.DESCRIPTION);
             builder.append("\r\n命令用法: \r\n");
-            for (String temp : USAGE) {
+            for (String temp : this.USAGE) {
                 builder.append(temp);
                 builder.append("\r\n");
             }
             builder.append("隐私: \r\n");
-            for (String temp : PRIVACY) {
+            for (String temp : this.PRIVACY) {
                 builder.append(temp);
                 builder.append("\r\n");
             }
-            HELP = builder.toString();
+            this.HELP = builder.toString();
         }
     }
 }

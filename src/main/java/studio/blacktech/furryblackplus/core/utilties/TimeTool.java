@@ -13,12 +13,17 @@ import java.time.ZoneOffset;
 public class TimeTool {
 
 
-    private TimeTool() { }
+    private TimeTool() {
+    }
 
 
     // ==================================================================================================
 
 
+    /**
+     * 抽取后的逻辑不易读
+     */
+    @SuppressWarnings("DuplicatedCode")
     @Api("格式化时间间隔")
     public static String duration(long time) {
 

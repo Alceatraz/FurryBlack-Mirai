@@ -22,7 +22,7 @@ public abstract class EventHandlerFilter extends AbstractEventHandler {
     @Api("生命周期 过滤群聊消息")
     public abstract boolean handleGroupMessage(GroupMessageEvent message);
 
-    public final static class FilterInfo extends ModuleInfo {
+    public static final class FilterInfo extends ModuleInfo {
 
         public FilterInfo(Filter annotation) {
             this(annotation.name(), annotation.artificial(), annotation.description(), annotation.privacy());

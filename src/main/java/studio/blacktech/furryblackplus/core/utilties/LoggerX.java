@@ -74,7 +74,7 @@ public final class LoggerX extends PlatformLogger {
         }
 
         public int getLevel() {
-            return level;
+            return this.level;
         }
 
     }
@@ -205,13 +205,13 @@ public final class LoggerX extends PlatformLogger {
 
 
     public void bypass(String message) {
-        String result = "[" + datetime() + "][BYPS][" + name + "]" + message;
+        String result = "[" + datetime() + "][BYPS][" + this.name + "]" + message;
         System.out.println(result);
         LoggerX.writeLog(result);
     }
 
     public void bypass(String message, Throwable throwable) {
-        String result = "[" + datetime() + "][BYPS][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + datetime() + "][BYPS][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
         System.out.println(result);
         LoggerX.writeLog(result);
     }
@@ -219,14 +219,14 @@ public final class LoggerX extends PlatformLogger {
 
     @Override
     public void error0(String message) {
-        String result = "[" + datetime() + "][EXCE][" + name + "]" + message;
+        String result = "[" + datetime() + "][EXCE][" + this.name + "]" + message;
         if (PRINT_ERROR) System.out.println(Color.RED + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
     @Override
     public void error0(String message, Throwable throwable) {
-        String result = "[" + datetime() + "][EXCE][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + datetime() + "][EXCE][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_ERROR) System.out.println(Color.RED + result + Color.RESET);
         LoggerX.writeLog(result);
     }
@@ -234,47 +234,46 @@ public final class LoggerX extends PlatformLogger {
 
     @Override
     public void warning0(String message) {
-        String result = "[" + datetime() + "][WARN][" + name + "]" + message;
+        String result = "[" + datetime() + "][WARN][" + this.name + "]" + message;
         if (PRINT_WARN) System.out.println(Color.LIGHT_YELLOW + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
     @Override
     public void warning0(String message, Throwable throwable) {
-        String result = "[" + datetime() + "][WARN][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + datetime() + "][WARN][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_WARN) System.out.println(Color.LIGHT_YELLOW + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
 
     public void hint(String message) {
-        String result = "[" + datetime() + "][HINT][" + name + "]" + message;
+        String result = "[" + datetime() + "][HINT][" + this.name + "]" + message;
         if (PRINT_HINT) System.out.println(Color.LIGHT_CYAN + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
     public void hint(String message, Throwable throwable) {
-        String result = "[" + datetime() + "][HINT][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + datetime() + "][HINT][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_HINT) System.out.println(Color.LIGHT_CYAN + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
 
     public void seek(String message) {
-        String result = "[" + datetime() + "][SEEK][" + name + "]" + message;
+        String result = "[" + datetime() + "][SEEK][" + this.name + "]" + message;
         if (PRINT_SEEK) System.out.println(Color.LIGHT_GREEN + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
-    public String seek(String message, String value) {
-        String result = "[" + datetime() + "][SEEK][" + name + "]" + message + " `" + value + "`";
+    public void seek(String message, String value) {
+        String result = "[" + datetime() + "][SEEK][" + this.name + "]" + message + " `" + value + "`";
         if (PRINT_SEEK) System.out.println(Color.LIGHT_GREEN + result + Color.RESET);
         LoggerX.writeLog(result);
-        return value;
     }
 
     public void seek(String message, Throwable throwable) {
-        String result = "[" + datetime() + "][SEEK][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + datetime() + "][SEEK][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_SEEK) System.out.println(Color.LIGHT_GREEN + result + Color.RESET);
         LoggerX.writeLog(result);
     }
@@ -282,14 +281,14 @@ public final class LoggerX extends PlatformLogger {
 
     @Override
     public void info0(String message) {
-        String result = "[" + datetime() + "][INFO][" + name + "]" + message;
+        String result = "[" + datetime() + "][INFO][" + this.name + "]" + message;
         if (PRINT_INFO) System.out.println(result);
         LoggerX.writeLog(result);
     }
 
     @Override
     public void info0(String message, Throwable throwable) {
-        String result = "[" + datetime() + "][INFO][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + datetime() + "][INFO][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_INFO) System.out.println(result);
         LoggerX.writeLog(result);
     }
@@ -297,14 +296,14 @@ public final class LoggerX extends PlatformLogger {
 
     @Override
     public void debug0(String message) {
-        String result = "[" + datetime() + "][DEBG][" + name + "]" + message;
+        String result = "[" + datetime() + "][DEBG][" + this.name + "]" + message;
         if (PRINT_DEBUG) System.out.println(Color.GRAY + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
     @Override
     public void debug0(String message, Throwable throwable) {
-        String result = "[" + datetime() + "][DEBG][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + datetime() + "][DEBG][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_DEBUG) System.out.println(Color.GRAY + result + Color.RESET);
         LoggerX.writeLog(result);
     }
@@ -312,14 +311,14 @@ public final class LoggerX extends PlatformLogger {
 
     @Override
     public void verbose0(String message) {
-        String result = "[" + datetime() + "][VERB][" + name + "]" + message;
+        String result = "[" + datetime() + "][VERB][" + this.name + "]" + message;
         if (PRINT_VERBOSE) System.out.println(Color.GRAY + result + Color.RESET);
         LoggerX.writeLog(result);
     }
 
     @Override
     public void verbose0(String message, Throwable throwable) {
-        String result = "[" + datetime() + "][VERB][" + name + "]" + message + "\r\n" + extractTrace(throwable);
+        String result = "[" + datetime() + "][VERB][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
         if (PRINT_VERBOSE) System.out.println(Color.GRAY + result + Color.RESET);
         LoggerX.writeLog(result);
     }
@@ -337,7 +336,7 @@ public final class LoggerX extends PlatformLogger {
         builder.append("[");
         builder.append(datetime());
         builder.append("][DUMP][");
-        builder.append(name);
+        builder.append(this.name);
         builder.append("]");
 
         if (event instanceof GroupMessageEvent) {
@@ -393,7 +392,7 @@ public final class LoggerX extends PlatformLogger {
             builder.append(" ");
             builder.append(message.getClass().getSimpleName());
             builder.append(" ");
-            builder.append(message.toString());
+            builder.append(message);
             builder.append("\r\n");
         }
 

@@ -27,31 +27,31 @@ public final class Command {
         int split = message.indexOf(' ');
 
         if (split < 0) {
-            commandName = message;
-            commandBody = null;
-            commandBodyLength = 0;
-            commandParameters = null;
-            commandParameterLength = 0;
+            this.commandName = message;
+            this.commandBody = null;
+            this.commandBodyLength = 0;
+            this.commandParameters = null;
+            this.commandParameterLength = 0;
             return;
         }
 
         // 命令名按照第一个空格拆分
 
-        commandName = message.substring(0, split);
-        commandBody = message.substring(split + 1);
+        this.commandName = message.substring(0, split);
+        this.commandBody = message.substring(split + 1);
 
         // 命令体按照转义规则拆分
 
         boolean isFiled = false;
         boolean isEscape = false;
 
-        commandBodyLength = commandBody.length();
+        this.commandBodyLength = this.commandBody.length();
         StringBuilder builder = new StringBuilder();
         List<String> commandBodySlice = new LinkedList<>();
 
-        for (int pointer = 0; pointer < commandBodyLength; pointer++) {
+        for (int pointer = 0; pointer < this.commandBodyLength; pointer++) {
 
-            char chat = commandBody.charAt(pointer);
+            char chat = this.commandBody.charAt(pointer);
 
             switch (chat) {
 
@@ -100,9 +100,9 @@ public final class Command {
                 slice = slice.substring(2);
                 int index = slice.indexOf("=");
                 if (index > 0) {
-                    commandOptions.put(slice.substring(0, index), slice.substring(index + 1)); // --XXX=XXX 选项
+                    this.commandOptions.put(slice.substring(0, index), slice.substring(index + 1)); // --XXX=XXX 选项
                 } else {
-                    commandOptions.put(slice, null); // --XXX 开关
+                    this.commandOptions.put(slice, null); // --XXX 开关
                 }
             } else {
                 commandParameterList.add(slice); // 提取所有其他内容为参数列表
@@ -118,74 +118,74 @@ public final class Command {
     @Api("从指定位置拼接剩余的内容")
     public String join(int index) {
         StringBuilder builder = new StringBuilder();
-        if (commandParameterLength == 0 || index > commandParameterLength) return null;
-        for (; index < commandParameterLength; index++) builder.append(commandParameters[index]).append(" ");
+        if (this.commandParameterLength == 0 || index > this.commandParameterLength) return null;
+        for (; index < this.commandParameterLength; index++) builder.append(this.commandParameters[index]).append(" ");
         return builder.toString();
     }
 
     @Api("获取命令名")
     public String getCommandName() {
-        return commandName;
+        return this.commandName;
     }
 
     @Api("获取命令体")
     public String getCommandBody() {
-        return commandBody;
+        return this.commandBody;
     }
 
     @Api("获取命令体 - 最大字符限制")
     public String getCommandBody(int length) {
-        if (length > commandBodyLength) {
-            return commandBody;
+        if (length > this.commandBodyLength) {
+            return this.commandBody;
         } else {
-            return commandBody.substring(0, length);
+            return this.commandBody.substring(0, length);
         }
     }
 
     @Api("获取参数长度")
     public int getCommandBodyLength() {
-        return commandBodyLength;
+        return this.commandBodyLength;
     }
 
     @Api("是否有命令体")
     public boolean hasCommandBody() {
-        return commandParameterLength > 0;
+        return this.commandParameterLength > 0;
     }
 
     @Api("获取参数个数")
     public int getParameterLength() {
-        return commandParameterLength;
+        return this.commandParameterLength;
     }
 
     @Api("获取所有参数")
     public String[] getParameterSegment() {
-        return commandParameters;
+        return this.commandParameters;
     }
 
     @Api("获取指定位置的参数")
     public String getParameterSegment(int i) {
-        return commandParameters[i];
+        return this.commandParameters[i];
     }
 
     @Api("是否包含选项")
     public boolean hasSwitch(String name) {
-        return commandOptions.containsKey(name);
+        return this.commandOptions.containsKey(name);
     }
 
     @Api("获取指定选项")
     public String getSwitch(String name) {
-        return commandOptions.get(name);
+        return this.commandOptions.get(name);
     }
 
     @Override
     public String toString() {
         return "Command{" +
-                   "commandName='" + commandName + '\'' +
-                   ", commandBody='" + commandBody + '\'' +
-                   ", commandBodyLength=" + commandBodyLength +
-                   ", commandParameters=" + Arrays.toString(commandParameters) +
-                   ", commandParameterLength=" + commandParameterLength +
-                   ", commandOptions=" + commandOptions +
+                   "commandName='" + this.commandName + '\'' +
+                   ", commandBody='" + this.commandBody + '\'' +
+                   ", commandBodyLength=" + this.commandBodyLength +
+                   ", commandParameters=" + Arrays.toString(this.commandParameters) +
+                   ", commandParameterLength=" + this.commandParameterLength +
+                   ", commandOptions=" + this.commandOptions +
                    '}';
     }
 }

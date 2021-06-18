@@ -19,6 +19,7 @@ import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.PlainText;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.UserInterruptException;
 import org.jline.reader.impl.completer.AggregateCompleter;
 import org.jline.reader.impl.completer.ArgumentCompleter;
 import org.jline.reader.impl.completer.StringsCompleter;
@@ -47,6 +48,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 
@@ -107,6 +109,7 @@ public final class Driver {
     private static volatile boolean shutBySignal = true;
     private static volatile boolean shutModeDrop = false;
 
+    private static final AtomicReference<String> prompt = new AtomicReference<>("");
 
     private static Thread consoleThread;
 
@@ -288,7 +291,7 @@ public final class Driver {
         enable = false;
 
         LoggerX.setPrintLevel(LoggerX.LEVEL.ALL);
-        logger.info("执行关闭流程");
+        logger.hint("执行关闭流程");
 
 
         // =====================================================================
@@ -303,6 +306,7 @@ public final class Driver {
 
         logger.hint("关闭核心系统");
 
+        logger.info("关闭控制台");
         consoleThread.interrupt();
         try {
             consoleThread.join();
@@ -310,29 +314,43 @@ public final class Driver {
             exception.printStackTrace();
         }
 
-        System.out.println("[FurryBlack][MAIN]FurryBlackPlus closed, Bye.");
+        System.out.println(">> [FurryBlack][MAIN]FurryBlackPlus closed, Bye.");
 
     }
 
-
     // ==========================================================================================================================================================
     //
     //
     //
     // ==========================================================================================================================================================
 
-    private static boolean firstPrompt = true;
 
     private static void console() {
-        Console console = new Console();
+
+
+        Console console = noJline ? new ReaderConsole() : new JLineConsole();
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(10L);
+            } catch (InterruptedException exception) {
+                exception.printStackTrace();
+            }
+            prompt.set("[console]$ ");
+        }).start();
+
         console:
         while (true) {
             try {
-                String temp = console.read("[console]$ ");
+                String temp = console.readLine(prompt.get());
                 if (temp == null || temp.isEmpty() || temp.isBlank()) continue;
                 Command command = new Command(temp.trim());
                 switch (command.getCommandName()) {
 
+                    case "kill":
+                        System.out.println("[FurryBlack] Kill the JVM");
+                        System.exit(-1);
+                        break console;
 
                     case "drop":
                         shutModeDrop = true;
@@ -341,8 +359,9 @@ public final class Driver {
                     case "quit":
                     case "exit":
                         shutBySignal = false;
+                        prompt.set("");
                         systemd.signal();
-                        break console;
+                        break;
 
                     case "?":
                     case "help":
@@ -508,61 +527,73 @@ public final class Driver {
                         break;
                 }
 
+            } catch (UserInterruptException exception) {
+                return;
             } catch (Exception exception) {
                 logger.error("命令导致了异常", exception);
             }
         }
     }
 
-    private static class Console {
 
-        private LineReader jlineReader;
-        private BufferedReader bufferedReader;
+    // ==========================================================================================================================================================
+    //
+    // 控制台
+    //
+    // ==========================================================================================================================================================
 
-        public Console() {
-            if (noJline) {
-                bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-            } else {
-                jlineReader = LineReaderBuilder.builder().completer(new AggregateCompleter(
-                    new ArgumentCompleter(new StringsCompleter("?", "help", "drop", "stop", "exit", "quit", "gc", "stat", "stats", "status", "enable", "disable", "level", "debug", "module")),
-                    new ArgumentCompleter(
-                        new StringsCompleter("list", "send"),
-                        new StringsCompleter("u", "usr", "user", "users", "f", "fri", "friend", "friends", "g", "grp", "group", "groups")
-                    ),
-                    new ArgumentCompleter(
-                        new StringsCompleter("reload"),
-                        new StringsCompleter(systemd.listAllPlugin())
-                    )
-                )).build();
-                AutopairWidgets autopairWidgets = new AutopairWidgets(jlineReader);
-                autopairWidgets.enable();
-                assert jlineReader != null;
-            }
+
+    public interface Console {
+        String readLine(String prompt);
+    }
+
+
+    public static class JLineConsole implements Console {
+
+        private final LineReader jlineReader;
+
+        public JLineConsole() {
+            this.jlineReader = LineReaderBuilder.builder().completer(new AggregateCompleter(
+                new ArgumentCompleter(new StringsCompleter("?", "help", "drop", "stop", "exit", "quit", "gc", "stat", "stats", "status", "enable", "disable", "level", "debug", "module")),
+                new ArgumentCompleter(
+                    new StringsCompleter("list", "send"),
+                    new StringsCompleter("u", "usr", "user", "users", "f", "fri", "friend", "friends", "g", "grp", "group", "groups")
+                ),
+                new ArgumentCompleter(
+                    new StringsCompleter("reload"),
+                    new StringsCompleter(systemd.listAllPlugin())
+                )
+            )).build();
+            AutopairWidgets autopairWidgets = new AutopairWidgets(this.jlineReader);
+            autopairWidgets.enable();
         }
 
-        public String read(String prompt) {
+        @Override
+        public String readLine(String prompt) {
+            return this.jlineReader.readLine(prompt);
+        }
 
-            if (noJline) {
-                if (firstPrompt) {
-                    firstPrompt = false;
-                } else {
-                    System.out.print(prompt);
-                }
-                try {
-                    return bufferedReader.readLine();
-                } catch (IOException exception) {
-                    return null;
-                }
-            } else {
-                if (firstPrompt) {
-                    firstPrompt = false;
-                    return jlineReader.readLine("");
-                } else {
-                    return jlineReader.readLine(prompt);
-                }
+    }
+
+
+    public static class ReaderConsole implements Console {
+
+        private final BufferedReader bufferedReader;
+
+        public ReaderConsole() {
+            this.bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+        }
+
+        @Override
+        public String readLine(String prompt) {
+            try {
+                return this.bufferedReader.readLine();
+            } catch (IOException exception) {
+                throw new RuntimeException(exception);
             }
         }
     }
+
 
     // ==========================================================================================================================================================
     //
@@ -581,6 +612,7 @@ public final class Driver {
         return BOOT_TIME;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     @Api("是否正在监听消息")
     public static boolean isEnable() {
         return enable;
