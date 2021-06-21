@@ -105,8 +105,6 @@ public final class Systemd {
     private static final String CONF_NET_HEARTBEAT_TIMEOUT = "net.heartbeat.timeout";
 
     private static final String CONF_NET_RECONNECT_RETRY = "net.reconnect.retry";
-    private static final String CONF_NET_RECONNECT_DELAY = "net.reconnect.delay";
-    private static final String CONF_NET_RECONNECT_PERIOD = "net.reconnect.period";
 
 
     // @formatter:off
@@ -147,11 +145,10 @@ public final class Systemd {
     "# 心跳超时\n" +
     CONF_NET_HEARTBEAT_TIMEOUT + "=5000\n" +
     "# 重连次数\n" +
-    CONF_NET_RECONNECT_RETRY + "=10\n" +
-    "# 重连等待\n" +
-    CONF_NET_RECONNECT_DELAY + "=5000\n" +
-    "# 重连周期\n" +
-    CONF_NET_RECONNECT_PERIOD + "=5000";
+    CONF_NET_RECONNECT_RETRY + "=10\n"
+
+
+    ;
 
 
     // @formatter:on
@@ -563,17 +560,12 @@ public final class Systemd {
         // 重连参数
 
 
-        long NET_RECONNECT_DELAY = this.parseLong(config.getProperty(CONF_NET_RECONNECT_DELAY));
-        long NET_RECONNECT_PERIOD = this.parseLong(config.getProperty(CONF_NET_RECONNECT_PERIOD));
         int NET_RECONNECT_RETRY = this.parseInteger(config.getProperty(CONF_NET_RECONNECT_RETRY));
 
-        this.logger.seek("重连间隔 " + NET_RECONNECT_PERIOD);
-        this.logger.seek("重连延迟 " + NET_RECONNECT_DELAY);
+
         this.logger.seek("重连次数 " + NET_RECONNECT_RETRY);
 
-        configuration.setReconnectPeriodMillis(NET_RECONNECT_PERIOD);
         configuration.setReconnectionRetryTimes(NET_RECONNECT_RETRY);
-        configuration.setFirstReconnectDelayMillis(NET_RECONNECT_DELAY);
 
 
         // 传入日志
