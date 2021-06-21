@@ -82,7 +82,7 @@ public final class Driver {
     }
 
 
-    public static final String APP_VERSION = "0.7.3";
+    public static final String APP_VERSION = "0.7.8";
 
 
     // ==========================================================================================================================================================
@@ -421,6 +421,7 @@ public final class Driver {
                     case "list":
                         if (!command.hasCommandBody()) continue console;
                         switch (command.getParameterSegment(0)) {
+
                             case "u":
                             case "usr":
                             case "user":
@@ -438,6 +439,7 @@ public final class Driver {
                                     .map(Driver::getFormattedNickName)
                                     .forEach(System.out::println);
                                 break;
+
                             case "g":
                             case "grp":
                             case "group":
@@ -451,6 +453,7 @@ public final class Driver {
                                     .map(item -> item.getName() + "(" + item.getId() + ") " + item.getMembers().size() + "人")
                                     .forEach(System.out::println);
                                 break;
+
                             default:
                                 long group;
                                 try {
@@ -484,6 +487,7 @@ public final class Driver {
                     case "send":
                         if (command.getParameterLength() < 1) continue;
                         switch (command.getParameterSegment(0)) {
+
                             case "u":
                             case "usr":
                             case "user":
@@ -495,6 +499,7 @@ public final class Driver {
                                 long user = Long.parseLong(command.getParameterSegment(1));
                                 Driver.sendUserMessage(user, command.join(2));
                                 break;
+
                             case "g":
                             case "grp":
                             case "group":
@@ -502,6 +507,7 @@ public final class Driver {
                                 long group = Long.parseLong(command.getParameterSegment(1));
                                 Driver.sendGroupMessage(group, command.join(2));
                                 break;
+
                             default:
                                 group = Long.parseLong(command.getParameterSegment(0));
                                 user = Long.parseLong(command.getParameterSegment(1));

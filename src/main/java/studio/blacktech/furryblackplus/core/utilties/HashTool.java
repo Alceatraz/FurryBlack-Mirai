@@ -23,11 +23,11 @@ public final class HashTool {
 
     @Api("md5")
     public static String md5(byte[] message) {
-        MessageDigest digest = null;
+        MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException exception) {
-            exception.printStackTrace();
+            throw new RuntimeException(exception);
         }
         byte[] digested = Objects.requireNonNull(digest).digest(message);
         StringBuilder builder = new StringBuilder();
@@ -54,11 +54,11 @@ public final class HashTool {
 
     @Api("sha256")
     public static String sha256(byte[] message) {
-        MessageDigest digest = null;
+        MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException exception) {
-            exception.printStackTrace();
+            throw new RuntimeException(exception);
         }
         return digest(message, digest);
     }
@@ -81,11 +81,11 @@ public final class HashTool {
 
     @Api("sha384")
     public static String sha384(byte[] message) {
-        MessageDigest digest = null;
+        MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("SHA-384");
         } catch (NoSuchAlgorithmException exception) {
-            exception.printStackTrace();
+            throw new RuntimeException(exception);
         }
         return digest(message, digest);
     }
@@ -107,11 +107,11 @@ public final class HashTool {
 
     @Api("sha512")
     public static String sha512(byte[] message) {
-        MessageDigest digest = null;
+        MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("SHA-512");
         } catch (NoSuchAlgorithmException exception) {
-            exception.printStackTrace();
+            throw new RuntimeException(exception);
         }
         return digest(message, digest);
     }
