@@ -608,11 +608,6 @@ public final class Driver {
     // ==========================================================================================================================================================
 
 
-    @Api("获取版本")
-    public static String getAppVersion() {
-        return APP_VERSION;
-    }
-
     @Api("获取启动时间戳")
     public static long getBootTime() {
         return BOOT_TIME;

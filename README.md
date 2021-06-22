@@ -46,9 +46,13 @@
 
 ## CHANGELOG
 
-### 0.7.8
+### 0.7.8-M3
 
-- 更新[Mirai-2.7-M1](https://github.com/mamoe/mirai/releases/tag/v2.7-M1#:~:text=%E5%8D%B3%E4%BD%BF%E8%BF%99%E5%8F%AF%E8%83%BD%E8%BF%98%E6%9C%AA%E7%A8%B3%E5%AE%9A%2C%20%E4%BD%86%E4%B9%9F%E5%BB%BA%E8%AE%AE%E5%B0%9D%E8%AF%95%202.7-M1%20%E5%B9%B6%E5%8F%8A%E6%97%B6%E5%8F%8D%E9%A6%88%E9%97%AE%E9%A2%98)
+- 修复部分烂代码
+
+### 0.7.8-M2
+
+- 更新[Mirai-2.7-M1](https://github.com/mamoe/mirai/releases/tag/v2.7-M1)
 
 ### 0.7.7
 

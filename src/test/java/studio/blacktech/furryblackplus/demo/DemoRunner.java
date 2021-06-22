@@ -33,8 +33,9 @@ public class DemoRunner extends EventHandlerRunner {
         System.out.println("关闭" + this.getClass().getName());
     }
 
+    @SuppressWarnings("EmptyMethod")
     public void demo() {
-
+        // Do what ever you need to
     }
 
 }

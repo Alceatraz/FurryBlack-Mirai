@@ -34,10 +34,20 @@ public final class LoggerX extends PlatformLogger {
 
     public static final List<String> LEVELS = Arrays.asList("MUTE", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "ALL");
 
-
     private static boolean INIT_LOCK = false;
+
     private static File FILE_LOGGER;
     private final String name;
+
+
+    private static boolean PRINT_ERROR = true;
+    private static boolean PRINT_WARN = true;
+    private static boolean PRINT_HINT = true;
+    private static boolean PRINT_SEEK = true;
+    private static boolean PRINT_INFO = true;
+    private static boolean PRINT_DEBUG = true;
+    private static boolean PRINT_VERBOSE = true;
+
 
     public LoggerX(String name) {
         super(name);
@@ -76,7 +86,6 @@ public final class LoggerX extends PlatformLogger {
         public int getLevel() {
             return this.level;
         }
-
     }
 
     public static boolean setPrintLevel(String level) {
@@ -100,15 +109,6 @@ public final class LoggerX extends PlatformLogger {
         PRINT_DEBUG = 5 < i;
         PRINT_VERBOSE = 6 < i;
     }
-
-
-    private static boolean PRINT_ERROR = true;
-    private static boolean PRINT_WARN = true;
-    private static boolean PRINT_HINT = true;
-    private static boolean PRINT_SEEK = true;
-    private static boolean PRINT_INFO = true;
-    private static boolean PRINT_DEBUG = true;
-    private static boolean PRINT_VERBOSE = true;
 
 
     // ==================================================================================================
@@ -211,9 +211,13 @@ public final class LoggerX extends PlatformLogger {
     }
 
     public void bypass(String message, Throwable throwable) {
-        String result = "[" + datetime() + "][BYPS][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
-        System.out.println(result);
-        LoggerX.writeLog(result);
+        if (throwable == null) {
+            this.bypass(message);
+        } else {
+            String result = "[" + datetime() + "][BYPS][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
+            System.out.println(result);
+            LoggerX.writeLog(result);
+        }
     }
 
 
@@ -226,9 +230,13 @@ public final class LoggerX extends PlatformLogger {
 
     @Override
     public void error0(String message, Throwable throwable) {
-        String result = "[" + datetime() + "][EXCE][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
-        if (PRINT_ERROR) System.out.println(Color.RED + result + Color.RESET);
-        LoggerX.writeLog(result);
+        if (throwable == null) {
+            this.error0(message);
+        } else {
+            String result = "[" + datetime() + "][EXCE][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
+            if (PRINT_ERROR) System.out.println(Color.RED + result + Color.RESET);
+            LoggerX.writeLog(result);
+        }
     }
 
 
@@ -241,9 +249,13 @@ public final class LoggerX extends PlatformLogger {
 
     @Override
     public void warning0(String message, Throwable throwable) {
-        String result = "[" + datetime() + "][WARN][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
-        if (PRINT_WARN) System.out.println(Color.LIGHT_YELLOW + result + Color.RESET);
-        LoggerX.writeLog(result);
+        if (throwable == null) {
+            this.warning0(message);
+        } else {
+            String result = "[" + datetime() + "][WARN][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
+            if (PRINT_WARN) System.out.println(Color.LIGHT_YELLOW + result + Color.RESET);
+            LoggerX.writeLog(result);
+        }
     }
 
 
@@ -254,9 +266,13 @@ public final class LoggerX extends PlatformLogger {
     }
 
     public void hint(String message, Throwable throwable) {
-        String result = "[" + datetime() + "][HINT][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
-        if (PRINT_HINT) System.out.println(Color.LIGHT_CYAN + result + Color.RESET);
-        LoggerX.writeLog(result);
+        if (throwable == null) {
+            this.hint(message);
+        } else {
+            String result = "[" + datetime() + "][HINT][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
+            if (PRINT_HINT) System.out.println(Color.LIGHT_CYAN + result + Color.RESET);
+            LoggerX.writeLog(result);
+        }
     }
 
 
@@ -273,9 +289,13 @@ public final class LoggerX extends PlatformLogger {
     }
 
     public void seek(String message, Throwable throwable) {
-        String result = "[" + datetime() + "][SEEK][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
-        if (PRINT_SEEK) System.out.println(Color.LIGHT_GREEN + result + Color.RESET);
-        LoggerX.writeLog(result);
+        if (throwable == null) {
+            this.seek(message);
+        } else {
+            String result = "[" + datetime() + "][SEEK][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
+            if (PRINT_SEEK) System.out.println(Color.LIGHT_GREEN + result + Color.RESET);
+            LoggerX.writeLog(result);
+        }
     }
 
 
@@ -288,9 +308,13 @@ public final class LoggerX extends PlatformLogger {
 
     @Override
     public void info0(String message, Throwable throwable) {
-        String result = "[" + datetime() + "][INFO][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
-        if (PRINT_INFO) System.out.println(result);
-        LoggerX.writeLog(result);
+        if (throwable == null) {
+            this.info0(message);
+        } else {
+            String result = "[" + datetime() + "][INFO][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
+            if (PRINT_INFO) System.out.println(result);
+            LoggerX.writeLog(result);
+        }
     }
 
 
@@ -303,9 +327,13 @@ public final class LoggerX extends PlatformLogger {
 
     @Override
     public void debug0(String message, Throwable throwable) {
-        String result = "[" + datetime() + "][DEBG][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
-        if (PRINT_DEBUG) System.out.println(Color.GRAY + result + Color.RESET);
-        LoggerX.writeLog(result);
+        if (throwable == null) {
+            this.debug0(message);
+        } else {
+            String result = "[" + datetime() + "][DEBG][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
+            if (PRINT_DEBUG) System.out.println(Color.GRAY + result + Color.RESET);
+            LoggerX.writeLog(result);
+        }
     }
 
 
@@ -318,9 +346,13 @@ public final class LoggerX extends PlatformLogger {
 
     @Override
     public void verbose0(String message, Throwable throwable) {
-        String result = "[" + datetime() + "][VERB][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
-        if (PRINT_VERBOSE) System.out.println(Color.GRAY + result + Color.RESET);
-        LoggerX.writeLog(result);
+        if (throwable == null) {
+            this.verbose0(message);
+        } else {
+            String result = "[" + datetime() + "][VERB][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
+            if (PRINT_VERBOSE) System.out.println(Color.GRAY + result + Color.RESET);
+            LoggerX.writeLog(result);
+        }
     }
 
 
@@ -410,7 +442,7 @@ public final class LoggerX extends PlatformLogger {
 
 
     public static String extractTrace(Throwable throwable) {
-        if (throwable == null) return "没有异常";
+        if (throwable == null) throw new IllegalArgumentException("Extract null");
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
         throwable.printStackTrace(printWriter);

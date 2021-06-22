@@ -22,6 +22,8 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 
+@SuppressWarnings("RedundantThrows")
+
 @Api("基础模块类")
 public abstract class AbstractEventHandler {
 

@@ -163,6 +163,9 @@ public final class Systemd {
 
     private final LoggerX logger = new LoggerX(this.getClass());
 
+    private final Lock lock = new ReentrantLock();
+    private final Condition condition = this.lock.newCondition();
+
     private final File FOLDER_CONFIG;
 
 
@@ -329,9 +332,9 @@ public final class Systemd {
         this.logger.info("初始化help");
         this.MESSAGE_HELP = this.readFile(FILE_HELP);
 
-        this.MESSAGE_EULA = this.MESSAGE_EULA.replaceAll("\\$\\{VERSION}", Driver.getAppVersion());
-        this.MESSAGE_INFO = this.MESSAGE_INFO.replaceAll("\\$\\{VERSION}", Driver.getAppVersion());
-        this.MESSAGE_HELP = this.MESSAGE_HELP.replaceAll("\\$\\{VERSION}", Driver.getAppVersion());
+        this.MESSAGE_EULA = this.MESSAGE_EULA.replaceAll("\\$\\{VERSION}", Driver.APP_VERSION);
+        this.MESSAGE_INFO = this.MESSAGE_INFO.replaceAll("\\$\\{VERSION}", Driver.APP_VERSION);
+        this.MESSAGE_HELP = this.MESSAGE_HELP.replaceAll("\\$\\{VERSION}", Driver.APP_VERSION);
 
         String SHA_EULA = HashTool.SHA256(this.MESSAGE_EULA);
         String SHA_INFO = HashTool.SHA256(this.MESSAGE_INFO);
@@ -684,12 +687,14 @@ public final class Systemd {
             this.logger.hint("扫描到以下定时器");
             runnerList.forEach(item -> this.logger.info(item.getAnnotation(Runner.class).priority() + " - " + item.getName()));
 
-        } catch (Exception exception) {
-            if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equalsIgnoreCase(exception.getMessage())) {
+        } catch (ReflectionsException exception) {
+            if ("Scanner SubTypesScanner was not configured".equalsIgnoreCase(exception.getMessage())) {
                 this.logger.info("没有扫描到任何定时器");
             } else {
-                this.logger.warning("扫描定时器时发生异常", exception);
+                throw new BootException("扫描定时器时发生异常", exception);
             }
+        } catch (Exception exception) {
+            throw new BootException("扫描定时器时发生异常", exception);
         }
 
 
@@ -728,12 +733,14 @@ public final class Systemd {
             this.logger.hint("扫描到以下监听器");
             monitorList.forEach(item -> this.logger.info(item.getAnnotation(Monitor.class).priority() + " - " + item.getName()));
 
-        } catch (Exception exception) {
-            if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equalsIgnoreCase(exception.getMessage())) {
+        } catch (ReflectionsException exception) {
+            if ("Scanner SubTypesScanner was not configured".equalsIgnoreCase(exception.getMessage())) {
                 this.logger.info("没有扫描到任何监听器");
             } else {
-                this.logger.warning("扫描监听器时发生异常", exception);
+                throw new BootException("扫描监听器时发生异常", exception);
             }
+        } catch (Exception exception) {
+            throw new BootException("扫描监听器时发生异常", exception);
         }
 
 
@@ -772,12 +779,14 @@ public final class Systemd {
             this.logger.hint("扫描到以下过滤器");
             filterList.forEach(item -> this.logger.info(item.getAnnotation(Filter.class).priority() + " - " + item.getName()));
 
-        } catch (Exception exception) {
-            if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equalsIgnoreCase(exception.getMessage())) {
+        } catch (ReflectionsException exception) {
+            if ("Scanner SubTypesScanner was not configured".equalsIgnoreCase(exception.getMessage())) {
                 this.logger.info("没有扫描到任何过滤器");
             } else {
-                this.logger.warning("扫描过滤器时发生异常", exception);
+                throw new BootException("扫描过滤器时发生异常", exception);
             }
+        } catch (Exception exception) {
+            throw new BootException("扫描过滤器时发生异常", exception);
         }
 
 
@@ -812,12 +821,14 @@ public final class Systemd {
             this.logger.hint("扫描到以下执行器");
             executorList.forEach(item -> this.logger.info(item.getName()));
 
-        } catch (Exception exception) {
-            if (exception instanceof ReflectionsException && "Scanner SubTypesScanner was not configured".equalsIgnoreCase(exception.getMessage())) {
+        } catch (ReflectionsException exception) {
+            if ("Scanner SubTypesScanner was not configured".equalsIgnoreCase(exception.getMessage())) {
                 this.logger.info("没有扫描到任何执行器");
             } else {
-                this.logger.warning("扫描执行器时发生异常", exception);
+                throw new BootException("扫描执行器时发生异常", exception);
             }
+        } catch (Exception exception) {
+            throw new BootException("扫描执行器时发生异常", exception);
         }
 
 
@@ -1407,10 +1418,6 @@ public final class Systemd {
     // ==========================================================================================================================================================
 
 
-    private final Lock lock = new ReentrantLock();
-    private final Condition condition = this.lock.newCondition();
-
-
     public void await() {
         try {
             this.lock.lock();
@@ -1659,7 +1666,6 @@ public final class Systemd {
         return Mirai.getInstance().queryProfile(this.bot, user);
     }
 
-    @SuppressWarnings("DuplicatedCode")
     @Api("获取预设昵称")
     public String getMappedNickName(long groupId, long userId) {
         if (this.NICKNAME_GROUPS.containsKey(groupId)) {
@@ -1680,7 +1686,6 @@ public final class Systemd {
         }
     }
 
-    @SuppressWarnings("DuplicatedCode")
     @Api("获取预设昵称")
     public String getMappedNickName(GroupMessageEvent event) {
         long groupId = event.getGroup().getId();
