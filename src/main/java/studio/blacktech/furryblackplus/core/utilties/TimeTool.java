@@ -13,8 +13,7 @@ import java.time.ZoneOffset;
 public class TimeTool {
 
 
-    private TimeTool() {
-    }
+    private TimeTool() { }
 
 
     // ==================================================================================================

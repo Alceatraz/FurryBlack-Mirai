@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -128,13 +129,18 @@ public final class LoggerX extends PlatformLogger {
     }
 
     @Api("格式化日期")
+    public static String date(long timeStamp) {
+        return DATE.format(Instant.ofEpochMilli(timeStamp));
+    }
+
+    @Api("格式化日期")
     public static String date(Instant instant) {
         return DATE.format(instant);
     }
 
     @Api("格式化日期")
-    public static String date(long timeStamp) {
-        return DATE.format(Instant.ofEpochMilli(timeStamp));
+    public static String date(LocalDateTime localDateTime) {
+        return DATE.format(localDateTime);
     }
 
 
@@ -144,13 +150,18 @@ public final class LoggerX extends PlatformLogger {
     }
 
     @Api("格式化时间")
-    public static String time(Instant instant) {
-        return DATE.format(instant);
+    public static String time(long timeStamp) {
+        return TIME.format(Instant.ofEpochMilli(timeStamp));
     }
 
     @Api("格式化时间")
-    public static String time(long timeStamp) {
-        return TIME.format(Instant.ofEpochMilli(timeStamp));
+    public static String time(Instant instant) {
+        return TIME.format(instant);
+    }
+
+    @Api("格式化时间")
+    public static String time(LocalDateTime localDateTime) {
+        return TIME.format(localDateTime);
     }
 
 
@@ -160,13 +171,18 @@ public final class LoggerX extends PlatformLogger {
     }
 
     @Api("格式化日期时间")
+    public static String datetime(long timeStamp) {
+        return DATETIME.format(Instant.ofEpochMilli(timeStamp));
+    }
+
+    @Api("格式化日期时间")
     public static String datetime(Instant instant) {
         return DATETIME.format(instant);
     }
 
     @Api("格式化日期时间")
-    public static String datetime(long timeStamp) {
-        return DATETIME.format(Instant.ofEpochMilli(timeStamp));
+    public static String datetime(LocalDateTime localDateTime) {
+        return DATETIME.format(localDateTime);
     }
 
 

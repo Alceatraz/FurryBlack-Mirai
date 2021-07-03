@@ -17,8 +17,7 @@ import java.util.Objects;
 public final class HashTool {
 
 
-    private HashTool() {
-    }
+    private HashTool() { }
 
 
     @Api("md5")
