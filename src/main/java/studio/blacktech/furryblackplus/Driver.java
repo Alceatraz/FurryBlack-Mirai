@@ -271,6 +271,7 @@ public final class Driver {
         if (!noConsole) {
             logger.info("启动终端线程");
             consoleThread = new Thread(Driver::console);
+            consoleThread.setDaemon(true);
             consoleThread.start();
         }
 
@@ -307,7 +308,17 @@ public final class Driver {
         logger.hint("关闭核心系统");
 
         logger.info("关闭控制台");
-        consoleThread.interrupt();
+
+        if (noJline) {
+            try {
+                System.in.close();
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        } else {
+            consoleThread.interrupt();
+        }
+
         try {
             consoleThread.join();
         } catch (InterruptedException exception) {
