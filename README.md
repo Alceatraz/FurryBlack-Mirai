@@ -46,6 +46,10 @@
 
 ## CHANGELOG
 
+### 0.7.8-M6
+
+- 貌似Mira更新了某种东西，没有login的时候closeAndJoin反而会开始登录
+
 ### 0.7.8-M5
 
 - 修复不使用jline导致无法退出的问题

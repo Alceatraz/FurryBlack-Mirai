@@ -1268,7 +1268,11 @@ public final class Systemd {
 
         this.logger.info("通知机器人关闭");
 
-        this.bot.closeAndJoin(null);
+        if (Driver.isNoLogin()) {
+            this.logger.warning("调试模式 不需要关闭机器人");
+        } else {
+            this.bot.closeAndJoin(null);
+        }
 
         this.logger.info("机器人已关闭");
 

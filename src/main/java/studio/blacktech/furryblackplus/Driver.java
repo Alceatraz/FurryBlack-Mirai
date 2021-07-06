@@ -307,25 +307,9 @@ public final class Driver {
 
         logger.hint("关闭核心系统");
 
-        logger.info("关闭控制台");
-
-        if (noJline) {
-            try {
-                System.in.close();
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            }
-        } else {
-            consoleThread.interrupt();
-        }
-
-        try {
-            consoleThread.join();
-        } catch (InterruptedException exception) {
-            exception.printStackTrace();
-        }
-
         System.out.println(">> [FurryBlack][MAIN]FurryBlackPlus closed, Bye.");
+
+//        System.exit(0);
 
     }
 
