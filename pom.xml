@@ -95,10 +95,12 @@
                             <overWriteSnapshots>true</overWriteSnapshots>
                             <excludeArtifactIds>
                                 apiguardian-api,
+                                junit-jupiter,
                                 junit-jupiter-api,
                                 junit-jupiter-engine,
-                                junit-platform-commons,
+                                junit-jupiter-params,
                                 junit-platform-engine,
+                                junit-platform-commons,
                                 kotlin-test,
                                 kotlin-test-annotations-common,
                                 kotlin-test-common,

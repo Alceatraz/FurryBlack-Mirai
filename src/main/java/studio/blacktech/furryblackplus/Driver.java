@@ -24,8 +24,8 @@ import org.jline.reader.impl.completer.AggregateCompleter;
 import org.jline.reader.impl.completer.ArgumentCompleter;
 import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.widget.AutopairWidgets;
-import studio.blacktech.furryblackplus.core.Systemd;
 import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.core.Systemd;
 import studio.blacktech.furryblackplus.core.exception.initlization.BootException;
 import studio.blacktech.furryblackplus.core.interfaces.EventHandlerRunner;
 import studio.blacktech.furryblackplus.core.utilties.Command;
@@ -350,7 +350,7 @@ public final class Driver {
                     case "kill":
                         System.out.println("[FurryBlack] Kill the JVM");
                         System.exit(-1);
-                        break console;
+
 
                     case "drop":
                         shutModeDrop = true;
@@ -361,7 +361,7 @@ public final class Driver {
                         shutBySignal = false;
                         prompt.set("");
                         systemd.signal();
-                        break;
+                        break console;
 
                     case "?":
                     case "help":
