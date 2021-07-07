@@ -96,8 +96,6 @@ public final class Systemd {
     private static final String CONF_BOT_DEVICE_INFO = "bot.device.info";
 
     private static final String CONF_BOT_COMMAND_PREFIX = "bot.command.prefix";
-    private static final String CONF_BOT_PACKAGE_PREFIX = "bot.package.prefix";
-
 
     private static final String CONF_NET_HEARTBEAT_PERIOD = "net.heartbeat.period";
     private static final String CONF_NET_HEARTBEAT_TIMEOUT = "net.heartbeat.timeout";
@@ -126,8 +124,6 @@ public final class Systemd {
     CONF_THREADS_SCHEDULE+ "=4\n"+
     "# 命令识别前缀\n" +
     CONF_BOT_COMMAND_PREFIX + "=\"/\"\n" +
-    "# 模块扫描路径\n" +
-    CONF_BOT_PACKAGE_PREFIX + "=studio.blacktech.furryblackplus.extensions\n" +
     "# =====================================\n" +
     "# 设备设置\n" +
     "# =====================================\n" +
