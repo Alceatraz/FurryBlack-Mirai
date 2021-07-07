@@ -2,8 +2,8 @@ package studio.blacktech.furryblackplus.core.interfaces;
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
-import studio.blacktech.furryblackplus.core.annotation.Api;
-import studio.blacktech.furryblackplus.core.annotation.Monitor;
+import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.core.annotation.Component;
 
 
 @Api("监听器父类")
@@ -24,7 +24,7 @@ public abstract class EventHandlerMonitor extends AbstractEventHandler {
 
     public static final class MonitorInfo extends ModuleInfo {
 
-        public MonitorInfo(Monitor annotation) {
+        public MonitorInfo(Component annotation) {
             this(annotation.name(), annotation.artificial(), annotation.description(), annotation.privacy());
         }
 

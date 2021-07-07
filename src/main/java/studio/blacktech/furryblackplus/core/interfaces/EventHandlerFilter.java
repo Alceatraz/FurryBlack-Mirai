@@ -2,8 +2,8 @@ package studio.blacktech.furryblackplus.core.interfaces;
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
-import studio.blacktech.furryblackplus.core.annotation.Api;
-import studio.blacktech.furryblackplus.core.annotation.Filter;
+import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.core.annotation.Component;
 
 
 @Api("过滤器父类")
@@ -24,7 +24,7 @@ public abstract class EventHandlerFilter extends AbstractEventHandler {
 
     public static final class FilterInfo extends ModuleInfo {
 
-        public FilterInfo(Filter annotation) {
+        public FilterInfo(Component annotation) {
             this(annotation.name(), annotation.artificial(), annotation.description(), annotation.privacy());
         }
 

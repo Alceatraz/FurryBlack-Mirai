@@ -1,4 +1,4 @@
-package studio.blacktech.furryblackplus.core.annotation;
+package studio.blacktech.furryblackplus.common;
 
 
 import java.lang.annotation.Documented;

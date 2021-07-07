@@ -1,8 +1,8 @@
 package studio.blacktech.furryblackplus.core.interfaces;
 
 
-import studio.blacktech.furryblackplus.core.annotation.Api;
-import studio.blacktech.furryblackplus.core.annotation.Runner;
+import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.core.annotation.Component;
 
 
 @Api("定时器父类")
@@ -17,7 +17,7 @@ public abstract class EventHandlerRunner extends AbstractEventHandler {
 
     public static final class RunnerInfo extends ModuleInfo {
 
-        public RunnerInfo(Runner annotation) {
+        public RunnerInfo(Component annotation) {
             this(annotation.name(), annotation.artificial(), annotation.description(), annotation.privacy());
         }
 

@@ -9,12 +9,12 @@
 
     <name>FurryBlack-Mirai-Core</name>
 
-    <version>0.7.8-M6</version>
+    <version>0.8.0</version>
 
     <packaging>jar</packaging>
 
     <properties>
-        <mirai.version>2.7-M1</mirai.version>
+        <mirai.version>2.7-M2</mirai.version>
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.source>11</maven.compiler.source>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -46,6 +46,7 @@
             <groupId>net.mamoe</groupId>
             <artifactId>mirai-core-jvm</artifactId>
             <version>${mirai.version}</version>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.jline/jline -->
@@ -55,11 +56,12 @@
             <version>3.20.0</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.reflections/reflections -->
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter -->
         <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>0.9.12</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.7.2</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

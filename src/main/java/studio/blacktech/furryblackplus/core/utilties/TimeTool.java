@@ -1,7 +1,7 @@
 package studio.blacktech.furryblackplus.core.utilties;
 
 import studio.blacktech.furryblackplus.Driver;
-import studio.blacktech.furryblackplus.core.annotation.Api;
+import studio.blacktech.furryblackplus.common.Api;
 
 import java.time.Instant;
 import java.time.LocalDate;

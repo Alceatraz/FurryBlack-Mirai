@@ -1,10 +1,10 @@
 package studio.blacktech.furryblackplus.demo;
 
-import studio.blacktech.furryblackplus.core.annotation.Runner;
+import studio.blacktech.furryblackplus.core.annotation.Component;
 import studio.blacktech.furryblackplus.core.interfaces.EventHandlerRunner;
 
 
-@Runner(
+@Component(
     artificial = "Runner_Demo",
     name = "示例",
     description = "示例执行器",

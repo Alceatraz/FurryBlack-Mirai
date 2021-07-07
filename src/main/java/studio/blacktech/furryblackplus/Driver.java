@@ -25,7 +25,7 @@ import org.jline.reader.impl.completer.ArgumentCompleter;
 import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.widget.AutopairWidgets;
 import studio.blacktech.furryblackplus.core.Systemd;
-import studio.blacktech.furryblackplus.core.annotation.Api;
+import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.exception.initlization.BootException;
 import studio.blacktech.furryblackplus.core.interfaces.EventHandlerRunner;
 import studio.blacktech.furryblackplus.core.utilties.Command;
@@ -116,6 +116,7 @@ public final class Driver {
     private static File FOLDER_ROOT;
     private static File FOLDER_CONFIG;
     private static File FOLDER_MODULE;
+    private static File FOLDER_PLUGIN;
     private static File FOLDER_LOGGER;
 
 
@@ -196,6 +197,7 @@ public final class Driver {
 
             FOLDER_CONFIG = Paths.get(userDir, "config").toFile();
             FOLDER_MODULE = Paths.get(userDir, "module").toFile();
+            FOLDER_PLUGIN = Paths.get(userDir, "plugin").toFile();
             FOLDER_LOGGER = Paths.get(userDir, "logger").toFile();
 
             File loggerFile = Paths.get(FOLDER_LOGGER.getAbsolutePath(), LoggerX.format("yyyy_MM_dd_HH_mm_ss", BOOT_TIME) + ".txt").toFile();
@@ -204,12 +206,14 @@ public final class Driver {
 
             if (!FOLDER_CONFIG.exists() && !FOLDER_CONFIG.mkdirs()) throw new BootException("无法创建文件夹 " + FOLDER_CONFIG.getAbsolutePath());
             if (!FOLDER_MODULE.exists() && !FOLDER_MODULE.mkdirs()) throw new BootException("无法创建文件夹 " + FOLDER_MODULE.getAbsolutePath());
+            if (!FOLDER_PLUGIN.exists() && !FOLDER_PLUGIN.mkdirs()) throw new BootException("无法创建文件夹 " + FOLDER_PLUGIN.getAbsolutePath());
             if (!FOLDER_LOGGER.exists() && !FOLDER_LOGGER.mkdirs()) throw new BootException("无法创建文件夹 " + FOLDER_LOGGER.getAbsolutePath());
 
             System.out.println("[FurryBlack][INIT]初始化检查");
 
             if (!FOLDER_CONFIG.isDirectory()) throw new BootException("文件夹被文件占位 " + FOLDER_CONFIG.getAbsolutePath());
             if (!FOLDER_MODULE.isDirectory()) throw new BootException("文件夹被文件占位 " + FOLDER_MODULE.getAbsolutePath());
+            if (!FOLDER_PLUGIN.isDirectory()) throw new BootException("文件夹被文件占位 " + FOLDER_PLUGIN.getAbsolutePath());
             if (!FOLDER_LOGGER.isDirectory()) throw new BootException("文件夹被文件占位 " + FOLDER_LOGGER.getAbsolutePath());
 
             System.out.println("[FurryBlack][INIT]创建日志文件");
@@ -223,11 +227,12 @@ public final class Driver {
             System.out.println("[FurryBlack][INIT]日志系统初始化完成");
 
             logger.info("应用工作目录 " + FOLDER_ROOT.getAbsolutePath());
-            logger.info("核心日志目录 " + FOLDER_LOGGER.getAbsolutePath());
+            logger.info("插件扫描目录 " + FOLDER_PLUGIN.getAbsolutePath());
             logger.info("模块数据目录 " + FOLDER_MODULE.getAbsolutePath());
+            logger.info("核心日志目录 " + FOLDER_LOGGER.getAbsolutePath());
             logger.info("当前日志文件 " + loggerFile.getAbsolutePath());
 
-            systemd = new Systemd(FOLDER_CONFIG);
+            systemd = new Systemd(FOLDER_CONFIG, FOLDER_PLUGIN);
 
         } catch (Exception exception) {
             throw new RuntimeException("[FurryBlack][FATAL]核心系统初始化发生异常 终止启动", exception);
@@ -309,7 +314,7 @@ public final class Driver {
 
         System.out.println(">> [FurryBlack][MAIN]FurryBlackPlus closed, Bye.");
 
-//        System.exit(0);
+        //        System.exit(0);
 
     }
 
@@ -642,6 +647,11 @@ public final class Driver {
     @Api("获取数据目录 - 不是插件私有目录")
     public static String getModuleFolder() {
         return FOLDER_MODULE.getAbsolutePath();
+    }
+
+    @Api("获取插件目录 - 不是插件私有目录")
+    public static String getPluginFolder() {
+        return FOLDER_PLUGIN.getAbsolutePath();
     }
 
     @Api("获取日志目录 - 不是插件私有目录")

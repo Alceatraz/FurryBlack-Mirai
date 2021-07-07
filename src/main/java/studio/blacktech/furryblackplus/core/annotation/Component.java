@@ -1,6 +1,5 @@
 package studio.blacktech.furryblackplus.core.annotation;
 
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,7 +10,7 @@ import java.lang.annotation.Target;
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Monitor {
+public @interface Component {
 
     /**
      * @return 插件的名字 用于控制台
@@ -33,19 +32,31 @@ public @interface Monitor {
      */
     String[] privacy() default {};
 
+
     /**
-     * @return 对私聊启用 默认启用
+     * @return 注册顺序 数字越大 越先启动/后关闭 对Executor无效
+     */
+    int priority() default 100;
+
+
+    /**
+     * @return 对私聊启用 默认启用 对Runner无效
      */
     boolean users() default true;
 
     /**
-     * @return 对群聊启用 默认启用
+     * @return 对群聊启用 默认启用 对Runner无效
      */
     boolean group() default true;
 
-    /**
-     * @return 注册顺序 数字越小 越优先启动/最后关闭
-     */
-    int priority() default 100;
 
+    /**
+     * @return 插件的命令 只有Executor有效
+     */
+    String command() default "";
+
+    /**
+     * @return 插件的用法 只有Executor有效
+     */
+    String[] usage() default {};
 }

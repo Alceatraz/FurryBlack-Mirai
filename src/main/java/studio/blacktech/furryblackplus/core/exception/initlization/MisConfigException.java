@@ -1,7 +1,7 @@
 package studio.blacktech.furryblackplus.core.exception.initlization;
 
 
-import studio.blacktech.furryblackplus.core.annotation.Api;
+import studio.blacktech.furryblackplus.common.Api;
 
 
 @SuppressWarnings("unused")
