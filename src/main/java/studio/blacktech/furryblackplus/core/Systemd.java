@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
@@ -655,25 +656,21 @@ public final class Systemd {
                         }
 
                         if (!clazz.isAnnotationPresent(Component.class)) continue;
-
-                        if (EventHandlerRunner.class.isAssignableFrom(clazz)) {
-                            runnerClassList.add((Class<? extends EventHandlerRunner>) clazz);
-
-                        } else if (EventHandlerMonitor.class.isAssignableFrom(clazz)) {
-                            monitorClassList.add((Class<? extends EventHandlerMonitor>) clazz);
-
-                        } else if (EventHandlerFilter.class.isAssignableFrom(clazz)) {
-                            filterClassList.add((Class<? extends EventHandlerFilter>) clazz);
-
-                        } else if (EventHandlerExecutor.class.isAssignableFrom(clazz)) {
-                            executorClassList.add((Class<? extends EventHandlerExecutor>) clazz);
-
-                        } else {
-
+                        Class<?> superclass = clazz.getSuperclass();
+                        if (superclass == AbstractEventHandler.class) {
                             this.logger.warning("发现错误继承的模块 " + clazz.getName());
                             continue;
+                        } else if (superclass == EventHandlerRunner.class) {
+                            runnerClassList.add((Class<? extends EventHandlerRunner>) clazz);
+                        } else if (superclass == EventHandlerMonitor.class) {
+                            monitorClassList.add((Class<? extends EventHandlerMonitor>) clazz);
+                        } else if (superclass == EventHandlerFilter.class) {
+                            filterClassList.add((Class<? extends EventHandlerFilter>) clazz);
+                        } else if (superclass == EventHandlerExecutor.class) {
+                            executorClassList.add((Class<? extends EventHandlerExecutor>) clazz);
+                        } else {
+                            continue;
                         }
-
                         this.logger.seek("加载 " + clazz.getName());
                     }
 
