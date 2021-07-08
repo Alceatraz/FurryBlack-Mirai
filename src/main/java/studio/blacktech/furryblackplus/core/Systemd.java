@@ -655,18 +655,24 @@ public final class Systemd {
                         }
 
                         if (!clazz.isAnnotationPresent(Component.class)) continue;
-                        Class<?> superclass = clazz.getSuperclass();
-                        if (superclass == AbstractEventHandler.class) {
+
+
+                        if (clazz.isAssignableFrom(AbstractEventHandler.class)) {
                             this.logger.warning("发现错误继承的模块 " + clazz.getName());
                             continue;
-                        } else if (superclass == EventHandlerRunner.class) {
+
+                        } else if (clazz.isAssignableFrom(EventHandlerRunner.class)) {
                             runnerClassList.add((Class<? extends EventHandlerRunner>) clazz);
-                        } else if (superclass == EventHandlerMonitor.class) {
+
+                        } else if (clazz.isAssignableFrom(EventHandlerMonitor.class)) {
                             monitorClassList.add((Class<? extends EventHandlerMonitor>) clazz);
-                        } else if (superclass == EventHandlerFilter.class) {
+
+                        } else if (clazz.isAssignableFrom(EventHandlerFilter.class)) {
                             filterClassList.add((Class<? extends EventHandlerFilter>) clazz);
-                        } else if (superclass == EventHandlerExecutor.class) {
+
+                        } else if (clazz.isAssignableFrom(EventHandlerExecutor.class)) {
                             executorClassList.add((Class<? extends EventHandlerExecutor>) clazz);
+
                         } else {
                             continue;
                         }
