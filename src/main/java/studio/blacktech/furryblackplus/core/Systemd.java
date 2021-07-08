@@ -187,7 +187,10 @@ public final class Systemd {
     private ThreadPoolExecutor MONITOR_PROCESS;
     private ScheduledThreadPoolExecutor EXECUTOR_SERVICE;
 
-    private Map<String, AbstractEventHandler> MODULES; // 所有模块及注册名
+    private Map<String, File> PLUGIN_PACKAGE;
+
+    private Map<String, Class<? extends AbstractEventHandler>> MODULES_TEMPLATE; // 所有模块及注册名
+    private Map<String, AbstractEventHandler> MODULES_INSTANCE; // 所有模块及注册名
 
     private Map<String, EventHandlerRunner> EVENT_RUNNER;
     private Map<String, EventHandlerMonitor> EVENT_MONITOR;
@@ -590,22 +593,24 @@ public final class Systemd {
         //
         // ==========================================================================================================================
 
+        this.PLUGIN_PACKAGE = new LinkedHashMap<>();
 
-        this.MODULES = new LinkedHashMap<>();
+        this.MODULES_TEMPLATE = new LinkedHashMap<>();
+        this.MODULES_INSTANCE = new LinkedHashMap<>();
 
-        this.EVENT_RUNNER = new LinkedHashMap<>();
+        this.EVENT_RUNNER = new ConcurrentSkipListMap<>();
 
-        this.EVENT_MONITOR = new LinkedHashMap<>();
+        this.EVENT_MONITOR = new ConcurrentSkipListMap<>();
         this.EVENT_MONITOR_USERS = new LinkedList<>();
         this.EVENT_MONITOR_GROUP = new LinkedList<>();
 
-        this.EVENT_FILTER = new LinkedHashMap<>();
+        this.EVENT_FILTER = new ConcurrentSkipListMap<>();
         this.EVENT_FILTER_USERS = new LinkedList<>();
         this.EVENT_FILTER_GROUP = new LinkedList<>();
 
-        this.EVENT_EXECUTOR = new LinkedHashMap<>();
-        this.EVENT_EXECUTOR_USERS = new LinkedHashMap<>();
-        this.EVENT_EXECUTOR_GROUP = new LinkedHashMap<>();
+        this.EVENT_EXECUTOR = new ConcurrentSkipListMap<>();
+        this.EVENT_EXECUTOR_USERS = new ConcurrentSkipListMap<>();
+        this.EVENT_EXECUTOR_GROUP = new ConcurrentSkipListMap<>();
 
 
         // ==========================================================================================================================
@@ -613,7 +618,6 @@ public final class Systemd {
 
 
         this.logger.hint("扫描插件");
-
 
         File[] files = this.FOLDER_PLUGIN.listFiles();
 
@@ -629,6 +633,8 @@ public final class Systemd {
         } else {
 
             for (File file : files) {
+
+                this.logger.seek("扫描 " + file.getAbsolutePath());
 
                 try (JarFile jarFile = new JarFile(file)) {
 
@@ -655,23 +661,29 @@ public final class Systemd {
                             continue;
                         }
 
+
                         if (!clazz.isAnnotationPresent(Component.class)) continue;
-                        Class<?> superclass = clazz.getSuperclass();
-                        if (superclass == AbstractEventHandler.class) {
+
+                        if (EventHandlerRunner.class.isAssignableFrom(clazz)) {
+                            runnerClassList.add((Class<? extends EventHandlerRunner>) clazz);
+
+                        } else if (EventHandlerMonitor.class.isAssignableFrom(clazz)) {
+                            monitorClassList.add((Class<? extends EventHandlerMonitor>) clazz);
+
+                        } else if (EventHandlerFilter.class.isAssignableFrom(clazz)) {
+                            filterClassList.add((Class<? extends EventHandlerFilter>) clazz);
+
+                        } else if (EventHandlerExecutor.class.isAssignableFrom(clazz)) {
+                            executorClassList.add((Class<? extends EventHandlerExecutor>) clazz);
+
+                        } else {
+
                             this.logger.warning("发现错误继承的模块 " + clazz.getName());
                             continue;
-                        } else if (superclass == EventHandlerRunner.class) {
-                            runnerClassList.add((Class<? extends EventHandlerRunner>) clazz);
-                        } else if (superclass == EventHandlerMonitor.class) {
-                            monitorClassList.add((Class<? extends EventHandlerMonitor>) clazz);
-                        } else if (superclass == EventHandlerFilter.class) {
-                            filterClassList.add((Class<? extends EventHandlerFilter>) clazz);
-                        } else if (superclass == EventHandlerExecutor.class) {
-                            executorClassList.add((Class<? extends EventHandlerExecutor>) clazz);
-                        } else {
-                            continue;
                         }
+
                         this.logger.seek("加载 " + clazz.getName());
+
                     }
 
                 } catch (IOException exception) {
@@ -854,7 +866,7 @@ public final class Systemd {
             try {
                 EventHandlerRunner instance = clazz.getConstructor(EventHandlerRunner.RunnerInfo.class).newInstance(info);
                 this.logger.info("注册定时器 " + annotation.priority() + " - " + info.ARTIFICIAL + " > " + clazz.getName());
-                this.MODULES.put(info.ARTIFICIAL, instance);
+                this.MODULES_INSTANCE.put(info.ARTIFICIAL, instance);
                 this.EVENT_RUNNER.put(info.ARTIFICIAL, instance);
             } catch (Exception exception) {
                 throw new BootException("定时器注册失败 " + clazz.getName(), exception);
@@ -873,7 +885,7 @@ public final class Systemd {
             try {
                 EventHandlerMonitor instance = clazz.getConstructor(EventHandlerMonitor.MonitorInfo.class).newInstance(info);
                 this.logger.info("注册监听器 " + annotation.priority() + " - " + info.ARTIFICIAL + " > " + clazz.getName());
-                this.MODULES.put(info.ARTIFICIAL, instance);
+                this.MODULES_INSTANCE.put(info.ARTIFICIAL, instance);
                 this.EVENT_MONITOR.put(info.ARTIFICIAL, instance);
                 if (annotation.users()) this.EVENT_MONITOR_USERS.add(instance);
                 if (annotation.group()) this.EVENT_MONITOR_GROUP.add(instance);
@@ -894,7 +906,7 @@ public final class Systemd {
                 EventHandlerFilter.FilterInfo info = new EventHandlerFilter.FilterInfo(annotation);
                 EventHandlerFilter instance = clazz.getConstructor(EventHandlerFilter.FilterInfo.class).newInstance(info);
                 this.logger.info("注册过滤器 " + annotation.priority() + " - " + info.ARTIFICIAL + " > " + clazz.getName());
-                this.MODULES.put(info.ARTIFICIAL, instance);
+                this.MODULES_INSTANCE.put(info.ARTIFICIAL, instance);
                 this.EVENT_FILTER.put(info.ARTIFICIAL, instance);
                 if (annotation.users()) this.EVENT_FILTER_USERS.add(instance);
                 if (annotation.group()) this.EVENT_FILTER_GROUP.add(instance);
@@ -916,7 +928,7 @@ public final class Systemd {
             try {
                 EventHandlerExecutor instance = clazz.getConstructor(EventHandlerExecutor.ExecutorInfo.class).newInstance(info);
                 this.logger.info("注册监听器 " + info.COMMAND + " - " + info.ARTIFICIAL + " > " + clazz.getName());
-                this.MODULES.put(info.ARTIFICIAL, instance);
+                this.MODULES_INSTANCE.put(info.ARTIFICIAL, instance);
                 this.EVENT_EXECUTOR.put(info.ARTIFICIAL, instance);
                 if (annotation.users()) this.EVENT_EXECUTOR_USERS.put(info.COMMAND, instance);
                 if (annotation.group()) this.EVENT_EXECUTOR_GROUP.put(info.COMMAND, instance);
@@ -1528,17 +1540,17 @@ public final class Systemd {
 
     @Api("列出模块")
     public Set<String> listAllPlugin() {
-        return this.MODULES.keySet();
+        return this.MODULES_INSTANCE.keySet();
     }
 
 
     @Api("按名称重载模块")
     public void reloadPlugin(String name) {
-        if (!this.MODULES.containsKey(name)) {
+        if (!this.MODULES_INSTANCE.containsKey(name)) {
             this.logger.warning("不存在此模块 -> " + name);
             return;
         }
-        AbstractEventHandler instance = this.MODULES.get(name);
+        AbstractEventHandler instance = this.MODULES_INSTANCE.get(name);
         try {
             this.logger.info("停止 " + name);
             instance.shut();
