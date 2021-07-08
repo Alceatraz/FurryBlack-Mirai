@@ -656,26 +656,24 @@ public final class Systemd {
 
                         if (!clazz.isAnnotationPresent(Component.class)) continue;
 
-
-                        if (clazz.isAssignableFrom(AbstractEventHandler.class)) {
-                            this.logger.warning("发现错误继承的模块 " + clazz.getName());
-                            continue;
-
-                        } else if (clazz.isAssignableFrom(EventHandlerRunner.class)) {
+                        if (EventHandlerRunner.class.isAssignableFrom(clazz)) {
                             runnerClassList.add((Class<? extends EventHandlerRunner>) clazz);
 
-                        } else if (clazz.isAssignableFrom(EventHandlerMonitor.class)) {
+                        } else if (EventHandlerMonitor.class.isAssignableFrom(clazz)) {
                             monitorClassList.add((Class<? extends EventHandlerMonitor>) clazz);
 
-                        } else if (clazz.isAssignableFrom(EventHandlerFilter.class)) {
+                        } else if (EventHandlerFilter.class.isAssignableFrom(clazz)) {
                             filterClassList.add((Class<? extends EventHandlerFilter>) clazz);
 
-                        } else if (clazz.isAssignableFrom(EventHandlerExecutor.class)) {
+                        } else if (EventHandlerExecutor.class.isAssignableFrom(clazz)) {
                             executorClassList.add((Class<? extends EventHandlerExecutor>) clazz);
 
                         } else {
+
+                            this.logger.warning("发现错误继承的模块 " + clazz.getName());
                             continue;
                         }
+
                         this.logger.seek("加载 " + clazz.getName());
                     }
 
