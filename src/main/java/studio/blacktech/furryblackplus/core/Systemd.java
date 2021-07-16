@@ -1579,15 +1579,19 @@ public final class Systemd {
     private void isCallerDriver(int level) {
         Thread thread = Thread.currentThread();
         StackTraceElement[] stackTrace = thread.getStackTrace();
-        if (!stackTrace[level].getClassName().equals("studio.blacktech.furryblackplus.Driver")) {
-            this.logger.error("发生违规调用：");
-            for (StackTraceElement stackTraceElement : stackTrace) {
-                this.logger.error("    " + stackTraceElement.toString());
+        int maxLevel = Math.min(level, stackTrace.length);
+        for (int i = 0; i < maxLevel; i++) {
+            if (stackTrace[level].getClassName().startsWith("studio.blacktech.furryblackplus.Driver")) {
+                return;
             }
-            if (!Driver.isDebug()) {
-                this.logger.error("检测到违规调用，系统即将关闭。如果要放行此操作，请使用Debug模式。");
-                this.signal();
-            }
+        }
+        this.logger.warning("发生违规调用：");
+        for (StackTraceElement stackTraceElement : stackTrace) {
+            this.logger.warning("    " + stackTraceElement.toString());
+        }
+        if (!Driver.isDebug()) {
+            this.logger.error("检测到违规调用，系统即将关闭。如果要放行此操作，请使用Debug模式。");
+            this.signal();
         }
     }
 
