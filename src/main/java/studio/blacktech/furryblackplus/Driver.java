@@ -268,7 +268,6 @@ public final class Driver {
             } catch (InterruptedException ignoring) {
                 logger.error("关闭信号回调被打断", ignoring);
             }
-            logger.info("回调结束");
         }));
 
         // =====================================================================
@@ -284,7 +283,7 @@ public final class Driver {
         // =====================================================================
 
         logger.hint("系统启动完成 耗时" + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME));
-        LoggerX.setPrintLevel(level);
+        if (!debug) LoggerX.setPrintLevel(level);
 
         enable = true;
 
@@ -299,7 +298,6 @@ public final class Driver {
         LoggerX.setPrintLevel(LoggerX.LEVEL.ALL);
         logger.hint("执行关闭流程");
 
-
         // =====================================================================
 
         logger.hint("关闭路由系统");
@@ -312,7 +310,7 @@ public final class Driver {
 
         logger.hint("关闭核心系统");
 
-        System.out.println(">> [FurryBlack][MAIN]FurryBlackPlus closed, Bye.");
+        System.out.println("[FurryBlack][MAIN]FurryBlackPlus closed, Bye.");
 
         //        System.exit(0);
 
@@ -381,11 +379,37 @@ public final class Driver {
                         break;
 
                     case "module":
-                        systemd.listAllPlugin().forEach(System.out::println);
-                        break;
 
-                    case "reload":
-                        for (String name : Arrays.stream(command.getParameterSegment()).collect(Collectors.toSet())) systemd.reloadPlugin(name);
+                        switch (command.getParameterLength()) {
+
+                            case 2:
+
+                                switch (command.getParameterSegment(0)) {
+
+                                    case "shut":
+                                        systemd.shutModule(command.getParameterSegment(1));
+                                        break;
+
+                                    case "load":
+                                        systemd.loadModule(command.getParameterSegment(1));
+                                        break;
+
+                                    case "boot":
+                                        systemd.bootModule(command.getParameterSegment(1));
+                                        break;
+
+                                    case "reboot":
+                                        systemd.shutModule(command.getParameterSegment(1));
+                                        systemd.loadModule(command.getParameterSegment(1));
+                                        systemd.bootModule(command.getParameterSegment(1));
+                                        break;
+                                }
+                                break;
+
+                            case 0:
+                                systemd.listAllModule().forEach(System.out::println);
+                                break;
+                        }
                         break;
 
                     case "enable":
@@ -560,14 +584,15 @@ public final class Driver {
 
         public JLineConsole() {
             this.jlineReader = LineReaderBuilder.builder().completer(new AggregateCompleter(
-                new ArgumentCompleter(new StringsCompleter("?", "help", "drop", "stop", "exit", "quit", "gc", "stat", "stats", "status", "enable", "disable", "level", "debug", "module")),
+                new ArgumentCompleter(new StringsCompleter("?", "help", "kill", "drop", "stop", "enable", "disable", "gc", "stat", "stats", "status", "level", "debug")),
                 new ArgumentCompleter(
                     new StringsCompleter("list", "send"),
                     new StringsCompleter("u", "usr", "user", "users", "f", "fri", "friend", "friends", "g", "grp", "group", "groups")
                 ),
                 new ArgumentCompleter(
-                    new StringsCompleter("reload"),
-                    new StringsCompleter(systemd.listAllPlugin())
+                    new StringsCompleter("module"),
+                    new StringsCompleter("reboot", "load", "boot", "shut"),
+                    new StringsCompleter(systemd.listAllModule())
                 )
             )).build();
             AutopairWidgets autopairWidgets = new AutopairWidgets(this.jlineReader);

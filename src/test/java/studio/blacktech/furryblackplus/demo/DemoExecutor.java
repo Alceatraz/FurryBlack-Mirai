@@ -21,9 +21,6 @@ import studio.blacktech.furryblackplus.core.utilties.Command;
 )
 public class DemoExecutor extends EventHandlerExecutor {
 
-    public DemoExecutor(ExecutorInfo INFO) {
-        super(INFO);
-    }
 
     @Override
     public void load() {
@@ -49,6 +46,4 @@ public class DemoExecutor extends EventHandlerExecutor {
     public void handleGroupMessage(GroupMessageEvent event, Command command) {
         System.out.println("消息" + this.getClass().getName());
     }
-
-
 }

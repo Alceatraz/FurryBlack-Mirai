@@ -7,6 +7,7 @@ import net.mamoe.mirai.event.events.FriendMessageEvent;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.GroupTempMessageEvent;
 import net.mamoe.mirai.event.events.MessageEvent;
+import net.mamoe.mirai.event.events.TempMessageEvent;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.SingleMessage;
 import net.mamoe.mirai.utils.PlatformLogger;

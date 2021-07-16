@@ -17,9 +17,6 @@ import studio.blacktech.furryblackplus.core.interfaces.EventHandlerMonitor;
 )
 public class DemoMonitor extends EventHandlerMonitor {
 
-    public DemoMonitor(MonitorInfo INFO) {
-        super(INFO);
-    }
 
     @Override
     public void load() {
@@ -47,5 +44,4 @@ public class DemoMonitor extends EventHandlerMonitor {
     public void handleGroupMessage(GroupMessageEvent event) {
         System.out.println("消息" + this.getClass().getName());
     }
-
 }

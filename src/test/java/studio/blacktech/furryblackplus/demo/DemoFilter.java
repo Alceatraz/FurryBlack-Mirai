@@ -16,9 +16,6 @@ import studio.blacktech.furryblackplus.core.interfaces.EventHandlerFilter;
 )
 public class DemoFilter extends EventHandlerFilter {
 
-    public DemoFilter(FilterInfo INFO) {
-        super(INFO);
-    }
 
     @Override
     public void load() {
@@ -46,6 +43,4 @@ public class DemoFilter extends EventHandlerFilter {
         System.out.println("消息" + this.getClass().getName());
         return false;
     }
-
-
 }

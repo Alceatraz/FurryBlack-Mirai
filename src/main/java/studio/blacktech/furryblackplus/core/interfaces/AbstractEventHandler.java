@@ -28,15 +28,17 @@ import java.util.stream.Collectors;
 @Api("基础模块类")
 public abstract class AbstractEventHandler {
 
-    @Api("模块内建的插件目录对象") protected final File FOLDER_ROOT;
-    @Api("模块内建的配置目录对象") protected final File FOLDER_CONF;
-    @Api("模块内建的数据目录对象") protected final File FOLDER_DATA;
-    @Api("模块内建的日志目录对象") protected final File FOLDER_LOGS;
-    @Api("模块内建的配置文件对象") protected final File FILE_CONFIG;
+    @Api("模块内建的模块信息注解") protected Component annotation;
 
-    @Api("模块内建的LoggerX实例") protected final LoggerX logger;
+    @Api("模块内建的插件目录对象") protected File FOLDER_ROOT;
+    @Api("模块内建的配置目录对象") protected File FOLDER_CONF;
+    @Api("模块内建的数据目录对象") protected File FOLDER_DATA;
+    @Api("模块内建的日志目录对象") protected File FOLDER_LOGS;
+    @Api("模块内建的配置文件对象") protected File FILE_CONFIG;
 
-    @Api("模块内建的config.properties实例") protected final Properties CONFIG;
+    @Api("模块内建的LoggerX实例") protected LoggerX logger;
+
+    @Api("模块内建的config.properties实例") protected Properties CONFIG;
 
     @Api("模块标志位表示是否初始化过插件目录") protected boolean INIT_ROOT = false;
     @Api("模块标志位表示是否初始化过配置目录") protected boolean INIT_CONF = false;
@@ -45,10 +47,14 @@ public abstract class AbstractEventHandler {
     @Api("模块标志位表示是否初始化过配置文件") protected boolean NEW_CONFIG = false;
 
 
-    protected AbstractEventHandler(String artificial) {
+    protected volatile boolean enable = false;
+
+
+    public void instantiated(Component annotation) {
+        this.annotation = annotation;
         this.logger = new LoggerX(this.getClass());
         this.CONFIG = new Properties();
-        this.FOLDER_ROOT = Paths.get(Driver.getModuleFolder(), artificial).toFile();
+        this.FOLDER_ROOT = Paths.get(Driver.getModuleFolder(), this.annotation.artificial()).toFile();
         this.FOLDER_CONF = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "conf").toFile();
         this.FOLDER_DATA = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "data").toFile();
         this.FOLDER_LOGS = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "logs").toFile();
@@ -56,14 +62,45 @@ public abstract class AbstractEventHandler {
     }
 
 
+    public void loadWrapper() throws BotException {
+        this.load();
+    }
+
+
+    public void bootWrapper() throws BotException {
+        this.boot();
+        this.enable = true;
+    }
+
+    public void shutWrapper() throws BotException {
+        this.enable = false;
+        this.shut();
+    }
+
+    public Component getAnnotation() {
+        return this.annotation;
+    }
+
+
     @Api("生命周期 初始化时")
-    public abstract void load() throws BootException;
+    protected abstract void load() throws BootException;
 
     @Api("生命周期 启动时")
-    public abstract void boot() throws BotException;
+    protected abstract void boot() throws BotException;
 
     @Api("生命周期 关闭时")
-    public abstract void shut() throws BotException;
+    protected abstract void shut() throws BotException;
+
+
+    @Api("查询模块的启用状态")
+    public boolean isEnable() {
+        return this.enable;
+    }
+
+    @Api("改变模块的启用状态")
+    public void setEnable(boolean enable) {
+        this.enable = enable;
+    }
 
 
     @Api("初始化插件总目录")
@@ -238,31 +275,4 @@ public abstract class AbstractEventHandler {
         return file;
     }
 
-
-    public static class ModuleInfo {
-
-        public final String NAME;
-        public final String ARTIFICIAL;
-        public final String DESCRIPTION;
-        public final String[] PRIVACY;
-
-        public ModuleInfo(Component component) {
-            this(
-                component.artificial(),
-                component.name(),
-                component.description(),
-                component.privacy()
-            );
-        }
-
-        public ModuleInfo(String name, String artificial, String description, String[] privacy) {
-            if (name.isBlank()) throw new IllegalArgumentException("无效的模块名称`name`");
-            if (artificial.isBlank()) throw new IllegalArgumentException("无效的模块全名`artificial`");
-            if (description.isBlank()) throw new IllegalArgumentException("无效的模块介绍`description`");
-            this.NAME = name;
-            this.ARTIFICIAL = artificial;
-            this.DESCRIPTION = description;
-            this.PRIVACY = privacy;
-        }
-    }
 }

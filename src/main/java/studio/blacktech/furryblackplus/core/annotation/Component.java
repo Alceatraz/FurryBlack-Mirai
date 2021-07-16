@@ -34,9 +34,14 @@ public @interface Component {
 
 
     /**
-     * @return 注册顺序 数字越大 越先启动/后关闭 对Executor无效
+     * 模块权重 数字越小越:
+     *
+     * 优先 实例化/加载/启动/执行
+     * 最后 关闭
+     *
+     * @return 注册顺序
      */
-    int priority() default 100;
+    int priority() default 0;
 
 
     /**
@@ -59,4 +64,6 @@ public @interface Component {
      * @return 插件的用法 只有Executor有效
      */
     String[] usage() default {};
+
+
 }
