@@ -12,7 +12,6 @@ public abstract class EventHandlerExecutor extends AbstractEventHandler {
 
     private String HELP;
 
-
     @Override
     public void instantiated(Component annotation) {
         if (annotation.command().isBlank()) throw new IllegalArgumentException("无效的模块命令`command`");

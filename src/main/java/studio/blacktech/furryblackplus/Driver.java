@@ -349,7 +349,6 @@ public final class Driver {
                         System.out.println("[FurryBlack] Kill the JVM");
                         System.exit(-1);
 
-
                     case "drop":
                         shutModeDrop = true;
 
@@ -372,10 +371,29 @@ public final class Driver {
                         break;
 
                     case "debug":
-                        synchronized (Driver.class) {
-                            debug = !debug;
+
+                        switch (command.getParameterLength()) {
+
+                            case 1:
+
+                                switch (command.getParameterSegment(0)) {
+
+                                    case "enable":
+                                        debug = true;
+                                        System.out.println("DEBUG模式启动");
+                                        break;
+
+                                    case "disable":
+                                        debug = false;
+                                        System.out.println("DEBUG模式关闭");
+                                        break;
+                                }
+
+                                break;
+                            default:
+                                systemd.debug();
+                                break;
                         }
-                        System.out.println(debug ? "Enable DEBUG" : "Disable DEBUG");
                         break;
 
                     case "module":
@@ -391,7 +409,7 @@ public final class Driver {
                                         break;
 
                                     case "load":
-                                        systemd.loadModule(command.getParameterSegment(1));
+                                        systemd.initModule(command.getParameterSegment(1));
                                         break;
 
                                     case "boot":
@@ -400,9 +418,15 @@ public final class Driver {
 
                                     case "reboot":
                                         systemd.shutModule(command.getParameterSegment(1));
-                                        systemd.loadModule(command.getParameterSegment(1));
+                                        systemd.initModule(command.getParameterSegment(1));
                                         systemd.bootModule(command.getParameterSegment(1));
                                         break;
+
+                                    case "reload":
+                                        System.out.println("热重载模块操作不是线程安全操作");
+                                        systemd.reInstantizeModule(command.getParameterSegment(1));
+                                        break;
+
                                 }
                                 break;
 
@@ -584,7 +608,11 @@ public final class Driver {
 
         public JLineConsole() {
             this.jlineReader = LineReaderBuilder.builder().completer(new AggregateCompleter(
-                new ArgumentCompleter(new StringsCompleter("?", "help", "kill", "drop", "stop", "enable", "disable", "gc", "stat", "stats", "status", "level", "debug")),
+                new ArgumentCompleter(new StringsCompleter("?", "help", "kill", "drop", "stop", "enable", "disable", "gc", "stat", "stats", "status", "level")),
+                new ArgumentCompleter(
+                    new StringsCompleter("debug"),
+                    new StringsCompleter("enable", "disable")
+                ),
                 new ArgumentCompleter(
                     new StringsCompleter("list", "send"),
                     new StringsCompleter("u", "usr", "user", "users", "f", "fri", "friend", "friends", "g", "grp", "group", "groups")

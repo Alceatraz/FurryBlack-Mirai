@@ -2,7 +2,11 @@ package studio.blacktech.furryblackplus.core.define;
 
 
 import studio.blacktech.furryblackplus.core.annotation.Component;
+import studio.blacktech.furryblackplus.core.exception.BotException;
 import studio.blacktech.furryblackplus.core.interfaces.AbstractEventHandler;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class ModuleWrapper<T extends AbstractEventHandler> {
 
@@ -33,4 +37,18 @@ public class ModuleWrapper<T extends AbstractEventHandler> {
     public String getClassName() {
         return this.clazz.getName();
     }
+
+
+    public T newInstance() {
+        T instance;
+        try {
+            Method method = this.clazz.getMethod("instantiated", Component.class);
+            instance = this.clazz.getConstructor().newInstance();
+            method.invoke(instance, this.annotation);
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException exception) {
+            throw new BotException("创建模块实例失败 -> " + exception);
+        }
+        return instance;
+    }
+
 }

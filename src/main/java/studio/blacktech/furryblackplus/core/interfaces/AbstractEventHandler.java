@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 @Api("基础模块类")
 public abstract class AbstractEventHandler {
 
+
     @Api("模块内建的模块信息注解") protected Component annotation;
 
     @Api("模块内建的插件目录对象") protected File FOLDER_ROOT;
@@ -62,8 +63,8 @@ public abstract class AbstractEventHandler {
     }
 
 
-    public void loadWrapper() throws BotException {
-        this.load();
+    public void initWrapper() throws BotException {
+        this.init();
     }
 
 
@@ -82,8 +83,14 @@ public abstract class AbstractEventHandler {
     }
 
 
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        System.out.println("this finalize called");
+    }
+
     @Api("生命周期 初始化时")
-    protected abstract void load() throws BootException;
+    protected abstract void init() throws BootException;
 
     @Api("生命周期 启动时")
     protected abstract void boot() throws BotException;

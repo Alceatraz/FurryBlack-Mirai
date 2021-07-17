@@ -13,24 +13,24 @@ import java.lang.annotation.Target;
 public @interface Component {
 
     /**
-     * @return 插件的名字 用于控制台
+     * @return 插件的名字 用于控制台和唯一标记
      */
-    String artificial() default "";
+    String artificial();
 
     /**
-     * @return 插件的名字
+     * @return 插件的名字 用于人类友好显示
      */
-    String name() default "";
+    String name() default "无名称";
 
     /**
      * @return 插件的简介
      */
-    String description() default "";
+    String description() default "无介绍";
 
     /**
      * @return 插件的隐私
      */
-    String[] privacy() default {};
+    String[] privacy() default {"无介绍"};
 
 
     /**
@@ -63,7 +63,7 @@ public @interface Component {
     /**
      * @return 插件的用法 只有Executor有效
      */
-    String[] usage() default {};
+    String[] usage() default {"无介绍"};
 
 
 }

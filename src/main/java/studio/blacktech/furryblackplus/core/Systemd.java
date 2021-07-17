@@ -46,7 +46,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
@@ -63,8 +62,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
@@ -200,18 +197,18 @@ public final class Systemd {
     private Map<String, ModuleWrapper<? extends EventHandlerExecutor>> COMPONENT_EXECUTOR_CLAZZ;
 
     // INSTANCE用于持有实例化后的对象，是有序Map，按照优先级排序
-    private Map<Component, AbstractEventHandler> COMPONENT_INSTANCE;
-    private Map<Component, EventHandlerRunner> COMPONENT_RUNNER_INSTANCE;
-    private Map<Component, EventHandlerFilter> COMPONENT_FILTER_INSTANCE;
-    private Map<Component, EventHandlerMonitor> COMPONENT_MONITOR_INSTANCE;
-    private Map<Component, EventHandlerExecutor> COMPONENT_EXECUTOR_INSTANCE;
+    private Map<String, AbstractEventHandler> COMPONENT_INSTANCE;
+    private Map<String, EventHandlerRunner> COMPONENT_RUNNER_INSTANCE;
+    private Map<String, EventHandlerFilter> COMPONENT_FILTER_INSTANCE;
+    private Map<String, EventHandlerMonitor> COMPONENT_MONITOR_INSTANCE;
+    private Map<String, EventHandlerExecutor> COMPONENT_EXECUTOR_INSTANCE;
 
     // CHAIN用于保存分类后的引用
-    private List<EventHandlerMonitor> MONITOR_USERS_CHAIN; // 私聊过滤器注册
-    private List<EventHandlerMonitor> MONITOR_GROUP_CHAIN; // 群聊过滤器注册
+    private LinkedList<EventHandlerMonitor> MONITOR_USERS_CHAIN; // 私聊过滤器注册
+    private LinkedList<EventHandlerMonitor> MONITOR_GROUP_CHAIN; // 群聊过滤器注册
 
-    private List<EventHandlerFilter> FILTER_USERS_CHAIN; // 私聊过滤器注册
-    private List<EventHandlerFilter> FILTER_GROUP_CHAIN; // 群聊过滤器注册
+    private LinkedList<EventHandlerFilter> FILTER_USERS_CHAIN; // 私聊过滤器注册
+    private LinkedList<EventHandlerFilter> FILTER_GROUP_CHAIN; // 群聊过滤器注册
 
     private Map<String, EventHandlerExecutor> EXECUTOR_USERS_COMMANDS; // 私聊执行器注册
     private Map<String, EventHandlerExecutor> EXECUTOR_GROUP_COMMANDS; // 群聊执行器注册
@@ -601,19 +598,19 @@ public final class Systemd {
         //
         // ==========================================================================================================================
 
-        this.COMPONENT_CLAZZ = new LinkedHashMap<>();
+        this.COMPONENT_CLAZZ = new HashMap<>();
 
         this.COMPONENT_RUNNER_CLAZZ = new LinkedHashMap<>();
         this.COMPONENT_FILTER_CLAZZ = new LinkedHashMap<>();
         this.COMPONENT_MONITOR_CLAZZ = new LinkedHashMap<>();
         this.COMPONENT_EXECUTOR_CLAZZ = new LinkedHashMap<>();
 
-        this.COMPONENT_INSTANCE = new LinkedHashMap<>();
+        this.COMPONENT_INSTANCE = new HashMap<>();
 
-        this.COMPONENT_RUNNER_INSTANCE = new ConcurrentSkipListMap<>(Comparator.comparingInt(Component::priority));
-        this.COMPONENT_FILTER_INSTANCE = new ConcurrentSkipListMap<>(Comparator.comparingInt(Component::priority));
-        this.COMPONENT_MONITOR_INSTANCE = new ConcurrentSkipListMap<>(Comparator.comparingInt(Component::priority));
-        this.COMPONENT_EXECUTOR_INSTANCE = new ConcurrentHashMap<>();
+        this.COMPONENT_RUNNER_INSTANCE = new LinkedHashMap<>();
+        this.COMPONENT_FILTER_INSTANCE = new LinkedHashMap<>();
+        this.COMPONENT_MONITOR_INSTANCE = new LinkedHashMap<>();
+        this.COMPONENT_EXECUTOR_INSTANCE = new HashMap<>();
 
         this.MONITOR_USERS_CHAIN = new LinkedList<>();
         this.MONITOR_GROUP_CHAIN = new LinkedList<>();
@@ -621,11 +618,16 @@ public final class Systemd {
         this.FILTER_USERS_CHAIN = new LinkedList<>();
         this.FILTER_GROUP_CHAIN = new LinkedList<>();
 
-        this.EXECUTOR_USERS_COMMANDS = new ConcurrentHashMap<>();
-        this.EXECUTOR_GROUP_COMMANDS = new ConcurrentHashMap<>();
+        this.EXECUTOR_USERS_COMMANDS = new HashMap<>();
+        this.EXECUTOR_GROUP_COMMANDS = new HashMap<>();
 
 
         // ==========================================================================================================================
+
+
+        List<ModuleWrapper<? extends EventHandlerRunner>> tempComponentRunnerClazz = new LinkedList<>();
+        List<ModuleWrapper<? extends EventHandlerFilter>> tempComponentFilterClazz = new LinkedList<>();
+        List<ModuleWrapper<? extends EventHandlerMonitor>> tempComponentMonitorClazz = new LinkedList<>();
 
 
         this.logger.hint("扫描插件");
@@ -639,7 +641,6 @@ public final class Systemd {
         } else {
 
 
-            Map<String, ModuleWrapper<? extends AbstractEventHandler>> modules = new HashMap<>();
             Map<String, ModuleWrapper<? extends EventHandlerExecutor>> executors = new HashMap<>();
 
 
@@ -683,18 +684,16 @@ public final class Systemd {
                         String fileName = file.getName();
                         String artificial = annotation.artificial();
 
-                        if (modules.containsKey(artificial)) {
-                            ModuleWrapper<? extends AbstractEventHandler> exist = modules.get(artificial);
+                        if (this.COMPONENT_CLAZZ.containsKey(artificial)) {
+                            ModuleWrapper<? extends AbstractEventHandler> exist = this.COMPONENT_CLAZZ.get(artificial);
                             throw new BootException("发现模块冲突 " + fileName + ":" + clazz.getName() + " 模块名" + artificial + "已被" + exist.getPluginName() + ":" + exist.getClassName() + "注册");
                         }
-
 
                         if (EventHandlerRunner.class.isAssignableFrom(clazz)) {
                             Class<? extends EventHandlerRunner> runnerClazz = (Class<? extends EventHandlerRunner>) clazz;
                             ModuleWrapper<? extends EventHandlerRunner> wrapper = new ModuleWrapper<>(fileName, runnerClazz);
-                            modules.put(artificial, wrapper);
                             this.COMPONENT_CLAZZ.put(artificial, wrapper);
-                            this.COMPONENT_RUNNER_CLAZZ.put(artificial, wrapper);
+                            tempComponentRunnerClazz.add(wrapper);
                             this.logger.info("加载定时器 " + clazz.getName());
                             continue;
                         }
@@ -706,24 +705,22 @@ public final class Systemd {
                             }
                             Class<? extends EventHandlerFilter> runnerClazz = (Class<? extends EventHandlerFilter>) clazz;
                             ModuleWrapper<? extends EventHandlerFilter> wrapper = new ModuleWrapper<>(fileName, runnerClazz);
-                            modules.put(artificial, wrapper);
                             this.COMPONENT_CLAZZ.put(artificial, wrapper);
-                            this.COMPONENT_FILTER_CLAZZ.put(artificial, wrapper);
+                            tempComponentFilterClazz.add(wrapper);
                             this.logger.info("加载过滤器 " + clazz.getName());
                             continue;
                         }
 
                         if (EventHandlerMonitor.class.isAssignableFrom(clazz)) {
                             if (!annotation.users() && !annotation.group()) {
-                                this.logger.warning("发现未启用监视器 " + clazz.getName());
+                                this.logger.warning("发现未启用监听器 " + clazz.getName());
                                 continue;
                             }
                             Class<? extends EventHandlerMonitor> runnerClazz = (Class<? extends EventHandlerMonitor>) clazz;
                             ModuleWrapper<? extends EventHandlerMonitor> wrapper = new ModuleWrapper<>(fileName, runnerClazz);
-                            modules.put(artificial, wrapper);
                             this.COMPONENT_CLAZZ.put(artificial, wrapper);
-                            this.COMPONENT_MONITOR_CLAZZ.put(artificial, wrapper);
-                            this.logger.info("加载监视器 " + clazz.getName());
+                            tempComponentMonitorClazz.add(wrapper);
+                            this.logger.info("加载监听器 " + clazz.getName());
                             continue;
                         }
 
@@ -739,7 +736,6 @@ public final class Systemd {
                             }
                             Class<? extends EventHandlerExecutor> runnerClazz = (Class<? extends EventHandlerExecutor>) clazz;
                             ModuleWrapper<? extends EventHandlerExecutor> wrapper = new ModuleWrapper<>(fileName, runnerClazz);
-                            modules.put(artificial, wrapper);
                             executors.put(command, wrapper);
                             this.COMPONENT_CLAZZ.put(artificial, wrapper);
                             this.COMPONENT_EXECUTOR_CLAZZ.put(artificial, wrapper);
@@ -769,19 +765,32 @@ public final class Systemd {
 
 
         // ==========================================================================================================================
-        //
+        // 排序模块
+
+
+        tempComponentRunnerClazz.sort(Comparator.comparingInt(o -> o.getAnnotation().priority()));
+        for (ModuleWrapper<? extends EventHandlerRunner> wrapper : tempComponentRunnerClazz) {
+            this.COMPONENT_RUNNER_CLAZZ.put(wrapper.getAnnotation().artificial(), wrapper);
+        }
+
+
+        tempComponentFilterClazz.sort(Comparator.comparingInt(o -> o.getAnnotation().priority()));
+        for (ModuleWrapper<? extends EventHandlerFilter> wrapper : tempComponentFilterClazz) {
+            this.COMPONENT_FILTER_CLAZZ.put(wrapper.getAnnotation().artificial(), wrapper);
+        }
+
+
+        tempComponentMonitorClazz.sort(Comparator.comparingInt(o -> o.getAnnotation().priority()));
+        for (ModuleWrapper<? extends EventHandlerMonitor> wrapper : tempComponentMonitorClazz) {
+            this.COMPONENT_MONITOR_CLAZZ.put(wrapper.getAnnotation().artificial(), wrapper);
+        }
+
+
         // ==========================================================================================================================
+        // 注册模块
 
 
-        this.logger.hint("注册模块实例");
-
-
-        // ==========================================================================================================================
-        // 注册定时器
-
-
-        this.logger.info("注册定时器");
-
+        this.logger.hint("注册定时器");
 
         for (Map.Entry<String, ModuleWrapper<? extends EventHandlerRunner>> entry : this.COMPONENT_RUNNER_CLAZZ.entrySet()) {
 
@@ -790,44 +799,12 @@ public final class Systemd {
             Component annotation = wrapper.getAnnotation();
 
             try {
-                Method method = wrapper.getClazz().getMethod("instantiated", Component.class);
-                EventHandlerRunner instance = wrapper.getClazz().getConstructor().newInstance();
-                method.invoke(instance, annotation);
-                this.COMPONENT_INSTANCE.put(annotation, instance);
-                this.COMPONENT_RUNNER_INSTANCE.put(annotation, instance);
+                EventHandlerRunner instance = wrapper.newInstance();
+                this.COMPONENT_INSTANCE.put(artificial, instance);
+                this.COMPONENT_RUNNER_INSTANCE.put(artificial, instance);
                 this.logger.info("注册定时器 " + annotation.priority() + " - " + artificial + " > " + wrapper.getClassName());
             } catch (Exception exception) {
                 throw new BootException("定时器创建失败 " + wrapper.getPluginName() + ":" + wrapper.getClazz().getName(), exception);
-            }
-        }
-
-
-        // ==========================================================================================================================
-        // 注册监听器
-
-
-        this.logger.hint("注册监听器");
-
-
-        for (Map.Entry<String, ModuleWrapper<? extends EventHandlerFilter>> entry : this.COMPONENT_FILTER_CLAZZ.entrySet()) {
-
-            String artificial = entry.getKey();
-            ModuleWrapper<? extends EventHandlerFilter> wrapper = entry.getValue();
-            Component annotation = wrapper.getAnnotation();
-
-            try {
-                Method method = wrapper.getClazz().getMethod("instantiated", Component.class);
-                EventHandlerFilter instance = wrapper.getClazz().getConstructor().newInstance();
-                method.invoke(instance, annotation);
-                this.COMPONENT_INSTANCE.put(annotation, instance);
-                this.COMPONENT_FILTER_INSTANCE.put(annotation, instance);
-
-                if (annotation.users()) this.FILTER_USERS_CHAIN.add(instance);
-                if (annotation.group()) this.FILTER_GROUP_CHAIN.add(instance);
-
-                this.logger.info("注册过滤器 " + annotation.priority() + " - " + artificial + " > " + wrapper.getClassName());
-            } catch (Exception exception) {
-                throw new BootException("过滤器创建失败 " + wrapper.getPluginName() + ":" + wrapper.getClazz().getName(), exception);
             }
         }
 
@@ -838,7 +815,6 @@ public final class Systemd {
 
         this.logger.hint("注册过滤器");
 
-
         for (Map.Entry<String, ModuleWrapper<? extends EventHandlerMonitor>> entry : this.COMPONENT_MONITOR_CLAZZ.entrySet()) {
 
             String artificial = entry.getKey();
@@ -846,11 +822,9 @@ public final class Systemd {
             Component annotation = wrapper.getAnnotation();
 
             try {
-                Method method = wrapper.getClazz().getMethod("instantiated", Component.class);
-                EventHandlerMonitor instance = wrapper.getClazz().getConstructor().newInstance();
-                method.invoke(instance, annotation);
-                this.COMPONENT_INSTANCE.put(annotation, instance);
-                this.COMPONENT_MONITOR_INSTANCE.put(annotation, instance);
+                EventHandlerMonitor instance = wrapper.newInstance();
+                this.COMPONENT_INSTANCE.put(artificial, instance);
+                this.COMPONENT_MONITOR_INSTANCE.put(artificial, instance);
 
                 if (annotation.users()) this.MONITOR_USERS_CHAIN.add(instance);
                 if (annotation.group()) this.MONITOR_GROUP_CHAIN.add(instance);
@@ -863,11 +837,37 @@ public final class Systemd {
 
 
         // ==========================================================================================================================
+        // 注册监听器
+
+
+        this.logger.hint("注册监听器");
+
+        for (Map.Entry<String, ModuleWrapper<? extends EventHandlerFilter>> entry : this.COMPONENT_FILTER_CLAZZ.entrySet()) {
+
+            String artificial = entry.getKey();
+            ModuleWrapper<? extends EventHandlerFilter> wrapper = entry.getValue();
+            Component annotation = wrapper.getAnnotation();
+
+            try {
+                EventHandlerFilter instance = wrapper.newInstance();
+                this.COMPONENT_INSTANCE.put(artificial, instance);
+                this.COMPONENT_FILTER_INSTANCE.put(artificial, instance);
+
+                if (annotation.users()) this.FILTER_USERS_CHAIN.add(instance);
+                if (annotation.group()) this.FILTER_GROUP_CHAIN.add(instance);
+
+                this.logger.info("注册过滤器 " + annotation.priority() + " - " + artificial + " > " + wrapper.getClassName());
+            } catch (Exception exception) {
+                throw new BootException("过滤器创建失败 " + wrapper.getPluginName() + ":" + wrapper.getClazz().getName(), exception);
+            }
+        }
+
+
+        // ==========================================================================================================================
         // 注册执行器
 
 
         this.logger.hint("注册执行器");
-
 
         for (Map.Entry<String, ModuleWrapper<? extends EventHandlerExecutor>> entry : this.COMPONENT_EXECUTOR_CLAZZ.entrySet()) {
 
@@ -876,11 +876,9 @@ public final class Systemd {
             Component annotation = wrapper.getAnnotation();
 
             try {
-                Method method = wrapper.getClazz().getMethod("instantiated", Component.class);
-                EventHandlerExecutor instance = wrapper.getClazz().getConstructor().newInstance();
-                method.invoke(instance, annotation);
-                this.COMPONENT_INSTANCE.put(annotation, instance);
-                this.COMPONENT_EXECUTOR_INSTANCE.put(annotation, instance);
+                EventHandlerExecutor instance = wrapper.newInstance();
+                this.COMPONENT_INSTANCE.put(artificial, instance);
+                this.COMPONENT_EXECUTOR_INSTANCE.put(artificial, instance);
 
                 if (annotation.users()) this.EXECUTOR_USERS_COMMANDS.put(annotation.command(), instance);
                 if (annotation.group()) this.EXECUTOR_GROUP_COMMANDS.put(annotation.command(), instance);
@@ -891,6 +889,7 @@ public final class Systemd {
             }
         }
 
+        this.logger.hint("生成模板消息");
 
         // 注册完成
         // ==========================================================================================================================
@@ -905,67 +904,62 @@ public final class Systemd {
 
 
         // ==========================================================================================================================
-        // 加载模块
+        // 执行初始化方法
 
 
-        // ==========================================================================================================================
-        // 加载定时器
+        this.logger.hint("预载定时器");
 
-
-        this.logger.hint("加载定时器");
-
-
-        for (Map.Entry<Component, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.entrySet()) {
+        for (Map.Entry<String, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
             try {
-                v.loadWrapper();
-                this.logger.info("加载定时器成功 " + k.artificial() + " -> " + v);
+                v.initWrapper();
             } catch (Exception exception) {
-                throw new BootException("加载定时器失败 " + v.getClass().getName(), exception);
+                throw new BootException("预载定时器失败 " + v.getClass().getName(), exception);
             }
+            this.logger.info("预载定时器 " + this.COMPONENT_RUNNER_CLAZZ.get(k).getAnnotation().artificial() + " -> " + v);
         }
 
 
-        this.logger.hint("加载监听器");
+        this.logger.hint("预载监听器");
 
-        for (Map.Entry<Component, EventHandlerMonitor> entry : this.COMPONENT_MONITOR_INSTANCE.entrySet()) {
+        for (Map.Entry<String, EventHandlerMonitor> entry : this.COMPONENT_MONITOR_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
             try {
-                v.loadWrapper();
-                this.logger.info("加载监听器成功 " + k.artificial() + " -> " + v.getClass().getName());
+                v.initWrapper();
             } catch (Exception exception) {
-                throw new BootException("加载监听器失败 " + v.getClass().getName(), exception);
+                throw new BootException("预载监听器失败 " + v.getClass().getName(), exception);
             }
+            this.logger.info("预载监听器 " + this.COMPONENT_MONITOR_CLAZZ.get(k).getAnnotation().artificial() + " -> " + v);
         }
 
 
-        this.logger.hint("加载过滤器");
+        this.logger.hint("预载过滤器");
 
-        for (Map.Entry<Component, EventHandlerFilter> entry : this.COMPONENT_FILTER_INSTANCE.entrySet()) {
+        for (Map.Entry<String, EventHandlerFilter> entry : this.COMPONENT_FILTER_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
             try {
-                v.loadWrapper();
-                this.logger.info("启动过滤器成功 " + k.artificial() + " -> " + v.getClass().getName());
+                v.initWrapper();
             } catch (Exception exception) {
-                throw new BootException("加载过滤器失败 " + v.getClass().getName(), exception);
+                throw new BootException("预载过滤器失败 " + v.getClass().getName(), exception);
             }
+            this.logger.info("预载过滤器 " + this.COMPONENT_FILTER_CLAZZ.get(k).getAnnotation().artificial() + " -> " + v);
         }
 
 
-        this.logger.hint("加载执行器");
+        this.logger.hint("预载执行器");
 
-        for (Map.Entry<Component, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
+        for (Map.Entry<String, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
             try {
-                v.loadWrapper();
-                this.logger.info("加载执行器成功 " + k.artificial() + " -> " + v.getClass().getName());
+                v.initWrapper();
             } catch (Exception exception) {
-                throw new BootException("加载执行器失败 " + v.getClass().getName(), exception);
+                throw new BootException("预载执行器失败 " + v.getClass().getName(), exception);
             }
+            this.logger.info("预载执行器 " + this.COMPONENT_EXECUTOR_CLAZZ.get(k).getAnnotation().artificial() + " -> " + v);
         }
 
 
@@ -1044,56 +1038,59 @@ public final class Systemd {
 
 
         this.logger.hint("启动定时器");
-        for (Map.Entry<Component, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.entrySet()) {
+
+
+        for (Map.Entry<String, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
             try {
                 v.bootWrapper();
-                v.setEnable(true);
-                this.logger.info("启动定时器成功 " + k.artificial() + " -> " + v.getClass().getName());
             } catch (Exception exception) {
                 throw new BootException("启动定时器失败 " + v.getClass().getName(), exception);
             }
-        }
-
-
-        this.logger.hint("启动监听器");
-        for (Map.Entry<Component, EventHandlerMonitor> entry : this.COMPONENT_MONITOR_INSTANCE.entrySet()) {
-            var k = entry.getKey();
-            var v = entry.getValue();
-            try {
-                v.bootWrapper();
-                v.setEnable(true);
-                this.logger.info("启动监听器成功 " + k.artificial() + " -> " + v.getClass().getName());
-            } catch (Exception exception) {
-                throw new BootException("启动监听器失败 " + v.getClass().getName(), exception);
-            }
+            this.logger.info("启动定时器 " + this.COMPONENT_RUNNER_CLAZZ.get(k).getAnnotation().artificial() + " -> " + v);
         }
 
 
         this.logger.hint("启动过滤器");
-        for (Map.Entry<Component, EventHandlerFilter> entry : this.COMPONENT_FILTER_INSTANCE.entrySet()) {
+
+        for (Map.Entry<String, EventHandlerFilter> entry : this.COMPONENT_FILTER_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
             try {
                 v.bootWrapper();
-                this.logger.info("启动过滤器成功 " + k.artificial() + " -> " + v.getClass().getName());
             } catch (Exception exception) {
                 throw new BootException("启动过滤器失败 " + v.getClass().getName(), exception);
             }
+            this.logger.info("启动过滤器 " + this.COMPONENT_FILTER_CLAZZ.get(k).getAnnotation().artificial() + " -> " + v);
+        }
+
+
+        this.logger.hint("启动监听器");
+
+        for (Map.Entry<String, EventHandlerMonitor> entry : this.COMPONENT_MONITOR_INSTANCE.entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            try {
+                v.bootWrapper();
+            } catch (Exception exception) {
+                throw new BootException("启动监听器失败 " + v.getClass().getName(), exception);
+            }
+            this.logger.info("启动监听器 " + this.COMPONENT_MONITOR_CLAZZ.get(k).getAnnotation().artificial() + " -> " + v);
         }
 
 
         this.logger.hint("启动执行器");
-        for (Map.Entry<Component, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
+
+        for (Map.Entry<String, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
             try {
                 v.bootWrapper();
-                this.logger.info("启动执行器成功 " + k.artificial() + " -> " + v.getClass().getName());
             } catch (Exception exception) {
                 throw new BootException("启动执行器失败 " + v.getClass().getName(), exception);
             }
+            this.logger.info("启动执行器 " + this.COMPONENT_EXECUTOR_CLAZZ.get(k).getAnnotation().artificial() + " -> " + v);
         }
 
 
@@ -1159,85 +1156,68 @@ public final class Systemd {
         // 关闭模块
 
 
-        // ==========================================================================================================================
-        // 关闭执行器
-
-
         this.logger.hint("关闭执行器");
 
-
-        for (Map.Entry<Component, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
+        for (Map.Entry<String, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
             try {
                 v.shutWrapper();
-                this.logger.info("关闭执行器成功 " + k.artificial() + " -> " + v.getClass().getName());
             } catch (Exception exception) {
                 this.logger.error("关闭执行器失败 " + v.getClass().getName(), exception);
             }
+            this.logger.info("关闭执行器 " + this.COMPONENT_EXECUTOR_CLAZZ.get(k).getAnnotation().artificial() + " -> " + v);
         }
-
-
-        // ==========================================================================================================================
-        // 关闭过滤器
-
-
-        this.logger.hint("关闭过滤器");
-
-
-        ArrayList<Map.Entry<Component, EventHandlerFilter>> reverseFilter = new ArrayList<>(this.COMPONENT_FILTER_INSTANCE.entrySet());
-        Collections.reverse(reverseFilter);
-
-        for (Map.Entry<Component, EventHandlerFilter> entry : reverseFilter) {
-            var k = entry.getKey();
-            var v = entry.getValue();
-            try {
-                this.logger.info("关闭过滤器成功 " + k.artificial() + " -> " + v.getClass().getName());
-            } catch (Exception exception) {
-                this.logger.error("关闭过滤器失败 " + v.getClass().getName(), exception);
-            }
-        }
-
-
-        // ==========================================================================================================================
-        // 关闭监听器
 
 
         this.logger.hint("关闭监听器");
 
-
-        ArrayList<Map.Entry<Component, EventHandlerMonitor>> reverseMonitor = new ArrayList<>(this.COMPONENT_MONITOR_INSTANCE.entrySet());
+        ArrayList<Map.Entry<String, EventHandlerMonitor>> reverseMonitor = new ArrayList<>(this.COMPONENT_MONITOR_INSTANCE.entrySet());
         Collections.reverse(reverseMonitor);
 
-        for (Map.Entry<Component, EventHandlerMonitor> entry : reverseMonitor) {
+        for (Map.Entry<String, EventHandlerMonitor> entry : reverseMonitor) {
             var k = entry.getKey();
             var v = entry.getValue();
             try {
-                this.logger.info("关闭监听器成功 " + k.artificial() + " -> " + v.getClass().getName());
+                v.shutWrapper();
             } catch (Exception exception) {
                 this.logger.error("关闭监听器失败 " + v.getClass().getName(), exception);
             }
+            this.logger.info("关闭监听器 " + this.COMPONENT_MONITOR_CLAZZ.get(k).getAnnotation().artificial() + " -> " + v);
         }
 
 
-        // ==========================================================================================================================
-        // 关闭定时器
+        this.logger.hint("关闭过滤器");
+
+        ArrayList<Map.Entry<String, EventHandlerFilter>> reverseFilter = new ArrayList<>(this.COMPONENT_FILTER_INSTANCE.entrySet());
+        Collections.reverse(reverseFilter);
+
+        for (Map.Entry<String, EventHandlerFilter> entry : reverseFilter) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            try {
+                v.shutWrapper();
+            } catch (Exception exception) {
+                this.logger.error("关闭过滤器失败 " + v.getClass().getName(), exception);
+            }
+            this.logger.info("关闭过滤器 " + this.COMPONENT_FILTER_CLAZZ.get(k).getAnnotation().artificial() + " -> " + v);
+        }
 
 
         this.logger.hint("关闭定时器");
 
-
-        ArrayList<Map.Entry<Component, EventHandlerRunner>> reverseRunner = new ArrayList<>(this.COMPONENT_RUNNER_INSTANCE.entrySet());
+        ArrayList<Map.Entry<String, EventHandlerRunner>> reverseRunner = new ArrayList<>(this.COMPONENT_RUNNER_INSTANCE.entrySet());
         Collections.reverse(reverseRunner);
 
-        for (Map.Entry<Component, EventHandlerRunner> entry : reverseRunner) {
+        for (Map.Entry<String, EventHandlerRunner> entry : reverseRunner) {
             var k = entry.getKey();
             var v = entry.getValue();
             try {
-                this.logger.info("关闭定时器成功 " + k.artificial() + " -> " + v.getClass().getName());
+                v.shutWrapper();
             } catch (Exception exception) {
                 this.logger.error("关闭定时器失败 " + v.getClass().getName(), exception);
             }
+            this.logger.info("关闭定时器 " + this.COMPONENT_RUNNER_CLAZZ.get(k).getAnnotation().artificial() + " -> " + v);
         }
 
 
@@ -1608,20 +1588,20 @@ public final class Systemd {
             throw new BotException("没有此模块 -> " + name);
         }
         Component annotation = this.COMPONENT_CLAZZ.get(name).getAnnotation();
-        AbstractEventHandler instance = this.COMPONENT_INSTANCE.get(annotation);
+        AbstractEventHandler instance = this.COMPONENT_INSTANCE.get(annotation.artificial());
         this.logger.info("停止 " + name);
         instance.shutWrapper();
     }
 
-    public void loadModule(String name) {
+    public void initModule(String name) {
         this.isCallerDriver(3);
         if (!this.COMPONENT_CLAZZ.containsKey(name)) {
             throw new BotException("没有此模块 -> " + name);
         }
         Component annotation = this.COMPONENT_CLAZZ.get(name).getAnnotation();
-        AbstractEventHandler instance = this.COMPONENT_INSTANCE.get(annotation);
+        AbstractEventHandler instance = this.COMPONENT_INSTANCE.get(annotation.artificial());
         this.logger.info("加载 " + name);
-        instance.loadWrapper();
+        instance.initWrapper();
     }
 
     public void bootModule(String name) {
@@ -1630,9 +1610,94 @@ public final class Systemd {
             throw new BotException("没有此模块 -> " + name);
         }
         Component annotation = this.COMPONENT_CLAZZ.get(name).getAnnotation();
-        AbstractEventHandler instance = this.COMPONENT_INSTANCE.get(annotation);
+        AbstractEventHandler instance = this.COMPONENT_INSTANCE.get(annotation.artificial());
         this.logger.info("启动 " + name);
         instance.bootWrapper();
+    }
+
+    public void reInstantizeModule(String name) {
+
+        if (!this.COMPONENT_CLAZZ.containsKey(name)) {
+            throw new BotException("没有此模块 -> " + name);
+        }
+
+        if (this.COMPONENT_RUNNER_CLAZZ.containsKey(name)) {
+            ModuleWrapper<? extends EventHandlerRunner> moduleWrapper = this.COMPONENT_RUNNER_CLAZZ.get(name);
+            Component annotation = moduleWrapper.getAnnotation();
+            EventHandlerRunner newInstance = moduleWrapper.newInstance();
+            EventHandlerRunner oldInstance = this.COMPONENT_RUNNER_INSTANCE.get(annotation.artificial());
+            this.logger.info("停止旧实例 " + name + " " + oldInstance.hashCode());
+            oldInstance.shutWrapper();
+            this.logger.info("加载新实例 " + name + " " + newInstance.hashCode());
+            this.COMPONENT_INSTANCE.put(annotation.artificial(), newInstance);
+            this.COMPONENT_RUNNER_INSTANCE.put(annotation.artificial(), newInstance);
+            this.logger.info("预载新实例 " + name + " " + newInstance.hashCode());
+            newInstance.initWrapper();
+            this.logger.info("启动新实例 " + name + " " + newInstance.hashCode());
+            newInstance.bootWrapper();
+            return;
+        }
+
+        if (this.COMPONENT_FILTER_CLAZZ.containsKey(name)) {
+            ModuleWrapper<? extends EventHandlerFilter> moduleWrapper = this.COMPONENT_FILTER_CLAZZ.get(name);
+            Component annotation = moduleWrapper.getAnnotation();
+            EventHandlerFilter newInstance = moduleWrapper.newInstance();
+            EventHandlerFilter oldInstance = this.COMPONENT_FILTER_INSTANCE.get(annotation.artificial());
+            this.logger.info("停止旧实例 " + name + " " + oldInstance.hashCode());
+            oldInstance.shutWrapper();
+            this.logger.info("加载新实例 " + name + " " + newInstance.hashCode());
+            this.COMPONENT_INSTANCE.put(annotation.artificial(), newInstance);
+            this.COMPONENT_FILTER_INSTANCE.put(annotation.artificial(), newInstance);
+            if (annotation.users()) this.FILTER_USERS_CHAIN.replaceAll(item -> newInstance);
+            if (annotation.group()) this.FILTER_GROUP_CHAIN.replaceAll(item -> newInstance);
+            this.logger.info("预载新实例 " + name + " " + newInstance.hashCode());
+            newInstance.initWrapper();
+            this.logger.info("启动新实例 " + name + " " + newInstance.hashCode());
+            newInstance.bootWrapper();
+            return;
+        }
+
+        if (this.COMPONENT_MONITOR_CLAZZ.containsKey(name)) {
+            ModuleWrapper<? extends EventHandlerMonitor> moduleWrapper = this.COMPONENT_MONITOR_CLAZZ.get(name);
+            Component annotation = moduleWrapper.getAnnotation();
+            EventHandlerMonitor newInstance = moduleWrapper.newInstance();
+            EventHandlerMonitor oldInstance = this.COMPONENT_MONITOR_INSTANCE.get(annotation.artificial());
+            this.logger.info("停止旧实例 " + name + " " + oldInstance.hashCode());
+            oldInstance.shutWrapper();
+            this.logger.info("加载新实例 " + name + " " + newInstance.hashCode());
+            this.COMPONENT_INSTANCE.put(annotation.artificial(), newInstance);
+            this.COMPONENT_MONITOR_INSTANCE.put(annotation.artificial(), newInstance);
+            if (annotation.users()) this.MONITOR_USERS_CHAIN.replaceAll(item -> newInstance);
+            if (annotation.group()) this.MONITOR_GROUP_CHAIN.replaceAll(item -> newInstance);
+            this.logger.info("预载新实例 " + name + " " + newInstance.hashCode());
+            newInstance.initWrapper();
+            this.logger.info("启动新实例 " + name + " " + newInstance.hashCode());
+            newInstance.bootWrapper();
+            return;
+        }
+
+
+        if (this.COMPONENT_EXECUTOR_CLAZZ.containsKey(name)) {
+            ModuleWrapper<? extends EventHandlerExecutor> moduleWrapper = this.COMPONENT_EXECUTOR_CLAZZ.get(name);
+            Component annotation = moduleWrapper.getAnnotation();
+            EventHandlerExecutor newInstance = moduleWrapper.newInstance();
+            EventHandlerExecutor oldInstance = this.COMPONENT_EXECUTOR_INSTANCE.get(annotation.artificial());
+            this.logger.info("停止旧实例 " + name + " " + oldInstance.hashCode());
+            oldInstance.shutWrapper();
+            this.logger.info("加载新实例 " + name + " " + newInstance.hashCode());
+            this.COMPONENT_INSTANCE.put(annotation.artificial(), newInstance);
+            this.COMPONENT_EXECUTOR_INSTANCE.put(annotation.artificial(), newInstance);
+            if (annotation.users()) this.EXECUTOR_USERS_COMMANDS.put(annotation.command(), newInstance);
+            if (annotation.group()) this.EXECUTOR_GROUP_COMMANDS.put(annotation.command(), newInstance);
+            this.logger.info("预载新实例 " + name + " " + newInstance.hashCode());
+            newInstance.initWrapper();
+            this.logger.info("启动新实例 " + name + " " + newInstance.hashCode());
+            newInstance.bootWrapper();
+            return;
+        }
+
+        throw new BotException("WTF if something inside CC but not any sub clazz");
+
     }
 
 
@@ -1643,6 +1708,95 @@ public final class Systemd {
         if (collect.size() == 1) return (T) collect.get(0);
         throw new IllegalArgumentException("No such runner exist");
     }
+
+
+    public void debug() {
+
+
+        System.out.println(">> COMPONENT_CLAZZ");
+        for (Map.Entry<String, ModuleWrapper<? extends AbstractEventHandler>> entry : this.COMPONENT_CLAZZ.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue());
+        }
+
+        System.out.println(">> COMPONENT_RUNNER_CLAZZ");
+        for (Map.Entry<String, ModuleWrapper<? extends EventHandlerRunner>> entry : this.COMPONENT_RUNNER_CLAZZ.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue());
+        }
+
+        System.out.println(">> COMPONENT_FILTER_CLAZZ");
+        for (Map.Entry<String, ModuleWrapper<? extends EventHandlerFilter>> entry : this.COMPONENT_FILTER_CLAZZ.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue());
+        }
+
+        System.out.println(">> COMPONENT_MONITOR_CLAZZ");
+        for (Map.Entry<String, ModuleWrapper<? extends EventHandlerMonitor>> entry : this.COMPONENT_MONITOR_CLAZZ.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue());
+        }
+
+        System.out.println(">> COMPONENT_EXECUTOR_CLAZZ");
+        for (Map.Entry<String, ModuleWrapper<? extends EventHandlerExecutor>> entry : this.COMPONENT_EXECUTOR_CLAZZ.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue());
+        }
+
+        System.out.println(">> COMPONENT_INSTANCE");
+        for (Map.Entry<String, AbstractEventHandler> entry : this.COMPONENT_INSTANCE.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue() + " " + entry.getValue().hashCode());
+        }
+
+        System.out.println(">> COMPONENT_RUNNER_INSTANCE");
+        for (Map.Entry<String, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue() + " " + entry.getValue().hashCode());
+        }
+
+        System.out.println(">> COMPONENT_FILTER_INSTANCE");
+        for (Map.Entry<String, EventHandlerFilter> entry : this.COMPONENT_FILTER_INSTANCE.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue() + " " + entry.getValue().hashCode());
+        }
+
+        System.out.println(">> FILTER_USERS_CHAIN");
+        for (EventHandlerFilter entry : this.FILTER_USERS_CHAIN) {
+            System.out.println(entry);
+        }
+
+        System.out.println(">> FILTER_GROUP_CHAIN");
+        for (EventHandlerFilter entry : this.FILTER_GROUP_CHAIN) {
+            System.out.println(entry);
+        }
+
+        System.out.println(">> COMPONENT_MONITOR_INSTANCE");
+        for (Map.Entry<String, EventHandlerMonitor> entry : this.COMPONENT_MONITOR_INSTANCE.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue() + " " + entry.getValue().hashCode());
+        }
+
+        System.out.println(">> MONITOR_USERS_CHAIN");
+        for (EventHandlerMonitor entry : this.MONITOR_USERS_CHAIN) {
+            System.out.println(entry);
+        }
+
+        System.out.println(">> MONITOR_GROUP_CHAIN");
+        for (EventHandlerMonitor entry : this.MONITOR_GROUP_CHAIN) {
+            System.out.println(entry);
+        }
+
+        System.out.println(">> COMPONENT_EXECUTOR_INSTANCE");
+        for (Map.Entry<String, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue() + " " + entry.getValue().hashCode());
+        }
+
+        System.out.println(">> EXECUTOR_USERS_COMMANDS");
+        for (Map.Entry<String, EventHandlerExecutor> entry : this.EXECUTOR_USERS_COMMANDS.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue());
+        }
+
+        System.out.println(">> EXECUTOR_GROUP_COMMANDS");
+        for (Map.Entry<String, EventHandlerExecutor> entry : this.EXECUTOR_GROUP_COMMANDS.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue());
+        }
+
+    }
+
+
+    // ==========================================================================================================================================================
 
 
     // ==========================================================================================================================================================
