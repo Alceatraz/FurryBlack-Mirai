@@ -83,12 +83,6 @@ public abstract class AbstractEventHandler {
     }
 
 
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        System.out.println("this finalize called");
-    }
-
     @Api("生命周期 初始化时")
     protected abstract void init() throws BootException;
 

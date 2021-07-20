@@ -82,7 +82,7 @@ public final class Driver {
     }
 
 
-    public static final String APP_VERSION = "0.8.1";
+    public static final String APP_VERSION = "0.8.0-SNAPSHOT";
 
 
     // ==========================================================================================================================================================

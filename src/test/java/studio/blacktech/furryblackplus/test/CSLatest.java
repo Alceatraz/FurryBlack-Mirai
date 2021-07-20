@@ -2,6 +2,9 @@ package studio.blacktech.furryblackplus.test;
 
 import org.junit.jupiter.api.Test;
 import studio.blacktech.furryblackplus.core.annotation.Component;
+import studio.blacktech.furryblackplus.core.exception.BotException;
+import studio.blacktech.furryblackplus.core.exception.initlization.BootException;
+import studio.blacktech.furryblackplus.core.interfaces.AbstractEventHandler;
 
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -66,12 +69,60 @@ public class CSLatest {
 
 
     @Component(artificial = "c1")
-    private static class c1 {
+    public static class c1 extends AbstractEventHandler {
+
+        @Override
+        protected void init() throws BootException {
+
+        }
+
+        @Override
+        protected void boot() throws BotException {
+
+        }
+
+        @Override
+        protected void shut() throws BotException {
+
+        }
     }
 
     @Component(artificial = "c2")
-    private static class c2 {
+    public static class c2 extends AbstractEventHandler {
+
+        @Override
+        protected void init() throws BootException {
+
+        }
+
+        @Override
+        protected void boot() throws BotException {
+
+        }
+
+        @Override
+        protected void shut() throws BotException {
+
+        }
     }
 
+    @Component(artificial = "c3")
+    public static class c3 extends AbstractEventHandler {
+
+        @Override
+        protected void init() throws BootException {
+
+        }
+
+        @Override
+        protected void boot() throws BotException {
+
+        }
+
+        @Override
+        protected void shut() throws BotException {
+
+        }
+    }
 
 }

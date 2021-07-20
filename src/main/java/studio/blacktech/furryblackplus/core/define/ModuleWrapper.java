@@ -26,8 +26,20 @@ public class ModuleWrapper<T extends AbstractEventHandler> {
         return this.pluginName;
     }
 
-    public Component getAnnotation() {
+    public Component annotation() {
         return this.annotation;
+    }
+
+    public String artificial() {
+        return this.annotation.artificial();
+    }
+
+    public String name() {
+        return this.annotation.name();
+    }
+
+    public int priority() {
+        return this.annotation.priority();
     }
 
     public Class<T> getClazz() {
@@ -51,4 +63,21 @@ public class ModuleWrapper<T extends AbstractEventHandler> {
         return instance;
     }
 
+    public static int comparePriority(ModuleWrapper<? extends AbstractEventHandler> o1, ModuleWrapper<? extends AbstractEventHandler> o2) {
+        Component o1Annotation = o1.annotation();
+        Component o2Annotation = o2.annotation();
+        return o1Annotation.priority() - o2Annotation.priority();
+    }
+
+    public boolean users() {
+        return this.annotation.users();
+    }
+
+    public boolean group() {
+        return this.annotation.group();
+    }
+
+    public String command() {
+        return this.annotation.command();
+    }
 }

@@ -41,7 +41,7 @@ public @interface Component {
      *
      * @return 注册顺序
      */
-    int priority() default 0;
+    int priority() default Integer.MAX_VALUE;
 
 
     /**
