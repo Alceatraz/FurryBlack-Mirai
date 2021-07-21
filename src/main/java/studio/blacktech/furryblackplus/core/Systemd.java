@@ -824,6 +824,7 @@ public final class Systemd {
             } catch (Exception exception) {
                 throw new BootException("定时器创建失败 " + wrapper.getPluginName() + ":" + wrapper.getClassName(), exception);
             }
+            this.COMPONENT_INSTANCE.put(artificial, instance);
             this.COMPONENT_RUNNER_INSTANCE.put(artificial, instance);
             if (wrapper.priority() < Integer.MAX_VALUE) {
                 this.logger.info("创建定时器 " + wrapper.priority() + " - " + artificial + " > " + wrapper.getPluginName() + ":" + wrapper.getClassName());
@@ -1587,9 +1588,20 @@ public final class Systemd {
         }
     }
 
+
     public Set<String> listAllPlugin() {
         this.isCallerDriver(3);
         return this.PLUGINS.keySet();
+    }
+
+
+    public void reloadPlugin() {
+        System.out.println("This function TODO");
+    }
+
+
+    public void reloadPlugin(String name) {
+        System.out.println("This function TODO");
     }
 
 
@@ -1603,6 +1615,8 @@ public final class Systemd {
             throw new BotException("没有此插件 -> " + name);
         }
 
+        this.logger.hint("卸载插件 -> " + pluginPackage.getName() + ":" + pluginPackage.hashCode());
+
         for (Class<? extends EventHandlerExecutor> clazz : pluginPackage.getModulesExecutor()) {
             Component annotation = clazz.getAnnotation(Component.class);
             String artificial = annotation.artificial();
@@ -1613,6 +1627,7 @@ public final class Systemd {
             this.COMPONENT_INSTANCE.remove(artificial);
             this.COMPONENT_EXECUTOR_CLAZZ.remove(artificial);
             this.COMPONENT_CLAZZ.remove(artificial);
+            this.logger.info("卸载执行器 -> " + artificial + ":" + handler.hashCode());
         }
 
 
@@ -1626,6 +1641,7 @@ public final class Systemd {
             this.COMPONENT_INSTANCE.remove(artificial);
             this.COMPONENT_FILTER_CLAZZ.remove(artificial);
             this.COMPONENT_CLAZZ.remove(artificial);
+            this.logger.info("卸载过滤器 -> " + artificial + ":" + handler.hashCode());
         }
 
 
@@ -1639,6 +1655,7 @@ public final class Systemd {
             this.COMPONENT_INSTANCE.remove(artificial);
             this.COMPONENT_MONITOR_CLAZZ.remove(artificial);
             this.COMPONENT_CLAZZ.remove(artificial);
+            this.logger.info("卸载监视器 -> " + artificial + ":" + handler.hashCode());
         }
 
 
@@ -1650,15 +1667,20 @@ public final class Systemd {
             this.COMPONENT_INSTANCE.remove(artificial);
             this.COMPONENT_RUNNER_CLAZZ.remove(artificial);
             this.COMPONENT_CLAZZ.remove(artificial);
+            this.logger.info("卸载定时器 -> " + artificial + ":" + handler.hashCode());
         }
 
     }
 
 
-    @Api("列出所有模块")
-    public Set<String> listAllModule() {
+    @Api("列出所有模块及其实例化状态")
+    public Map<String, Boolean> listAllModule() {
         this.isCallerDriver(3);
-        return this.COMPONENT_CLAZZ.keySet();
+        Map<String, Boolean> result = new HashMap<>(this.COMPONENT_CLAZZ.size());
+        for (String name : this.COMPONENT_CLAZZ.keySet()) {
+            result.put(name, this.COMPONENT_INSTANCE.containsKey(name));
+        }
+        return result;
     }
 
 
@@ -1695,7 +1717,61 @@ public final class Systemd {
         instance.bootWrapper();
     }
 
-    public void reInstantizeModule(String name) {
+
+    public void unloadModule(String name) {
+        if (!this.COMPONENT_CLAZZ.containsKey(name)) {
+            throw new BotException("没有此模块 -> " + name);
+        }
+
+        if (this.COMPONENT_RUNNER_CLAZZ.containsKey(name)) {
+            EventHandlerRunner instance = this.COMPONENT_RUNNER_INSTANCE.remove(name);
+            this.logger.info("停止定时器 " + name + " " + instance.hashCode());
+            instance.shutWrapper();
+            this.logger.info("移除定时器 " + name + " " + instance.hashCode());
+            this.COMPONENT_INSTANCE.remove(name);
+            return;
+        }
+
+        if (this.COMPONENT_FILTER_CLAZZ.containsKey(name)) {
+            EventHandlerFilter instance = this.COMPONENT_FILTER_INSTANCE.remove(name);
+            this.logger.info("停止过滤器 " + name + " " + instance.hashCode());
+            instance.shutWrapper();
+            this.logger.info("移除过滤器 " + name + " " + instance.hashCode());
+            this.FILTER_USERS_CHAIN.remove(instance);
+            this.FILTER_GROUP_CHAIN.remove(instance);
+            this.COMPONENT_INSTANCE.remove(name);
+            return;
+        }
+
+        if (this.COMPONENT_MONITOR_CLAZZ.containsKey(name)) {
+            EventHandlerMonitor instance = this.COMPONENT_MONITOR_INSTANCE.remove(name);
+            this.logger.info("停止过滤器 " + name + " " + instance.hashCode());
+            instance.shutWrapper();
+            this.logger.info("移除过滤器 " + name + " " + instance.hashCode());
+            this.MONITOR_USERS_CHAIN.remove(instance);
+            this.MONITOR_GROUP_CHAIN.remove(instance);
+            this.COMPONENT_INSTANCE.remove(name);
+            return;
+        }
+
+
+        if (this.COMPONENT_EXECUTOR_CLAZZ.containsKey(name)) {
+            EventHandlerExecutor instance = this.COMPONENT_EXECUTOR_INSTANCE.remove(name);
+            String command = instance.getAnnotation().command();
+            this.logger.info("停止执行器 " + name + " " + instance.hashCode());
+            instance.shutWrapper();
+            this.logger.info("移除执行器 " + name + " " + instance.hashCode());
+            this.EXECUTOR_USERS_COMMANDS.remove(command);
+            this.EXECUTOR_GROUP_COMMANDS.remove(command);
+            this.COMPONENT_INSTANCE.remove(name);
+            return;
+        }
+
+        throw new BotException("WTF if something inside CC but not any sub clazz");
+
+    }
+
+    public void reloadModule(String name) {
 
         if (!this.COMPONENT_CLAZZ.containsKey(name)) {
             throw new BotException("没有此模块 -> " + name);

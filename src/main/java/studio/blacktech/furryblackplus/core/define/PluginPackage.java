@@ -32,7 +32,8 @@ public class PluginPackage {
     private final File file;
     private final String name;
 
-    private final Map<JarEntry, Class<? extends AbstractEventHandler>> modules;
+    private final Map<String, Class<? extends AbstractEventHandler>> modules;
+
     private final List<Class<? extends EventHandlerRunner>> modulesRunner;
     private final List<Class<? extends EventHandlerFilter>> modulesFilter;
     private final List<Class<? extends EventHandlerMonitor>> modulesMonitor;
@@ -82,6 +83,7 @@ public class PluginPackage {
         while (entries.hasMoreElements()) {
 
             JarEntry jarEntry = entries.nextElement();
+
             if (jarEntry.isDirectory()) {
                 continue;
             }
@@ -110,7 +112,7 @@ public class PluginPackage {
                 continue;
             }
 
-            this.modules.put(jarEntry, (Class<? extends AbstractEventHandler>) clazz);
+            this.modules.put(entryName, (Class<? extends AbstractEventHandler>) clazz);
         }
 
         try {
@@ -216,7 +218,7 @@ public class PluginPackage {
     }
 
 
-    public Map<JarEntry, Class<? extends AbstractEventHandler>> getModules() {
+    public Map<String, Class<? extends AbstractEventHandler>> getModules() {
         return this.modules;
     }
 

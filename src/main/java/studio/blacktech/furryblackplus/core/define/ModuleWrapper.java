@@ -8,7 +8,6 @@ import studio.blacktech.furryblackplus.core.interfaces.AbstractEventHandler;
 import java.lang.reflect.InvocationTargetException;
 
 
-@Deprecated
 public class ModuleWrapper<T extends AbstractEventHandler> {
 
 

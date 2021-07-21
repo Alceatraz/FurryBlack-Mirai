@@ -43,6 +43,7 @@ import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -432,12 +433,32 @@ public final class Driver {
                                 switch (command.getParameterSegment(0)) {
 
                                     case "unload":
-                                        System.out.println("卸载 " + command.getParameterSegment(1));
                                         systemd.unloadPlugin(command.getParameterSegment(1));
                                         break;
 
                                     case "reload":
-                                        System.out.println("reload plugin TODO"); // TODO
+                                        // TODO
+                                        systemd.reloadPlugin(command.getParameterSegment(1));
+                                        break;
+
+                                    default:
+                                        break;
+
+                                }
+                                break;
+
+                            case 1:
+
+                                switch (command.getParameterSegment(0)) {
+
+                                    case "unload":
+                                        for (String name : systemd.listAllPlugin()) {
+                                            systemd.unloadPlugin(name);
+                                        }
+                                        break;
+
+                                    case "reload":
+                                        systemd.reloadPlugin();
                                         break;
 
                                     default:
@@ -464,7 +485,7 @@ public final class Driver {
                                         systemd.shutModule(command.getParameterSegment(1));
                                         break;
 
-                                    case "load":
+                                    case "init":
                                         systemd.initModule(command.getParameterSegment(1));
                                         break;
 
@@ -478,15 +499,22 @@ public final class Driver {
                                         systemd.bootModule(command.getParameterSegment(1));
                                         break;
 
+                                    case "unload":
+                                        systemd.unloadModule(command.getParameterSegment(1));
+                                        break;
+
+
                                     case "reload":
-                                        systemd.reInstantizeModule(command.getParameterSegment(1));
+                                        systemd.reloadModule(command.getParameterSegment(1));
                                         break;
 
                                 }
                                 break;
 
                             case 0:
-                                systemd.listAllModule().forEach(System.out::println);
+                                for (Map.Entry<String, Boolean> entry : systemd.listAllModule().entrySet()) {
+                                    System.out.println(entry.getKey() + " " + (entry.getValue() ? " 运行" : " 卸载"));
+                                }
                                 break;
                         }
                         break;
@@ -674,9 +702,14 @@ public final class Driver {
                     new StringsCompleter("u", "usr", "user", "users", "f", "fri", "friend", "friends", "g", "grp", "group", "groups")
                 ),
                 new ArgumentCompleter(
+                    new StringsCompleter("plugin"),
+                    new StringsCompleter("unload", "reload"),
+                    new StringsCompleter(systemd.listAllPlugin())
+                ),
+                new ArgumentCompleter(
                     new StringsCompleter("module"),
-                    new StringsCompleter("reboot", "load", "boot", "shut"),
-                    new StringsCompleter(systemd.listAllModule())
+                    new StringsCompleter("init", "boot", "shut", "reboot", "unload", "reload"),
+                    new StringsCompleter(systemd.listAllModule().keySet())
                 )
             )).build();
             AutopairWidgets autopairWidgets = new AutopairWidgets(this.jlineReader);
