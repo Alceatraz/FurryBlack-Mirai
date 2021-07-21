@@ -3,19 +3,17 @@ package studio.blacktech.furryblackplus.core.interfaces;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.annotation.Component;
 import studio.blacktech.furryblackplus.core.utilties.Command;
 
 
 @Api("执行器父类")
 public abstract class EventHandlerExecutor extends AbstractEventHandler {
 
-    private String HELP;
+    private final String HELP;
 
-    @Override
-    public void instantiated(Component annotation) {
-        if (annotation.command().isBlank()) throw new IllegalArgumentException("无效的模块命令`command`");
-        super.instantiated(annotation);
+    public EventHandlerExecutor() {
+        super();
+        if (this.annotation.command().isBlank()) throw new IllegalArgumentException("无效的模块命令`command`");
         StringBuilder builder = new StringBuilder();
         builder.append(this.annotation.command());
         builder.append(" ");

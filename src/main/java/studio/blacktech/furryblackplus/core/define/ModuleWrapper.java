@@ -6,8 +6,9 @@ import studio.blacktech.furryblackplus.core.exception.BotException;
 import studio.blacktech.furryblackplus.core.interfaces.AbstractEventHandler;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
+
+@Deprecated
 public class ModuleWrapper<T extends AbstractEventHandler> {
 
 
@@ -54,14 +55,13 @@ public class ModuleWrapper<T extends AbstractEventHandler> {
     public T newInstance() {
         T instance;
         try {
-            Method method = this.clazz.getMethod("instantiated", Component.class);
             instance = this.clazz.getConstructor().newInstance();
-            method.invoke(instance, this.annotation);
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException exception) {
             throw new BotException("创建模块实例失败 -> " + exception);
         }
         return instance;
     }
+
 
     public static int comparePriority(ModuleWrapper<? extends AbstractEventHandler> o1, ModuleWrapper<? extends AbstractEventHandler> o2) {
         Component o1Annotation = o1.annotation();
@@ -80,4 +80,5 @@ public class ModuleWrapper<T extends AbstractEventHandler> {
     public String command() {
         return this.annotation.command();
     }
+
 }

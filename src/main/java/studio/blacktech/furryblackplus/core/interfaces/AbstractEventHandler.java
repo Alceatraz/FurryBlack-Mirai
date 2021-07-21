@@ -51,8 +51,8 @@ public abstract class AbstractEventHandler {
     protected volatile boolean enable = false;
 
 
-    public void instantiated(Component annotation) {
-        this.annotation = annotation;
+    public AbstractEventHandler() {
+        this.annotation = this.getClass().getAnnotation(Component.class);
         this.logger = new LoggerX(this.getClass());
         this.CONFIG = new Properties();
         this.FOLDER_ROOT = Paths.get(Driver.getModuleFolder(), this.annotation.artificial()).toFile();

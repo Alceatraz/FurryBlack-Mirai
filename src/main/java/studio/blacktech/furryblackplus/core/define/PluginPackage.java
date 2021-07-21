@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -117,6 +119,12 @@ public class PluginPackage {
             throw new BotException(exception);
         }
 
+        try {
+            jarFile.close();
+        } catch (IOException exception) {
+            throw new BotException(exception);
+        }
+
         this.modulesRunner.clear();
         this.modulesFilter.clear();
         this.modulesMonitor.clear();
@@ -163,6 +171,10 @@ public class PluginPackage {
 
         }
 
+        this.modulesRunner.sort(PluginPackage::comparePriority);
+        this.modulesFilter.sort(PluginPackage::comparePriority);
+        this.modulesMonitor.sort(PluginPackage::comparePriority);
+
         int runnerSize = this.modulesRunner.size();
         if (runnerSize > 0) {
             this.logger.info("扫描到" + runnerSize + "定时器");
@@ -197,6 +209,13 @@ public class PluginPackage {
     }
 
 
+    public static int comparePriority(Class<? extends AbstractEventHandler> o1, Class<? extends AbstractEventHandler> o2) {
+        Component o1Annotation = o1.getAnnotation(Component.class);
+        Component o2Annotation = o2.getAnnotation(Component.class);
+        return o1Annotation.priority() - o2Annotation.priority();
+    }
+
+
     public Map<JarEntry, Class<? extends AbstractEventHandler>> getModules() {
         return this.modules;
     }
@@ -213,8 +232,30 @@ public class PluginPackage {
         return this.modulesMonitor;
     }
 
+
+    public List<Class<? extends EventHandlerRunner>> getModulesRunnerReverse() {
+        ArrayList<Class<? extends EventHandlerRunner>> list = new ArrayList<>(this.modulesRunner);
+        Collections.reverse(list);
+        return list;
+    }
+
+    public List<Class<? extends EventHandlerFilter>> getModulesFilterReverse() {
+        ArrayList<Class<? extends EventHandlerFilter>> list = new ArrayList<>(this.modulesFilter);
+        Collections.reverse(list);
+        return list;
+    }
+
+    public List<Class<? extends EventHandlerMonitor>> getModulesMonitorReverse() {
+        ArrayList<Class<? extends EventHandlerMonitor>> list = new ArrayList<>(this.modulesMonitor);
+        Collections.reverse(list);
+        return list;
+    }
+
+
     public List<Class<? extends EventHandlerExecutor>> getModulesExecutor() {
-        return this.modulesExecutor;
+        ArrayList<Class<? extends EventHandlerExecutor>> list = new ArrayList<>(this.modulesExecutor);
+        Collections.reverse(list);
+        return list;
     }
 
 

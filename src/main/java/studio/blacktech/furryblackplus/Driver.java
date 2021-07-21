@@ -345,6 +345,10 @@ public final class Driver {
                 Command command = new Command(temp.trim());
                 switch (command.getCommandName()) {
 
+
+                    // =========================================================
+
+
                     case "kill":
                         System.out.println("[FurryBlack] Kill the JVM");
                         System.exit(-1);
@@ -360,6 +364,10 @@ public final class Driver {
                         systemd.signal();
                         break console;
 
+
+                    // =========================================================
+
+
                     case "?":
                     case "help":
                         System.out.println("exit    退出");
@@ -369,6 +377,10 @@ public final class Driver {
                         System.out.println("module  列出所有模块");
                         System.out.println("reload  重启指定模块");
                         break;
+
+
+                    // =========================================================
+
 
                     case "debug":
 
@@ -390,8 +402,52 @@ public final class Driver {
                                 }
 
                                 break;
-                            default:
+
+                            case 0:
                                 systemd.debug();
+                                break;
+                        }
+                        break;
+
+
+                    // =========================================================
+
+
+                    case "enable":
+                        enable = true;
+                        System.out.println("启动事件响应");
+                        break;
+
+                    case "disable":
+                        enable = false;
+                        System.out.println("关闭事件响应");
+                        break;
+
+                    case "plugin":
+
+                        switch (command.getParameterLength()) {
+
+                            case 2:
+
+                                switch (command.getParameterSegment(0)) {
+
+                                    case "unload":
+                                        System.out.println("卸载 " + command.getParameterSegment(1));
+                                        systemd.unloadPlugin(command.getParameterSegment(1));
+                                        break;
+
+                                    case "reload":
+                                        System.out.println("reload plugin TODO"); // TODO
+                                        break;
+
+                                    default:
+                                        break;
+
+                                }
+                                break;
+
+                            default:
+                                systemd.listAllPlugin().forEach(System.out::println);
                                 break;
                         }
                         break;
@@ -423,7 +479,6 @@ public final class Driver {
                                         break;
 
                                     case "reload":
-                                        System.out.println("热重载模块操作不是线程安全操作");
                                         systemd.reInstantizeModule(command.getParameterSegment(1));
                                         break;
 
@@ -436,14 +491,20 @@ public final class Driver {
                         }
                         break;
 
-                    case "enable":
-                        enable = true;
-                        System.out.println("启动事件响应");
-                        break;
 
-                    case "disable":
-                        enable = false;
-                        System.out.println("关闭事件响应");
+                    // =========================================================
+
+
+                    case "gc":
+                    case "stat":
+                    case "stats":
+                    case "status":
+                        long totalMemory = Runtime.getRuntime().totalMemory() / 1024;
+                        long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
+                        long maxMemory = Runtime.getRuntime().maxMemory() / 1024;
+                        System.out.println("消息事件: " + (enable ? "启用" : "关闭"));
+                        System.out.println("运行时间: " + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME));
+                        System.out.println("内存占用: " + (totalMemory - freeMemory) + "KB/" + totalMemory + "KB/" + maxMemory + "KB(" + (maxMemory / 1024) + "MB)");
                         break;
 
                     case "level":
@@ -465,6 +526,10 @@ public final class Driver {
                             logger.verbose("[VERB]详情 灰色 VERBOSE");
                         }
                         break;
+
+
+                    // =========================================================
+
 
                     case "list":
                         if (!command.hasCommandBody()) continue console;
@@ -563,17 +628,8 @@ public final class Driver {
                         }
                         break;
 
-                    case "gc":
-                    case "stat":
-                    case "stats":
-                    case "status":
-                        long totalMemory = Runtime.getRuntime().totalMemory() / 1024;
-                        long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
-                        long maxMemory = Runtime.getRuntime().maxMemory() / 1024;
-                        System.out.println("消息事件: " + (enable ? "启用" : "关闭"));
-                        System.out.println("运行时间: " + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME));
-                        System.out.println("内存占用: " + (totalMemory - freeMemory) + "KB/" + totalMemory + "KB/" + maxMemory + "KB(" + (maxMemory / 1024) + "MB)");
-                        break;
+
+                    // =========================================================
 
 
                     default:
