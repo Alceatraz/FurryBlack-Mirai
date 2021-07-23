@@ -1,4 +1,4 @@
-package studio.blacktech.furryblackplus.core.interfaces;
+package studio.blacktech.furryblackplus.core.define.moduel;
 
 
 import studio.blacktech.furryblackplus.common.Api;
@@ -53,7 +53,6 @@ public abstract class AbstractEventHandler {
     @Api("模块启停") protected volatile boolean enable = false;
 
 
-    // 这不优雅
     public AbstractEventHandler() {
         Class<? extends AbstractEventHandler> clazz = this.getClass();
         if (clazz.getAnnotations().length == 0) {

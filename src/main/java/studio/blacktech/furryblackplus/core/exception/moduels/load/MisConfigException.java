@@ -1,4 +1,4 @@
-package studio.blacktech.furryblackplus.core.exception.initlization;
+package studio.blacktech.furryblackplus.core.exception.moduels.load;
 
 
 import studio.blacktech.furryblackplus.common.Api;
@@ -6,7 +6,7 @@ import studio.blacktech.furryblackplus.common.Api;
 
 @SuppressWarnings("unused")
 @Api("配置错误")
-public class MisConfigException extends BootException {
+public class MisConfigException extends LoadException {
 
     public MisConfigException() {
         super();

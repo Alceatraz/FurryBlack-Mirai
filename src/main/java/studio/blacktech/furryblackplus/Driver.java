@@ -26,7 +26,7 @@ import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.widget.AutopairWidgets;
 import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.Systemd;
-import studio.blacktech.furryblackplus.core.exception.initlization.BootException;
+import studio.blacktech.furryblackplus.core.exception.moduels.BootException;
 import studio.blacktech.furryblackplus.core.interfaces.EventHandlerRunner;
 import studio.blacktech.furryblackplus.core.utilties.Command;
 import studio.blacktech.furryblackplus.core.utilties.LoggerX;

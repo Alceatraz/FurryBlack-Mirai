@@ -8,30 +8,23 @@ import studio.blacktech.furryblackplus.core.exception.BotException;
 @SuppressWarnings("unused")
 
 @Api("启动过程发生的异常")
-public class LoadException extends BotException {
+public class ShutException extends BotException {
 
-
-    private static final long serialVersionUID = 1L;
-
-
-    public LoadException() {
+    public ShutException() {
         super();
     }
 
-
-    public LoadException(String message) {
+    public ShutException(String message) {
         super(message);
     }
 
 
-    public LoadException(String message, Throwable cause) {
+    public ShutException(String message, Throwable cause) {
         super(message, cause);
     }
 
 
-    public LoadException(Throwable cause) {
+    public ShutException(Throwable cause) {
         super(cause);
     }
-
-
 }

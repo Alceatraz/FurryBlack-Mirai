@@ -1,4 +1,4 @@
-package studio.blacktech.furryblackplus.core.exception.initlization;
+package studio.blacktech.furryblackplus.core.exception.moduels.load;
 
 
 import studio.blacktech.furryblackplus.common.Api;
@@ -6,7 +6,7 @@ import studio.blacktech.furryblackplus.common.Api;
 
 @SuppressWarnings("unused")
 @Api("初次启动 不能以默认值运行时 打断启动过程")
-public class FirstBootException extends BootException {
+public class FirstBootException extends LoadException {
 
     public FirstBootException() {
         super();

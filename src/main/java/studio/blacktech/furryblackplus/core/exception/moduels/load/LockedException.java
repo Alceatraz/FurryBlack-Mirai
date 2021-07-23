@@ -7,21 +7,21 @@ import studio.blacktech.furryblackplus.common.Api;
 @SuppressWarnings("unused")
 
 @Api("防止多次初始化的锁")
-public class BootLockedException extends LoadException {
+public class LockedException extends LoadException {
 
-    public BootLockedException() {
+    public LockedException() {
         super();
     }
 
-    public BootLockedException(String message) {
+    public LockedException(String message) {
         super(message);
     }
 
-    public BootLockedException(String message, Throwable cause) {
+    public LockedException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public BootLockedException(Throwable cause) {
+    public LockedException(Throwable cause) {
         super(cause);
     }
 

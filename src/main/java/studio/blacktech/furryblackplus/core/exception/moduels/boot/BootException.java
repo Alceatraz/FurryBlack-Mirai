@@ -1,4 +1,4 @@
-package studio.blacktech.furryblackplus.core.exception.moduels;
+package studio.blacktech.furryblackplus.core.exception.moduels.boot;
 
 
 import studio.blacktech.furryblackplus.common.Api;

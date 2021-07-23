@@ -1,9 +1,9 @@
-package studio.blacktech.furryblackplus.core.interfaces;
+package studio.blacktech.furryblackplus.core.define.moduel;
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.define.Command;
+import studio.blacktech.furryblackplus.core.utilties.Command;
 
 
 @Api("执行器父类")
