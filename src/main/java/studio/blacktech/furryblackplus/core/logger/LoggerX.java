@@ -7,13 +7,12 @@ import net.mamoe.mirai.event.events.FriendMessageEvent;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.GroupTempMessageEvent;
 import net.mamoe.mirai.event.events.MessageEvent;
-import net.mamoe.mirai.event.events.TempMessageEvent;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.SingleMessage;
 import net.mamoe.mirai.utils.PlatformLogger;
 import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.exception.BotException;
-import studio.blacktech.furryblackplus.core.exception.initlization.BootLockedException;
+import studio.blacktech.furryblackplus.core.exception.moduels.load.LockedException;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -62,7 +61,7 @@ public final class LoggerX extends PlatformLogger {
     }
 
     public static void init(File file) throws BotException {
-        if (INIT_LOCK) throw new BootLockedException();
+        if (INIT_LOCK) throw new LockedException();
         INIT_LOCK = true;
         FILE_LOGGER = file;
     }

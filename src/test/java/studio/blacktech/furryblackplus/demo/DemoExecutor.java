@@ -3,7 +3,7 @@ package studio.blacktech.furryblackplus.demo;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import studio.blacktech.furryblackplus.core.annotation.Component;
-import studio.blacktech.furryblackplus.core.interfaces.EventHandlerExecutor;
+import studio.blacktech.furryblackplus.core.interfaces.EventHandlerCommand;
 import studio.blacktech.furryblackplus.core.utilties.Command;
 
 
@@ -19,7 +19,7 @@ import studio.blacktech.furryblackplus.core.utilties.Command;
         "/demo - 示例执行器"
     }
 )
-public class DemoExecutor extends EventHandlerExecutor {
+public class DemoCommand extends EventHandlerCommand {
 
 
     @Override

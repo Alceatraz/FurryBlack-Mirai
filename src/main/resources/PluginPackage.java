@@ -1,14 +1,15 @@
 package studio.blacktech.furryblackplus.core.define;
 
-import studio.blacktech.furryblackplus.core.annotation.Component;
 import studio.blacktech.furryblackplus.core.exception.BotException;
-import studio.blacktech.furryblackplus.core.interfaces.AbstractEventHandler;
-import studio.blacktech.furryblackplus.core.interfaces.EventHandlerExecutor;
-import studio.blacktech.furryblackplus.core.interfaces.EventHandlerFilter;
-import studio.blacktech.furryblackplus.core.interfaces.EventHandlerMonitor;
-import studio.blacktech.furryblackplus.core.interfaces.EventHandlerRunner;
-import studio.blacktech.furryblackplus.core.utilties.LoggerX;
+import studio.blacktech.furryblackplus.core.exception.moduels.scan.ScanException;
+import studio.blacktech.furryblackplus.core.define.moduel.AbstractEventHandler;
+import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerExecutor;
+import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerFilter;
+import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerMonitor;
+import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerRunner;
+import studio.blacktech.furryblackplus.core.logger.LoggerX;
 
+import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,7 +25,7 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-@SuppressWarnings({"unused", "unchecked"})
+@SuppressWarnings({"unused"})
 public class PluginPackage {
 
     private final LoggerX logger;
@@ -103,28 +104,23 @@ public class PluginPackage {
                 continue;
             }
 
-            if (!clazz.isAnnotationPresent(Component.class)) {
-                continue;
+            if (AbstractEventHandler.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                this.modules.put(entryName, (Class<? extends AbstractEventHandler>) clazz);
             }
 
-            if (!AbstractEventHandler.class.isAssignableFrom(clazz)) {
-                this.logger.warning("发现无效模块 " + className);
-                continue;
-            }
-
-            this.modules.put(entryName, (Class<? extends AbstractEventHandler>) clazz);
         }
 
         try {
             classLoader.close();
         } catch (IOException exception) {
-            throw new BotException(exception);
+            throw new ScanException(exception);
         }
 
         try {
             jarFile.close();
         } catch (IOException exception) {
-            throw new BotException(exception);
+            throw new ScanException(exception);
         }
 
         this.modulesRunner.clear();

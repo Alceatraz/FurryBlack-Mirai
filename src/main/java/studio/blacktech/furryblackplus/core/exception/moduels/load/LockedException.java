@@ -1,4 +1,4 @@
-package studio.blacktech.furryblackplus.core.exception.initlization;
+package studio.blacktech.furryblackplus.core.exception.moduels.load;
 
 
 import studio.blacktech.furryblackplus.common.Api;
@@ -7,7 +7,7 @@ import studio.blacktech.furryblackplus.common.Api;
 @SuppressWarnings("unused")
 
 @Api("防止多次初始化的锁")
-public class BootLockedException extends BootException {
+public class BootLockedException extends LoadException {
 
     public BootLockedException() {
         super();

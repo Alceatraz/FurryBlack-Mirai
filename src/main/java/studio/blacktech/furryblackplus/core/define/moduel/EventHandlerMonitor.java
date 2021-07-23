@@ -17,10 +17,24 @@ public abstract class EventHandlerMonitor extends AbstractEventHandler {
 
 
     public void handleUsersMessageWrapper(UserMessageEvent message) {
-        if (this.enable) this.handleUsersMessage(message);
+        try {
+            this.readWriteLock.readLock().lock();
+            if (this.enable) {
+                this.handleUsersMessage(message);
+            }
+        } finally {
+            this.readWriteLock.readLock().unlock();
+        }
     }
 
     public void handleGroupMessageWrapper(GroupMessageEvent message) {
-        if (this.enable) this.handleGroupMessage(message);
+        try {
+            this.readWriteLock.readLock().lock();
+            if (this.enable) {
+                this.handleGroupMessage(message);
+            }
+        } finally {
+            this.readWriteLock.readLock().unlock();
+        }
     }
 }

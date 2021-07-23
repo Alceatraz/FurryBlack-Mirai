@@ -17,12 +17,26 @@ public abstract class EventHandlerFilter extends AbstractEventHandler {
 
 
     public boolean handleUsersMessageWrapper(UserMessageEvent message) {
-        if (this.enable) return this.handleUsersMessage(message);
+        try {
+            this.readWriteLock.readLock().lock();
+            if (this.enable) {
+                return this.handleUsersMessage(message);
+            }
+        } finally {
+            this.readWriteLock.readLock().unlock();
+        }
         return false;
     }
 
     public boolean handleGroupMessageWrapper(GroupMessageEvent message) {
-        if (this.enable) return this.handleGroupMessage(message);
+        try {
+            this.readWriteLock.readLock().lock();
+            if (this.enable) {
+                return this.handleGroupMessage(message);
+            }
+        } finally {
+            this.readWriteLock.readLock().unlock();
+        }
         return false;
     }
 }

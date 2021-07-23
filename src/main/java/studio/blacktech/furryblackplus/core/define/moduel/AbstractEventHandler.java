@@ -1,11 +1,14 @@
 package studio.blacktech.furryblackplus.core.interfaces;
 
 
-import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.annotation.Component;
+import studio.blacktech.furryblackplus.core.annotation.Executor;
+import studio.blacktech.furryblackplus.core.annotation.Filter;
+import studio.blacktech.furryblackplus.core.annotation.Monitor;
+import studio.blacktech.furryblackplus.core.annotation.Runner;
 import studio.blacktech.furryblackplus.core.exception.BotException;
-import studio.blacktech.furryblackplus.core.exception.initlization.BootException;
+import studio.blacktech.furryblackplus.core.exception.moduels.boot.BootException;
+import studio.blacktech.furryblackplus.core.exception.moduels.scan.ScanException;
 import studio.blacktech.furryblackplus.core.utilties.LoggerX;
 
 import java.io.BufferedReader;
@@ -20,6 +23,8 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 
@@ -28,38 +33,54 @@ import java.util.stream.Collectors;
 @Api("基础模块类")
 public abstract class AbstractEventHandler {
 
+    protected final LoggerX logger;
+    protected final ReadWriteLock readWriteLock;
 
-    @Api("模块内建的模块信息注解") protected Component annotation;
+    @Api("插件目录对象") protected final File FOLDER_ROOT;
+    @Api("配置目录对象") protected final File FOLDER_CONF;
+    @Api("数据目录对象") protected final File FOLDER_DATA;
+    @Api("日志目录对象") protected final File FOLDER_LOGS;
+    @Api("配置文件对象") protected final File FILE_CONFIG;
+    @Api("配置文件对象") protected final Properties CONFIG;
 
-    @Api("模块内建的插件目录对象") protected File FOLDER_ROOT;
-    @Api("模块内建的配置目录对象") protected File FOLDER_CONF;
-    @Api("模块内建的数据目录对象") protected File FOLDER_DATA;
-    @Api("模块内建的日志目录对象") protected File FOLDER_LOGS;
-    @Api("模块内建的配置文件对象") protected File FILE_CONFIG;
+    @Api("初始化过插件目录") protected boolean INIT_ROOT = false;
+    @Api("初始化过配置目录") protected boolean INIT_CONF = false;
+    @Api("初始化过数据目录") protected boolean INIT_DATA = false;
+    @Api("初始化过日志目录") protected boolean INIT_LOGS = false;
+    @Api("初始化过配置文件") protected boolean NEW_CONFIG = false;
 
-    @Api("模块内建的LoggerX实例") protected LoggerX logger;
-
-    @Api("模块内建的config.properties实例") protected Properties CONFIG;
-
-    @Api("模块标志位表示是否初始化过插件目录") protected boolean INIT_ROOT = false;
-    @Api("模块标志位表示是否初始化过配置目录") protected boolean INIT_CONF = false;
-    @Api("模块标志位表示是否初始化过数据目录") protected boolean INIT_DATA = false;
-    @Api("模块标志位表示是否初始化过日志目录") protected boolean INIT_LOGS = false;
-    @Api("模块标志位表示是否初始化过配置文件") protected boolean NEW_CONFIG = false;
-
-
-    protected volatile boolean enable = false;
+    @Api("模块名字") protected final String name;
+    @Api("模块启停") protected volatile boolean enable = false;
 
 
+    // 这不优雅
     public AbstractEventHandler() {
-        this.annotation = this.getClass().getAnnotation(Component.class);
-        this.logger = new LoggerX(this.getClass());
-        this.CONFIG = new Properties();
-        this.FOLDER_ROOT = Paths.get(Driver.getModuleFolder(), this.annotation.artificial()).toFile();
+        Class<? extends AbstractEventHandler> clazz = this.getClass();
+        if (clazz.getAnnotations().length == 0) {
+            throw new ScanException("发现无效模块 没有任何注解");
+        } else if (clazz.isAnnotationPresent(Runner.class)) {
+            Runner annotation = clazz.getAnnotation(Runner.class);
+            this.name = annotation.value();
+        } else if (clazz.isAnnotationPresent(Filter.class)) {
+            Filter annotation = clazz.getAnnotation(Filter.class);
+            this.name = annotation.value();
+        } else if (clazz.isAnnotationPresent(Monitor.class)) {
+            Monitor annotation = clazz.getAnnotation(Monitor.class);
+            this.name = annotation.value();
+        } else if (clazz.isAnnotationPresent(Executor.class)) {
+            Executor annotation = clazz.getAnnotation(Executor.class);
+            this.name = annotation.value();
+        } else {
+            throw new ScanException("发现无效模块 没有任何有效注解");
+        }
+        this.logger = new LoggerX(clazz);
+        this.readWriteLock = new ReentrantReadWriteLock(true);
+        this.FOLDER_ROOT = Paths.get("test", this.name).toFile();
         this.FOLDER_CONF = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "conf").toFile();
         this.FOLDER_DATA = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "data").toFile();
         this.FOLDER_LOGS = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "logs").toFile();
         this.FILE_CONFIG = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "config.properties").toFile();
+        this.CONFIG = new Properties();
     }
 
 
@@ -67,23 +88,22 @@ public abstract class AbstractEventHandler {
         this.init();
     }
 
-
     public void bootWrapper() throws BotException {
         this.boot();
         this.enable = true;
     }
 
     public void shutWrapper() throws BotException {
-        this.enable = false;
-        this.shut();
+        try {
+            this.readWriteLock.writeLock().lock();
+            this.enable = false;
+            this.shut();
+        } finally {
+            this.readWriteLock.writeLock().unlock();
+        }
     }
 
-    public Component getAnnotation() {
-        return this.annotation;
-    }
-
-
-    @Api("生命周期 初始化时")
+    @Api("生命周期 预载时")
     protected abstract void init() throws BootException;
 
     @Api("生命周期 启动时")
@@ -91,7 +111,6 @@ public abstract class AbstractEventHandler {
 
     @Api("生命周期 关闭时")
     protected abstract void shut() throws BotException;
-
 
     @Api("查询模块的启用状态")
     public boolean isEnable() {
@@ -102,7 +121,6 @@ public abstract class AbstractEventHandler {
     public void setEnable(boolean enable) {
         this.enable = enable;
     }
-
 
     @Api("初始化插件总目录")
     protected void initRootFolder() {
