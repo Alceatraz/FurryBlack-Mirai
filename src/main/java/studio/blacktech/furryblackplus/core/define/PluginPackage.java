@@ -1,13 +1,13 @@
 package studio.blacktech.furryblackplus.core.define;
 
-import studio.blacktech.furryblackplus.core.exception.BotException;
-import studio.blacktech.furryblackplus.core.exception.moduels.scan.ScanException;
 import studio.blacktech.furryblackplus.core.define.moduel.AbstractEventHandler;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerExecutor;
-import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerFilter;
-import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerMonitor;
-import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerRunner;
-import studio.blacktech.furryblackplus.core.logger.LoggerX;
+import studio.blacktech.furryblackplus.core.exception.BotException;
+import studio.blacktech.furryblackplus.core.exception.moduels.scan.ScanException;
+import studio.blacktech.furryblackplus.core.interfaces.EventHandlerFilter;
+import studio.blacktech.furryblackplus.core.interfaces.EventHandlerMonitor;
+import studio.blacktech.furryblackplus.core.interfaces.EventHandlerRunner;
+import studio.blacktech.furryblackplus.core.utilties.LoggerX;
 
 import java.awt.Component;
 import java.io.File;
@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-@SuppressWarnings({"unused"})
+
 public class PluginPackage {
 
     private final LoggerX logger;

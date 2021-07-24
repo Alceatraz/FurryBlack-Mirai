@@ -1,8 +1,8 @@
 package studio.blacktech.furryblackplus.core.define;
 
 
-import studio.blacktech.furryblackplus.core.exception.BotException;
 import studio.blacktech.furryblackplus.core.define.moduel.AbstractEventHandler;
+import studio.blacktech.furryblackplus.core.exception.BotException;
 
 import java.awt.Component;
 import java.lang.reflect.InvocationTargetException;

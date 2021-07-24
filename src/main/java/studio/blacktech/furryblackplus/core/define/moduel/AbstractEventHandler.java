@@ -243,11 +243,15 @@ public abstract class AbstractEventHandler {
             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
             BufferedReader reader = new BufferedReader(inputStreamReader)
         ) {
-            while ((line = reader.readLine()) != null) temp.add(line);
+            while ((line = reader.readLine()) != null) {
+                temp.add(line);
+            }
             reader.close();
             inputStreamReader.close();
             fileInputStream.close();
-            if (keepComment) return temp;
+            if (keepComment) {
+                return temp;
+            }
             return temp
                        .stream()
                        .filter(item -> item.length() > 0)
@@ -269,9 +273,13 @@ public abstract class AbstractEventHandler {
     @Api("初始化文件夹")
     protected File initFolder(File file) {
         if (file.exists()) {
-            if (!file.isDirectory()) throw new IllegalArgumentException("文件夹被文件占位 -> " + file.getAbsolutePath());
+            if (!file.isDirectory()) {
+                throw new IllegalArgumentException("文件夹被文件占位 -> " + file.getAbsolutePath());
+            }
         } else {
-            if (file.mkdirs()) this.logger.seek("创建新目录 -> " + file.getAbsolutePath());
+            if (file.mkdirs()) {
+                this.logger.seek("创建新目录 -> " + file.getAbsolutePath());
+            }
         }
         return file;
     }
@@ -288,8 +296,12 @@ public abstract class AbstractEventHandler {
         } catch (IOException exception) {
             throw new RuntimeException("创建文件失败 -> " + file.getAbsolutePath(), exception);
         }
-        if (!file.canRead()) throw new IllegalArgumentException("文件无权读取 -> " + file.getAbsolutePath());
-        if (!file.canWrite()) throw new IllegalArgumentException("文件无权写入 -> " + file.getAbsolutePath());
+        if (!file.canRead()) {
+            throw new IllegalArgumentException("文件无权读取 -> " + file.getAbsolutePath());
+        }
+        if (!file.canWrite()) {
+            throw new IllegalArgumentException("文件无权写入 -> " + file.getAbsolutePath());
+        }
         return file;
     }
 
