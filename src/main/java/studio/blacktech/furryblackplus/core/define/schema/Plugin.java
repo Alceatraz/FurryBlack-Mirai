@@ -26,7 +26,7 @@ import java.util.jar.JarFile;
 
 public class Plugin {
 
-    private final LoggerX logger = new LoggerX(this.getClass());
+    private final LoggerX logger;
 
     private final File file;
 
@@ -79,7 +79,7 @@ public class Plugin {
 
         String fileName = this.file.getName();
 
-        int index = fileName.lastIndexOf("\\.");
+        int index = fileName.lastIndexOf(".");
 
         if (index > 0) {
             this.name = fileName.substring(0, index);
@@ -87,11 +87,13 @@ public class Plugin {
             this.name = fileName;
         }
 
+        this.logger = new LoggerX(this.name);
     }
 
 
     @SuppressWarnings({"unchecked", "DuplicatedCode"})
     public void scan() {
+
 
         URL[] urls;
 
@@ -100,6 +102,8 @@ public class Plugin {
         } catch (MalformedURLException exception) {
             throw new ScanException(exception);
         }
+
+        this.logger.seek("扫描插件包 " + urls[0]);
 
         try (
             JarFile jarFile = new JarFile(this.file);
@@ -139,6 +143,8 @@ public class Plugin {
                     continue;
                 }
 
+                String clazzHashName = clazz.getName() + ":" + clazz.hashCode();
+
                 if (EventHandlerRunner.class.isAssignableFrom(clazz)) {
 
                     if (!clazz.isAnnotationPresent(Runner.class)) {
@@ -159,6 +165,7 @@ public class Plugin {
 
                     this.modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
                     this.runnerClassMap.put(annotation, (Class<? extends EventHandlerRunner>) clazz);
+                    this.logger.info("定时器 -> " + clazzHashName);
 
                     continue;
 
@@ -183,8 +190,9 @@ public class Plugin {
                     if (annotation.users() || annotation.group()) {
                         this.modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
                         this.filterClassMap.put(annotation, (Class<? extends EventHandlerFilter>) clazz);
+                        this.logger.info("过滤器 -> " + clazzHashName);
                     } else {
-                        this.logger.warning("发现未启用过滤器 " + clazz.getName());
+                        this.logger.warning("发现未启用过滤器 " + clazzHashName);
                     }
 
                     continue;
@@ -210,6 +218,7 @@ public class Plugin {
                     if (annotation.users() || annotation.group()) {
                         this.modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
                         this.monitorClassMap.put(annotation, (Class<? extends EventHandlerMonitor>) clazz);
+                        this.logger.info("监视器 -> " + clazzHashName);
                     } else {
                         this.logger.warning("发现未启用监听器 " + clazz.getName());
                     }
@@ -243,9 +252,15 @@ public class Plugin {
                         throw new ScanException("发现垃圾插件 包含自冲突");
                     }
 
-                    commands.put(command, (Class<? extends EventHandlerExecutor>) clazz);
-                    this.modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
-                    this.executorClassMap.put(annotation, (Class<? extends EventHandlerExecutor>) clazz);
+
+                    if (annotation.users() || annotation.group()) {
+                        commands.put(command, (Class<? extends EventHandlerExecutor>) clazz);
+                        this.modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
+                        this.executorClassMap.put(annotation, (Class<? extends EventHandlerExecutor>) clazz);
+                        this.logger.info("执行器 -> " + clazzHashName);
+                    } else {
+                        this.logger.warning("发现未启用执行器 " + clazzHashName);
+                    }
 
                     continue;
                 }

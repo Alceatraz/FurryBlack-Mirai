@@ -24,10 +24,6 @@ import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.utils.BotConfiguration;
 import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.annotation.Executor;
-import studio.blacktech.furryblackplus.core.annotation.Filter;
-import studio.blacktech.furryblackplus.core.annotation.Monitor;
-import studio.blacktech.furryblackplus.core.annotation.Runner;
 import studio.blacktech.furryblackplus.core.define.Command;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerExecutor;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerMonitor;
@@ -49,8 +45,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -65,7 +59,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 
 @Api("系统核心路由")
@@ -595,12 +588,7 @@ public final class Systemd {
 
         this.logger.hint("生成模板消息");
 
-        this.logger.info("组装用户list消息");
-        this.MESSAGE_LIST_USERS = this.generateListMessage(this.schema.getEXECUTOR_USERS_POOL().entrySet());
-
-        this.logger.info("组装群组list消息");
-        this.MESSAGE_LIST_GROUP = this.generateListMessage(this.schema.getEXECUTOR_GROUP_POOL().entrySet());
-
+        this.generateListMessage();
 
         // ==========================================================================================================================
         // 执行初始化方法
@@ -682,9 +670,9 @@ public final class Systemd {
         // ==========================================================================================================================
         // 启动模块
 
-        this.logger.hint("启动模块");
 
         this.schema.boot();
+
 
         // ==========================================================================================================================
         // 列出所有好友和群组
@@ -836,12 +824,12 @@ public final class Systemd {
 
         try {
 
-            if (this.schema.getFILTER_USERS_CHAIN().stream().anyMatch(item -> item.handleUsersMessageWrapper(event))) {
+            if (this.schema.getFilterUsersChain().stream().anyMatch(item -> item.handleUsersMessageWrapper(event))) {
                 return;
             }
 
             this.MONITOR_PROCESS.submit(() -> {
-                for (EventHandlerMonitor item : this.schema.getMONITOR_USERS_CHAIN()) {
+                for (EventHandlerMonitor item : this.schema.getMonitorUsersChain()) {
                     item.handleUsersMessageWrapper(event);
                 }
             });
@@ -860,7 +848,7 @@ public final class Systemd {
                     case "help":
                         if (command.hasCommandBody()) {
                             String segment = command.getParameterSegment(0);
-                            EventHandlerExecutor executor = this.schema.getEXECUTOR_USERS_POOL().get(segment);
+                            EventHandlerExecutor executor = this.schema.getExecutorUsersPool().get(segment);
                             if (executor == null) {
                                 Driver.sendMessage(event, "没有此命令");
                             } else {
@@ -884,7 +872,7 @@ public final class Systemd {
                         break;
 
                     default:
-                        EventHandlerExecutor executor = this.schema.getEXECUTOR_USERS_POOL().get(commandName);
+                        EventHandlerExecutor executor = this.schema.getExecutorUsersPool().get(commandName);
                         if (executor == null) {
                             Driver.sendMessage(event, "没有此命令");
                         } else {
@@ -905,12 +893,12 @@ public final class Systemd {
 
         try {
 
-            if (this.schema.getFILTER_GROUP_CHAIN().stream().anyMatch(item -> item.handleGroupMessageWrapper(event))) {
+            if (this.schema.getFilterGroupChain().stream().anyMatch(item -> item.handleGroupMessageWrapper(event))) {
                 return;
             }
 
             this.MONITOR_PROCESS.submit(() -> {
-                for (EventHandlerMonitor item : this.schema.getMONITOR_GROUP_CHAIN()) {
+                for (EventHandlerMonitor item : this.schema.getMonitorGroupChain()) {
                     item.handleGroupMessageWrapper(event);
                 }
             });
@@ -929,7 +917,7 @@ public final class Systemd {
                     case "help":
                         if (command.hasCommandBody()) {
                             String segment = command.getParameterSegment(0);
-                            EventHandlerExecutor executor = this.schema.getEXECUTOR_GROUP_POOL().get(segment);
+                            EventHandlerExecutor executor = this.schema.getExecutorGroupPool().get(segment);
                             if (executor == null) {
                                 Driver.sendMessage(event, "没有此命令");
                             } else {
@@ -973,7 +961,7 @@ public final class Systemd {
                         break;
 
                     default:
-                        EventHandlerExecutor executor = this.schema.getEXECUTOR_GROUP_POOL().get(commandName);
+                        EventHandlerExecutor executor = this.schema.getExecutorGroupPool().get(commandName);
                         if (executor != null) {
                             executor.handleGroupMessageWrapper(event, command);
                         }
@@ -1078,19 +1066,13 @@ public final class Systemd {
     }
 
 
-    private String generateListMessage(Set<Map.Entry<String, EventHandlerExecutor>> entrySet) {
-        if (entrySet.size() == 0) return "无模块";
-        StringBuilder builder = new StringBuilder();
-        for (Executor executor : this.schema.getCOMPONENT_EXECUTOR_CLAZZ().keySet()) {
-            builder.append(executor.command());
-            builder.append(" ");
-            builder.append(executor.value());
-            builder.append(" ");
-            builder.append(executor.description());
-            builder.append("\r\n");
-        }
-        builder.setLength(builder.length() - 2);
-        return builder.toString();
+    private void generateListMessage() {
+
+        this.logger.info("组装用户list消息");
+        this.MESSAGE_LIST_USERS = this.schema.generateUsersExecutorList();
+
+        this.logger.info("组装群组list消息");
+        this.MESSAGE_LIST_GROUP = this.schema.generateGroupExecutorList();
     }
 
 
@@ -1106,88 +1088,50 @@ public final class Systemd {
 
 
     public Set<String> listAllPlugin() {
-        return this.schema.getPLUGINS().keySet();
+        return this.schema.listAllPlugin();
     }
 
     public void unloadPlugin(String name) {
-        System.out.println("This function TODO " + name);
+        this.schema.unloadPlugin(name);
     }
 
     public void reloadPlugin(String name) {
-        System.out.println("This function TODO " + name);
+        this.schema.reloadPlugin(name);
     }
-
 
     @Api("列出所有模块及其加载状态")
     public Map<String, Boolean> listAllModule() {
-        Map<String, Boolean> result = new LinkedHashMap<>();
-        for (Runner annotation : this.schema.getCOMPONENT_RUNNER_CLAZZ().keySet()) {
-            if (this.schema.getCOMPONENT_RUNNER_INSTANCE().containsKey(annotation)) {
-                result.put(annotation.value(), true);
-            } else {
-                result.put(annotation.value(), false);
-            }
-        }
-        for (Filter annotation : this.schema.getCOMPONENT_FILTER_CLAZZ().keySet()) {
-            if (this.schema.getCOMPONENT_FILTER_INSTANCE().containsKey(annotation)) {
-                result.put(annotation.value(), true);
-            } else {
-                result.put(annotation.value(), false);
-            }
-        }
-        for (Monitor annotation : this.schema.getCOMPONENT_MONITOR_CLAZZ().keySet()) {
-            if (this.schema.getCOMPONENT_MONITOR_INSTANCE().containsKey(annotation)) {
-                result.put(annotation.value(), true);
-            } else {
-                result.put(annotation.value(), false);
-            }
-        }
-        for (Executor annotation : this.schema.getCOMPONENT_EXECUTOR_CLAZZ().keySet()) {
-            if (this.schema.getCOMPONENT_EXECUTOR_INSTANCE().containsKey(annotation)) {
-                result.put(annotation.value(), true);
-            } else {
-                result.put(annotation.value(), false);
-            }
-        }
-        return result;
+        return this.schema.listAllModule();
     }
 
-
     public void shutModule(String name) {
-        System.out.println("This function TODO " + name);
+        this.schema.shutModule(name);
     }
 
     public void initModule(String name) {
-        System.out.println("This function TODO " + name);
+        this.schema.initModule(name);
     }
 
     public void bootModule(String name) {
-        System.out.println("This function TODO " + name);
+        this.schema.bootModule(name);
     }
 
     public void rebootModule(String name) {
-        System.out.println("This function TODO " + name);
+        this.schema.rebootModule(name);
     }
 
     public void unloadModule(String name) {
-        System.out.println("This function TODO " + name);
+        this.schema.unloadModule(name);
     }
 
     public void reloadModule(String name) {
-        System.out.println("This function TODO " + name);
+        this.schema.reloadModule(name);
     }
 
 
     @Api("获取模块实例")
-    @SuppressWarnings("unchecked")
     public <T extends EventHandlerRunner> T getRunner(Class<T> clazz) {
-        List<EventHandlerRunner> collect = this.schema.getCOMPONENT_RUNNER_INSTANCE().values().stream()
-                                               .filter(clazz::isInstance)
-                                               .collect(Collectors.toUnmodifiableList());
-        if (collect.size() == 1) {
-            return (T) collect.get(0);
-        }
-        throw new IllegalArgumentException("No such runner exist");
+        return this.schema.getRunner(clazz);
     }
 
 
