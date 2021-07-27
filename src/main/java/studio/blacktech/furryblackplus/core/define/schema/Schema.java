@@ -56,8 +56,10 @@ public class Schema {
 
     private final List<EventHandlerFilter> FILTER_USERS_CHAIN;
     private final List<EventHandlerFilter> FILTER_GROUP_CHAIN;
+
     private final List<EventHandlerMonitor> MONITOR_USERS_CHAIN;
     private final List<EventHandlerMonitor> MONITOR_GROUP_CHAIN;
+
     private final Map<String, EventHandlerExecutor> EXECUTOR_USERS_POOL;
     private final Map<String, EventHandlerExecutor> EXECUTOR_GROUP_POOL;
 
