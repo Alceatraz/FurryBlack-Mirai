@@ -2,17 +2,13 @@ package studio.blacktech.furryblackplus.demo;
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
-import studio.blacktech.furryblackplus.core.annotation.Component;
-import studio.blacktech.furryblackplus.core.interfaces.EventHandlerFilter;
+import studio.blacktech.furryblackplus.core.annotation.Filter;
+import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerFilter;
 
 
-@Component(
-    artificial = "Filter_Demo",
-    name = "示例",
-    description = "示例过滤器",
-    privacy = {
-        "无"
-    }
+@Filter(
+    value = "demo-filter",
+    priority = 100
 )
 public class DemoFilter extends EventHandlerFilter {
 

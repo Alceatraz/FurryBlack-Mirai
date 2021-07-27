@@ -18,7 +18,7 @@ public @interface Filter {
     String value();
 
     @Api("模块权重")
-    int priority() default Integer.MAX_VALUE;
+    int priority() default 0;
 
     @Api("对私聊启用 默认启用")
     boolean users() default true;

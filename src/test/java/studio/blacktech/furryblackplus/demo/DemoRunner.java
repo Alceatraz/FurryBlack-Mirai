@@ -1,16 +1,11 @@
 package studio.blacktech.furryblackplus.demo;
 
-import studio.blacktech.furryblackplus.core.annotation.Component;
-import studio.blacktech.furryblackplus.core.interfaces.EventHandlerRunner;
 
+import studio.blacktech.furryblackplus.core.annotation.Runner;
+import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerRunner;
 
-@Component(
-    artificial = "Runner_Demo",
-    name = "示例",
-    description = "示例执行器",
-    privacy = {
-        "无"
-    }
+@Runner(
+    value = "demo-runner"
 )
 public class DemoRunner extends EventHandlerRunner {
 
@@ -30,8 +25,7 @@ public class DemoRunner extends EventHandlerRunner {
         System.out.println("关闭" + this.getClass().getName());
     }
 
-    @SuppressWarnings("EmptyMethod")
     public void demo() {
-        // Do what ever you need to
+        this.logger.info("DemoRunner working!");
     }
 }

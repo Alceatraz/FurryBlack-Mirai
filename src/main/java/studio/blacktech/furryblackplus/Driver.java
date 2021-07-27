@@ -26,9 +26,9 @@ import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.widget.AutopairWidgets;
 import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.Systemd;
-import studio.blacktech.furryblackplus.core.exception.moduels.BootException;
-import studio.blacktech.furryblackplus.core.interfaces.EventHandlerRunner;
-import studio.blacktech.furryblackplus.core.utilties.Command;
+import studio.blacktech.furryblackplus.core.define.Command;
+import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerRunner;
+import studio.blacktech.furryblackplus.core.exception.moduels.boot.BootException;
 import studio.blacktech.furryblackplus.core.utilties.LoggerX;
 import studio.blacktech.furryblackplus.core.utilties.TimeTool;
 
@@ -102,13 +102,13 @@ public final class Driver {
 
     private static volatile boolean debug;
 
-    private static volatile boolean noLogin = false;
-    private static volatile boolean noJline = false;
+    private static volatile boolean enable;
 
-    private static volatile boolean enable = false;
+    private static volatile boolean noLogin;
+    private static volatile boolean noJline;
 
+    private static volatile boolean shutModeDrop;
     private static volatile boolean shutBySignal = true;
-    private static volatile boolean shutModeDrop = false;
 
     private static final AtomicReference<String> prompt = new AtomicReference<>("");
 
@@ -297,11 +297,8 @@ public final class Driver {
         enable = false;
 
         LoggerX.setPrintLevel(LoggerX.LEVEL.ALL);
-        logger.hint("执行关闭流程");
 
         // =====================================================================
-
-        logger.hint("关闭路由系统");
 
         try {
             systemd.shut();
@@ -309,11 +306,11 @@ public final class Driver {
             logger.error("关闭路由系统关闭异常", exception);
         }
 
-        logger.hint("关闭核心系统");
-
         System.out.println("[FurryBlack][MAIN]FurryBlackPlus closed, Bye.");
 
-        //        System.exit(0);
+        if (parameters.contains("--force-exit")) {
+            System.exit(0);
+        }
 
     }
 
@@ -405,7 +402,7 @@ public final class Driver {
                                 break;
 
                             case 0:
-                                systemd.debug();
+                                // systemd.debug();
                                 break;
                         }
                         break;
@@ -424,6 +421,8 @@ public final class Driver {
                         System.out.println("关闭事件响应");
                         break;
 
+
+                    // plugin
                     case "plugin":
 
                         switch (command.getParameterLength()) {
@@ -432,47 +431,27 @@ public final class Driver {
 
                                 switch (command.getParameterSegment(0)) {
 
+                                    // plugin unload <plugin>
                                     case "unload":
                                         systemd.unloadPlugin(command.getParameterSegment(1));
                                         break;
 
+                                    // plugin reload <plugin>
                                     case "reload":
-                                        // TODO
                                         systemd.reloadPlugin(command.getParameterSegment(1));
                                         break;
 
-                                    default:
-                                        break;
-
                                 }
                                 break;
 
-                            case 1:
-
-                                switch (command.getParameterSegment(0)) {
-
-                                    case "unload":
-                                        for (String name : systemd.listAllPlugin()) {
-                                            systemd.unloadPlugin(name);
-                                        }
-                                        break;
-
-                                    case "reload":
-                                        systemd.reloadPlugin();
-                                        break;
-
-                                    default:
-                                        break;
-
-                                }
-                                break;
-
-                            default:
+                            // plugin
+                            case 0:
                                 systemd.listAllPlugin().forEach(System.out::println);
                                 break;
                         }
                         break;
 
+                    // module
                     case "module":
 
                         switch (command.getParameterLength()) {
@@ -481,29 +460,32 @@ public final class Driver {
 
                                 switch (command.getParameterSegment(0)) {
 
+                                    // module shut <plugin>
                                     case "shut":
                                         systemd.shutModule(command.getParameterSegment(1));
                                         break;
 
+                                    // module init <plugin>
                                     case "init":
                                         systemd.initModule(command.getParameterSegment(1));
                                         break;
 
+                                    // module boot <plugin>
                                     case "boot":
                                         systemd.bootModule(command.getParameterSegment(1));
                                         break;
 
+                                    // module reboot <plugin>
                                     case "reboot":
-                                        systemd.shutModule(command.getParameterSegment(1));
-                                        systemd.initModule(command.getParameterSegment(1));
-                                        systemd.bootModule(command.getParameterSegment(1));
+                                        systemd.rebootModule(command.getParameterSegment(1));
                                         break;
 
+                                    // module unload <plugin>
                                     case "unload":
                                         systemd.unloadModule(command.getParameterSegment(1));
                                         break;
 
-
+                                    // module reload <plugin>
                                     case "reload":
                                         systemd.reloadModule(command.getParameterSegment(1));
                                         break;
@@ -511,9 +493,10 @@ public final class Driver {
                                 }
                                 break;
 
+                            // module
                             case 0:
                                 for (Map.Entry<String, Boolean> entry : systemd.listAllModule().entrySet()) {
-                                    System.out.println(entry.getKey() + " " + (entry.getValue() ? " 运行" : " 卸载"));
+                                    System.out.println((entry.getValue() ? "⚪ " : "× ") + entry.getKey());
                                 }
                                 break;
                         }
@@ -532,7 +515,7 @@ public final class Driver {
                         long maxMemory = Runtime.getRuntime().maxMemory() / 1024;
                         System.out.println("消息事件: " + (enable ? "启用" : "关闭"));
                         System.out.println("运行时间: " + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME));
-                        System.out.println("内存占用: " + (totalMemory - freeMemory) + "KB/" + totalMemory + "KB/" + maxMemory + "KB(" + (maxMemory / 1024) + "MB)");
+                        System.out.println("内存占用: " + (totalMemory - freeMemory) + "KB/" + totalMemory + "KB/" + maxMemory + "KB(" + maxMemory / 1024 + "MB)");
                         break;
 
                     case "level":
@@ -1059,5 +1042,4 @@ public final class Driver {
         Member memberOrFail = groupOrFail.getOrFail(member);
         sendAtMessage(groupOrFail, memberOrFail, new PlainText(message));
     }
-
 }

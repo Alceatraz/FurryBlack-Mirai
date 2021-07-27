@@ -18,6 +18,6 @@ public @interface Runner {
     String value();
 
     @Api("模块权重")
-    int priority() default Integer.MAX_VALUE;
+    int priority() default 0;
 
 }

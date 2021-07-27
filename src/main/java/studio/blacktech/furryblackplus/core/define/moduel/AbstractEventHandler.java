@@ -1,14 +1,10 @@
 package studio.blacktech.furryblackplus.core.define.moduel;
 
 
+import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.annotation.Executor;
-import studio.blacktech.furryblackplus.core.annotation.Filter;
-import studio.blacktech.furryblackplus.core.annotation.Monitor;
-import studio.blacktech.furryblackplus.core.annotation.Runner;
 import studio.blacktech.furryblackplus.core.exception.BotException;
 import studio.blacktech.furryblackplus.core.exception.moduels.boot.BootException;
-import studio.blacktech.furryblackplus.core.exception.moduels.scan.ScanException;
 import studio.blacktech.furryblackplus.core.utilties.LoggerX;
 
 import java.io.BufferedReader;
@@ -23,8 +19,6 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 
@@ -34,47 +28,33 @@ import java.util.stream.Collectors;
 public abstract class AbstractEventHandler {
 
     protected final LoggerX logger;
-    protected final ReadWriteLock readWriteLock;
 
-    @Api("插件目录对象") protected final File FOLDER_ROOT;
-    @Api("配置目录对象") protected final File FOLDER_CONF;
-    @Api("数据目录对象") protected final File FOLDER_DATA;
-    @Api("日志目录对象") protected final File FOLDER_LOGS;
-    @Api("配置文件对象") protected final File FILE_CONFIG;
-    @Api("配置文件对象") protected final Properties CONFIG;
+    @Api("插件目录对象") protected File FOLDER_ROOT;
+    @Api("配置目录对象") protected File FOLDER_CONF;
+    @Api("数据目录对象") protected File FOLDER_DATA;
+    @Api("日志目录对象") protected File FOLDER_LOGS;
+    @Api("配置文件对象") protected File FILE_CONFIG;
+    @Api("配置文件对象") protected Properties CONFIG;
 
-    @Api("初始化过插件目录") protected boolean INIT_ROOT = false;
-    @Api("初始化过配置目录") protected boolean INIT_CONF = false;
-    @Api("初始化过数据目录") protected boolean INIT_DATA = false;
-    @Api("初始化过日志目录") protected boolean INIT_LOGS = false;
-    @Api("初始化过配置文件") protected boolean NEW_CONFIG = false;
+    @Api("初始化过插件目录") protected boolean INIT_ROOT;
+    @Api("初始化过配置目录") protected boolean INIT_CONF;
+    @Api("初始化过数据目录") protected boolean INIT_DATA;
+    @Api("初始化过日志目录") protected boolean INIT_LOGS;
+    @Api("初始化过配置文件") protected boolean NEW_CONFIG;
 
-    @Api("模块名字") protected final String name;
-    @Api("模块启停") protected volatile boolean enable = false;
+    @Api("模块名字") protected String name;
+    @Api("模块启停") protected volatile boolean enable;
 
 
     public AbstractEventHandler() {
-        Class<? extends AbstractEventHandler> clazz = this.getClass();
-        if (clazz.getAnnotations().length == 0) {
-            throw new ScanException("发现无效模块 没有任何注解");
-        } else if (clazz.isAnnotationPresent(Runner.class)) {
-            Runner annotation = clazz.getAnnotation(Runner.class);
-            this.name = annotation.value();
-        } else if (clazz.isAnnotationPresent(Filter.class)) {
-            Filter annotation = clazz.getAnnotation(Filter.class);
-            this.name = annotation.value();
-        } else if (clazz.isAnnotationPresent(Monitor.class)) {
-            Monitor annotation = clazz.getAnnotation(Monitor.class);
-            this.name = annotation.value();
-        } else if (clazz.isAnnotationPresent(Executor.class)) {
-            Executor annotation = clazz.getAnnotation(Executor.class);
-            this.name = annotation.value();
-        } else {
-            throw new ScanException("发现无效模块 没有任何有效注解");
-        }
-        this.logger = new LoggerX(clazz);
-        this.readWriteLock = new ReentrantReadWriteLock(true);
-        this.FOLDER_ROOT = Paths.get("test", this.name).toFile();
+        this.logger = new LoggerX(this.getClass());
+    }
+
+
+    @Deprecated
+    public void internalInit(String name) {
+        this.name = name;
+        this.FOLDER_ROOT = Paths.get(Driver.getModuleFolder(), this.name).toFile();
         this.FOLDER_CONF = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "conf").toFile();
         this.FOLDER_DATA = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "data").toFile();
         this.FOLDER_LOGS = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "logs").toFile();
@@ -93,13 +73,8 @@ public abstract class AbstractEventHandler {
     }
 
     public void shutWrapper() throws BotException {
-        try {
-            this.readWriteLock.writeLock().lock();
-            this.enable = false;
-            this.shut();
-        } finally {
-            this.readWriteLock.writeLock().unlock();
-        }
+        this.enable = false;
+        this.shut();
     }
 
     @Api("生命周期 预载时")

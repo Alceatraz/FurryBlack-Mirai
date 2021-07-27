@@ -2,24 +2,13 @@ package studio.blacktech.furryblackplus.demo;
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
-import studio.blacktech.furryblackplus.core.annotation.Component;
-import studio.blacktech.furryblackplus.core.interfaces.EventHandlerCommand;
-import studio.blacktech.furryblackplus.core.utilties.Command;
+import studio.blacktech.furryblackplus.core.annotation.Executor;
+import studio.blacktech.furryblackplus.core.define.Command;
+import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerExecutor;
 
 
-@Component(
-    artificial = "Executor_Demo",
-    name = "示例",
-    description = "示例执行器",
-    privacy = {
-        "无"
-    },
-    command = "demo",
-    usage = {
-        "/demo - 示例执行器"
-    }
-)
-public class DemoCommand extends EventHandlerCommand {
+@Executor(value = "demo-executor", outline = "示例", description = "示例执行器", command = "demo", usage = "/demo - 示例执行器", privacy = "获取命令执行人")
+public class DemoExecutor extends EventHandlerExecutor {
 
 
     @Override

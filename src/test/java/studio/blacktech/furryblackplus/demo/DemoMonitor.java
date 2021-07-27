@@ -3,17 +3,13 @@ package studio.blacktech.furryblackplus.demo;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import studio.blacktech.furryblackplus.Driver;
-import studio.blacktech.furryblackplus.core.annotation.Component;
-import studio.blacktech.furryblackplus.core.interfaces.EventHandlerMonitor;
+import studio.blacktech.furryblackplus.core.annotation.Monitor;
+import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerMonitor;
 
 
-@Component(
-    artificial = "Monitor_Demo",
-    name = "示例",
-    description = "示例监视器",
-    privacy = {
-        "无"
-    }
+@Monitor(
+    value = "demo-monitor",
+    users = false
 )
 public class DemoMonitor extends EventHandlerMonitor {
 

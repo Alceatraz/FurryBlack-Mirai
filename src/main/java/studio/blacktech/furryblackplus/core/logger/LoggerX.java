@@ -35,7 +35,7 @@ public final class LoggerX extends PlatformLogger {
 
     public static final List<String> LEVELS = Arrays.asList("MUTE", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "ALL");
 
-    private static boolean INIT_LOCK = false;
+    private static boolean INIT_LOCK;
 
     private static File FILE_LOGGER;
     private final String name;

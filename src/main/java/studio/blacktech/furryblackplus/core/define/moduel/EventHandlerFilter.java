@@ -1,4 +1,4 @@
-package studio.blacktech.furryblackplus.core.interfaces;
+package studio.blacktech.furryblackplus.core.define.moduel;
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
@@ -17,26 +17,11 @@ public abstract class EventHandlerFilter extends AbstractEventHandler {
 
 
     public boolean handleUsersMessageWrapper(UserMessageEvent message) {
-        try {
-            this.readWriteLock.readLock().lock();
-            if (this.enable) {
-                return this.handleUsersMessage(message);
-            }
-        } finally {
-            this.readWriteLock.readLock().unlock();
-        }
-        return false;
+        return this.handleUsersMessage(message);
+
     }
 
     public boolean handleGroupMessageWrapper(GroupMessageEvent message) {
-        try {
-            this.readWriteLock.readLock().lock();
-            if (this.enable) {
-                return this.handleGroupMessage(message);
-            }
-        } finally {
-            this.readWriteLock.readLock().unlock();
-        }
-        return false;
+        return this.handleGroupMessage(message);
     }
 }

@@ -1,4 +1,4 @@
-package studio.blacktech.furryblackplus.core.interfaces;
+package studio.blacktech.furryblackplus.core.define.moduel;
 
 
 import studio.blacktech.furryblackplus.common.Api;
