@@ -7,7 +7,7 @@ public class ConsoleException extends BotException {
 
 
     public ConsoleException() {
-        super();
+
     }
 
     public ConsoleException(String message) {

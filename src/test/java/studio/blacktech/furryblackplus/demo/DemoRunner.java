@@ -1,12 +1,10 @@
 package studio.blacktech.furryblackplus.demo;
 
 
-import studio.blacktech.furryblackplus.core.annotation.Runner;
+import studio.blacktech.furryblackplus.core.define.annotation.Runner;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerRunner;
 
-@Runner(
-    value = "demo-runner"
-)
+@Runner("demo-runner")
 public class DemoRunner extends EventHandlerRunner {
 
 

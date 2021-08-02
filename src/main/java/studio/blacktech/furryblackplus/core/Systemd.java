@@ -32,8 +32,8 @@ import studio.blacktech.furryblackplus.core.define.schema.Schema;
 import studio.blacktech.furryblackplus.core.exception.moduels.boot.BootException;
 import studio.blacktech.furryblackplus.core.exception.moduels.load.FirstBootException;
 import studio.blacktech.furryblackplus.core.exception.moduels.load.MisConfigException;
-import studio.blacktech.furryblackplus.core.utilties.HashTool;
-import studio.blacktech.furryblackplus.core.utilties.LoggerX;
+import studio.blacktech.furryblackplus.core.utilties.common.HashTool;
+import studio.blacktech.furryblackplus.core.utilties.logger.LoggerX;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -1128,6 +1128,9 @@ public final class Systemd {
         this.schema.reloadModule(name);
     }
 
+    public void debug() {
+        this.schema.debug();
+    }
 
     @Api("获取模块实例")
     public <T extends EventHandlerRunner> T getRunner(Class<T> clazz) {

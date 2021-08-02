@@ -1,4 +1,4 @@
-package studio.blacktech.furryblackplus.core.utilties;
+package studio.blacktech.furryblackplus.core.utilties.common;
 
 
 import studio.blacktech.furryblackplus.common.Api;

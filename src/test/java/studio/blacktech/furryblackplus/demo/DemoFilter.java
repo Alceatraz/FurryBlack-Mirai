@@ -2,7 +2,7 @@ package studio.blacktech.furryblackplus.demo;
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
-import studio.blacktech.furryblackplus.core.annotation.Filter;
+import studio.blacktech.furryblackplus.core.define.annotation.Filter;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerFilter;
 
 

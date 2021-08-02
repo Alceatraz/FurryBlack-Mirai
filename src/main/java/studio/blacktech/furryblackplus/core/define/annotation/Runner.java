@@ -1,4 +1,4 @@
-package studio.blacktech.furryblackplus.core.annotation;
+package studio.blacktech.furryblackplus.core.define.annotation;
 
 import studio.blacktech.furryblackplus.common.Api;
 
@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Monitor {
+public @interface Runner {
 
     @Api("模块名")
     String value();
@@ -20,9 +20,4 @@ public @interface Monitor {
     @Api("模块权重")
     int priority() default 0;
 
-    @Api("对私聊启用 默认启用")
-    boolean users() default true;
-
-    @Api("对群聊启用 默认启用")
-    boolean group() default true;
 }

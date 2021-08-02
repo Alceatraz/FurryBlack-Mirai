@@ -1,4 +1,4 @@
-package studio.blacktech.furryblackplus.core.utilties;
+package studio.blacktech.furryblackplus.core.utilties.logger;
 
 import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.contact.Group;

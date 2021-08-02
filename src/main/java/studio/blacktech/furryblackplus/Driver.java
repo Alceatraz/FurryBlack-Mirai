@@ -29,8 +29,8 @@ import studio.blacktech.furryblackplus.core.Systemd;
 import studio.blacktech.furryblackplus.core.define.Command;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerRunner;
 import studio.blacktech.furryblackplus.core.exception.moduels.boot.BootException;
-import studio.blacktech.furryblackplus.core.utilties.LoggerX;
-import studio.blacktech.furryblackplus.core.utilties.TimeTool;
+import studio.blacktech.furryblackplus.core.utilties.common.TimeTool;
+import studio.blacktech.furryblackplus.core.utilties.logger.LoggerX;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -402,7 +402,7 @@ public final class Driver {
                                 break;
 
                             case 0:
-                                // systemd.debug();
+                                systemd.debug();
                                 break;
                         }
                         break;
@@ -496,7 +496,7 @@ public final class Driver {
                             // module
                             case 0:
                                 for (Map.Entry<String, Boolean> entry : systemd.listAllModule().entrySet()) {
-                                    System.out.println((entry.getValue() ? "⚪ " : "× ") + entry.getKey());
+                                    System.out.println((entry.getValue() ? "✅ " : "❌ ") + entry.getKey());
                                 }
                                 break;
                         }

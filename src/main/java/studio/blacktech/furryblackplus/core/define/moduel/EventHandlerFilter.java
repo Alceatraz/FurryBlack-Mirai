@@ -18,7 +18,6 @@ public abstract class EventHandlerFilter extends AbstractEventHandler {
 
     public boolean handleUsersMessageWrapper(UserMessageEvent message) {
         return this.handleUsersMessage(message);
-
     }
 
     public boolean handleGroupMessageWrapper(GroupMessageEvent message) {

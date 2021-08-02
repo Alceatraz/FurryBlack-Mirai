@@ -1,16 +1,16 @@
 package studio.blacktech.furryblackplus.core.define.schema;
 
-import studio.blacktech.furryblackplus.core.annotation.Executor;
-import studio.blacktech.furryblackplus.core.annotation.Filter;
-import studio.blacktech.furryblackplus.core.annotation.Monitor;
-import studio.blacktech.furryblackplus.core.annotation.Runner;
+import studio.blacktech.furryblackplus.core.define.annotation.Executor;
+import studio.blacktech.furryblackplus.core.define.annotation.Filter;
+import studio.blacktech.furryblackplus.core.define.annotation.Monitor;
+import studio.blacktech.furryblackplus.core.define.annotation.Runner;
 import studio.blacktech.furryblackplus.core.define.moduel.AbstractEventHandler;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerExecutor;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerFilter;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerMonitor;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerRunner;
 import studio.blacktech.furryblackplus.core.exception.moduels.scan.ScanException;
-import studio.blacktech.furryblackplus.core.utilties.LoggerX;
+import studio.blacktech.furryblackplus.core.utilties.logger.LoggerX;
 
 import java.io.File;
 import java.io.IOException;

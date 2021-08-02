@@ -5,7 +5,7 @@ import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.exception.BotException;
 import studio.blacktech.furryblackplus.core.exception.moduels.boot.BootException;
-import studio.blacktech.furryblackplus.core.utilties.LoggerX;
+import studio.blacktech.furryblackplus.core.utilties.logger.LoggerX;
 
 import java.io.BufferedReader;
 import java.io.File;

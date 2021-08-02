@@ -1,4 +1,4 @@
-package studio.blacktech.furryblackplus.core.annotation;
+package studio.blacktech.furryblackplus.core.define.annotation;
 
 import studio.blacktech.furryblackplus.common.Api;
 
