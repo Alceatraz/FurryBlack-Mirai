@@ -739,7 +739,6 @@ public final class Systemd {
 
 
         // ==========================================================================================================================
-        // 关闭模块
 
 
         this.logger.hint("关闭线程池");
@@ -767,10 +766,6 @@ public final class Systemd {
         }
 
 
-        // ==========================================================================================================================
-        // 关闭模块
-
-
         if (Driver.isShutModeDrop()) {
 
             this.logger.info("强制关闭异步任务线程池");
@@ -793,7 +788,6 @@ public final class Systemd {
 
 
         // ==========================================================================================================================
-        // 关闭模块
 
 
         this.logger.hint("关闭机器人");
@@ -803,7 +797,11 @@ public final class Systemd {
         if (Driver.isNoLogin()) {
             this.logger.warning("调试模式 不需要关闭机器人");
         } else {
-            this.bot.closeAndJoin(null);
+            if (Driver.isShutModeDrop()) {
+                this.bot.close(null);
+            } else {
+                this.bot.closeAndJoin(null);
+            }
         }
 
         this.logger.info("机器人已关闭");
@@ -963,7 +961,11 @@ public final class Systemd {
                     default:
                         EventHandlerExecutor executor = this.schema.getExecutorGroupPool().get(commandName);
                         if (executor != null) {
-                            executor.handleGroupMessageWrapper(event, command);
+                            if (executor.isEnable()) {
+                                executor.handleGroupMessageWrapper(event, command);
+                            } else {
+                                Driver.sendMessage(event, "没有此命令");
+                            }
                         }
                 }
             }
@@ -1066,7 +1068,7 @@ public final class Systemd {
     }
 
 
-    private void generateListMessage() {
+    public void generateListMessage() {
 
         this.logger.info("组装用户list消息");
         this.MESSAGE_LIST_USERS = this.schema.generateUsersExecutorList();
@@ -1091,6 +1093,10 @@ public final class Systemd {
         return this.schema.listAllPlugin();
     }
 
+    public void importPlugin(String name) {
+        this.schema.importPlugin(name);
+    }
+
     public void unloadPlugin(String name) {
         this.schema.unloadPlugin(name);
     }
@@ -1099,7 +1105,6 @@ public final class Systemd {
         this.schema.reloadPlugin(name);
     }
 
-    @Api("列出所有模块及其加载状态")
     public Map<String, Boolean> listAllModule() {
         return this.schema.listAllModule();
     }
@@ -1128,11 +1133,11 @@ public final class Systemd {
         this.schema.reloadModule(name);
     }
 
-    public void debug() {
+    public void schemaDebug() {
         this.schema.debug();
     }
 
-    @Api("获取模块实例")
+
     public <T extends EventHandlerRunner> T getRunner(Class<T> clazz) {
         return this.schema.getRunner(clazz);
     }

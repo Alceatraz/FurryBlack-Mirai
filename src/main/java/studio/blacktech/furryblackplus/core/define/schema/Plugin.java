@@ -94,7 +94,6 @@ public class Plugin {
     @SuppressWarnings({"unchecked", "DuplicatedCode"})
     public void scan() {
 
-
         URL[] urls;
 
         try {

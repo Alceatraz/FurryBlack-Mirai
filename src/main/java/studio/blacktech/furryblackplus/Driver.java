@@ -138,6 +138,13 @@ public final class Driver {
         List<String> parameters = Arrays.asList(args);
 
         // =====================================================================
+        // help 模式
+        if (parameters.contains("--help")) {
+            printHelp();
+            return;
+        }
+
+        // =====================================================================
         // debug 模式
         debug = parameters.contains("--debug");
         if (debug) {
@@ -308,12 +315,79 @@ public final class Driver {
 
         System.out.println("[FurryBlack][MAIN]FurryBlackPlus closed, Bye.");
 
-        if (parameters.contains("--force-exit")) {
+        if (parameters.contains("--force-exit") || shutModeDrop) {
             System.exit(0);
         }
 
     }
 
+
+    public static void printHelp() {
+
+        System.out.println(LoggerX.Color.LIGHT_CYAN + "# FurryBlackPlus 启动参数 ===========================" + LoggerX.Color.RESET);
+        System.out.println("--debug       使用DEBUG模式启动");
+        System.out.println("--no-login    使用离线模式，仅用于基础调试，功能基本都不可用");
+        System.out.println("--no-console  不使用控制台，唯一正常关闭方式是使用进程信号");
+        System.out.println("--no-jline    不使用jline控制台，使用BufferedReader");
+        System.out.println("--force-exit  关闭流程执行后，强制结束System.exit(0)");
+
+        System.out.println(LoggerX.Color.LIGHT_CYAN + "# FurryBlackPlus 系统参数 ===========================" + LoggerX.Color.RESET);
+        System.out.println("furryblack.logger.level 日志等级");
+
+        System.out.println(LoggerX.Color.LIGHT_CYAN + "# FurryBlackPlus 控制台  ===========================" + LoggerX.Color.RESET);
+        System.out.println(LoggerX.Color.RED + "⚠ 控制台任何操作都属于底层操作可以直接对框架进行不安全和非法的操作" + LoggerX.Color.RESET);
+        System.out.println("安全：设计如此，不会导致异常或者不可预测的结果");
+        System.out.println("风险：功能设计上是安全操作，但是具体被操作对象可能导致错误");
+        System.out.println("危险：没有安全性检查的操作，可能会让功能严重异常导致被迫重启或损坏模块的数据存档");
+        System.out.println("高危：后果完全未知的危险操作，或者正常流程中不应该如此操作但是控制台仍然可以强制执行");
+
+        System.out.println(LoggerX.Color.EMERALD_GREEN + "# 系统管理 ==========================================" + LoggerX.Color.RESET);
+        System.out.println("level (安全) 修改控制台日志打印等级，日志不受影响(可能导致漏掉ERR/WARN信息)");
+        System.out.println("stat  (安全) 查看性能状态");
+        System.out.println("stop  (安全) 正常退出，完整执行关闭流程，等待模块结束，等待线程池结束，等待所有线程");
+        System.out.println("drop  (高危) 强制退出，不等待插件关闭完成，不等待线程池结束，且最终杀死JVM");
+        System.out.println("kill  (高危) 命令执行后直接杀死JVM，不会进行任何关闭操作");
+
+        System.out.println(LoggerX.Color.EMERALD_GREEN + "# 功能管理 ==========================================" + LoggerX.Color.RESET);
+        System.out.println("enable  (安全) 启用消息事件处理 正常响应消息");
+        System.out.println("disable (安全) 停用消息事件处理 无视任何消息");
+
+        System.out.println(LoggerX.Color.EMERALD_GREEN + "# 好友相关 ==========================================" + LoggerX.Color.RESET);
+        System.out.println("list users   (安全) 列出好友");
+        System.out.println("list group   (安全) 列出群组");
+        System.out.println("list <group> (安全) 列出成员");
+
+        System.out.println(LoggerX.Color.EMERALD_GREEN + "# 发送消息 ==========================================" + LoggerX.Color.RESET);
+        System.out.println("send users <users> <消息>  (安全) 向好友发送消息");
+        System.out.println("send group <group> <消息>  (安全) 向群聊发送消息");
+        System.out.println("send <group> <user> <消息> (安全) 向群聊发送AT消息");
+
+        System.out.println(LoggerX.Color.EMERALD_GREEN + "# 模型管理 ==========================================" + LoggerX.Color.RESET);
+        System.out.println("schema (安全) 详细显示插件和模块");
+
+        System.out.println(LoggerX.Color.EMERALD_GREEN + "# 插件管理 ==========================================" + LoggerX.Color.RESET);
+        System.out.println("plugin (安全) 列出插件");
+        System.out.println("plugin unload (安全) 卸载所有插件，关闭顺序等效于shut");
+        System.out.println("plugin import <路径> (风险) 加载某个插件，如果加载被异常打断，无法回滚至加载前的状态，只能重启");
+        System.out.println("plugin unload <名称> (危险) 卸载某个插件，因为插件之间Runner有可能相互依赖，有可能导致意外或者抛出异常");
+        System.out.println("plugin reload <名称> (危险) 重载某个插件，插件将被卸载，再加载同文件路径插件包，不检查模块增减和版本，可能崩溃");
+
+        System.out.println(LoggerX.Color.EMERALD_GREEN + "# 模块管理 ==========================================" + LoggerX.Color.RESET);
+        System.out.println("module (安全) 列出模块");
+        System.out.println("※ Runner可能会被依赖，底层操作框架不检查依赖，有可能导致关联模块崩溃");
+        System.out.println("module reboot <名称> (风险) 重启指定模块(执行 shut + init + boot)");
+        System.out.println("module shut   <名称> (风险) 关闭指定模块(执行 shut)");
+        System.out.println("module init   <名称> (风险) 预载指定模块(执行 init)");
+        System.out.println("module shut   <名称> (风险) 启动指定模块(执行 boot)");
+        System.out.println("※ Runner可能会被依赖，框架无法检查此操作，相关的模块仍然使用旧实例，需要重启相关模块(重新执行getRunner)");
+        System.out.println("module unload <名称> (危险) 卸载指定模块实例，但保留扫描结果");
+        System.out.println("module reload <名称> (危险) 重启 + 重新实例化执行模块");
+
+        System.out.println(LoggerX.Color.EMERALD_GREEN + "# 调试功能 ==========================================" + LoggerX.Color.RESET);
+        System.out.println("debug [enable|disable] (风险) DEBUG开关，打印DEBUG输出和控制某些功能，插件如果不遵守标准开发可能会导致崩溃");
+    }
+
+
     // ==========================================================================================================================================================
     //
     //
@@ -321,6 +395,7 @@ public final class Driver {
     // ==========================================================================================================================================================
 
 
+    @SuppressWarnings("SwitchStatementWithTooFewBranches")
     private static void console() {
 
 
@@ -368,12 +443,7 @@ public final class Driver {
 
                     case "?":
                     case "help":
-                        System.out.println("exit    退出");
-                        System.out.println("list    列出好友和群");
-                        System.out.println("enable  开启消息处理");
-                        System.out.println("disable 关闭消息处理");
-                        System.out.println("module  列出所有模块");
-                        System.out.println("reload  重启指定模块");
+                        printHelp();
                         break;
 
 
@@ -382,28 +452,20 @@ public final class Driver {
 
                     case "debug":
 
-                        switch (command.getParameterLength()) {
+                        if (command.getParameterLength() == 1) {
 
-                            case 1:
+                            switch (command.getParameterSegment(0)) {
 
-                                switch (command.getParameterSegment(0)) {
+                                case "enable":
+                                    debug = true;
+                                    System.out.println("DEBUG模式启动");
+                                    break;
 
-                                    case "enable":
-                                        debug = true;
-                                        System.out.println("DEBUG模式启动");
-                                        break;
-
-                                    case "disable":
-                                        debug = false;
-                                        System.out.println("DEBUG模式关闭");
-                                        break;
-                                }
-
-                                break;
-
-                            case 0:
-                                systemd.debug();
-                                break;
+                                case "disable":
+                                    debug = false;
+                                    System.out.println("DEBUG模式关闭");
+                                    break;
+                            }
                         }
                         break;
 
@@ -431,6 +493,11 @@ public final class Driver {
 
                                 switch (command.getParameterSegment(0)) {
 
+                                    // plugin load <file-name>
+                                    case "import":
+                                        systemd.importPlugin(command.getParameterSegment(1));
+                                        break;
+
                                     // plugin unload <plugin>
                                     case "unload":
                                         systemd.unloadPlugin(command.getParameterSegment(1));
@@ -442,12 +509,28 @@ public final class Driver {
                                         break;
 
                                 }
+                                systemd.generateListMessage();
+                                break;
+
+                            case 1:
+
+                                switch (command.getParameterSegment(0)) {
+
+                                    // plugin unload
+                                    case "unload":
+                                        for (String s : systemd.listAllPlugin()) {
+                                            systemd.unloadPlugin(s);
+                                        }
+                                        systemd.generateListMessage();
+                                        break;
+
+                                }
                                 break;
 
                             // plugin
                             case 0:
                                 systemd.listAllPlugin().forEach(System.out::println);
-                                break;
+
                         }
                         break;
 
@@ -643,6 +726,11 @@ public final class Driver {
                     // =========================================================
 
 
+                    case "schema":
+                        systemd.schemaDebug();
+                        break;
+
+
                     default:
                         System.out.println("没有此命令");
                         break;
@@ -675,19 +763,23 @@ public final class Driver {
 
         public JLineConsole() {
             this.jlineReader = LineReaderBuilder.builder().completer(new AggregateCompleter(
-                new ArgumentCompleter(new StringsCompleter("?", "help", "kill", "drop", "stop", "enable", "disable", "gc", "stat", "stats", "status", "level")),
+                new ArgumentCompleter(new StringsCompleter("?", "help", "kill", "drop", "stop", "enable", "disable", "stat", "level", "schema")),
                 new ArgumentCompleter(
                     new StringsCompleter("debug"),
                     new StringsCompleter("enable", "disable")
                 ),
                 new ArgumentCompleter(
                     new StringsCompleter("list", "send"),
-                    new StringsCompleter("u", "usr", "user", "users", "f", "fri", "friend", "friends", "g", "grp", "group", "groups")
+                    new StringsCompleter("users", "group")
                 ),
                 new ArgumentCompleter(
                     new StringsCompleter("plugin"),
                     new StringsCompleter("unload", "reload"),
                     new StringsCompleter(systemd.listAllPlugin())
+                ),
+                new ArgumentCompleter(
+                    new StringsCompleter("plugin"),
+                    new StringsCompleter("import")
                 ),
                 new ArgumentCompleter(
                     new StringsCompleter("module"),
