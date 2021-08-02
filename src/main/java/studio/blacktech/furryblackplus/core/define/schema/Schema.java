@@ -645,6 +645,10 @@ public class Schema {
             throw new ScanException("指定的文件不可读 " + pluginPackage.getAbsolutePath());
         }
         Plugin plugin = new Plugin(pluginPackage);
+        Plugin exist = this.PLUGINS.get(plugin.getName());
+        if (exist != null) {
+            throw new ScanException("同名插件已存在 " + pluginPackage.getAbsolutePath() + " -> " + exist.getFile().getAbsolutePath());
+        }
         plugin.scan();
         this.load(plugin);
         this.make(plugin);
