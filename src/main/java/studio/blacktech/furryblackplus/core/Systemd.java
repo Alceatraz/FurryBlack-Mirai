@@ -1076,6 +1076,15 @@ public final class Systemd {
 
         this.logger.info("组装群组list消息");
         this.MESSAGE_LIST_GROUP = this.schema.generateGroupExecutorList();
+
+    }
+
+    public String getMessageListUsers() {
+        return this.MESSAGE_LIST_USERS;
+    }
+
+    public String getMessageListGroup() {
+        return this.MESSAGE_LIST_GROUP;
     }
 
 

@@ -123,10 +123,10 @@ public class Schema {
             if (!this.EXECUTOR_USERS_POOL.containsKey(executor.command())) {
                 continue;
             }
+            builder.append(executor.outline());
+            builder.append("[");
             builder.append(executor.command());
-            builder.append(" ");
-            builder.append(executor.value());
-            builder.append(" ");
+            builder.append("] ");
             builder.append(executor.description());
             builder.append("\r\n");
         }
@@ -144,10 +144,10 @@ public class Schema {
             if (!this.EXECUTOR_GROUP_POOL.containsKey(executor.command())) {
                 continue;
             }
+            builder.append(executor.outline());
+            builder.append("[");
             builder.append(executor.command());
-            builder.append(" ");
-            builder.append(executor.value());
-            builder.append(" ");
+            builder.append("] ");
             builder.append(executor.description());
             builder.append("\r\n");
         }

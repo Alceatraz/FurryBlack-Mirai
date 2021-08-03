@@ -661,6 +661,12 @@ public final class Driver {
                                     System.out.println((entry.getValue() ? "√ " : "  ") + entry.getKey());
                                 }
 
+                                System.out.println(">> 私聊命令列表");
+                                System.out.println(systemd.getMessageListUsers());
+
+                                System.out.println(">> 群聊命令列表");
+                                System.out.println(systemd.getMessageListGroup());
+
                                 break;
                         }
                         break;
@@ -772,6 +778,10 @@ public final class Driver {
                                     });
                         }
                         break;
+
+
+                    // =========================================================
+
 
                     case "send":
                         if (command.getParameterLength() < 1) continue;
