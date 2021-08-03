@@ -575,6 +575,7 @@ public final class Driver {
 
                                     default:
                                         System.out.println("plugin unload");
+                                        break;
 
                                 }
                                 break;
@@ -582,7 +583,7 @@ public final class Driver {
                             // plugin
                             case 0:
                                 systemd.listAllPlugin().forEach(System.out::println);
-
+                                break;
 
                         }
                         break;

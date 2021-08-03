@@ -104,9 +104,13 @@ public class Plugin {
 
         this.logger.seek("扫描插件包 " + urls[0]);
 
+        ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+
+        System.out.println(systemClassLoader.getClass().getName());
+
         try (
             JarFile jarFile = new JarFile(this.file);
-            URLClassLoader classLoader = new URLClassLoader(urls, ClassLoader.getSystemClassLoader())
+            URLClassLoader classLoader = new URLClassLoader(urls, systemClassLoader)
         ) {
 
             Enumeration<JarEntry> entries = jarFile.entries();
