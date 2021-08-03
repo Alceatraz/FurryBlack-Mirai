@@ -28,6 +28,7 @@ import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.Systemd;
 import studio.blacktech.furryblackplus.core.define.Command;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerRunner;
+import studio.blacktech.furryblackplus.core.exception.console.ConsoleException;
 import studio.blacktech.furryblackplus.core.exception.moduels.boot.BootException;
 import studio.blacktech.furryblackplus.core.utilties.common.TimeTool;
 import studio.blacktech.furryblackplus.core.utilties.logger.LoggerX;
@@ -485,6 +486,10 @@ public final class Driver {
 
                                 }
                                 break;
+
+                            default:
+                                System.out.println(debug ? "DEBUG已开启" : "DEBUG已关闭");
+
                         }
 
                         break;
@@ -550,12 +555,20 @@ public final class Driver {
                                         systemd.generateListMessage();
                                         break;
 
+                                    default:
+                                        System.out.println("plugin unload");
+
                                 }
                                 break;
 
                             // plugin
                             case 0:
                                 systemd.listAllPlugin().forEach(System.out::println);
+
+
+                            default:
+                                System.out.println("plugin unload");
+                                System.out.println("plugin <import|unload|reload> <name|path>");
 
                         }
                         break;
@@ -863,7 +876,7 @@ public final class Driver {
             try {
                 return this.bufferedReader.readLine();
             } catch (IOException exception) {
-                throw new RuntimeException(exception);
+                throw new ConsoleException(exception);
             }
         }
     }

@@ -117,11 +117,11 @@ public final class Command {
 
     @Api("从指定位置拼接剩余的内容")
     public String join(int index) {
-        StringBuilder builder = new StringBuilder();
         if (this.commandParameterLength == 0 || index > this.commandParameterLength) {
             return null;
         }
-        for (; index < this.commandParameterLength; index++) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = index; i < this.commandParameterLength; i++) {
             builder.append(this.commandParameters[index]).append(" ");
         }
         return builder.toString();

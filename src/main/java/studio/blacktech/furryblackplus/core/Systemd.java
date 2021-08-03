@@ -189,7 +189,9 @@ public final class Systemd {
 
     public Systemd(File folderConfig, File folderPlugin) {
         synchronized (Systemd.class) {
-            if (INSTANCE_LOCK) System.exit(0);
+            if (INSTANCE_LOCK) {
+                System.exit(0);
+            }
             INSTANCE_LOCK = true;
             this.FOLDER_CONFIG = folderConfig;
             this.FOLDER_PLUGIN = folderPlugin;
@@ -842,7 +844,6 @@ public final class Systemd {
 
                 switch (commandName) {
 
-                    case "?":
                     case "help":
                         if (command.hasCommandBody()) {
                             String segment = command.getParameterSegment(0);
@@ -909,9 +910,8 @@ public final class Systemd {
 
                 String commandName = command.getCommandName();
 
-                switch (command.getCommandName()) {
+                switch (commandName) {
 
-                    case "?":
                     case "help":
                         if (command.hasCommandBody()) {
                             String segment = command.getParameterSegment(0);
