@@ -2,7 +2,7 @@
 
 ## 自豪的使用[Mirai](https://github.com/mamoe/mirai)
 
-![Java CI with Maven](https://github.com/Alceatraz/FurryBlack-Mirai/workflows/Java%20CI%20with%20Maven/badge.svg?branch=master)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/fcb9badd8cc1414d944c0965cba13ab5)](https://www.codacy.com/gh/Alceatraz/FurryBlack-Mirai/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Alceatraz/FurryBlack-Mirai&amp;utm_campaign=Badge_Grade)
 
 ### 消歧义
 
