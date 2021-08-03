@@ -53,6 +53,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+// 🔫 🧦 ❌ ✔️ ⭕ 🚧 🀄
 
 /**
  * FurryBlack Plus Framework
@@ -463,6 +464,18 @@ public final class Driver {
                     // =========================================================
 
 
+                    case "info":
+                        System.out.println("FurryBlack-Plus");
+                        System.out.println("A Mirai wrapper QQ-Bot framework make with love and \uD83E\uDDE6");
+                        System.out.println("Mr.Black is a  with a white bear furry visualize");
+                        System.out.println("Create by Alceatraz Warprays @ Black Tech Studio");
+                        System.out.println("https://www.blacktech.studio");
+                        break;
+
+
+                    // =========================================================
+
+
                     case "debug":
 
                         switch (command.getParameterLength()) {
@@ -622,25 +635,25 @@ public final class Driver {
                                 Map<String, Boolean> listAllRunner = systemd.listAllRunner();
                                 System.out.println(">> 定时器 " + listAllRunner.size());
                                 for (Map.Entry<String, Boolean> entry : listAllRunner.entrySet()) {
-                                    System.out.println((entry.getValue() ? "✅ " : "❌ ") + entry.getKey());
+                                    System.out.println((entry.getValue() ? "✔️ " : "⭕ ") + entry.getKey());
                                 }
 
                                 Map<String, Boolean> listAllFilter = systemd.listAllFilter();
                                 System.out.println(">> 过滤器 " + listAllFilter.size());
                                 for (Map.Entry<String, Boolean> entry : listAllFilter.entrySet()) {
-                                    System.out.println((entry.getValue() ? "✅ " : "❌ ") + entry.getKey());
+                                    System.out.println((entry.getValue() ? "✔️ " : "⭕ ") + entry.getKey());
                                 }
 
                                 Map<String, Boolean> listAllMonitor = systemd.listAllMonitor();
                                 System.out.println(">> 监听器 " + listAllMonitor.size());
                                 for (Map.Entry<String, Boolean> entry : listAllMonitor.entrySet()) {
-                                    System.out.println((entry.getValue() ? "✅ " : "❌ ") + entry.getKey());
+                                    System.out.println((entry.getValue() ? "✔️ " : "⭕ ") + entry.getKey());
                                 }
 
                                 Map<String, Boolean> listAllExecutor = systemd.listAllExecutor();
                                 System.out.println(">> 执行器 " + listAllExecutor.size());
                                 for (Map.Entry<String, Boolean> entry : listAllExecutor.entrySet()) {
-                                    System.out.println((entry.getValue() ? "✅ " : "❌ ") + entry.getKey());
+                                    System.out.println((entry.getValue() ? "✔️ " : "   ") + entry.getKey());
                                 }
 
                                 break;
