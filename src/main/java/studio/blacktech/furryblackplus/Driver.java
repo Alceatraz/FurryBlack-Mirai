@@ -496,12 +496,14 @@ public final class Driver {
 
                                     default:
                                         System.out.println(debug ? "DEBUG已开启" : "DEBUG已关闭");
+                                        break;
 
                                 }
                                 break;
 
                             default:
                                 System.out.println(debug ? "DEBUG已开启" : "DEBUG已关闭");
+                                break;
 
                         }
 
@@ -520,6 +522,9 @@ public final class Driver {
                         enable = false;
                         System.out.println("关闭事件响应");
                         break;
+
+
+                    // =========================================================
 
 
                     // plugin
@@ -551,9 +556,9 @@ public final class Driver {
 
                                     default:
                                         System.out.println("plugin <import|unload|reload> <name|path>");
+                                        break;
 
                                 }
-
                                 break;
 
                             case 1:
@@ -585,6 +590,10 @@ public final class Driver {
 
                         }
                         break;
+
+
+                    // =========================================================
+
 
                     // module
                     case "module":

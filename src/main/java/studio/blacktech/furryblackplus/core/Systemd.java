@@ -876,6 +876,7 @@ public final class Systemd {
                         } else {
                             executor.handleUsersMessageWrapper(event, command);
                         }
+                        break;
                 }
             }
 
@@ -966,6 +967,7 @@ public final class Systemd {
                                 Driver.sendMessage(event, "没有此命令");
                             }
                         }
+                        break;
                 }
             }
 
