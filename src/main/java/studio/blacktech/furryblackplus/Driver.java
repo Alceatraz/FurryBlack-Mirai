@@ -584,10 +584,6 @@ public final class Driver {
                                 systemd.listAllPlugin().forEach(System.out::println);
 
 
-                            default:
-                                System.out.println("plugin unload");
-                                System.out.println("plugin <import|unload|reload> <name|path>");
-
                         }
                         break;
 
@@ -644,25 +640,25 @@ public final class Driver {
                                 Map<String, Boolean> listAllRunner = systemd.listAllRunner();
                                 System.out.println(">> 定时器 " + listAllRunner.size());
                                 for (Map.Entry<String, Boolean> entry : listAllRunner.entrySet()) {
-                                    System.out.println((entry.getValue() ? "✔️ " : "⭕ ") + entry.getKey());
+                                    System.out.println((entry.getValue() ? "√ " : "  ") + entry.getKey());
                                 }
 
                                 Map<String, Boolean> listAllFilter = systemd.listAllFilter();
                                 System.out.println(">> 过滤器 " + listAllFilter.size());
                                 for (Map.Entry<String, Boolean> entry : listAllFilter.entrySet()) {
-                                    System.out.println((entry.getValue() ? "✔️ " : "⭕ ") + entry.getKey());
+                                    System.out.println((entry.getValue() ? "√ " : "  ") + entry.getKey());
                                 }
 
                                 Map<String, Boolean> listAllMonitor = systemd.listAllMonitor();
                                 System.out.println(">> 监听器 " + listAllMonitor.size());
                                 for (Map.Entry<String, Boolean> entry : listAllMonitor.entrySet()) {
-                                    System.out.println((entry.getValue() ? "✔️ " : "⭕ ") + entry.getKey());
+                                    System.out.println((entry.getValue() ? "√ " : "  ") + entry.getKey());
                                 }
 
                                 Map<String, Boolean> listAllExecutor = systemd.listAllExecutor();
                                 System.out.println(">> 执行器 " + listAllExecutor.size());
                                 for (Map.Entry<String, Boolean> entry : listAllExecutor.entrySet()) {
-                                    System.out.println((entry.getValue() ? "✔️ " : "   ") + entry.getKey());
+                                    System.out.println((entry.getValue() ? "√ " : "  ") + entry.getKey());
                                 }
 
                                 break;
