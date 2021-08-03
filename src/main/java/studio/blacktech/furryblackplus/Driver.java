@@ -107,6 +107,7 @@ public final class Driver {
     private static volatile boolean noLogin;
     private static volatile boolean noJline;
 
+    private static volatile boolean shutModeExit;
     private static volatile boolean shutModeDrop;
     private static volatile boolean shutBySignal = true;
 
@@ -182,6 +183,16 @@ public final class Driver {
         }
 
         // =====================================================================
+        // 退出模式 设置
+        shutModeExit = parameters.contains("--force-exit");
+        if (shutModeExit) {
+            System.out.println("[FurryBlack][ARGS]使用强制退出");
+        } else {
+            System.out.println("[FurryBlack][ARGS]使用正常退出");
+        }
+
+
+        // =====================================================================
         // 日志级别 设置
         String level = System.getProperty("furryblack.logger.level");
         if (level != null) {
@@ -243,7 +254,7 @@ public final class Driver {
             systemd = new Systemd(FOLDER_CONFIG, FOLDER_PLUGIN);
 
         } catch (Exception exception) {
-            throw new RuntimeException("[FurryBlack][FATAL]核心系统初始化发生异常 终止启动", exception);
+            throw new BootException("[FurryBlack][FATAL]核心系统初始化发生异常 终止启动", exception);
         }
 
 
@@ -265,16 +276,13 @@ public final class Driver {
         Thread mainThread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (!shutBySignal) return;
-            logger.info("接收到关闭信号");
-            logger.info("关闭控制台");
             consoleThread.interrupt();
-            logger.info("关闭机器人");
             systemd.signal();
-            logger.info("等待主线程");
             try {
                 mainThread.join();
-            } catch (InterruptedException ignoring) {
-                logger.error("关闭信号回调被打断", ignoring);
+            } catch (InterruptedException exception) {
+                System.out.println("[FurryBlack][MAIN]FurryBlackPlus shutdown hook interrupted!");
+                exception.printStackTrace();
             }
         }));
 
@@ -291,7 +299,9 @@ public final class Driver {
         // =====================================================================
 
         logger.hint("系统启动完成 耗时" + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME));
-        if (!debug) LoggerX.setPrintLevel(level);
+        if (!debug) {
+            LoggerX.setPrintLevel(level);
+        }
 
         enable = true;
 
@@ -313,10 +323,12 @@ public final class Driver {
             logger.error("关闭路由系统关闭异常", exception);
         }
 
-        System.out.println("[FurryBlack][MAIN]FurryBlackPlus closed, Bye.");
 
-        if (parameters.contains("--force-exit") || shutModeDrop) {
+        if (shutModeExit || shutModeDrop) {
+            System.out.println("[FurryBlack][MAIN]FurryBlackPlus force exit, Bye.");
             System.exit(0);
+        } else {
+            System.out.println("[FurryBlack][MAIN]FurryBlackPlus closed, Bye.");
         }
 
     }
@@ -452,21 +464,29 @@ public final class Driver {
 
                     case "debug":
 
-                        if (command.getParameterLength() == 1) {
+                        switch (command.getParameterLength()) {
 
-                            switch (command.getParameterSegment(0)) {
+                            case 1:
 
-                                case "enable":
-                                    debug = true;
-                                    System.out.println("DEBUG模式启动");
-                                    break;
+                                switch (command.getParameterSegment(0)) {
 
-                                case "disable":
-                                    debug = false;
-                                    System.out.println("DEBUG模式关闭");
-                                    break;
-                            }
+                                    case "enable":
+                                        debug = true;
+                                        System.out.println("DEBUG模式启动");
+                                        break;
+
+                                    case "disable":
+                                        debug = false;
+                                        System.out.println("DEBUG模式关闭");
+                                        break;
+
+                                    default:
+                                        System.out.println(debug ? "DEBUG已开启" : "DEBUG已关闭");
+
+                                }
+                                break;
                         }
+
                         break;
 
 
@@ -496,20 +516,26 @@ public final class Driver {
                                     // plugin load <file-name>
                                     case "import":
                                         systemd.importPlugin(command.getParameterSegment(1));
+                                        systemd.generateListMessage();
                                         break;
 
                                     // plugin unload <plugin>
                                     case "unload":
                                         systemd.unloadPlugin(command.getParameterSegment(1));
+                                        systemd.generateListMessage();
                                         break;
 
                                     // plugin reload <plugin>
                                     case "reload":
                                         systemd.reloadPlugin(command.getParameterSegment(1));
+                                        systemd.generateListMessage();
                                         break;
 
+                                    default:
+                                        System.out.println("plugin <import|unload|reload> <name|path>");
+
                                 }
-                                systemd.generateListMessage();
+
                                 break;
 
                             case 1:
@@ -576,11 +602,34 @@ public final class Driver {
                                 }
                                 break;
 
+
                             // module
                             case 0:
-                                for (Map.Entry<String, Boolean> entry : systemd.listAllModule().entrySet()) {
+
+                                Map<String, Boolean> listAllRunner = systemd.listAllRunner();
+                                System.out.println(">> 定时器 " + listAllRunner.size());
+                                for (Map.Entry<String, Boolean> entry : listAllRunner.entrySet()) {
                                     System.out.println((entry.getValue() ? "✅ " : "❌ ") + entry.getKey());
                                 }
+
+                                Map<String, Boolean> listAllFilter = systemd.listAllFilter();
+                                System.out.println(">> 过滤器 " + listAllFilter.size());
+                                for (Map.Entry<String, Boolean> entry : listAllFilter.entrySet()) {
+                                    System.out.println((entry.getValue() ? "✅ " : "❌ ") + entry.getKey());
+                                }
+
+                                Map<String, Boolean> listAllMonitor = systemd.listAllMonitor();
+                                System.out.println(">> 监听器 " + listAllMonitor.size());
+                                for (Map.Entry<String, Boolean> entry : listAllMonitor.entrySet()) {
+                                    System.out.println((entry.getValue() ? "✅ " : "❌ ") + entry.getKey());
+                                }
+
+                                Map<String, Boolean> listAllExecutor = systemd.listAllExecutor();
+                                System.out.println(">> 执行器 " + listAllExecutor.size());
+                                for (Map.Entry<String, Boolean> entry : listAllExecutor.entrySet()) {
+                                    System.out.println((entry.getValue() ? "✅ " : "❌ ") + entry.getKey());
+                                }
+
                                 break;
                         }
                         break;
@@ -596,6 +645,8 @@ public final class Driver {
                         long totalMemory = Runtime.getRuntime().totalMemory() / 1024;
                         long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
                         long maxMemory = Runtime.getRuntime().maxMemory() / 1024;
+                        System.out.println("调试模式: " + (debug ? "启用" : "关闭"));
+                        System.out.println("关闭模式: " + (shutModeExit ? "强制" : "正常"));
                         System.out.println("消息事件: " + (enable ? "启用" : "关闭"));
                         System.out.println("运行时间: " + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME));
                         System.out.println("内存占用: " + (totalMemory - freeMemory) + "KB/" + totalMemory + "KB/" + maxMemory + "KB(" + maxMemory / 1024 + "MB)");
@@ -779,7 +830,7 @@ public final class Driver {
                 ),
                 new ArgumentCompleter(
                     new StringsCompleter("plugin"),
-                    new StringsCompleter("import")
+                    new StringsCompleter("import", "unload")
                 ),
                 new ArgumentCompleter(
                     new StringsCompleter("module"),

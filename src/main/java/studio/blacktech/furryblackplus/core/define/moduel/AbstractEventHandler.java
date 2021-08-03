@@ -4,6 +4,7 @@ package studio.blacktech.furryblackplus.core.define.moduel;
 import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.exception.BotException;
+import studio.blacktech.furryblackplus.core.exception.moduels.ModuleException;
 import studio.blacktech.furryblackplus.core.exception.moduels.boot.BootException;
 import studio.blacktech.furryblackplus.core.utilties.logger.LoggerX;
 
@@ -51,6 +52,7 @@ public abstract class AbstractEventHandler {
     }
 
 
+    @Api("这是一个内部使用的方法")
     @Deprecated
     public void internalInit(String name) {
         this.name = name;
@@ -172,7 +174,7 @@ public abstract class AbstractEventHandler {
             try {
                 this.initFile(this.FILE_CONFIG);
             } catch (Exception exception) {
-                throw new RuntimeException("初始化配置错误", exception);
+                throw new ModuleException("初始化配置错误", exception);
             }
             this.NEW_CONFIG = true;
         }
@@ -183,7 +185,7 @@ public abstract class AbstractEventHandler {
         try (FileInputStream inStream = new FileInputStream(this.FILE_CONFIG)) {
             this.CONFIG.load(inStream);
         } catch (IOException exception) {
-            throw new RuntimeException("加载配置错误", exception);
+            throw new ModuleException("加载配置错误", exception);
         }
     }
 
@@ -197,7 +199,7 @@ public abstract class AbstractEventHandler {
         try (FileOutputStream outputStream = new FileOutputStream(this.FILE_CONFIG)) {
             this.CONFIG.store(outputStream, comments);
         } catch (IOException exception) {
-            throw new RuntimeException("保存配置错误", exception);
+            throw new ModuleException("保存配置错误", exception);
         }
     }
 
@@ -236,7 +238,7 @@ public abstract class AbstractEventHandler {
                                         item)
                        .collect(Collectors.toList());
         } catch (IOException exception) {
-            throw new RuntimeException(exception);
+            throw new ModuleException(exception);
         }
     }
 
@@ -249,7 +251,7 @@ public abstract class AbstractEventHandler {
     protected File initFolder(File file) {
         if (file.exists()) {
             if (!file.isDirectory()) {
-                throw new IllegalArgumentException("文件夹被文件占位 -> " + file.getAbsolutePath());
+                throw new ModuleException("文件夹被文件占位 -> " + file.getAbsolutePath());
             }
         } else {
             if (file.mkdirs()) {
@@ -269,13 +271,13 @@ public abstract class AbstractEventHandler {
         try {
             if (file.createNewFile()) this.logger.seek("创建新文件 -> " + file.getAbsolutePath());
         } catch (IOException exception) {
-            throw new RuntimeException("创建文件失败 -> " + file.getAbsolutePath(), exception);
+            throw new ModuleException("创建文件失败 -> " + file.getAbsolutePath(), exception);
         }
         if (!file.canRead()) {
-            throw new IllegalArgumentException("文件无权读取 -> " + file.getAbsolutePath());
+            throw new ModuleException("文件无权读取 -> " + file.getAbsolutePath());
         }
         if (!file.canWrite()) {
-            throw new IllegalArgumentException("文件无权写入 -> " + file.getAbsolutePath());
+            throw new ModuleException("文件无权写入 -> " + file.getAbsolutePath());
         }
         return file;
     }

@@ -2,11 +2,11 @@ package studio.blacktech.furryblackplus.core.exception.moduels.boot;
 
 
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.exception.BotException;
+import studio.blacktech.furryblackplus.core.exception.moduels.ModuleException;
 
 
 @Api("启动过程发生的异常")
-public class BootException extends BotException {
+public class BootException extends ModuleException {
 
     public BootException() {
 

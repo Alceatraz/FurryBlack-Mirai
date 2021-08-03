@@ -1109,6 +1109,23 @@ public final class Systemd {
         return this.schema.listAllModule();
     }
 
+    public Map<String, Boolean> listAllRunner() {
+        return this.schema.listAllRunner();
+    }
+
+    public Map<String, Boolean> listAllFilter() {
+        return this.schema.listAllFilter();
+    }
+
+    public Map<String, Boolean> listAllMonitor() {
+        return this.schema.listAllMonitor();
+    }
+
+    public Map<String, Boolean> listAllExecutor() {
+        return this.schema.listAllExecutor();
+    }
+
+
     public void shutModule(String name) {
         this.schema.shutModule(name);
     }
