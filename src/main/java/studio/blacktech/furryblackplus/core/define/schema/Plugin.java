@@ -106,8 +106,6 @@ public class Plugin {
 
         ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 
-        System.out.println(systemClassLoader.getClass().getName());
-
         try (
             JarFile jarFile = new JarFile(this.file);
             URLClassLoader classLoader = new URLClassLoader(urls, systemClassLoader)
