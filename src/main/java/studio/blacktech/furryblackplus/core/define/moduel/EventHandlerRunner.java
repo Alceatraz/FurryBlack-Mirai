@@ -10,6 +10,7 @@ public abstract class EventHandlerRunner extends AbstractEventHandler {
 
     private volatile boolean lock;
 
+    @SuppressWarnings("deprecation")
     @Override
     @Deprecated
     public void internalInit(String name) {

@@ -521,7 +521,7 @@ public final class LoggerX extends PlatformLogger {
 
         @Override
         public String toString() {
-            return format;
+            return this.format;
         }
     }
 

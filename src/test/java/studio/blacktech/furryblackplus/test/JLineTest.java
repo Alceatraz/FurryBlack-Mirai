@@ -10,6 +10,7 @@ import org.jline.widget.AutopairWidgets;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("InfiniteLoopStatement")
 public class JLineTest {
 
 

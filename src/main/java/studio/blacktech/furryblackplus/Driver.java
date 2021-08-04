@@ -880,7 +880,7 @@ public final class Driver {
 
     public static class JLineConsole implements Console {
 
-        private volatile LineReader jlineReader;
+        private final LineReader jlineReader;
 
         public JLineConsole() {
             this.jlineReader = LineReaderBuilder.builder().completer(completerDelegate).build();

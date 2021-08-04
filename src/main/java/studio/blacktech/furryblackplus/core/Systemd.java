@@ -1276,7 +1276,6 @@ public final class Systemd {
         return Mirai.getInstance().queryProfile(this.bot, user);
     }
 
-    @SuppressWarnings("DuplicatedCode")
     @Api("获取预设昵称")
     public String getMappedNickName(long groupId, long userId) {
 
@@ -1300,7 +1299,6 @@ public final class Systemd {
         }
     }
 
-    @SuppressWarnings("DuplicatedCode")
     @Api("获取预设昵称")
     public String getMappedNickName(GroupMessageEvent event) {
 

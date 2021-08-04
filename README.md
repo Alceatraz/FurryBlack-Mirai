@@ -50,6 +50,10 @@
 
 ## CHANGELOG
 
+### 0.8.2
+
+- 修复reload导致NPE的BUG
+
 ### 0.8.1
 
 - 加强控制台 自动补全跟随`plugin`和`module`更新

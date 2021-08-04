@@ -543,6 +543,7 @@ public class Schema {
     }
 
 
+    @SuppressWarnings("deprecation")
     public void reloadModule(String name) {
 
         for (Map.Entry<Runner, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.entrySet()) {
@@ -559,6 +560,7 @@ public class Schema {
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException exception) {
                     throw new BotException("重载定时器失败 " + clazz.getName(), exception);
                 }
+                newInstance.internalInit(annotation.value());
                 this.logger.info("预载定时器 -> " + clazz.getName() + ":" + newInstance.hashCode());
                 newInstance.initWrapper();
                 this.logger.info("关闭定时器 -> " + clazz.getName() + ":" + newInstance.hashCode());
@@ -583,6 +585,7 @@ public class Schema {
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException exception) {
                     throw new BotException("重载过滤器失败 " + clazz.getName(), exception);
                 }
+                newInstance.internalInit(annotation.value());
                 this.logger.info("预载过滤器 -> " + clazz.getName() + ":" + newInstance.hashCode());
                 newInstance.initWrapper();
                 this.logger.info("关闭过滤器 -> " + clazz.getName() + ":" + newInstance.hashCode());
@@ -607,6 +610,7 @@ public class Schema {
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException exception) {
                     throw new BotException("重载定时器失败 " + clazz.getName(), exception);
                 }
+                newInstance.internalInit(annotation.value());
                 this.logger.info("预载监听器 -> " + clazz.getName() + ":" + newInstance.hashCode());
                 newInstance.initWrapper();
                 this.logger.info("关闭监听器 -> " + clazz.getName() + ":" + newInstance.hashCode());
@@ -631,6 +635,7 @@ public class Schema {
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException exception) {
                     throw new BotException("重载定时器失败 " + clazz.getName(), exception);
                 }
+                newInstance.internalInit(annotation.value());
                 this.logger.info("预载执行器 -> " + clazz.getName() + ":" + newInstance.hashCode());
                 newInstance.initWrapper();
                 this.logger.info("关闭执行器 -> " + clazz.getName() + ":" + newInstance.hashCode());
