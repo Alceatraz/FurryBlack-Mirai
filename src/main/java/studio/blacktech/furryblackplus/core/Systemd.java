@@ -409,6 +409,7 @@ public final class Systemd {
         File cacheFolder = Paths.get(this.FOLDER_CONFIG.getAbsolutePath(), "cache").toFile();
 
         configuration.setCacheDir(cacheFolder);
+        configuration.enableContactCache();
 
 
         // ==========================================================================================================================
@@ -538,8 +539,8 @@ public final class Systemd {
         // 传入日志
 
 
-        configuration.setBotLoggerSupplier(botInstance -> new LoggerX("MiraiBot"));
-        configuration.setNetworkLoggerSupplier(botInstance -> new LoggerX("MiraiNet"));
+        configuration.setBotLoggerSupplier(i -> new LoggerX("MiraiBot"));
+        configuration.setNetworkLoggerSupplier(i -> new LoggerX("MiraiNet"));
 
 
         // ==========================================================================================================================

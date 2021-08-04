@@ -17,8 +17,13 @@ import net.mamoe.mirai.message.data.FlashImage;
 import net.mamoe.mirai.message.data.Image;
 import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.PlainText;
+import org.jline.builtins.Completers;
+import org.jline.builtins.Completers.TreeCompleter;
+import org.jline.reader.Candidate;
+import org.jline.reader.Completer;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.ParsedLine;
 import org.jline.reader.UserInterruptException;
 import org.jline.reader.impl.completer.AggregateCompleter;
 import org.jline.reader.impl.completer.ArgumentCompleter;
@@ -53,6 +58,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import static org.jline.builtins.Completers.TreeCompleter.node;
+
 // 🔫 🧦 ❌ ✔️ ⭕ 🚧 🀄
 
 /**
@@ -68,8 +75,27 @@ import java.util.stream.Collectors;
 public final class Driver {
 
 
+    // ==========================================================================================================================================================
+    //
+    // 版本信息
+    //
+    // ==========================================================================================================================================================
+
+
+    public static final String APP_VERSION = "0.8.0";
+
+
+    // ==========================================================================================================================================================
+    //
+    // 系统信息
+    //
+    // ==========================================================================================================================================================
+
+
     @Api("原始系统时区") public static final ZoneId SYSTEM_ZONEID;
     @Api("原始系统偏差") public static final ZoneOffset SYSTEM_OFFSET;
+
+    @Api("系统启动时间") private static final long BOOT_TIME = System.currentTimeMillis();
 
 
     static {
@@ -85,9 +111,6 @@ public final class Driver {
     }
 
 
-    public static final String APP_VERSION = "0.8.0-SNAPSHOT";
-
-
     // ==========================================================================================================================================================
     //
     // 私有变量
@@ -95,11 +118,10 @@ public final class Driver {
     // ==========================================================================================================================================================
 
 
-    private static final long BOOT_TIME = System.currentTimeMillis();
-
     private static final LoggerX logger = new LoggerX(Driver.class);
 
     private static Systemd systemd;
+    private static JLineConsole.CompleterDelegate completerDelegate;
 
 
     private static volatile boolean debug;
@@ -412,6 +434,8 @@ public final class Driver {
     @SuppressWarnings("SwitchStatementWithTooFewBranches")
     private static void console() {
 
+        completerDelegate = new JLineConsole.CompleterDelegate();
+        completerDelegate.update();
 
         Console console = noJline ? new ReaderConsole() : new JLineConsole();
 
@@ -540,18 +564,21 @@ public final class Driver {
                                     case "import":
                                         systemd.importPlugin(command.getParameterSegment(1));
                                         systemd.generateListMessage();
+                                        completerDelegate.update();
                                         break;
 
                                     // plugin unload <plugin>
                                     case "unload":
                                         systemd.unloadPlugin(command.getParameterSegment(1));
                                         systemd.generateListMessage();
+                                        completerDelegate.update();
                                         break;
 
                                     // plugin reload <plugin>
                                     case "reload":
                                         systemd.reloadPlugin(command.getParameterSegment(1));
                                         systemd.generateListMessage();
+                                        completerDelegate.update();
                                         break;
 
                                     default:
@@ -571,6 +598,7 @@ public final class Driver {
                                             systemd.unloadPlugin(s);
                                         }
                                         systemd.generateListMessage();
+                                        completerDelegate.update();
                                         break;
 
                                     default:
@@ -852,34 +880,10 @@ public final class Driver {
 
     public static class JLineConsole implements Console {
 
-        private final LineReader jlineReader;
+        private volatile LineReader jlineReader;
 
         public JLineConsole() {
-            this.jlineReader = LineReaderBuilder.builder().completer(new AggregateCompleter(
-                new ArgumentCompleter(new StringsCompleter("?", "help", "kill", "drop", "stop", "enable", "disable", "stat", "level", "schema")),
-                new ArgumentCompleter(
-                    new StringsCompleter("debug"),
-                    new StringsCompleter("enable", "disable")
-                ),
-                new ArgumentCompleter(
-                    new StringsCompleter("list", "send"),
-                    new StringsCompleter("users", "group")
-                ),
-                new ArgumentCompleter(
-                    new StringsCompleter("plugin"),
-                    new StringsCompleter("unload", "reload"),
-                    new StringsCompleter(systemd.listAllPlugin())
-                ),
-                new ArgumentCompleter(
-                    new StringsCompleter("plugin"),
-                    new StringsCompleter("import", "unload")
-                ),
-                new ArgumentCompleter(
-                    new StringsCompleter("module"),
-                    new StringsCompleter("init", "boot", "shut", "reboot", "unload", "reload"),
-                    new StringsCompleter(systemd.listAllModule().keySet())
-                )
-            )).build();
+            this.jlineReader = LineReaderBuilder.builder().completer(completerDelegate).build();
             AutopairWidgets autopairWidgets = new AutopairWidgets(this.jlineReader);
             autopairWidgets.enable();
         }
@@ -889,6 +893,79 @@ public final class Driver {
             return this.jlineReader.readLine(prompt);
         }
 
+
+        public static class CompleterDelegate implements Completer {
+
+            private Completer completer;
+
+            @Override
+            public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
+                this.completer.complete(reader, line, candidates);
+            }
+
+            public void update() {
+
+
+                this.completer = new AggregateCompleter(
+
+                    new ArgumentCompleter(
+
+                        new StringsCompleter(
+                            "help",
+                            "kill",
+                            "drop",
+                            "stop",
+                            "stat",
+                            "enable",
+                            "disable",
+                            "schema"
+                        )
+                    ),
+
+                    new ArgumentCompleter(
+                        new StringsCompleter("list", "send"),
+                        new StringsCompleter("users", "group")
+                    ),
+
+                    new TreeCompleter(
+                        node("level",
+                            node("MUTE", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "ALL")
+                        )
+                    ),
+
+                    new TreeCompleter(
+                        node("debug",
+                            node("enable", "disable")
+                        )
+                    ),
+
+                    new TreeCompleter(
+                        node("plugin",
+                            node("unload"),
+                            node("unload",
+                                node(new StringsCompleter(systemd.listAllPlugin()))
+                            ),
+                            node("reload",
+                                node(new StringsCompleter(systemd.listAllPlugin()))
+                            ),
+                            node("import",
+                                node(new Completers.FilesCompleter(FOLDER_PLUGIN))
+                            )
+                        )
+                    ),
+
+                    new TreeCompleter(
+                        node("module",
+                            node("init", "boot", "shut", "reboot", "unload", "reload",
+                                node(new StringsCompleter(systemd.listAllModule().keySet()))
+                            )
+                        )
+                    )
+                );
+
+
+            }
+        }
     }
 
 
@@ -908,6 +985,7 @@ public final class Driver {
                 throw new ConsoleException(exception);
             }
         }
+
     }
 
 
@@ -924,6 +1002,7 @@ public final class Driver {
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+
     @Api("是否正在监听消息")
     public static boolean isEnable() {
         return enable;
