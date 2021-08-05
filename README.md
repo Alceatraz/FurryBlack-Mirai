@@ -11,9 +11,35 @@
 - FurryBlack扩展：指基于FurryBlack框架编写的插件；
 - FurryBlack机器人：指由BTS运营的基于FurryBlack框架的机器人。
 
-## LICENSE
+### 许可证
 
-- 见LICENSE
+See LICENSE
+
+```text
+           BTS Anti Commercial GNU AFFERO GENERAL PUBLIC LICENSE
+
+  This GNU Affero General Public License is extends from The GNU Affero General
+Public License, But as Additional Terms, Here is override:
+
+  1: Override A-GPL No.5, "I" keep power to "discriminate against any person or
+group of persons.", But for one proper's and for one proper's only:
+And form commercial activity relay on this framework is forbidden, And I will
+revoke the permission of "You" to see/use/modify. otherwise, If you use it in
+commercial activity (framework itself or your extension or ghostwrite) You will
+banned by this project, This project equivalent close source for you. Any read/
+copy/use/modify/develop-base-on-it will be legal.
+
+For example:
+
+    If you are charged service provider, You MUST provide OpenAPI for everyone
+and create wrapper by FurryBlack into QQ, Clients pay for you OpenAPI NOT the
+FurryBlack or your extensions, You extensions must implements A-GPL. Must be
+opensource and free to use.
+
+  2: Downstream code/project/your-extension must annotation as BTS Anti 
+Commercial GNU AFFERO GENERAL PUBLIC LICENSE, Using another LICENSE equivalent
+as commercial usage. You is banned if you do it.
+```
 
 ## 如何开发
 
