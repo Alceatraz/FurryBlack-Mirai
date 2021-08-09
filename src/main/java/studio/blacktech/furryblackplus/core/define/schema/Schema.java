@@ -1429,6 +1429,12 @@ public class Schema {
             }
         }
 
+        for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> entry : this.COMPONENT_CHECKER_CLAZZ.entrySet()) {
+            if (entry.getKey().value().equals(name)) {
+                return entry.getValue();
+            }
+        }
+
         for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> entry : this.COMPONENT_EXECUTOR_CLAZZ.entrySet()) {
             if (entry.getKey().value().equals(name)) {
                 return entry.getValue();
@@ -1458,6 +1464,12 @@ public class Schema {
         }
 
         for (Map.Entry<Monitor, EventHandlerMonitor> entry : this.COMPONENT_MONITOR_INSTANCE.entrySet()) {
+            if (entry.getKey().value().equals(name)) {
+                return entry.getValue();
+            }
+        }
+
+        for (Map.Entry<Checker, EventHandlerChecker> entry : this.COMPONENT_CHECKER_INSTANCE.entrySet()) {
             if (entry.getKey().value().equals(name)) {
                 return entry.getValue();
             }

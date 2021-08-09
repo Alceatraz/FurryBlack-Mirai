@@ -43,7 +43,7 @@ public class DemoRunner extends EventHandlerRunner {
     }
 
     public boolean checkPermission(long userId, String permission) {
-        return userId == 100000L && permission.equals("demo.command.demo");
+        return userId == 100000L && "demo.command.demo".equals(permission);
     }
 
 }
