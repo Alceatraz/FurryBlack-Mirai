@@ -18,22 +18,24 @@ package studio.blacktech.furryblackplus.demo;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import studio.blacktech.furryblackplus.Driver;
-import studio.blacktech.furryblackplus.core.define.annotation.Monitor;
-import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerMonitor;
+import studio.blacktech.furryblackplus.core.define.Command;
+import studio.blacktech.furryblackplus.core.define.annotation.Checker;
+import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerChecker;
 
 
-@Monitor(
-    value = "demo-monitor",
-    users = false
+@Checker(
+    value = "demo-executor",
+    command = "demo"
 )
-public class DemoMonitor extends EventHandlerMonitor {
+public class DemoChecker extends EventHandlerChecker {
 
+
+    private DemoRunner runner;
 
     @Override
     public void init() {
         System.out.println("加载" + this.getClass().getName());
-        DemoRunner demoRunner = Driver.getRunner(DemoRunner.class);
-        demoRunner.demo();
+        this.runner = Driver.getRunner(DemoRunner.class);
     }
 
     @Override
@@ -47,12 +49,15 @@ public class DemoMonitor extends EventHandlerMonitor {
     }
 
     @Override
-    public void handleUsersMessage(UserMessageEvent event) {
+    public boolean handleUsersMessage(UserMessageEvent event, Command command) {
         System.out.println("消息" + this.getClass().getName());
+        return false;
     }
 
     @Override
-    public void handleGroupMessage(GroupMessageEvent event) {
+    public boolean handleGroupMessage(GroupMessageEvent event, Command command) {
         System.out.println("消息" + this.getClass().getName());
+        return this.runner.checkPermission(event.getSender().getId(), "demo.command.demo");
+
     }
 }

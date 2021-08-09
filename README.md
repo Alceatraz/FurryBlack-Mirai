@@ -76,6 +76,12 @@ as commercial usage. You is banned if you do it.
 
 ## CHANGELOG
 
+### 0.9.0
+
+- 修复大量热重载导致的BUG
+- 调整监听器和过滤器的执行顺序
+- 新增检查器，用于检查命令，在执行器前运行
+
 ### 0.8.2
 
 - 修复reload导致NPE的BUG

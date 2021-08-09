@@ -40,7 +40,14 @@ import net.mamoe.mirai.utils.BotConfiguration;
 import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.define.Command;
+import studio.blacktech.furryblackplus.core.define.annotation.Checker;
+import studio.blacktech.furryblackplus.core.define.annotation.Executor;
+import studio.blacktech.furryblackplus.core.define.annotation.Filter;
+import studio.blacktech.furryblackplus.core.define.annotation.Monitor;
+import studio.blacktech.furryblackplus.core.define.annotation.Runner;
+import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerChecker;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerExecutor;
+import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerFilter;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerMonitor;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerRunner;
 import studio.blacktech.furryblackplus.core.define.schema.Schema;
@@ -60,6 +67,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -839,8 +847,8 @@ public final class Systemd {
 
         try {
 
-            if (this.schema.getFilterUsersChain().stream().anyMatch(item -> item.handleUsersMessageWrapper(event))) {
-                return;
+            for (EventHandlerFilter eventHandlerFilter : this.schema.getFilterUsersChain()) {
+                if (eventHandlerFilter.handleUsersMessageWrapper(event)) return;
             }
 
             this.MONITOR_PROCESS.submit(() -> {
@@ -889,9 +897,15 @@ public final class Systemd {
                         EventHandlerExecutor executor = this.schema.getExecutorUsersPool().get(commandName);
                         if (executor == null) {
                             Driver.sendMessage(event, "没有此命令");
-                        } else {
-                            executor.handleUsersMessageWrapper(event, command);
+                            return;
                         }
+                        for (EventHandlerChecker checker : this.schema.getGlobalCheckerUsersPool()) {
+                            if (checker.handleUsersMessageWrapper(event, command)) return;
+                        }
+                        for (EventHandlerChecker checker : this.schema.getCommandCheckerUsersPool(commandName)) {
+                            if (checker.handleUsersMessageWrapper(event, command)) return;
+                        }
+                        executor.handleUsersMessageWrapper(event, command);
                         break;
                 }
             }
@@ -908,8 +922,8 @@ public final class Systemd {
 
         try {
 
-            if (this.schema.getFilterGroupChain().stream().anyMatch(item -> item.handleGroupMessageWrapper(event))) {
-                return;
+            for (EventHandlerFilter eventHandlerFilter : this.schema.getFilterGroupChain()) {
+                if (eventHandlerFilter.handleGroupMessageWrapper(event)) return;
             }
 
             this.MONITOR_PROCESS.submit(() -> {
@@ -976,12 +990,13 @@ public final class Systemd {
 
                     default:
                         EventHandlerExecutor executor = this.schema.getExecutorGroupPool().get(commandName);
-                        if (executor != null) {
-                            if (executor.isEnable()) {
-                                executor.handleGroupMessageWrapper(event, command);
-                            } else {
-                                Driver.sendMessage(event, "没有此命令");
-                            }
+                        if (executor == null) return;
+                        executor.handleGroupMessageWrapper(event, command);
+                        for (EventHandlerChecker checker : this.schema.getGlobalCheckerGroupPool()) {
+                            if (checker.handleGroupMessageWrapper(event, command)) return;
+                        }
+                        for (EventHandlerChecker checker : this.schema.getCommandCheckerGroupPool(commandName)) {
+                            if (checker.handleGroupMessageWrapper(event, command)) return;
                         }
                         break;
                 }
@@ -1135,19 +1150,39 @@ public final class Systemd {
         return this.schema.listAllModule();
     }
 
-    public Map<String, Boolean> listAllRunner() {
+    public Map<Runner, Boolean> listAllRunner() {
         return this.schema.listAllRunner();
     }
 
-    public Map<String, Boolean> listAllFilter() {
+    public Map<Filter, Boolean> listAllFilter() {
         return this.schema.listAllFilter();
     }
 
-    public Map<String, Boolean> listAllMonitor() {
+    public Map<Monitor, Boolean> listAllMonitor() {
         return this.schema.listAllMonitor();
     }
 
-    public Map<String, Boolean> listAllExecutor() {
+    public Map<Checker, Boolean> listAllChecker() {
+        return this.schema.listAllChecker();
+    }
+
+    public List<Checker> listGlobalUsersChecker() {
+        return this.schema.listGlobalUsersChecker();
+    }
+
+    public List<Checker> listGlobalGroupChecker() {
+        return this.schema.listGlobalGroupChecker();
+    }
+
+    public Map<String, List<Checker>> listCommandUsersChecker() {
+        return this.schema.listCommandsUsersChecker();
+    }
+
+    public Map<String, List<Checker>> listCommandGroupChecker() {
+        return this.schema.listCommandsGroupChecker();
+    }
+
+    public Map<Executor, Boolean> listAllExecutor() {
         return this.schema.listAllExecutor();
     }
 

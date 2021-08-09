@@ -15,11 +15,13 @@
 
 package studio.blacktech.furryblackplus.core.define.schema;
 
+import studio.blacktech.furryblackplus.core.define.annotation.Checker;
 import studio.blacktech.furryblackplus.core.define.annotation.Executor;
 import studio.blacktech.furryblackplus.core.define.annotation.Filter;
 import studio.blacktech.furryblackplus.core.define.annotation.Monitor;
 import studio.blacktech.furryblackplus.core.define.annotation.Runner;
 import studio.blacktech.furryblackplus.core.define.moduel.AbstractEventHandler;
+import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerChecker;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerExecutor;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerFilter;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerMonitor;
@@ -52,6 +54,7 @@ public class Plugin {
     private final Map<Runner, Class<? extends EventHandlerRunner>> runnerClassMap;
     private final Map<Filter, Class<? extends EventHandlerFilter>> filterClassMap;
     private final Map<Monitor, Class<? extends EventHandlerMonitor>> monitorClassMap;
+    private final Map<Checker, Class<? extends EventHandlerChecker>> checkerClassMap;
     private final Map<Executor, Class<? extends EventHandlerExecutor>> executorClassMap;
 
     public File getFile() {
@@ -78,6 +81,10 @@ public class Plugin {
         return this.monitorClassMap;
     }
 
+    public Map<Checker, Class<? extends EventHandlerChecker>> getCheckerClassMap() {
+        return this.checkerClassMap;
+    }
+
     public Map<Executor, Class<? extends EventHandlerExecutor>> getExecutorClassMap() {
         return this.executorClassMap;
     }
@@ -90,6 +97,7 @@ public class Plugin {
         this.runnerClassMap = new LinkedHashMap<>();
         this.filterClassMap = new LinkedHashMap<>();
         this.monitorClassMap = new LinkedHashMap<>();
+        this.checkerClassMap = new LinkedHashMap<>();
         this.executorClassMap = new LinkedHashMap<>();
 
         String fileName = this.file.getName();
@@ -241,6 +249,34 @@ public class Plugin {
 
                     continue;
 
+                } else if (EventHandlerChecker.class.isAssignableFrom(clazz)) {
+
+                    if (!clazz.isAnnotationPresent(Checker.class)) {
+                        this.logger.warning("发现无注解模块 不予注册 " + this.name);
+                        continue;
+                    }
+
+                    Checker annotation = clazz.getAnnotation(Checker.class);
+
+                    String moduleName = annotation.value();
+
+                    if (this.modules.containsKey(moduleName)) {
+                        Class<? extends AbstractEventHandler> exist = this.modules.get(moduleName);
+                        this.logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
+                        this.logger.warning("不予注册插件 " + this.name);
+                        throw new ScanException("发现垃圾插件 包含自冲突");
+                    }
+
+                    if (annotation.users() || annotation.group()) {
+                        this.modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
+                        this.checkerClassMap.put(annotation, (Class<? extends EventHandlerChecker>) clazz);
+                        this.logger.info("检查器 -> " + clazzHashName);
+                    } else {
+                        this.logger.warning("发现未启用检查器 " + clazz.getName());
+                    }
+
+                    continue;
+
                 } else if (EventHandlerExecutor.class.isAssignableFrom(clazz)) {
 
                     if (!clazz.isAnnotationPresent(Executor.class)) {
@@ -267,7 +303,6 @@ public class Plugin {
                         this.logger.warning("不予注册插件 " + this.name);
                         throw new ScanException("发现垃圾插件 包含自冲突");
                     }
-
 
                     if (annotation.users() || annotation.group()) {
                         commands.put(command, (Class<? extends EventHandlerExecutor>) clazz);

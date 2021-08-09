@@ -17,11 +17,13 @@ package studio.blacktech.furryblackplus.core.define.schema;
 
 import studio.blacktech.furryblackplus.Driver;
 import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.core.define.annotation.Checker;
 import studio.blacktech.furryblackplus.core.define.annotation.Executor;
 import studio.blacktech.furryblackplus.core.define.annotation.Filter;
 import studio.blacktech.furryblackplus.core.define.annotation.Monitor;
 import studio.blacktech.furryblackplus.core.define.annotation.Runner;
 import studio.blacktech.furryblackplus.core.define.moduel.AbstractEventHandler;
+import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerChecker;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerExecutor;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerFilter;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerMonitor;
@@ -39,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -62,11 +65,13 @@ public class Schema {
     private final Map<Runner, Class<? extends EventHandlerRunner>> COMPONENT_RUNNER_CLAZZ;
     private final Map<Filter, Class<? extends EventHandlerFilter>> COMPONENT_FILTER_CLAZZ;
     private final Map<Monitor, Class<? extends EventHandlerMonitor>> COMPONENT_MONITOR_CLAZZ;
+    private final Map<Checker, Class<? extends EventHandlerChecker>> COMPONENT_CHECKER_CLAZZ;
     private final Map<Executor, Class<? extends EventHandlerExecutor>> COMPONENT_EXECUTOR_CLAZZ;
 
     private final Map<Runner, EventHandlerRunner> COMPONENT_RUNNER_INSTANCE;
     private final Map<Filter, EventHandlerFilter> COMPONENT_FILTER_INSTANCE;
     private final Map<Monitor, EventHandlerMonitor> COMPONENT_MONITOR_INSTANCE;
+    private final Map<Checker, EventHandlerChecker> COMPONENT_CHECKER_INSTANCE;
     private final Map<Executor, EventHandlerExecutor> COMPONENT_EXECUTOR_INSTANCE;
 
     private final Map<String, Executor> COMMAND_EXECUTOR_RELATION;
@@ -81,6 +86,11 @@ public class Schema {
     private final Map<String, EventHandlerExecutor> EXECUTOR_USERS_POOL;
     private final Map<String, EventHandlerExecutor> EXECUTOR_GROUP_POOL;
 
+    private final List<EventHandlerChecker> GLOBAL_CHECKER_USERS_POOL;
+    private final List<EventHandlerChecker> GLOBAL_CHECKER_GROUP_POOL;
+
+    private final Map<String, List<EventHandlerChecker>> COMMAND_CHECKER_USERS_POOL;
+    private final Map<String, List<EventHandlerChecker>> COMMAND_CHECKER_GROUP_POOL;
 
     public Schema(File folder) {
 
@@ -92,28 +102,32 @@ public class Schema {
         this.COMPONENT_RUNNER_CLAZZ = new ConcurrentSkipListMap<>(Schema::compare); // 3
         this.COMPONENT_FILTER_CLAZZ = new ConcurrentSkipListMap<>(Schema::compare); // 4
         this.COMPONENT_MONITOR_CLAZZ = new ConcurrentSkipListMap<>(Schema::compare); // 5
-        this.COMPONENT_EXECUTOR_CLAZZ = new ConcurrentSkipListMap<>(Schema::compare); // 6
+        this.COMPONENT_CHECKER_CLAZZ = new ConcurrentSkipListMap<>(Schema::compare); // 6
+        this.COMPONENT_EXECUTOR_CLAZZ = new ConcurrentSkipListMap<>(Schema::compare); // 7
 
-        this.COMPONENT_RUNNER_INSTANCE = new ConcurrentSkipListMap<>(Schema::compare); // 7
-        this.COMPONENT_FILTER_INSTANCE = new ConcurrentSkipListMap<>(Schema::compare); // 8
-        this.COMPONENT_MONITOR_INSTANCE = new ConcurrentSkipListMap<>(Schema::compare); // 9
-        this.COMPONENT_EXECUTOR_INSTANCE = new ConcurrentSkipListMap<>(Schema::compare); // a
+        this.COMPONENT_RUNNER_INSTANCE = new ConcurrentSkipListMap<>(Schema::compare); // 8
+        this.COMPONENT_FILTER_INSTANCE = new ConcurrentSkipListMap<>(Schema::compare); // 9
+        this.COMPONENT_MONITOR_INSTANCE = new ConcurrentSkipListMap<>(Schema::compare); // 10
+        this.COMPONENT_CHECKER_INSTANCE = new ConcurrentSkipListMap<>(Schema::compare); // 11
+        this.COMPONENT_EXECUTOR_INSTANCE = new ConcurrentSkipListMap<>(Schema::compare); // 12
 
-        this.COMMAND_EXECUTOR_RELATION = new ConcurrentHashMap<>(); // b
-        this.MODULE_PLUGIN_RELATION = new ConcurrentHashMap<>(); // c
+        this.COMMAND_EXECUTOR_RELATION = new ConcurrentHashMap<>(); // 13
+        this.MODULE_PLUGIN_RELATION = new ConcurrentHashMap<>(); // 14
 
-        this.FILTER_USERS_CHAIN = new CopyOnWriteArrayList<>(); // d
-        this.FILTER_GROUP_CHAIN = new CopyOnWriteArrayList<>(); // f
+        this.FILTER_USERS_CHAIN = new CopyOnWriteArrayList<>(); // 15
+        this.FILTER_GROUP_CHAIN = new CopyOnWriteArrayList<>(); // 16
 
-        this.MONITOR_USERS_CHAIN = new CopyOnWriteArrayList<>(); // g
-        this.MONITOR_GROUP_CHAIN = new CopyOnWriteArrayList<>(); // h
+        this.MONITOR_USERS_CHAIN = new CopyOnWriteArrayList<>(); // 17
+        this.MONITOR_GROUP_CHAIN = new CopyOnWriteArrayList<>(); // 18
 
-        this.EXECUTOR_USERS_POOL = new ConcurrentHashMap<>(); // i
-        this.EXECUTOR_GROUP_POOL = new ConcurrentHashMap<>(); // j
+        this.EXECUTOR_USERS_POOL = new ConcurrentHashMap<>(); // 19
+        this.EXECUTOR_GROUP_POOL = new ConcurrentHashMap<>(); // 20
 
+        this.GLOBAL_CHECKER_USERS_POOL = new CopyOnWriteArrayList<>(); // 21
+        this.GLOBAL_CHECKER_GROUP_POOL = new CopyOnWriteArrayList<>(); // 22
 
-        // 用了18个容器就解决了 多方便
-
+        this.COMMAND_CHECKER_USERS_POOL = new ConcurrentHashMap<>(); // 23
+        this.COMMAND_CHECKER_GROUP_POOL = new ConcurrentHashMap<>(); // 24
 
     }
 
@@ -172,27 +186,23 @@ public class Schema {
 
 
     // =================================================================================================================
-    // 获取Runner
-
-
-    @SuppressWarnings("unchecked")
-    public <T extends EventHandlerRunner> T getRunner(Class<T> clazz) {
-        List<EventHandlerRunner> collect = this.COMPONENT_RUNNER_INSTANCE.values().stream().filter(clazz::isInstance).collect(Collectors.toUnmodifiableList());
-        if (collect.size() == 1) {
-            return (T) collect.get(0);
-        } else {
-            return null;
-        }
-    }
+    //
+    // 插件相关
+    //
+    // =================================================================================================================
 
 
     // =================================================================================================================
-    // 插件操作
+    // 列出插件
 
 
     public Set<String> listAllPlugin() {
         return this.PLUGINS.keySet();
     }
+
+
+    // =================================================================================================================
+    // 导入插件
 
 
     public void importPlugin(String fileName) {
@@ -229,6 +239,10 @@ public class Schema {
     }
 
 
+    // =================================================================================================================
+    // 重载插件
+
+
     public void reloadPlugin(String name) {
 
         Plugin plugin = this.PLUGINS.get(name);
@@ -252,6 +266,10 @@ public class Schema {
     }
 
 
+    // =================================================================================================================
+    // 卸载插件
+
+
     public void unloadPlugin(String name) {
 
         Plugin plugin = this.PLUGINS.remove(name);
@@ -260,6 +278,7 @@ public class Schema {
             System.out.println("没有这个插件 " + name);
             return;
         }
+
 
         Set<Executor> pendingExecutors = plugin.getExecutorClassMap().keySet();
 
@@ -270,23 +289,33 @@ public class Schema {
             if (!pendingExecutors.contains(annotation)) {
                 continue;
             }
-            EventHandlerExecutor instance = this.COMPONENT_EXECUTOR_INSTANCE.remove(annotation);
-            String command = annotation.command();
-            this.logger.info("卸载执行器 " + annotation.value() + "[" + command + "] -> " + instance.getClass().getName() + ":" + instance.hashCode());
-            try {
-                instance.shutWrapper();
-            } catch (Exception exception) {
-                this.logger.warning("关闭执行器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
-            }
-            this.MODULES.remove(annotation.value());
-            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
-            this.EXECUTOR_USERS_POOL.remove(command);
-            this.EXECUTOR_GROUP_POOL.remove(command);
-            this.COMMAND_EXECUTOR_RELATION.remove(command);
+            this.unloadExecutorInstance(annotation);
         }
 
-        for (Executor executor : pendingExecutors) {
-            this.COMPONENT_EXECUTOR_CLAZZ.remove(executor);
+        for (Executor annotation : pendingExecutors) {
+            this.MODULES.remove(annotation.value());
+            this.COMPONENT_EXECUTOR_CLAZZ.remove(annotation);
+            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
+            this.COMMAND_EXECUTOR_RELATION.remove(annotation.command());
+        }
+
+
+        Set<Checker> pendingCheckers = plugin.getCheckerClassMap().keySet();
+
+        ArrayList<Checker> checkers = new ArrayList<>(this.COMPONENT_CHECKER_CLAZZ.keySet());
+        Collections.reverse(checkers);
+
+        for (Checker annotation : checkers) {
+            if (!pendingCheckers.contains(annotation)) {
+                continue;
+            }
+            this.unloadCheckerInstance(annotation);
+        }
+
+        for (Checker annotation : pendingCheckers) {
+            this.MODULES.remove(annotation.value());
+            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
+            this.COMPONENT_CHECKER_CLAZZ.remove(annotation);
         }
 
 
@@ -299,21 +328,12 @@ public class Schema {
             if (!pendingMonitors.contains(annotation)) {
                 continue;
             }
-            EventHandlerMonitor instance = this.COMPONENT_MONITOR_INSTANCE.remove(annotation);
-            this.logger.info("卸载监听器 " + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName() + ":" + instance.hashCode());
-            try {
-                instance.shutWrapper();
-            } catch (Exception exception) {
-                this.logger.warning("关闭监听器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
-            }
-            this.MODULES.remove(annotation.value());
-            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
-            this.MONITOR_USERS_CHAIN.remove(instance);
-            this.MONITOR_GROUP_CHAIN.remove(instance);
+            this.unloadMonitorInstance(annotation);
         }
 
-
         for (Monitor annotation : pendingMonitors) {
+            this.MODULES.remove(annotation.value());
+            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
             this.COMPONENT_MONITOR_CLAZZ.remove(annotation);
         }
 
@@ -327,21 +347,12 @@ public class Schema {
             if (!pendingFilters.contains(annotation)) {
                 continue;
             }
-            EventHandlerFilter instance = this.COMPONENT_FILTER_INSTANCE.remove(annotation);
-            this.logger.info("卸载过滤器 " + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName() + ":" + instance.hashCode());
-            try {
-                instance.shutWrapper();
-            } catch (Exception exception) {
-                this.logger.warning("关闭过滤器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
-            }
-            this.MODULES.remove(annotation.value());
-            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
-            this.FILTER_USERS_CHAIN.remove(instance);
-            this.FILTER_GROUP_CHAIN.remove(instance);
+            this.unloadFilterInstance(annotation);
         }
 
-
         for (Filter annotation : pendingFilters) {
+            this.MODULES.remove(annotation.value());
+            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
             this.COMPONENT_FILTER_CLAZZ.remove(annotation);
         }
 
@@ -355,60 +366,26 @@ public class Schema {
             if (!pendingRunners.contains(annotation)) {
                 continue;
             }
-            EventHandlerRunner instance = this.COMPONENT_RUNNER_INSTANCE.remove(annotation);
-            this.logger.info("卸载定时器 " + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName() + ":" + instance.hashCode());
-            try {
-                instance.shutWrapper();
-            } catch (Exception exception) {
-                this.logger.warning("关闭定时器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
-            }
-            this.MODULES.remove(annotation.value());
-            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
+            this.unloadRunnerInstance(annotation);
         }
-
 
         for (Runner annotation : pendingRunners) {
+            this.MODULES.remove(annotation.value());
+            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
             this.COMPONENT_RUNNER_CLAZZ.remove(annotation);
         }
-
     }
 
 
     // =================================================================================================================
-    // 模块操作
+    //
+    // 模块相关
+    //
+    // =================================================================================================================
 
 
-    public Map<String, Boolean> listAllRunner() {
-        Map<String, Boolean> result = new LinkedHashMap<>();
-        for (Runner annotation : this.COMPONENT_RUNNER_CLAZZ.keySet()) {
-            result.put(annotation.value(), this.COMPONENT_RUNNER_INSTANCE.containsKey(annotation));
-        }
-        return result;
-    }
-
-    public Map<String, Boolean> listAllFilter() {
-        Map<String, Boolean> result = new LinkedHashMap<>();
-        for (Filter annotation : this.COMPONENT_FILTER_CLAZZ.keySet()) {
-            result.put(annotation.value(), this.COMPONENT_FILTER_CLAZZ.containsKey(annotation));
-        }
-        return result;
-    }
-
-    public Map<String, Boolean> listAllMonitor() {
-        Map<String, Boolean> result = new LinkedHashMap<>();
-        for (Monitor annotation : this.COMPONENT_MONITOR_CLAZZ.keySet()) {
-            result.put(annotation.value(), this.COMPONENT_MONITOR_INSTANCE.containsKey(annotation));
-        }
-        return result;
-    }
-
-    public Map<String, Boolean> listAllExecutor() {
-        Map<String, Boolean> result = new LinkedHashMap<>();
-        for (Executor annotation : this.COMPONENT_EXECUTOR_CLAZZ.keySet()) {
-            result.put(annotation.value(), this.COMPONENT_EXECUTOR_INSTANCE.containsKey(annotation));
-        }
-        return result;
-    }
+    // =================================================================================================================
+    // 列出模块
 
 
     public Map<String, Boolean> listAllModule() {
@@ -427,12 +404,97 @@ public class Schema {
             result.put(annotation.value(), this.COMPONENT_MONITOR_INSTANCE.containsKey(annotation));
         }
 
+        for (Checker annotation : this.COMPONENT_CHECKER_CLAZZ.keySet()) {
+            result.put(annotation.value(), this.COMPONENT_CHECKER_CLAZZ.containsKey(annotation));
+        }
+
         for (Executor annotation : this.COMPONENT_EXECUTOR_CLAZZ.keySet()) {
             result.put(annotation.value(), this.COMPONENT_EXECUTOR_INSTANCE.containsKey(annotation));
         }
 
         return result;
     }
+
+
+    public Map<Runner, Boolean> listAllRunner() {
+        Map<Runner, Boolean> result = new LinkedHashMap<>();
+        for (Runner annotation : this.COMPONENT_RUNNER_CLAZZ.keySet()) {
+            result.put(annotation, this.COMPONENT_RUNNER_INSTANCE.containsKey(annotation));
+        }
+        return result;
+    }
+
+    public Map<Filter, Boolean> listAllFilter() {
+        Map<Filter, Boolean> result = new LinkedHashMap<>();
+        for (Filter annotation : this.COMPONENT_FILTER_CLAZZ.keySet()) {
+            result.put(annotation, this.COMPONENT_FILTER_CLAZZ.containsKey(annotation));
+        }
+        return result;
+    }
+
+    public Map<Monitor, Boolean> listAllMonitor() {
+        Map<Monitor, Boolean> result = new LinkedHashMap<>();
+        for (Monitor annotation : this.COMPONENT_MONITOR_CLAZZ.keySet()) {
+            result.put(annotation, this.COMPONENT_MONITOR_INSTANCE.containsKey(annotation));
+        }
+        return result;
+    }
+
+    public Map<Checker, Boolean> listAllChecker() {
+        Map<Checker, Boolean> result = new LinkedHashMap<>();
+        for (Checker annotation : this.COMPONENT_CHECKER_CLAZZ.keySet()) {
+            result.put(annotation, this.COMPONENT_CHECKER_INSTANCE.containsKey(annotation));
+        }
+        return result;
+    }
+
+    public List<Checker> listGlobalUsersChecker() {
+        return this.GLOBAL_CHECKER_USERS_POOL.stream()
+                   .map(item -> item.getClass().getAnnotation(Checker.class))
+                   .collect(Collectors.toUnmodifiableList());
+    }
+
+
+    public List<Checker> listGlobalGroupChecker() {
+        return this.GLOBAL_CHECKER_USERS_POOL.stream()
+                   .map(item -> item.getClass().getAnnotation(Checker.class))
+                   .collect(Collectors.toUnmodifiableList());
+    }
+
+
+    public Map<String, List<Checker>> listCommandsUsersChecker() {
+        Map<String, List<Checker>> result = new LinkedHashMap<>();
+        for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_USERS_POOL.entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            List<Checker> collect = v.stream().map(item -> item.getClass().getAnnotation(Checker.class)).collect(Collectors.toUnmodifiableList());
+            result.put(k, collect);
+        }
+        return result;
+    }
+
+    public Map<String, List<Checker>> listCommandsGroupChecker() {
+        Map<String, List<Checker>> result = new LinkedHashMap<>();
+        for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_GROUP_POOL.entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            List<Checker> collect = v.stream().map(item -> item.getClass().getAnnotation(Checker.class)).collect(Collectors.toUnmodifiableList());
+            result.put(k, collect);
+        }
+        return result;
+    }
+
+    public Map<Executor, Boolean> listAllExecutor() {
+        Map<Executor, Boolean> result = new LinkedHashMap<>();
+        for (Executor annotation : this.COMPONENT_EXECUTOR_CLAZZ.keySet()) {
+            result.put(annotation, this.COMPONENT_EXECUTOR_INSTANCE.containsKey(annotation));
+        }
+        return result;
+    }
+
+
+    // =================================================================================================================
+    // 模块操作
 
 
     public void shutModule(String name) {
@@ -503,63 +565,47 @@ public class Schema {
 
     public void unloadModule(String name) {
 
-        for (Map.Entry<Runner, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.entrySet()) {
-            var k = entry.getKey();
-            var v = entry.getValue();
-            if (k.value().equals(name)) {
-                this.logger.info("卸载定时器 -> " + name + " " + this.MODULE_PLUGIN_RELATION.get(k.value()) + ":" + v.getClass().getName() + ":" + v.hashCode());
-                v.shutWrapper();
-                this.COMPONENT_RUNNER_INSTANCE.remove(k);
+        for (Executor annotation : this.COMPONENT_EXECUTOR_INSTANCE.keySet()) {
+            if (annotation.value().equals(name)) {
+                this.unloadExecutorInstance(annotation);
                 return;
             }
         }
 
-
-        for (Map.Entry<Filter, EventHandlerFilter> entry : this.COMPONENT_FILTER_INSTANCE.entrySet()) {
-            var k = entry.getKey();
-            var v = entry.getValue();
-            if (k.value().equals(name)) {
-                this.logger.info("卸载过滤器 -> " + name + " " + this.MODULE_PLUGIN_RELATION.get(k.value()) + ":" + v.getClass().getName() + ":" + v.hashCode());
-                v.shutWrapper();
-                this.FILTER_USERS_CHAIN.remove(v);
-                this.FILTER_GROUP_CHAIN.remove(v);
-                this.COMPONENT_FILTER_INSTANCE.remove(k);
+        for (Checker annotation : this.COMPONENT_CHECKER_INSTANCE.keySet()) {
+            if (annotation.value().equals(name)) {
+                this.unloadCheckerInstance(annotation);
                 return;
             }
         }
 
-
-        for (Map.Entry<Monitor, EventHandlerMonitor> entry : this.COMPONENT_MONITOR_INSTANCE.entrySet()) {
-            var k = entry.getKey();
-            var v = entry.getValue();
-            if (k.value().equals(name)) {
-                this.logger.info("卸载监听器 -> " + name + " " + this.MODULE_PLUGIN_RELATION.get(k.value()) + ":" + v.getClass().getName() + ":" + v.hashCode());
-                v.shutWrapper();
-                this.MONITOR_USERS_CHAIN.remove(v);
-                this.MONITOR_GROUP_CHAIN.remove(v);
-                this.COMPONENT_MONITOR_INSTANCE.remove(k);
+        for (Monitor annotation : this.COMPONENT_MONITOR_INSTANCE.keySet()) {
+            if (annotation.value().equals(name)) {
+                this.unloadMonitorInstance(annotation);
                 return;
             }
         }
 
-
-        for (Map.Entry<Executor, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
-            var k = entry.getKey();
-            var v = entry.getValue();
-            if (k.value().equals(name)) {
-                this.logger.info("卸载执行器 -> " + name + " " + this.MODULE_PLUGIN_RELATION.get(k.value()) + ":" + v.getClass().getName() + ":" + v.hashCode());
-                v.shutWrapper();
-                this.EXECUTOR_USERS_POOL.remove(k.value());
-                this.EXECUTOR_GROUP_POOL.remove(k.value());
-                this.COMPONENT_EXECUTOR_INSTANCE.remove(k);
+        for (Filter annotation : this.COMPONENT_FILTER_CLAZZ.keySet()) {
+            if (annotation.value().equals(name)) {
+                this.unloadFilterInstance(annotation);
                 return;
             }
         }
+
+        for (Runner annotation : this.COMPONENT_RUNNER_INSTANCE.keySet()) {
+            if (annotation.value().equals(name)) {
+                this.unloadRunnerInstance(annotation);
+                return;
+            }
+        }
+
     }
 
 
     @SuppressWarnings("deprecation")
     public void reloadModule(String name) {
+
 
         for (Map.Entry<Runner, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.entrySet()) {
             var annotation = entry.getKey();
@@ -590,7 +636,7 @@ public class Schema {
             var annotation = entry.getKey();
             var oldInstance = entry.getValue();
             if (annotation.value().equals(name)) {
-                this.logger.info("关闭过滤器 -> " + name + ":" + oldInstance.hashCode());
+                this.logger.info("关闭旧过滤器 -> " + name + ":" + oldInstance.hashCode());
                 oldInstance.shutWrapper();
                 Class<? extends EventHandlerFilter> clazz = this.COMPONENT_FILTER_CLAZZ.get(annotation);
                 this.logger.info("创建新实例 -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + clazz.getName());
@@ -598,7 +644,7 @@ public class Schema {
                 try {
                     newInstance = clazz.getConstructor().newInstance();
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException exception) {
-                    throw new BotException("重载过滤器失败 " + clazz.getName(), exception);
+                    throw new BotException("创建过滤器失败 " + clazz.getName(), exception);
                 }
                 newInstance.internalInit(annotation.value());
                 this.logger.info("预载过滤器 -> " + clazz.getName() + ":" + newInstance.hashCode());
@@ -606,6 +652,17 @@ public class Schema {
                 this.logger.info("关闭过滤器 -> " + clazz.getName() + ":" + newInstance.hashCode());
                 newInstance.bootWrapper();
                 this.COMPONENT_FILTER_INSTANCE.put(annotation, newInstance);
+                this.logger.info("注册过滤器 -> " + clazz.getName() + ":" + newInstance.hashCode());
+                if (annotation.users()) {
+                    int usersIndex = this.FILTER_USERS_CHAIN.indexOf(oldInstance);
+                    this.FILTER_USERS_CHAIN.remove(oldInstance);
+                    this.FILTER_USERS_CHAIN.add(usersIndex, newInstance);
+                }
+                if (annotation.group()) {
+                    int groupIndex = this.FILTER_GROUP_CHAIN.indexOf(oldInstance);
+                    this.FILTER_GROUP_CHAIN.remove(oldInstance);
+                    this.FILTER_GROUP_CHAIN.add(groupIndex, newInstance);
+                }
                 return;
             }
         }
@@ -623,7 +680,7 @@ public class Schema {
                 try {
                     newInstance = clazz.getConstructor().newInstance();
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException exception) {
-                    throw new BotException("重载定时器失败 " + clazz.getName(), exception);
+                    throw new BotException("重载监听器失败 " + clazz.getName(), exception);
                 }
                 newInstance.internalInit(annotation.value());
                 this.logger.info("预载监听器 -> " + clazz.getName() + ":" + newInstance.hashCode());
@@ -631,6 +688,66 @@ public class Schema {
                 this.logger.info("关闭监听器 -> " + clazz.getName() + ":" + newInstance.hashCode());
                 newInstance.bootWrapper();
                 this.COMPONENT_MONITOR_INSTANCE.put(annotation, newInstance);
+                if (annotation.users()) {
+                    int usersIndex = this.MONITOR_USERS_CHAIN.indexOf(oldInstance);
+                    this.MONITOR_USERS_CHAIN.remove(oldInstance);
+                    this.MONITOR_USERS_CHAIN.add(usersIndex, newInstance);
+                }
+                if (annotation.group()) {
+                    int groupIndex = this.MONITOR_GROUP_CHAIN.indexOf(oldInstance);
+                    this.MONITOR_GROUP_CHAIN.remove(oldInstance);
+                    this.MONITOR_GROUP_CHAIN.add(groupIndex, newInstance);
+                }
+                return;
+            }
+        }
+
+
+        for (Map.Entry<Checker, EventHandlerChecker> entry : this.COMPONENT_CHECKER_INSTANCE.entrySet()) {
+            var annotation = entry.getKey();
+            var oldInstance = entry.getValue();
+            if (annotation.value().equals(name)) {
+                this.logger.info("关闭检查器 -> " + name + ":" + oldInstance.hashCode());
+                oldInstance.shutWrapper();
+                Class<? extends EventHandlerChecker> clazz = this.COMPONENT_CHECKER_CLAZZ.get(annotation);
+                this.logger.info("创建新实例 -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + clazz.getName());
+                EventHandlerChecker newInstance;
+                try {
+                    newInstance = clazz.getConstructor().newInstance();
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException exception) {
+                    throw new BotException("重载检查器失败 " + clazz.getName(), exception);
+                }
+                newInstance.internalInit(annotation.value());
+                this.logger.info("预载检查器 -> " + clazz.getName() + ":" + newInstance.hashCode());
+                newInstance.initWrapper();
+                this.logger.info("关闭检查器 -> " + clazz.getName() + ":" + newInstance.hashCode());
+                newInstance.bootWrapper();
+                this.COMPONENT_CHECKER_INSTANCE.put(annotation, newInstance);
+                if (annotation.command().equals("\\*")) {
+                    if (annotation.users()) {
+                        int usersIndex = this.GLOBAL_CHECKER_USERS_POOL.indexOf(oldInstance);
+                        this.GLOBAL_CHECKER_USERS_POOL.remove(oldInstance);
+                        this.GLOBAL_CHECKER_USERS_POOL.add(usersIndex, newInstance);
+                    }
+                    if (annotation.group()) {
+                        int usersIndex = this.GLOBAL_CHECKER_GROUP_POOL.indexOf(oldInstance);
+                        this.GLOBAL_CHECKER_GROUP_POOL.remove(oldInstance);
+                        this.GLOBAL_CHECKER_GROUP_POOL.add(usersIndex, newInstance);
+                    }
+                } else {
+                    if (annotation.users()) {
+                        List<EventHandlerChecker> checkerList = this.COMMAND_CHECKER_USERS_POOL.get(annotation.command());
+                        int usersIndex = checkerList.indexOf(oldInstance);
+                        checkerList.remove(oldInstance);
+                        checkerList.add(usersIndex, newInstance);
+                    }
+                    if (annotation.group()) {
+                        List<EventHandlerChecker> checkerList = this.COMMAND_CHECKER_GROUP_POOL.get(annotation.command());
+                        int usersIndex = checkerList.indexOf(oldInstance);
+                        checkerList.remove(oldInstance);
+                        checkerList.add(usersIndex, newInstance);
+                    }
+                }
                 return;
             }
         }
@@ -648,7 +765,7 @@ public class Schema {
                 try {
                     newInstance = clazz.getConstructor().newInstance();
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException exception) {
-                    throw new BotException("重载定时器失败 " + clazz.getName(), exception);
+                    throw new BotException("重载执行器失败 " + clazz.getName(), exception);
                 }
                 newInstance.internalInit(annotation.value());
                 this.logger.info("预载执行器 -> " + clazz.getName() + ":" + newInstance.hashCode());
@@ -656,6 +773,8 @@ public class Schema {
                 this.logger.info("关闭执行器 -> " + clazz.getName() + ":" + newInstance.hashCode());
                 newInstance.bootWrapper();
                 this.COMPONENT_EXECUTOR_INSTANCE.put(annotation, newInstance);
+                if (annotation.users()) this.EXECUTOR_USERS_POOL.put(annotation.command(), newInstance);
+                if (annotation.group()) this.EXECUTOR_GROUP_POOL.put(annotation.command(), newInstance);
                 return;
             }
         }
@@ -663,8 +782,25 @@ public class Schema {
 
 
     // =================================================================================================================
+    // 获取Runner
+
+
+    @SuppressWarnings("unchecked")
+    public <T extends EventHandlerRunner> T getRunner(Class<T> clazz) {
+        List<EventHandlerRunner> collect = this.COMPONENT_RUNNER_INSTANCE.values().stream()
+                                               .filter(clazz::isInstance)
+                                               .collect(Collectors.toUnmodifiableList());
+        if (collect.size() == 1) {
+            return (T) collect.get(0);
+        } else {
+            return null;
+        }
+    }
+
+
+    // =================================================================================================================
     //
-    // 模块管理
+    // 模型相关
     //
     // =================================================================================================================
 
@@ -727,10 +863,8 @@ public class Schema {
         }
 
 
-        // =====================================================================
-
-
         this.logger.info("模块冲突检查 -> " + pluginName);
+
 
         for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> moduleEntry : pluginItem.getRunnerClassMap().entrySet()) {
             var k = moduleEntry.getKey();
@@ -738,6 +872,43 @@ public class Schema {
             if (this.COMPONENT_RUNNER_CLAZZ.containsKey(k)) {
                 Class<? extends AbstractEventHandler> exist = this.COMPONENT_RUNNER_CLAZZ.get(k);
                 throw new ScanException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + this.COMPONENT_RUNNER_CLAZZ.get(k) + ":" + exist.getName());
+            }
+        }
+
+        for (Map.Entry<Filter, Class<? extends EventHandlerFilter>> moduleEntry : pluginItem.getFilterClassMap().entrySet()) {
+            var k = moduleEntry.getKey();
+            var v = moduleEntry.getValue();
+            if (this.COMPONENT_FILTER_CLAZZ.containsKey(k)) {
+                Class<? extends AbstractEventHandler> exist = this.COMPONENT_FILTER_CLAZZ.get(k);
+                throw new ScanException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + this.COMPONENT_FILTER_CLAZZ.get(k) + ":" + exist.getName());
+            }
+        }
+
+        for (Map.Entry<Monitor, Class<? extends EventHandlerMonitor>> moduleEntry : pluginItem.getMonitorClassMap().entrySet()) {
+            var k = moduleEntry.getKey();
+            var v = moduleEntry.getValue();
+            if (this.COMPONENT_MONITOR_CLAZZ.containsKey(k)) {
+                Class<? extends AbstractEventHandler> exist = this.COMPONENT_MONITOR_CLAZZ.get(k);
+                throw new ScanException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + this.COMPONENT_MONITOR_CLAZZ.get(k) + ":" + exist.getName());
+            }
+        }
+
+
+        for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> moduleEntry : pluginItem.getCheckerClassMap().entrySet()) {
+            var k = moduleEntry.getKey();
+            var v = moduleEntry.getValue();
+            if (this.COMPONENT_CHECKER_CLAZZ.containsKey(k)) {
+                Class<? extends AbstractEventHandler> exist = this.COMPONENT_CHECKER_CLAZZ.get(k);
+                throw new ScanException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + this.COMPONENT_CHECKER_CLAZZ.get(k) + ":" + exist.getName());
+            }
+        }
+
+        for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> moduleEntry : pluginItem.getExecutorClassMap().entrySet()) {
+            var k = moduleEntry.getKey();
+            var v = moduleEntry.getValue();
+            if (this.COMPONENT_EXECUTOR_CLAZZ.containsKey(k)) {
+                Class<? extends AbstractEventHandler> exist = this.COMPONENT_EXECUTOR_CLAZZ.get(k);
+                throw new ScanException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + this.COMPONENT_EXECUTOR_CLAZZ.get(k) + ":" + exist.getName());
             }
         }
 
@@ -753,10 +924,8 @@ public class Schema {
             }
         }
 
+
         this.logger.info("模块检查通过 -> " + pluginName);
-
-
-        // =====================================================================
 
 
         for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> entry : pluginItem.getRunnerClassMap().entrySet()) {
@@ -789,6 +958,16 @@ public class Schema {
             this.logger.info("注册监听器 " + pluginName + ":" + moduleName + "[" + k.priority() + "] -> " + v.getName());
         }
 
+        for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> entry : pluginItem.getCheckerClassMap().entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            String moduleName = k.value();
+            this.MODULES.put(moduleName, v);
+            this.COMPONENT_CHECKER_CLAZZ.put(k, v);
+            this.MODULE_PLUGIN_RELATION.put(moduleName, pluginName);
+            this.logger.info("注册检查器 " + pluginName + ":" + moduleName + "[" + k.priority() + "] -> " + v.getName());
+        }
+
         for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> entry : pluginItem.getExecutorClassMap().entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
@@ -816,6 +995,9 @@ public class Schema {
 
         this.logger.hint("加载监听器 " + this.COMPONENT_MONITOR_CLAZZ.size());
         this.COMPONENT_MONITOR_CLAZZ.forEach(this::makeMonitor);
+
+        this.logger.hint("加载检查器 " + this.COMPONENT_CHECKER_CLAZZ.size());
+        this.COMPONENT_CHECKER_CLAZZ.forEach(this::makeChecker);
 
         this.logger.hint("加载执行器 " + this.COMPONENT_EXECUTOR_CLAZZ.size());
         this.COMPONENT_EXECUTOR_CLAZZ.forEach(this::makeExecutor);
@@ -873,6 +1055,18 @@ public class Schema {
             this.makeMonitor(k, v);
         }
 
+        Set<Checker> checkerHashSet = new HashSet<>(plugin.getCheckerClassMap().keySet());
+
+        this.logger.hint("加载执行器 " + checkerHashSet.size());
+
+        for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> entry : this.COMPONENT_CHECKER_CLAZZ.entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            if (!checkerHashSet.contains(k)) {
+                continue;
+            }
+            this.makeChecker(k, v);
+        }
 
         Set<Executor> executorHashSet = new HashSet<>(plugin.getExecutorClassMap().keySet());
 
@@ -905,6 +1099,9 @@ public class Schema {
         this.logger.hint("预载监听器");
         this.COMPONENT_MONITOR_INSTANCE.forEach(this::initMonitor);
 
+        this.logger.hint("预载检查器");
+        this.COMPONENT_CHECKER_INSTANCE.forEach(this::initChecker);
+
         this.logger.hint("预载执行器");
         this.COMPONENT_EXECUTOR_INSTANCE.forEach(this::initExecutor);
 
@@ -915,9 +1112,7 @@ public class Schema {
 
 
         Set<Runner> runnerHashSet = new HashSet<>(plugin.getRunnerClassMap().keySet());
-
         this.logger.hint("预载定时器");
-
         for (Map.Entry<Runner, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
@@ -929,9 +1124,7 @@ public class Schema {
 
 
         Set<Filter> filterHashSet = new HashSet<>(plugin.getFilterClassMap().keySet());
-
         this.logger.hint("预载过滤器");
-
         for (Map.Entry<Filter, EventHandlerFilter> entry : this.COMPONENT_FILTER_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
@@ -951,6 +1144,18 @@ public class Schema {
                 continue;
             }
             this.initMonitor(k, v);
+        }
+
+
+        Set<Checker> checkerHashSet = new HashSet<>(plugin.getCheckerClassMap().keySet());
+        this.logger.hint("预载检查器");
+        for (Map.Entry<Checker, EventHandlerChecker> entry : this.COMPONENT_CHECKER_INSTANCE.entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            if (!checkerHashSet.contains(k)) {
+                continue;
+            }
+            this.initChecker(k, v);
         }
 
 
@@ -977,14 +1182,14 @@ public class Schema {
         this.logger.hint("启动定时器");
         this.COMPONENT_RUNNER_INSTANCE.forEach(this::bootRunner);
 
-
         this.logger.hint("启动过滤器");
         this.COMPONENT_FILTER_INSTANCE.forEach(this::bootFilter);
-
 
         this.logger.hint("启动监听器");
         this.COMPONENT_MONITOR_INSTANCE.forEach(this::bootMonitor);
 
+        this.logger.hint("启动检查器");
+        this.COMPONENT_CHECKER_INSTANCE.forEach(this::bootChecker);
 
         this.logger.hint("启动执行器");
         this.COMPONENT_EXECUTOR_INSTANCE.forEach(this::bootExecutor);
@@ -1036,6 +1241,18 @@ public class Schema {
         }
 
 
+        Set<Checker> checkerHashSet = new HashSet<>(plugin.getCheckerClassMap().keySet());
+        this.logger.hint("启动检查器");
+        for (Map.Entry<Checker, EventHandlerChecker> entry : this.COMPONENT_CHECKER_INSTANCE.entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            if (!checkerHashSet.contains(k)) {
+                continue;
+            }
+            this.bootChecker(k, v);
+        }
+
+
         Set<Executor> executorHashSet = new HashSet<>(plugin.getExecutorClassMap().keySet());
         this.logger.hint("启动执行器");
         for (Map.Entry<Executor, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
@@ -1062,6 +1279,11 @@ public class Schema {
         Collections.reverse(executors);
         executors.forEach(this::shutExecutor);
 
+        this.logger.hint("关闭监听器");
+
+        ArrayList<Checker> checkers = new ArrayList<>(this.COMPONENT_CHECKER_INSTANCE.keySet());
+        Collections.reverse(checkers);
+        checkers.forEach(this::shutChecker);
 
         this.logger.hint("关闭监听器");
 
@@ -1112,6 +1334,21 @@ public class Schema {
         return this.MONITOR_GROUP_CHAIN;
     }
 
+    public List<EventHandlerChecker> getGlobalCheckerUsersPool() {
+        return this.GLOBAL_CHECKER_USERS_POOL;
+    }
+
+    public List<EventHandlerChecker> getGlobalCheckerGroupPool() {
+        return this.GLOBAL_CHECKER_GROUP_POOL;
+    }
+
+    public List<EventHandlerChecker> getCommandCheckerUsersPool(String command) {
+        return this.COMMAND_CHECKER_USERS_POOL.get(command);
+    }
+
+    public List<EventHandlerChecker> getCommandCheckerGroupPool(String command) {
+        return this.COMMAND_CHECKER_GROUP_POOL.get(command);
+    }
 
     public Map<String, EventHandlerExecutor> getExecutorUsersPool() {
         return this.EXECUTOR_USERS_POOL;
@@ -1144,6 +1381,16 @@ public class Schema {
 
 
     private static int compare(Monitor o1, Monitor o2) {
+        if (o1 == o2 || Objects.equals(o1, o2)) {
+            return 0;
+        } else {
+            int i = o1.priority() - o2.priority();
+            return i == 0 ? 1 : i;
+        }
+    }
+
+
+    private static int compare(Checker o1, Checker o2) {
         if (o1 == o2 || Objects.equals(o1, o2)) {
             return 0;
         } else {
@@ -1274,6 +1521,44 @@ public class Schema {
 
 
     @SuppressWarnings("deprecation")
+    private void makeChecker(Checker k, Class<? extends EventHandlerChecker> v) {
+        this.logger.info("加载检查器 " + k.value() + "[" + k.priority() + "] -> " + v.getName());
+        EventHandlerChecker instance;
+        try {
+            instance = v.getConstructor().newInstance();
+            instance.internalInit(k.value());
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+            throw new LoadException("加载检查器失败 " + this.MODULE_PLUGIN_RELATION.get(k.value()) + ":" + k.value() + " " + v.getName());
+        }
+        this.COMPONENT_CHECKER_INSTANCE.put(k, instance);
+        if (k.command().equals("*")) {
+            if (k.users()) this.GLOBAL_CHECKER_USERS_POOL.add(instance);
+            if (k.group()) this.GLOBAL_CHECKER_GROUP_POOL.add(instance);
+        } else {
+            if (k.users()) {
+                List<EventHandlerChecker> checkerList = this.COMMAND_CHECKER_USERS_POOL.computeIfAbsent(k.command(), k1 -> new LinkedList<>());
+                checkerList.add(instance);
+                checkerList.sort((o1, o2) -> {
+                    Checker o1Annotation = o1.getClass().getAnnotation(Checker.class);
+                    Checker o2Annotation = o2.getClass().getAnnotation(Checker.class);
+                    return o1Annotation.priority() - o2Annotation.priority();
+                });
+            }
+            if (k.group()) {
+                List<EventHandlerChecker> checkerList = this.COMMAND_CHECKER_GROUP_POOL.computeIfAbsent(k.command(), k1 -> new LinkedList<>());
+                checkerList.add(instance);
+                checkerList.sort((o1, o2) -> {
+                    Checker o1Annotation = o1.getClass().getAnnotation(Checker.class);
+                    Checker o2Annotation = o2.getClass().getAnnotation(Checker.class);
+                    return o1Annotation.priority() - o2Annotation.priority();
+                });
+            }
+        }
+
+    }
+
+
+    @SuppressWarnings("deprecation")
     private void makeFilter(Filter k, Class<? extends EventHandlerFilter> v) {
         this.logger.info("加载过滤器 " + k.value() + "[" + k.priority() + "] -> " + v.getName());
         EventHandlerFilter instance;
@@ -1319,6 +1604,16 @@ public class Schema {
     }
 
 
+    private void initChecker(Checker k, EventHandlerChecker v) {
+        this.logger.info("预载检查器 " + k.value() + "[" + k.priority() + "] -> " + v.getClass().getName());
+        try {
+            v.initWrapper();
+        } catch (Exception exception) {
+            throw new BootException("预载检查器失败 " + this.MODULE_PLUGIN_RELATION.get(k.value()) + ":" + k.value() + " -> " + v.getClass().getName(), exception);
+        }
+    }
+
+
     private void initExecutor(Executor k, EventHandlerExecutor v) {
         this.logger.info("预载执行器 " + k.value() + "[" + k.command() + "] -> " + v.getClass().getName());
         try {
@@ -1359,6 +1654,16 @@ public class Schema {
     }
 
 
+    private void bootChecker(Checker k, EventHandlerChecker v) {
+        this.logger.info("启动检查器 " + k.value() + "[" + k.priority() + "] -> " + v.getClass().getName());
+        try {
+            v.bootWrapper();
+        } catch (Exception exception) {
+            throw new BootException("启动检查器失败 " + this.MODULE_PLUGIN_RELATION.get(k.value()) + ":" + k.value() + " -> " + v.getClass().getName(), exception);
+        }
+    }
+
+
     private void bootExecutor(Executor k, EventHandlerExecutor v) {
         this.logger.info("启动执行器 " + k.value() + "[" + k.command() + "] -> " + v.getClass().getName());
         try {
@@ -1367,6 +1672,7 @@ public class Schema {
             throw new BootException("启动执行器失败 " + this.MODULE_PLUGIN_RELATION.get(k.value()) + ":" + k.value() + " -> " + v.getClass().getName(), exception);
         }
     }
+
 
     private void shutRunner(Runner annotation) {
         EventHandlerRunner instance = this.COMPONENT_RUNNER_INSTANCE.get(annotation);
@@ -1413,6 +1719,21 @@ public class Schema {
     }
 
 
+    private void shutChecker(Checker annotation) {
+        EventHandlerChecker instance = this.COMPONENT_CHECKER_INSTANCE.get(annotation);
+        this.logger.info("关闭检查器 " + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+        try {
+            if (Driver.isShutModeDrop()) {
+                new Thread(instance::shutWrapper).start();
+            } else {
+                instance.shutWrapper();
+            }
+        } catch (Exception exception) {
+            this.logger.warning("关闭检查器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
+        }
+    }
+
+
     private void shutExecutor(Executor annotation) {
         EventHandlerExecutor instance = this.COMPONENT_EXECUTOR_INSTANCE.get(annotation);
         this.logger.info("关闭执行器 " + annotation.value() + "[" + annotation.command() + "] -> " + instance.getClass().getName());
@@ -1425,6 +1746,83 @@ public class Schema {
         } catch (Exception exception) {
             this.logger.warning("关闭执行器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
         }
+    }
+
+
+    private void unloadRunnerInstance(Runner annotation) {
+        EventHandlerRunner instance = this.COMPONENT_RUNNER_INSTANCE.remove(annotation);
+        this.logger.info("卸载定时器 " + annotation.value() + " -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + instance.getClass().getName() + ":" + instance.hashCode());
+        try {
+            instance.shutWrapper();
+        } catch (Exception exception) {
+            this.logger.info("停止定时器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
+        }
+    }
+
+
+    private void unloadFilterInstance(Filter annotation) {
+        EventHandlerFilter instance = this.COMPONENT_FILTER_INSTANCE.remove(annotation);
+        this.logger.info("卸载过滤器 " + annotation.value() + " -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + instance.getClass().getName() + ":" + instance.hashCode());
+        try {
+            instance.shutWrapper();
+        } catch (Exception exception) {
+            this.logger.info("停止过滤器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
+        }
+        if (annotation.users()) this.FILTER_USERS_CHAIN.remove(instance);
+        if (annotation.group()) this.FILTER_GROUP_CHAIN.remove(instance);
+    }
+
+
+    private void unloadMonitorInstance(Monitor annotation) {
+        EventHandlerMonitor instance = this.COMPONENT_MONITOR_INSTANCE.remove(annotation);
+        this.logger.info("卸载监听器 " + annotation.value() + " -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + instance.getClass().getName() + ":" + instance.hashCode());
+        try {
+            instance.shutWrapper();
+        } catch (Exception exception) {
+            this.logger.info("停止监听器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
+        }
+        this.COMPONENT_MONITOR_INSTANCE.remove(annotation);
+        if (annotation.users()) this.MONITOR_USERS_CHAIN.remove(instance);
+        if (annotation.group()) this.MONITOR_GROUP_CHAIN.remove(instance);
+    }
+
+
+    private void unloadCheckerInstance(Checker annotation) {
+        EventHandlerChecker instance = this.COMPONENT_CHECKER_INSTANCE.remove(annotation);
+        this.logger.info("卸载检查器 " + annotation.value() + " -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + instance.getClass().getName() + ":" + instance.hashCode());
+        try {
+            instance.shutWrapper();
+        } catch (Exception exception) {
+            this.logger.info("停止检查器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
+        }
+        if (annotation.command().equals("*")) {
+            if (annotation.users()) this.GLOBAL_CHECKER_USERS_POOL.remove(instance);
+            if (annotation.group()) this.GLOBAL_CHECKER_GROUP_POOL.remove(instance);
+        } else {
+            if (annotation.users()) {
+                List<EventHandlerChecker> checkerList = this.COMMAND_CHECKER_USERS_POOL.get(annotation.command());
+                if (checkerList == null) return;
+                checkerList.remove(instance);
+            }
+            if (annotation.group()) {
+                List<EventHandlerChecker> checkerList = this.COMMAND_CHECKER_GROUP_POOL.get(annotation.command());
+                if (checkerList == null) return;
+                checkerList.remove(instance);
+            }
+        }
+    }
+
+
+    private void unloadExecutorInstance(Executor annotation) {
+        EventHandlerExecutor instance = this.COMPONENT_EXECUTOR_INSTANCE.remove(annotation);
+        this.logger.info("卸载执行器 " + annotation.value() + " -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + instance.getClass().getName() + ":" + instance.hashCode());
+        try {
+            instance.shutWrapper();
+        } catch (Exception exception) {
+            this.logger.info("停止执行器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
+        }
+        if (annotation.users()) this.EXECUTOR_USERS_POOL.remove(annotation.command());
+        if (annotation.group()) this.EXECUTOR_GROUP_POOL.remove(annotation.command());
     }
 
 
@@ -1470,6 +1868,14 @@ public class Schema {
             System.out.println(k + ":" + k.hashCode() + " -> " + v.getName() + ":" + v.hashCode());
         }
 
+        System.out.println(">> COMPONENT_CHECKER_CLAZZ");
+
+        for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> entry : this.COMPONENT_CHECKER_CLAZZ.entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            System.out.println(k + ":" + k.hashCode() + " -> " + v.getName() + ":" + v.hashCode());
+        }
+
         System.out.println(">> COMPONENT_EXECUTOR_CLAZZ");
 
         for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> entry : this.COMPONENT_EXECUTOR_CLAZZ.entrySet()) {
@@ -1497,6 +1903,14 @@ public class Schema {
         System.out.println(">> COMPONENT_MONITOR_INSTANCE");
 
         for (Map.Entry<Monitor, EventHandlerMonitor> entry : this.COMPONENT_MONITOR_INSTANCE.entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            System.out.println(k + ":" + k.hashCode() + " -> " + v.getClass().getName() + ":" + v.hashCode());
+        }
+
+        System.out.println(">> COMPONENT_CHECKER_INSTANCE");
+
+        for (Map.Entry<Checker, EventHandlerChecker> entry : this.COMPONENT_CHECKER_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
             System.out.println(k + ":" + k.hashCode() + " -> " + v.getClass().getName() + ":" + v.hashCode());
@@ -1550,6 +1964,40 @@ public class Schema {
             System.out.println(item.getClass().getName() + ":" + item.hashCode());
         }
 
+        System.out.println(">> GLOBAL_CHECKER_USERS_POOL");
+
+        for (EventHandlerChecker item : this.GLOBAL_CHECKER_USERS_POOL) {
+            System.out.println(item.getClass().getName() + ":" + item.hashCode());
+        }
+
+        System.out.println(">> GLOBAL_CHECKER_GROUP_POOL");
+
+        for (EventHandlerChecker item : this.GLOBAL_CHECKER_GROUP_POOL) {
+            System.out.println(item.getClass().getName() + ":" + item.hashCode());
+        }
+
+        System.out.println(">> COMMAND_CHECKER_USERS_POOL");
+
+        for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_USERS_POOL.entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            System.out.println(k + " -> " + v.size());
+            for (EventHandlerChecker checker : v) {
+                System.out.println(checker.getClass().getName() + ":" + checker.hashCode());
+            }
+        }
+
+        System.out.println(">> COMMAND_CHECKER_GROUP_POOL");
+
+        for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_GROUP_POOL.entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            System.out.println(k + " -> " + v.size());
+            for (EventHandlerChecker checker : v) {
+                System.out.println(checker.getClass().getName() + ":" + checker.hashCode());
+            }
+        }
+
         System.out.println(">> EXECUTOR_USERS_POOL");
 
         for (Map.Entry<String, EventHandlerExecutor> entry : this.EXECUTOR_USERS_POOL.entrySet()) {
@@ -1567,6 +2015,5 @@ public class Schema {
         }
 
     }
-
 
 }

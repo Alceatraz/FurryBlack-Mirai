@@ -25,17 +25,17 @@ public abstract class EventHandlerMonitor extends AbstractEventHandler {
 
 
     @Api("生命周期 监听私聊消息")
-    public abstract void handleUsersMessage(UserMessageEvent message);
+    protected abstract void handleUsersMessage(UserMessageEvent event);
 
     @Api("生命周期 监听群聊消息")
-    public abstract void handleGroupMessage(GroupMessageEvent message);
+    protected abstract void handleGroupMessage(GroupMessageEvent event);
 
 
-    public void handleUsersMessageWrapper(UserMessageEvent message) {
-        this.handleUsersMessage(message);
+    public void handleUsersMessageWrapper(UserMessageEvent event) {
+        this.handleUsersMessage(event);
     }
 
-    public void handleGroupMessageWrapper(GroupMessageEvent message) {
-        this.handleGroupMessage(message);
+    public void handleGroupMessageWrapper(GroupMessageEvent event) {
+        this.handleGroupMessage(event);
     }
 }

@@ -57,10 +57,10 @@ public abstract class EventHandlerExecutor extends AbstractEventHandler {
     }
 
     @Api("生命周期 处理私聊命令")
-    public abstract void handleUsersMessage(UserMessageEvent event, Command command);
+    protected abstract void handleUsersMessage(UserMessageEvent event, Command command);
 
     @Api("生命周期 处理群聊命令")
-    public abstract void handleGroupMessage(GroupMessageEvent event, Command command);
+    protected abstract void handleGroupMessage(GroupMessageEvent event, Command command);
 
 
     public void handleUsersMessageWrapper(UserMessageEvent event, Command command) {

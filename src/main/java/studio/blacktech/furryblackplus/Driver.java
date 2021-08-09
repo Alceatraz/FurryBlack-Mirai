@@ -47,6 +47,11 @@ import org.jline.widget.AutopairWidgets;
 import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.Systemd;
 import studio.blacktech.furryblackplus.core.define.Command;
+import studio.blacktech.furryblackplus.core.define.annotation.Checker;
+import studio.blacktech.furryblackplus.core.define.annotation.Executor;
+import studio.blacktech.furryblackplus.core.define.annotation.Filter;
+import studio.blacktech.furryblackplus.core.define.annotation.Monitor;
+import studio.blacktech.furryblackplus.core.define.annotation.Runner;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerRunner;
 import studio.blacktech.furryblackplus.core.exception.console.ConsoleException;
 import studio.blacktech.furryblackplus.core.exception.moduels.boot.BootException;
@@ -681,34 +686,70 @@ public final class Driver {
                             // module
                             case 0:
 
-                                Map<String, Boolean> listAllRunner = systemd.listAllRunner();
-                                System.out.println(">> 定时器 " + listAllRunner.size());
-                                for (Map.Entry<String, Boolean> entry : listAllRunner.entrySet()) {
-                                    System.out.println((entry.getValue() ? "√ " : "  ") + entry.getKey());
+                                Map<Runner, Boolean> listAllRunner = systemd.listAllRunner();
+                                System.out.println(LoggerX.Color.LIGHT_BLUE + ">> 定时器 " + listAllRunner.size() + LoggerX.Color.RESET);
+                                for (Map.Entry<Runner, Boolean> entry : listAllRunner.entrySet()) {
+                                    System.out.println((entry.getValue() ? "√ " : "   ") + entry.getKey().value());
                                 }
 
-                                Map<String, Boolean> listAllFilter = systemd.listAllFilter();
-                                System.out.println(">> 过滤器 " + listAllFilter.size());
-                                for (Map.Entry<String, Boolean> entry : listAllFilter.entrySet()) {
-                                    System.out.println((entry.getValue() ? "√ " : "  ") + entry.getKey());
+                                Map<Filter, Boolean> listAllFilter = systemd.listAllFilter();
+                                System.out.println(LoggerX.Color.LIGHT_BLUE + ">> 过滤器 " + listAllFilter.size() + LoggerX.Color.RESET);
+                                for (Map.Entry<Filter, Boolean> entry : listAllFilter.entrySet()) {
+                                    System.out.println((entry.getValue() ? "√ " : "   ") + entry.getKey().value());
                                 }
 
-                                Map<String, Boolean> listAllMonitor = systemd.listAllMonitor();
-                                System.out.println(">> 监听器 " + listAllMonitor.size());
-                                for (Map.Entry<String, Boolean> entry : listAllMonitor.entrySet()) {
-                                    System.out.println((entry.getValue() ? "√ " : "  ") + entry.getKey());
+                                Map<Monitor, Boolean> listAllMonitor = systemd.listAllMonitor();
+                                System.out.println(LoggerX.Color.LIGHT_BLUE + ">> 监听器 " + listAllMonitor.size() + LoggerX.Color.RESET);
+                                for (Map.Entry<Monitor, Boolean> entry : listAllMonitor.entrySet()) {
+                                    System.out.println((entry.getValue() ? "√ " : "   ") + entry.getKey().value());
                                 }
 
-                                Map<String, Boolean> listAllExecutor = systemd.listAllExecutor();
-                                System.out.println(">> 执行器 " + listAllExecutor.size());
-                                for (Map.Entry<String, Boolean> entry : listAllExecutor.entrySet()) {
-                                    System.out.println((entry.getValue() ? "√ " : "  ") + entry.getKey());
+                                Map<Checker, Boolean> listAllChecker = systemd.listAllChecker();
+                                System.out.println(LoggerX.Color.LIGHT_BLUE + ">> 检查器 " + listAllChecker.size() + LoggerX.Color.RESET);
+                                for (Map.Entry<Checker, Boolean> entry : listAllChecker.entrySet()) {
+                                    System.out.println((entry.getValue() ? "√ " : "   ") + entry.getKey().value() + "[" + entry.getKey().command() + "]");
                                 }
 
-                                System.out.println(">> 私聊命令列表");
+                                Map<Executor, Boolean> listAllExecutor = systemd.listAllExecutor();
+                                System.out.println(LoggerX.Color.LIGHT_BLUE + ">> 执行器 " + listAllExecutor.size() + LoggerX.Color.RESET);
+                                for (Map.Entry<Executor, Boolean> entry : listAllExecutor.entrySet()) {
+                                    System.out.println((entry.getValue() ? "√ " : "   ") + entry.getKey().value() + "[" + entry.getKey().command() + "]" + (entry.getKey().users() ? "私聊" : "") + (entry.getKey().users() ? "群聊" : ""));
+                                }
+
+                                List<Checker> globalUsersChecker = systemd.listGlobalUsersChecker();
+                                System.out.println(LoggerX.Color.LIGHT_BLUE + ">> 全局私聊检查器 " + globalUsersChecker.size() + LoggerX.Color.RESET);
+                                for (Checker annotation : globalUsersChecker) {
+                                    System.out.println(annotation.value());
+                                }
+
+                                Map<String, List<Checker>> listCommandUsersChecker = systemd.listCommandUsersChecker();
+                                System.out.println(LoggerX.Color.LIGHT_BLUE + ">> 指定私聊检查器 " + listCommandUsersChecker.size() + LoggerX.Color.RESET);
+                                for (Map.Entry<String, List<Checker>> entry : listCommandUsersChecker.entrySet()) {
+                                    System.out.println(entry.getKey() + " " + entry.getValue().size());
+                                    for (Checker item : entry.getValue()) {
+                                        System.out.println(item.value());
+                                    }
+                                }
+
+                                List<Checker> globalGroupChecker = systemd.listGlobalGroupChecker();
+                                System.out.println(LoggerX.Color.LIGHT_BLUE + ">> 全局群聊检查器 " + globalGroupChecker.size() + LoggerX.Color.RESET);
+                                for (Checker annotation : globalGroupChecker) {
+                                    System.out.println("  " + annotation.value());
+                                }
+
+                                Map<String, List<Checker>> listCommandGroupChecker = systemd.listCommandGroupChecker();
+                                System.out.println(LoggerX.Color.LIGHT_BLUE + ">> 指定群聊检查器 " + listCommandGroupChecker.size() + LoggerX.Color.RESET);
+                                for (Map.Entry<String, List<Checker>> entry : listCommandGroupChecker.entrySet()) {
+                                    System.out.println(entry.getKey() + " " + entry.getValue().size());
+                                    for (Checker item : entry.getValue()) {
+                                        System.out.println("  " + item.value());
+                                    }
+                                }
+
+                                System.out.println(LoggerX.Color.LIGHT_BLUE + ">> 私聊命令列表" + LoggerX.Color.RESET);
                                 System.out.println(systemd.getMessageListUsers());
 
-                                System.out.println(">> 群聊命令列表");
+                                System.out.println(LoggerX.Color.LIGHT_BLUE + ">> 群聊命令列表" + LoggerX.Color.RESET);
                                 System.out.println(systemd.getMessageListGroup());
 
                                 break;

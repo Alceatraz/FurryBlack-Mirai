@@ -18,24 +18,25 @@ package studio.blacktech.furryblackplus.core.define.moduel;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.core.define.Command;
 
 
-@Api("过滤器父类")
-public abstract class EventHandlerFilter extends AbstractEventHandler {
+@Api("检查器父类")
+public abstract class EventHandlerChecker extends AbstractEventHandler {
 
 
-    @Api("生命周期 过滤私聊消息")
-    protected abstract boolean handleUsersMessage(UserMessageEvent event);
+    @Api("生命周期 检查私聊命令")
+    protected abstract boolean handleUsersMessage(UserMessageEvent event, Command command);
 
-    @Api("生命周期 过滤群聊消息")
-    protected abstract boolean handleGroupMessage(GroupMessageEvent event);
+    @Api("生命周期 检查群聊命令")
+    protected abstract boolean handleGroupMessage(GroupMessageEvent event, Command command);
 
 
-    public boolean handleUsersMessageWrapper(UserMessageEvent event) {
-        return this.handleUsersMessage(event);
+    public boolean handleUsersMessageWrapper(UserMessageEvent event, Command command) {
+        return this.handleUsersMessage(event, command);
     }
 
-    public boolean handleGroupMessageWrapper(GroupMessageEvent event) {
-        return this.handleGroupMessage(event);
+    public boolean handleGroupMessageWrapper(GroupMessageEvent event, Command command) {
+        return this.handleGroupMessage(event, command);
     }
 }
