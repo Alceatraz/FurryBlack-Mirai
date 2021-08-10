@@ -1870,12 +1870,12 @@ public final class Schema {
 
     public void verboseStatus() {
 
-        System.out.println(Color.LIGHT_YELLOW + ">> PLUGINS" + Color.RESET);
+        System.out.println(Color.LIGHT_PURPLE + ">> PLUGINS" + Color.RESET);
 
         for (Map.Entry<String, Plugin> entry : this.PLUGINS.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(k + ":" + hash(v) + v.getFile());
+            System.out.println(Color.GREEN + k + ":" + hash(v) + " " + v.getFile() + Color.RESET);
             for (Map.Entry<String, Class<? extends AbstractEventHandler>> classEntry : v.getModules().entrySet()) {
                 var classK = classEntry.getKey();
                 var classV = classEntry.getValue();
@@ -1883,12 +1883,20 @@ public final class Schema {
             }
         }
 
-        System.out.println(Color.LIGHT_YELLOW + ">> MODULES" + Color.RESET);
+        System.out.println(Color.LIGHT_PURPLE + ">> MODULES" + Color.RESET);
 
         for (Map.Entry<String, Class<? extends AbstractEventHandler>> entry : this.MODULES.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
             System.out.println(k + " -> " + v.getName() + ":" + hash(v));
+        }
+
+        System.out.println(Color.LIGHT_PURPLE + ">> MODULE_PLUGIN_RELATION" + Color.RESET);
+
+        for (Map.Entry<String, String> entry : this.MODULE_PLUGIN_RELATION.entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            System.out.println(k + " -> " + v);
         }
 
         System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_RUNNER_CLAZZ" + Color.RESET);
@@ -1931,7 +1939,7 @@ public final class Schema {
             System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getName() + ":" + hash(v));
         }
 
-        System.out.println(Color.LIGHT_GREEN + ">> COMPONENT_RUNNER_INSTANCE" + Color.RESET);
+        System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_RUNNER_INSTANCE" + Color.RESET);
 
         for (Map.Entry<Runner, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.entrySet()) {
             var k = entry.getKey();
@@ -1939,7 +1947,7 @@ public final class Schema {
             System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
-        System.out.println(Color.LIGHT_GREEN + ">> COMPONENT_FILTER_INSTANCE" + Color.RESET);
+        System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_FILTER_INSTANCE" + Color.RESET);
 
         for (Map.Entry<Filter, EventHandlerFilter> entry : this.COMPONENT_FILTER_INSTANCE.entrySet()) {
             var k = entry.getKey();
@@ -1947,7 +1955,7 @@ public final class Schema {
             System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
-        System.out.println(Color.LIGHT_GREEN + ">> COMPONENT_MONITOR_INSTANCE" + Color.RESET);
+        System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_MONITOR_INSTANCE" + Color.RESET);
 
         for (Map.Entry<Monitor, EventHandlerMonitor> entry : this.COMPONENT_MONITOR_INSTANCE.entrySet()) {
             var k = entry.getKey();
@@ -1955,7 +1963,7 @@ public final class Schema {
             System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
-        System.out.println(Color.LIGHT_GREEN + ">> COMPONENT_CHECKER_INSTANCE" + Color.RESET);
+        System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_CHECKER_INSTANCE" + Color.RESET);
 
         for (Map.Entry<Checker, EventHandlerChecker> entry : this.COMPONENT_CHECKER_INSTANCE.entrySet()) {
             var k = entry.getKey();
@@ -1963,35 +1971,12 @@ public final class Schema {
             System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
-        System.out.println(Color.LIGHT_GREEN + ">> COMPONENT_EXECUTOR_INSTANCE" + Color.RESET);
+        System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_EXECUTOR_INSTANCE" + Color.RESET);
 
         for (Map.Entry<Executor, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
             System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
-        }
-
-        System.out.println(Color.LIGHT_BLUE + ">> COMMAND_EXECUTOR_RELATION" + Color.RESET);
-
-        for (Map.Entry<String, Executor> entry : this.COMMAND_EXECUTOR_RELATION.entrySet()) {
-            var k = entry.getKey();
-            var v = entry.getValue();
-            System.out.println(k + " -> " + v.value() + " " + "{" + (v.users() ? "U" : "") + (v.group() ? "G" : "") + "} " + v.outline() + ":" + v.description());
-            for (String temp : v.usage()) {
-                System.out.println("  " + temp);
-            }
-            for (String temp : v.privacy()) {
-                System.out.println("  " + temp);
-            }
-            System.out.println();
-        }
-
-        System.out.println(Color.LIGHT_BLUE + ">> MODULE_PLUGIN_RELATION" + Color.RESET);
-
-        for (Map.Entry<String, String> entry : this.MODULE_PLUGIN_RELATION.entrySet()) {
-            var k = entry.getKey();
-            var v = entry.getValue();
-            System.out.println(k + " -> " + v);
         }
 
         System.out.println(Color.LIGHT_CYAN + ">> FILTER_USERS_CHAIN" + Color.RESET);
@@ -2066,6 +2051,20 @@ public final class Schema {
             var k = entry.getKey();
             var v = entry.getValue();
             System.out.println(k + " -> " + v.getClass().getName() + ":" + hash(v));
+        }
+
+        System.out.println(Color.LIGHT_CYAN + ">> COMMAND_EXECUTOR_RELATION" + Color.RESET);
+
+        for (Map.Entry<String, Executor> entry : this.COMMAND_EXECUTOR_RELATION.entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            System.out.println(Color.GREEN + k + Color.RESET + " -> " + v.value() + " " + "{" + (v.users() ? "U" : "") + (v.group() ? "G" : "") + "} " + v.outline() + ":" + v.description());
+            for (String temp : v.usage()) {
+                System.out.println(temp);
+            }
+            for (String temp : v.privacy()) {
+                System.out.println(temp);
+            }
         }
 
     }
