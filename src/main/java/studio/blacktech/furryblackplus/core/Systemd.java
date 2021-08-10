@@ -50,6 +50,7 @@ import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerExecutor;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerFilter;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerMonitor;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerRunner;
+import studio.blacktech.furryblackplus.core.define.schema.Plugin;
 import studio.blacktech.furryblackplus.core.define.schema.Schema;
 import studio.blacktech.furryblackplus.core.exception.moduels.boot.BootException;
 import studio.blacktech.furryblackplus.core.exception.moduels.load.FirstBootException;
@@ -1130,9 +1131,14 @@ public final class Systemd {
     // 插件操作
 
 
-    public Set<String> listAllPlugin() {
-        return this.schema.listAllPlugin();
+    public Set<Map.Entry<String, Plugin>> getAllPlugin() {
+        return this.schema.getAllPlugin();
     }
+
+    public Set<String> listAllPluginName() {
+        return this.schema.listAllPluginName();
+    }
+
 
     public void importPlugin(String name) {
         this.schema.importPlugin(name);
@@ -1211,8 +1217,8 @@ public final class Systemd {
         this.schema.reloadModule(name);
     }
 
-    public void schemaDebug() {
-        this.schema.debug();
+    public void schemaVerbose() {
+        this.schema.verboseStatus();
     }
 
 

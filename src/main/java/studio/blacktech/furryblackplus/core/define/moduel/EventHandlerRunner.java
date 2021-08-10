@@ -26,8 +26,8 @@ public abstract class EventHandlerRunner extends AbstractEventHandler {
     private volatile boolean lock;
 
     @SuppressWarnings("deprecation")
-    @Override
     @Deprecated
+    @Override
     public void internalInit(String name) {
         if (this.lock) {
             throw new BotException("Illegal access due to try invoke internalInit twice");
