@@ -80,10 +80,7 @@ as commercial usage. You is banned if you do it.
 
 - 修复checker执行的一个BUG
 - 加强关闭错误的输出
-
-#### 已知问题
-
-- shut时极低概率出现NullPointerException
+- 修复关闭NULL的问题 定位到了问题：使用keySet得到的注解实例，查询INSTANCE在有些时候返回NULL，使用DEBUG标记对象甚至就是同一对象，执行期间并没有修改容器，诡异问题
 
 ### 0.9.1 BUG💣
 

@@ -39,10 +39,8 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -62,38 +60,38 @@ public final class Schema {
 
     private final File folder;
 
-    private final Map<String, Plugin> PLUGINS;
-    private final Map<String, Class<? extends AbstractEventHandler>> MODULES;
+    private final ConcurrentHashMap<String, Plugin> PLUGINS;
+    private final ConcurrentHashMap<String, Class<? extends AbstractEventHandler>> MODULES;
 
-    private final Map<Runner, Class<? extends EventHandlerRunner>> COMPONENT_RUNNER_CLAZZ;
-    private final Map<Filter, Class<? extends EventHandlerFilter>> COMPONENT_FILTER_CLAZZ;
-    private final Map<Monitor, Class<? extends EventHandlerMonitor>> COMPONENT_MONITOR_CLAZZ;
-    private final Map<Checker, Class<? extends EventHandlerChecker>> COMPONENT_CHECKER_CLAZZ;
-    private final Map<Executor, Class<? extends EventHandlerExecutor>> COMPONENT_EXECUTOR_CLAZZ;
+    private final ConcurrentSkipListMap<Runner, Class<? extends EventHandlerRunner>> COMPONENT_RUNNER_CLAZZ;
+    private final ConcurrentSkipListMap<Filter, Class<? extends EventHandlerFilter>> COMPONENT_FILTER_CLAZZ;
+    private final ConcurrentSkipListMap<Monitor, Class<? extends EventHandlerMonitor>> COMPONENT_MONITOR_CLAZZ;
+    private final ConcurrentSkipListMap<Checker, Class<? extends EventHandlerChecker>> COMPONENT_CHECKER_CLAZZ;
+    private final ConcurrentSkipListMap<Executor, Class<? extends EventHandlerExecutor>> COMPONENT_EXECUTOR_CLAZZ;
 
-    private final Map<Runner, EventHandlerRunner> COMPONENT_RUNNER_INSTANCE;
-    private final Map<Filter, EventHandlerFilter> COMPONENT_FILTER_INSTANCE;
-    private final Map<Monitor, EventHandlerMonitor> COMPONENT_MONITOR_INSTANCE;
-    private final Map<Checker, EventHandlerChecker> COMPONENT_CHECKER_INSTANCE;
-    private final Map<Executor, EventHandlerExecutor> COMPONENT_EXECUTOR_INSTANCE;
+    private final ConcurrentSkipListMap<Runner, EventHandlerRunner> COMPONENT_RUNNER_INSTANCE;
+    private final ConcurrentSkipListMap<Filter, EventHandlerFilter> COMPONENT_FILTER_INSTANCE;
+    private final ConcurrentSkipListMap<Monitor, EventHandlerMonitor> COMPONENT_MONITOR_INSTANCE;
+    private final ConcurrentSkipListMap<Checker, EventHandlerChecker> COMPONENT_CHECKER_INSTANCE;
+    private final ConcurrentSkipListMap<Executor, EventHandlerExecutor> COMPONENT_EXECUTOR_INSTANCE;
 
-    private final Map<String, Executor> COMMAND_EXECUTOR_RELATION;
-    private final Map<String, String> MODULE_PLUGIN_RELATION;
+    private final ConcurrentHashMap<String, Executor> COMMAND_EXECUTOR_RELATION;
+    private final ConcurrentHashMap<String, String> MODULE_PLUGIN_RELATION;
 
-    private final List<EventHandlerFilter> FILTER_USERS_CHAIN;
-    private final List<EventHandlerFilter> FILTER_GROUP_CHAIN;
+    private final CopyOnWriteArrayList<EventHandlerFilter> FILTER_USERS_CHAIN;
+    private final CopyOnWriteArrayList<EventHandlerFilter> FILTER_GROUP_CHAIN;
 
-    private final List<EventHandlerMonitor> MONITOR_USERS_CHAIN;
-    private final List<EventHandlerMonitor> MONITOR_GROUP_CHAIN;
+    private final CopyOnWriteArrayList<EventHandlerMonitor> MONITOR_USERS_CHAIN;
+    private final CopyOnWriteArrayList<EventHandlerMonitor> MONITOR_GROUP_CHAIN;
 
     private final Map<String, EventHandlerExecutor> EXECUTOR_USERS_POOL;
     private final Map<String, EventHandlerExecutor> EXECUTOR_GROUP_POOL;
 
-    private final List<EventHandlerChecker> GLOBAL_CHECKER_USERS_POOL;
-    private final List<EventHandlerChecker> GLOBAL_CHECKER_GROUP_POOL;
+    private final CopyOnWriteArrayList<EventHandlerChecker> GLOBAL_CHECKER_USERS_POOL;
+    private final CopyOnWriteArrayList<EventHandlerChecker> GLOBAL_CHECKER_GROUP_POOL;
 
-    private final Map<String, List<EventHandlerChecker>> COMMAND_CHECKER_USERS_POOL;
-    private final Map<String, List<EventHandlerChecker>> COMMAND_CHECKER_GROUP_POOL;
+    private final Map<String, CopyOnWriteArrayList<EventHandlerChecker>> COMMAND_CHECKER_USERS_POOL;
+    private final Map<String, CopyOnWriteArrayList<EventHandlerChecker>> COMMAND_CHECKER_GROUP_POOL;
 
     public Schema(File folder) {
 
@@ -285,100 +283,65 @@ public final class Schema {
             return;
         }
 
-
-        Set<Executor> pendingExecutors = plugin.getExecutorClassMap().keySet();
-
-        ArrayList<Executor> executors = new ArrayList<>(this.COMPONENT_EXECUTOR_CLAZZ.keySet());
-        Collections.reverse(executors);
-
+        Set<Executor> pendingExecutors = new HashSet<>(plugin.getExecutorClassMap().keySet());
+        List<Executor> executors = new ArrayList<>(this.COMPONENT_EXECUTOR_CLAZZ.descendingKeySet());
         for (Executor annotation : executors) {
-            if (!pendingExecutors.contains(annotation)) {
+            if (!pendingExecutors.remove(annotation)) {
                 continue;
             }
             this.unloadExecutorInstance(annotation);
-        }
-
-        for (Executor annotation : pendingExecutors) {
             this.MODULES.remove(annotation.value());
             this.COMPONENT_EXECUTOR_CLAZZ.remove(annotation);
             this.MODULE_PLUGIN_RELATION.remove(annotation.value());
             this.COMMAND_EXECUTOR_RELATION.remove(annotation.command());
         }
 
-
-        Set<Checker> pendingCheckers = plugin.getCheckerClassMap().keySet();
-
-        ArrayList<Checker> checkers = new ArrayList<>(this.COMPONENT_CHECKER_CLAZZ.keySet());
-        Collections.reverse(checkers);
-
+        Set<Checker> pendingCheckers = new HashSet<>(plugin.getCheckerClassMap().keySet());
+        List<Checker> checkers = new ArrayList<>(this.COMPONENT_CHECKER_CLAZZ.descendingKeySet());
         for (Checker annotation : checkers) {
-            if (!pendingCheckers.contains(annotation)) {
+            if (!pendingCheckers.remove(annotation)) {
                 continue;
             }
             this.unloadCheckerInstance(annotation);
-        }
-
-        for (Checker annotation : pendingCheckers) {
             this.MODULES.remove(annotation.value());
-            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
             this.COMPONENT_CHECKER_CLAZZ.remove(annotation);
+            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
         }
 
-
-        Set<Monitor> pendingMonitors = plugin.getMonitorClassMap().keySet();
-
-        ArrayList<Monitor> monitors = new ArrayList<>(this.COMPONENT_MONITOR_CLAZZ.keySet());
-        Collections.reverse(monitors);
-
+        Set<Monitor> pendingMonitors = new HashSet<>(plugin.getMonitorClassMap().keySet());
+        List<Monitor> monitors = new ArrayList<>(this.COMPONENT_MONITOR_CLAZZ.descendingKeySet());
         for (Monitor annotation : monitors) {
-            if (!pendingMonitors.contains(annotation)) {
+            if (!pendingMonitors.remove(annotation)) {
                 continue;
             }
             this.unloadMonitorInstance(annotation);
-        }
-
-        for (Monitor annotation : pendingMonitors) {
             this.MODULES.remove(annotation.value());
-            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
             this.COMPONENT_MONITOR_CLAZZ.remove(annotation);
+            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
         }
 
-
-        Set<Filter> pendingFilters = plugin.getFilterClassMap().keySet();
-
-        ArrayList<Filter> filters = new ArrayList<>(this.COMPONENT_FILTER_CLAZZ.keySet());
-        Collections.reverse(monitors);
-
+        Set<Filter> pendingFilters = new HashSet<>(plugin.getFilterClassMap().keySet());
+        List<Filter> filters = new ArrayList<>(this.COMPONENT_FILTER_CLAZZ.descendingKeySet());
         for (Filter annotation : filters) {
-            if (!pendingFilters.contains(annotation)) {
+            if (!pendingFilters.remove(annotation)) {
                 continue;
             }
             this.unloadFilterInstance(annotation);
-        }
-
-        for (Filter annotation : pendingFilters) {
             this.MODULES.remove(annotation.value());
-            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
             this.COMPONENT_FILTER_CLAZZ.remove(annotation);
+            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
         }
-
 
         Set<Runner> pendingRunners = new HashSet<>(plugin.getRunnerClassMap().keySet());
-
-        ArrayList<Runner> runners = new ArrayList<>(this.COMPONENT_RUNNER_CLAZZ.keySet());
-        Collections.reverse(runners);
-
+        List<Runner> runners = new ArrayList<>(this.COMPONENT_RUNNER_CLAZZ.descendingKeySet());
         for (Runner annotation : runners) {
-            if (!pendingRunners.contains(annotation)) {
+            if (!pendingRunners.remove(annotation)) {
                 continue;
             }
             this.unloadRunnerInstance(annotation);
-        }
-
-        for (Runner annotation : pendingRunners) {
             this.MODULES.remove(annotation.value());
-            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
             this.COMPONENT_RUNNER_CLAZZ.remove(annotation);
+            this.MODULE_PLUGIN_RELATION.remove(annotation.value());
         }
     }
 
@@ -470,7 +433,7 @@ public final class Schema {
 
     public Map<String, List<Checker>> listCommandsUsersChecker() {
         Map<String, List<Checker>> result = new LinkedHashMap<>();
-        for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_USERS_POOL.entrySet()) {
+        for (Map.Entry<String, CopyOnWriteArrayList<EventHandlerChecker>> entry : this.COMMAND_CHECKER_USERS_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
             List<Checker> collect = v.stream().map(item -> item.getClass().getAnnotation(Checker.class)).collect(Collectors.toUnmodifiableList());
@@ -481,7 +444,7 @@ public final class Schema {
 
     public Map<String, List<Checker>> listCommandsGroupChecker() {
         Map<String, List<Checker>> result = new LinkedHashMap<>();
-        for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_GROUP_POOL.entrySet()) {
+        for (Map.Entry<String, CopyOnWriteArrayList<EventHandlerChecker>> entry : this.COMMAND_CHECKER_GROUP_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
             List<Checker> collect = v.stream().map(item -> item.getClass().getAnnotation(Checker.class)).collect(Collectors.toUnmodifiableList());
@@ -1276,76 +1239,102 @@ public final class Schema {
     // 执行关闭
 
 
-    public boolean shut() {
-
-        boolean fine = true;
+    public void shut() {
 
         this.logger.hint("关闭执行器");
 
-        ArrayList<Executor> executors = new ArrayList<>(this.COMPONENT_EXECUTOR_INSTANCE.keySet());
-        Collections.reverse(executors);
-        for (Executor executor : executors) {
+        for (Map.Entry<Executor, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.descendingMap().entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
             try {
-                this.shutExecutor(executor);
+                if (Driver.isShutModeDrop()) {
+                    Thread thread = new Thread(v::shutWrapper);
+                    thread.setDaemon(true);
+                    thread.start();
+                } else {
+                    v.shutWrapper();
+                }
             } catch (Exception exception) {
-                fine = false;
-                this.logger.warning("关闭定时器发生异常 " + printAnnotation(executor) + ":" + hash(executor), exception);
+                this.logger.warning("关闭执行器发生异常" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v), exception);
             }
+            this.logger.warning("关闭执行器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+        }
+
+        this.logger.hint("关闭检查器");
+
+        for (Map.Entry<Checker, EventHandlerChecker> entry : this.COMPONENT_CHECKER_INSTANCE.descendingMap().entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
+            try {
+                if (Driver.isShutModeDrop()) {
+                    Thread thread = new Thread(v::shutWrapper);
+                    thread.setDaemon(true);
+                    thread.start();
+                } else {
+                    v.shutWrapper();
+                }
+            } catch (Exception exception) {
+                this.logger.warning("关闭检查器发生异常" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v), exception);
+            }
+            this.logger.warning("关闭检查器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
         this.logger.hint("关闭监听器");
 
-        ArrayList<Checker> checkers = new ArrayList<>(this.COMPONENT_CHECKER_INSTANCE.keySet());
-        Collections.reverse(checkers);
-        for (Checker checker : checkers) {
+        for (Map.Entry<Monitor, EventHandlerMonitor> entry : this.COMPONENT_MONITOR_INSTANCE.descendingMap().entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
             try {
-                this.shutChecker(checker);
+                if (Driver.isShutModeDrop()) {
+                    Thread thread = new Thread(v::shutWrapper);
+                    thread.setDaemon(true);
+                    thread.start();
+                } else {
+                    v.shutWrapper();
+                }
             } catch (Exception exception) {
-                fine = false;
-                this.logger.warning("关闭定时器发生异常 " + printAnnotation(checker) + ":" + hash(checker), exception);
+                this.logger.warning("关闭监听器发生异常" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v), exception);
             }
-        }
-
-        this.logger.hint("关闭监听器");
-
-        ArrayList<Monitor> monitors = new ArrayList<>(this.COMPONENT_MONITOR_INSTANCE.keySet());
-        Collections.reverse(monitors);
-        for (Monitor monitor : monitors) {
-            try {
-                this.shutMonitor(monitor);
-            } catch (Exception exception) {
-                fine = false;
-                this.logger.warning("关闭定时器发生异常 " + printAnnotation(monitor) + ":" + hash(monitor), exception);
-            }
+            this.logger.warning("关闭监听器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
         this.logger.hint("关闭过滤器");
 
-        ArrayList<Filter> filters = new ArrayList<>(this.COMPONENT_FILTER_INSTANCE.keySet());
-        Collections.reverse(filters);
-        for (Filter filter : filters) {
+        for (Map.Entry<Filter, EventHandlerFilter> entry : this.COMPONENT_FILTER_INSTANCE.descendingMap().entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
             try {
-                this.shutFilter(filter);
+                if (Driver.isShutModeDrop()) {
+                    Thread thread = new Thread(v::shutWrapper);
+                    thread.setDaemon(true);
+                    thread.start();
+                } else {
+                    v.shutWrapper();
+                }
             } catch (Exception exception) {
-                fine = false;
-                this.logger.warning("关闭定时器发生异常 " + printAnnotation(filter) + ":" + hash(filter), exception);
+                this.logger.warning("关闭过滤器发生异常" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v), exception);
             }
+            this.logger.warning("关闭过滤器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
         this.logger.hint("关闭定时器");
 
-        ArrayList<Runner> runners = new ArrayList<>(this.COMPONENT_RUNNER_INSTANCE.keySet());
-        Collections.reverse(runners);
-        for (Runner runner : runners) {
+        for (Map.Entry<Runner, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.descendingMap().entrySet()) {
+            var k = entry.getKey();
+            var v = entry.getValue();
             try {
-                this.shutRunner(runner);
+                if (Driver.isShutModeDrop()) {
+                    Thread thread = new Thread(v::shutWrapper);
+                    thread.setDaemon(true);
+                    thread.start();
+                } else {
+                    v.shutWrapper();
+                }
             } catch (Exception exception) {
-                fine = false;
-                this.logger.warning("关闭定时器发生异常 " + printAnnotation(runner) + ":" + hash(runner), exception);
+                this.logger.warning("关闭定时器发生异常" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v), exception);
             }
+            this.logger.warning("关闭定时器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
-
-        return fine;
 
     }
 
@@ -1590,7 +1579,7 @@ public final class Schema {
             if (k.group()) this.GLOBAL_CHECKER_GROUP_POOL.add(instance);
         } else {
             if (k.users()) {
-                List<EventHandlerChecker> checkerList = this.COMMAND_CHECKER_USERS_POOL.computeIfAbsent(k.command(), k1 -> new LinkedList<>());
+                List<EventHandlerChecker> checkerList = this.COMMAND_CHECKER_USERS_POOL.computeIfAbsent(k.command(), k1 -> new CopyOnWriteArrayList<>());
                 checkerList.add(instance);
                 checkerList.sort((o1, o2) -> {
                     Checker o1Annotation = o1.getClass().getAnnotation(Checker.class);
@@ -1599,7 +1588,7 @@ public final class Schema {
                 });
             }
             if (k.group()) {
-                List<EventHandlerChecker> checkerList = this.COMMAND_CHECKER_GROUP_POOL.computeIfAbsent(k.command(), k1 -> new LinkedList<>());
+                List<EventHandlerChecker> checkerList = this.COMMAND_CHECKER_GROUP_POOL.computeIfAbsent(k.command(), k1 -> new CopyOnWriteArrayList<>());
                 checkerList.add(instance);
                 checkerList.sort((o1, o2) -> {
                     Checker o1Annotation = o1.getClass().getAnnotation(Checker.class);
@@ -1725,87 +1714,6 @@ public final class Schema {
         } catch (Exception exception) {
             throw new BootException("启动执行器失败 " + this.MODULE_PLUGIN_RELATION.get(k.value()) + ":" + k.value() + " -> " + v.getClass().getName(), exception);
         }
-    }
-
-
-    private void shutRunner(Runner annotation) {
-        EventHandlerRunner instance = this.COMPONENT_RUNNER_INSTANCE.get(annotation);
-        try {
-            if (Driver.isShutModeDrop()) {
-                new Thread(instance::shutWrapper).start();
-            } else {
-                instance.shutWrapper();
-            }
-        } catch (Exception exception) {
-            this.logger.warning("关闭定时器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
-        }
-        this.logger.info("关闭定时器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
-    }
-
-
-    private void shutFilter(Filter annotation) {
-        EventHandlerFilter instance = this.COMPONENT_FILTER_INSTANCE.get(annotation);
-        try {
-            if (Driver.isShutModeDrop()) {
-                new Thread(instance::shutWrapper).start();
-            } else {
-                instance.shutWrapper();
-            }
-        } catch (Exception exception) {
-            this.logger.warning("关闭过滤器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
-        }
-        this.logger.info("关闭过滤器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
-    }
-
-
-    private void shutMonitor(Monitor annotation) {
-        EventHandlerMonitor instance = this.COMPONENT_MONITOR_INSTANCE.get(annotation);
-        try {
-            if (Driver.isShutModeDrop()) {
-                Thread thread = new Thread(instance::shutWrapper);
-                thread.setDaemon(true);
-                thread.start();
-            } else {
-                instance.shutWrapper();
-            }
-        } catch (Exception exception) {
-            this.logger.warning("关闭监听器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
-        }
-        this.logger.info("关闭监听器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
-    }
-
-
-    private void shutChecker(Checker annotation) {
-        EventHandlerChecker instance = this.COMPONENT_CHECKER_INSTANCE.get(annotation);
-        this.logger.info("关闭检查器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
-        try {
-            if (Driver.isShutModeDrop()) {
-                Thread thread = new Thread(instance::shutWrapper);
-                thread.setDaemon(true);
-                thread.start();
-            } else {
-                instance.shutWrapper();
-            }
-        } catch (Exception exception) {
-            this.logger.warning("关闭检查器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
-        }
-    }
-
-
-    private void shutExecutor(Executor annotation) {
-        EventHandlerExecutor instance = this.COMPONENT_EXECUTOR_INSTANCE.get(annotation);
-        try {
-            if (Driver.isShutModeDrop()) {
-                Thread thread = new Thread(instance::shutWrapper);
-                thread.setDaemon(true);
-                thread.start();
-            } else {
-                instance.shutWrapper();
-            }
-        } catch (Exception exception) {
-            this.logger.warning("关闭执行器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
-        }
-        this.logger.info("关闭执行器" + annotation.value() + "[" + annotation.command() + "] -> " + instance.getClass().getName());
     }
 
 
@@ -2056,7 +1964,7 @@ public final class Schema {
 
         System.out.println(Color.LIGHT_CYAN + ">> COMMAND_CHECKER_USERS_POOL" + Color.RESET);
 
-        for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_USERS_POOL.entrySet()) {
+        for (Map.Entry<String, CopyOnWriteArrayList<EventHandlerChecker>> entry : this.COMMAND_CHECKER_USERS_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
             System.out.println(k + " " + v.size());
@@ -2067,7 +1975,7 @@ public final class Schema {
 
         System.out.println(Color.LIGHT_CYAN + ">> COMMAND_CHECKER_GROUP_POOL" + Color.RESET);
 
-        for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_GROUP_POOL.entrySet()) {
+        for (Map.Entry<String, CopyOnWriteArrayList<EventHandlerChecker>> entry : this.COMMAND_CHECKER_GROUP_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
             System.out.println(k + " " + v.size());
