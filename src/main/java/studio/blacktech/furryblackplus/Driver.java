@@ -1439,68 +1439,68 @@ public final class Driver {
 
     public static void printHelp() {
 
-        logger.println(Color.LIGHT_CYAN + "# FurryBlackPlus 启动参数 ===========================" + Color.RESET);
-        logger.println("--debug       使用DEBUG模式启动");
-        logger.println("--unsafe      允许一些危险的调用");
-        logger.println("--no-login    使用离线模式，仅用于基础调试，功能基本都不可用");
-        logger.println("--no-console  不使用控制台，唯一正常关闭方式是使用进程信号");
-        logger.println("--no-jline    不使用jline控制台，使用BufferedReader");
-        logger.println("--force-exit  关闭流程执行后，强制结束System.exit(0)");
+        System.out.println(Color.LIGHT_CYAN + "# FurryBlackPlus 启动参数 ===========================" + Color.RESET);
+        System.out.println("--debug       使用DEBUG模式启动");
+        System.out.println("--unsafe      允许一些危险的调用");
+        System.out.println("--no-login    使用离线模式，仅用于基础调试，功能基本都不可用");
+        System.out.println("--no-console  不使用控制台，唯一正常关闭方式是使用进程信号");
+        System.out.println("--no-jline    不使用jline控制台，使用BufferedReader");
+        System.out.println("--force-exit  关闭流程执行后，强制结束System.exit(0)");
 
-        logger.println(Color.LIGHT_CYAN + "# FurryBlackPlus 系统参数 ===========================" + Color.RESET);
-        logger.println("furryblack.logger.level 日志等级");
+        System.out.println(Color.LIGHT_CYAN + "# FurryBlackPlus 系统参数 ===========================" + Color.RESET);
+        System.out.println("furryblack.logger.level 日志等级");
 
-        logger.println(Color.LIGHT_CYAN + "# FurryBlackPlus 控制台  ===========================" + Color.RESET);
-        logger.println(Color.RED + "⚠ 控制台任何操作都属于底层操作可以直接对框架进行不安全和非法的操作" + Color.RESET);
-        logger.println("安全：设计如此，不会导致异常或者不可预测的结果");
-        logger.println("风险：功能设计上是安全操作，但是具体被操作对象可能导致错误");
-        logger.println("危险：没有安全性检查的操作，可能会让功能严重异常导致被迫重启或损坏模块的数据存档");
-        logger.println("高危：后果完全未知的危险操作，或者正常流程中不应该如此操作但是控制台仍然可以强制执行");
+        System.out.println(Color.LIGHT_CYAN + "# FurryBlackPlus 控制台  ===========================" + Color.RESET);
+        System.out.println(Color.RED + "⚠ 控制台任何操作都属于底层操作可以直接对框架进行不安全和非法的操作" + Color.RESET);
+        System.out.println("安全：设计如此，不会导致异常或者不可预测的结果");
+        System.out.println("风险：功能设计上是安全操作，但是具体被操作对象可能导致错误");
+        System.out.println("危险：没有安全性检查的操作，可能会让功能严重异常导致被迫重启或损坏模块的数据存档");
+        System.out.println("高危：后果完全未知的危险操作，或者正常流程中不应该如此操作但是控制台仍然可以强制执行");
 
-        logger.println(Color.EMERALD_GREEN + "# 系统管理 ==========================================" + Color.RESET);
-        logger.println("level (安全) 修改控制台日志打印等级，日志不受影响(可能导致漏掉ERR/WARN信息)");
-        logger.println("stat  (安全) 查看性能状态");
-        logger.println("stop  (安全) 正常退出，完整执行关闭流程，等待模块结束，等待线程池结束，等待所有线程");
-        logger.println("drop  (高危) 强制退出，不等待插件关闭完成，不等待线程池结束，且最终杀死JVM");
-        logger.println("kill  (高危) 命令执行后直接杀死JVM，不会进行任何关闭操作");
+        System.out.println(Color.EMERALD_GREEN + "# 系统管理 ==========================================" + Color.RESET);
+        System.out.println("level (安全) 修改控制台日志打印等级，日志不受影响(可能导致漏掉ERR/WARN信息)");
+        System.out.println("stat  (安全) 查看性能状态");
+        System.out.println("stop  (安全) 正常退出，完整执行关闭流程，等待模块结束，等待线程池结束，等待所有线程");
+        System.out.println("drop  (高危) 强制退出，不等待插件关闭完成，不等待线程池结束，且最终杀死JVM");
+        System.out.println("kill  (高危) 命令执行后直接杀死JVM，不会进行任何关闭操作");
 
-        logger.println(Color.EMERALD_GREEN + "# 功能管理 ==========================================" + Color.RESET);
-        logger.println("enable  (安全) 启用消息事件处理 正常响应消息");
-        logger.println("disable (安全) 停用消息事件处理 无视任何消息");
+        System.out.println(Color.EMERALD_GREEN + "# 功能管理 ==========================================" + Color.RESET);
+        System.out.println("enable  (安全) 启用消息事件处理 正常响应消息");
+        System.out.println("disable (安全) 停用消息事件处理 无视任何消息");
 
-        logger.println(Color.EMERALD_GREEN + "# 好友相关 ==========================================" + Color.RESET);
-        logger.println("list users   (安全) 列出好友");
-        logger.println("list group   (安全) 列出群组");
-        logger.println("list <group> (安全) 列出成员");
+        System.out.println(Color.EMERALD_GREEN + "# 好友相关 ==========================================" + Color.RESET);
+        System.out.println("list users   (安全) 列出好友");
+        System.out.println("list group   (安全) 列出群组");
+        System.out.println("list <group> (安全) 列出成员");
 
-        logger.println(Color.EMERALD_GREEN + "# 发送消息 ==========================================" + Color.RESET);
-        logger.println("send users <users> <消息>  (安全) 向好友发送消息");
-        logger.println("send group <group> <消息>  (安全) 向群聊发送消息");
-        logger.println("send <group> <user> <消息> (安全) 向群聊发送AT消息");
+        System.out.println(Color.EMERALD_GREEN + "# 发送消息 ==========================================" + Color.RESET);
+        System.out.println("send users <users> <消息>  (安全) 向好友发送消息");
+        System.out.println("send group <group> <消息>  (安全) 向群聊发送消息");
+        System.out.println("send <group> <user> <消息> (安全) 向群聊发送AT消息");
 
-        logger.println(Color.EMERALD_GREEN + "# 模型管理 ==========================================" + Color.RESET);
-        logger.println("schema (安全) 详细显示插件和模块");
+        System.out.println(Color.EMERALD_GREEN + "# 模型管理 ==========================================" + Color.RESET);
+        System.out.println("schema (安全) 详细显示插件和模块");
 
-        logger.println(Color.EMERALD_GREEN + "# 插件管理 ==========================================" + Color.RESET);
-        logger.println("plugin (安全) 列出插件");
-        logger.println("plugin unload (安全) 卸载所有插件，关闭顺序等效于shut");
-        logger.println("plugin import <路径> (风险) 加载某个插件，如果加载被异常打断，无法回滚至加载前的状态，只能重启");
-        logger.println("plugin unload <名称> (危险) 卸载某个插件，因为插件之间Runner有可能相互依赖，有可能导致意外或者抛出异常");
-        logger.println("plugin reload <名称> (危险) 重载某个插件，插件将被卸载，再加载同文件路径插件包，不检查模块增减和版本，可能崩溃");
+        System.out.println(Color.EMERALD_GREEN + "# 插件管理 ==========================================" + Color.RESET);
+        System.out.println("plugin (安全) 列出插件");
+        System.out.println("plugin unload (安全) 卸载所有插件，关闭顺序等效于shut");
+        System.out.println("plugin import <路径> (风险) 加载某个插件，如果加载被异常打断，无法回滚至加载前的状态，只能重启");
+        System.out.println("plugin unload <名称> (危险) 卸载某个插件，因为插件之间Runner有可能相互依赖，有可能导致意外或者抛出异常");
+        System.out.println("plugin reload <名称> (危险) 重载某个插件，插件将被卸载，再加载同文件路径插件包，不检查模块增减和版本，可能崩溃");
 
-        logger.println(Color.EMERALD_GREEN + "# 模块管理 ==========================================" + Color.RESET);
-        logger.println("module (安全) 列出模块");
-        logger.println("※ Runner可能会被依赖，底层操作框架不检查依赖，有可能导致关联模块崩溃");
-        logger.println("module reboot <名称> (风险) 重启指定模块(执行 shut + init + boot)");
-        logger.println("module shut   <名称> (风险) 关闭指定模块(执行 shut)");
-        logger.println("module init   <名称> (风险) 预载指定模块(执行 init)");
-        logger.println("module shut   <名称> (风险) 启动指定模块(执行 boot)");
-        logger.println("※ Runner可能会被依赖，框架无法检查此操作，相关的模块仍然使用旧实例，需要重启相关模块(重新执行getRunner)");
-        logger.println("module unload <名称> (危险) 卸载指定模块实例，但保留扫描结果");
-        logger.println("module reload <名称> (危险) 重启 + 重新实例化执行模块");
+        System.out.println(Color.EMERALD_GREEN + "# 模块管理 ==========================================" + Color.RESET);
+        System.out.println("module (安全) 列出模块");
+        System.out.println("※ Runner可能会被依赖，底层操作框架不检查依赖，有可能导致关联模块崩溃");
+        System.out.println("module reboot <名称> (风险) 重启指定模块(执行 shut + init + boot)");
+        System.out.println("module shut   <名称> (风险) 关闭指定模块(执行 shut)");
+        System.out.println("module init   <名称> (风险) 预载指定模块(执行 init)");
+        System.out.println("module shut   <名称> (风险) 启动指定模块(执行 boot)");
+        System.out.println("※ Runner可能会被依赖，框架无法检查此操作，相关的模块仍然使用旧实例，需要重启相关模块(重新执行getRunner)");
+        System.out.println("module unload <名称> (危险) 卸载指定模块实例，但保留扫描结果");
+        System.out.println("module reload <名称> (危险) 重启 + 重新实例化执行模块");
 
-        logger.println(Color.EMERALD_GREEN + "# 调试功能 ==========================================" + Color.RESET);
-        logger.println("debug [enable|disable] (风险) DEBUG开关，打印DEBUG输出和控制某些功能，插件如果不遵守标准开发可能会导致崩溃");
+        System.out.println(Color.EMERALD_GREEN + "# 调试功能 ==========================================" + Color.RESET);
+        System.out.println("debug [enable|disable] (风险) DEBUG开关，打印DEBUG输出和控制某些功能，插件如果不遵守标准开发可能会导致崩溃");
 
     }
 }

@@ -281,7 +281,7 @@ public final class Schema {
         Plugin plugin = this.PLUGINS.remove(name);
 
         if (plugin == null) {
-            this.logger.println("没有这个插件 " + name);
+            System.out.println("没有这个插件 " + name);
             return;
         }
 
@@ -506,7 +506,7 @@ public final class Schema {
     public void shutModule(String name) {
         AbstractEventHandler moduleInstance = this.getModuleInstance(name);
         if (moduleInstance == null) {
-            this.logger.println("没有找到模块实例 -> " + name + " " + (this.getModuleClass(name) == null ? "不存在" : "未加载"));
+            System.out.println("没有找到模块实例 -> " + name + " " + (this.getModuleClass(name) == null ? "不存在" : "未加载"));
             return;
         }
         String instanceName = moduleInstance.getClass().getName() + ":" + hash(moduleInstance);
@@ -522,7 +522,7 @@ public final class Schema {
     public void initModule(String name) {
         AbstractEventHandler moduleInstance = this.getModuleInstance(name);
         if (moduleInstance == null) {
-            this.logger.println("没有找到模块实例 -> " + name + " " + (this.getModuleClass(name) == null ? "不存在" : "未加载"));
+            System.out.println("没有找到模块实例 -> " + name + " " + (this.getModuleClass(name) == null ? "不存在" : "未加载"));
             return;
         }
         String instanceName = moduleInstance.getClass().getName() + ":" + hash(moduleInstance);
@@ -538,7 +538,7 @@ public final class Schema {
     public void bootModule(String name) {
         AbstractEventHandler moduleInstance = this.getModuleInstance(name);
         if (moduleInstance == null) {
-            this.logger.println("没有找到模块实例 -> " + name + " " + (this.getModuleClass(name) == null ? "不存在" : "未加载"));
+            System.out.println("没有找到模块实例 -> " + name + " " + (this.getModuleClass(name) == null ? "不存在" : "未加载"));
             return;
         }
         String instanceName = moduleInstance.getClass().getName() + ":" + hash(moduleInstance);
@@ -554,7 +554,7 @@ public final class Schema {
     public void rebootModule(String name) {
         AbstractEventHandler moduleInstance = this.getModuleInstance(name);
         if (moduleInstance == null) {
-            this.logger.println("没有找到模块实例 -> " + name + " " + (this.getModuleClass(name) == null ? "不存在" : "未加载"));
+            System.out.println("没有找到模块实例 -> " + name + " " + (this.getModuleClass(name) == null ? "不存在" : "未加载"));
             return;
         }
         String instanceName = moduleInstance.getClass().getName() + ":" + hash(moduleInstance);
@@ -1894,200 +1894,200 @@ public final class Schema {
 
     public void verboseStatus() {
 
-        this.logger.println(Color.LIGHT_PURPLE + ">> PLUGINS" + Color.RESET);
+        System.out.println(Color.LIGHT_PURPLE + ">> PLUGINS" + Color.RESET);
 
         for (Map.Entry<String, Plugin> entry : this.PLUGINS.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(Color.GREEN + k + ":" + hash(v) + " " + v.getFile() + Color.RESET);
+            System.out.println(Color.GREEN + k + ":" + hash(v) + " " + v.getFile() + Color.RESET);
             for (Map.Entry<String, Class<? extends AbstractEventHandler>> classEntry : v.getModules().entrySet()) {
                 var classK = classEntry.getKey();
                 var classV = classEntry.getValue();
-                this.logger.println(classK + " -> " + classV.getName() + ":" + hash(classV));
+                System.out.println(classK + " -> " + classV.getName() + ":" + hash(classV));
             }
         }
 
-        this.logger.println(Color.LIGHT_PURPLE + ">> MODULES" + Color.RESET);
+        System.out.println(Color.LIGHT_PURPLE + ">> MODULES" + Color.RESET);
 
         for (Map.Entry<String, Class<? extends AbstractEventHandler>> entry : this.MODULES.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(k + " -> " + v.getName() + ":" + hash(v));
+            System.out.println(k + " -> " + v.getName() + ":" + hash(v));
         }
 
-        this.logger.println(Color.LIGHT_PURPLE + ">> MODULE_PLUGIN_RELATION" + Color.RESET);
+        System.out.println(Color.LIGHT_PURPLE + ">> MODULE_PLUGIN_RELATION" + Color.RESET);
 
         for (Map.Entry<String, String> entry : this.MODULE_PLUGIN_RELATION.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(k + " -> " + v);
+            System.out.println(k + " -> " + v);
         }
 
-        this.logger.println(Color.LIGHT_BLUE + ">> COMPONENT_RUNNER_CLAZZ" + Color.RESET);
+        System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_RUNNER_CLAZZ" + Color.RESET);
 
         for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> entry : this.COMPONENT_RUNNER_CLAZZ.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getName() + ":" + hash(v));
+            System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getName() + ":" + hash(v));
         }
 
-        this.logger.println(Color.LIGHT_BLUE + ">> COMPONENT_FILTER_CLAZZ" + Color.RESET);
+        System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_FILTER_CLAZZ" + Color.RESET);
 
         for (Map.Entry<Filter, Class<? extends EventHandlerFilter>> entry : this.COMPONENT_FILTER_CLAZZ.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getName() + ":" + hash(v));
+            System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getName() + ":" + hash(v));
         }
 
-        this.logger.println(Color.LIGHT_BLUE + ">> COMPONENT_MONITOR_CLAZZ" + Color.RESET);
+        System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_MONITOR_CLAZZ" + Color.RESET);
 
         for (Map.Entry<Monitor, Class<? extends EventHandlerMonitor>> entry : this.COMPONENT_MONITOR_CLAZZ.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getName() + ":" + hash(v));
+            System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getName() + ":" + hash(v));
         }
 
-        this.logger.println(Color.LIGHT_BLUE + ">> COMPONENT_CHECKER_CLAZZ" + Color.RESET);
+        System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_CHECKER_CLAZZ" + Color.RESET);
 
         for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> entry : this.COMPONENT_CHECKER_CLAZZ.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getName() + ":" + hash(v));
+            System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getName() + ":" + hash(v));
         }
 
-        this.logger.println(Color.LIGHT_BLUE + ">> COMPONENT_EXECUTOR_CLAZZ" + Color.RESET);
+        System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_EXECUTOR_CLAZZ" + Color.RESET);
 
         for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> entry : this.COMPONENT_EXECUTOR_CLAZZ.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getName() + ":" + hash(v));
+            System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getName() + ":" + hash(v));
         }
 
-        this.logger.println(Color.LIGHT_BLUE + ">> COMPONENT_RUNNER_INSTANCE" + Color.RESET);
+        System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_RUNNER_INSTANCE" + Color.RESET);
 
         for (Map.Entry<Runner, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+            System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
-        this.logger.println(Color.LIGHT_BLUE + ">> COMPONENT_FILTER_INSTANCE" + Color.RESET);
+        System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_FILTER_INSTANCE" + Color.RESET);
 
         for (Map.Entry<Filter, EventHandlerFilter> entry : this.COMPONENT_FILTER_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+            System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
-        this.logger.println(Color.LIGHT_BLUE + ">> COMPONENT_MONITOR_INSTANCE" + Color.RESET);
+        System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_MONITOR_INSTANCE" + Color.RESET);
 
         for (Map.Entry<Monitor, EventHandlerMonitor> entry : this.COMPONENT_MONITOR_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+            System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
-        this.logger.println(Color.LIGHT_BLUE + ">> COMPONENT_CHECKER_INSTANCE" + Color.RESET);
+        System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_CHECKER_INSTANCE" + Color.RESET);
 
         for (Map.Entry<Checker, EventHandlerChecker> entry : this.COMPONENT_CHECKER_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+            System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
-        this.logger.println(Color.LIGHT_BLUE + ">> COMPONENT_EXECUTOR_INSTANCE" + Color.RESET);
+        System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_EXECUTOR_INSTANCE" + Color.RESET);
 
         for (Map.Entry<Executor, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+            System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
-        this.logger.println(Color.LIGHT_CYAN + ">> FILTER_USERS_CHAIN" + Color.RESET);
+        System.out.println(Color.LIGHT_CYAN + ">> FILTER_USERS_CHAIN" + Color.RESET);
 
         for (EventHandlerFilter item : this.FILTER_USERS_CHAIN) {
-            this.logger.println(item.getClass().getName() + ":" + hash(item));
+            System.out.println(item.getClass().getName() + ":" + hash(item));
         }
 
-        this.logger.println(Color.LIGHT_CYAN + ">> FILTER_GROUP_CHAIN" + Color.RESET);
+        System.out.println(Color.LIGHT_CYAN + ">> FILTER_GROUP_CHAIN" + Color.RESET);
 
         for (EventHandlerFilter item : this.FILTER_GROUP_CHAIN) {
-            this.logger.println(item.getClass().getName() + ":" + hash(item));
+            System.out.println(item.getClass().getName() + ":" + hash(item));
         }
 
-        this.logger.println(Color.LIGHT_CYAN + ">> MONITOR_USERS_CHAIN" + Color.RESET);
+        System.out.println(Color.LIGHT_CYAN + ">> MONITOR_USERS_CHAIN" + Color.RESET);
 
         for (EventHandlerMonitor item : this.MONITOR_USERS_CHAIN) {
-            this.logger.println(item.getClass().getName() + ":" + hash(item));
+            System.out.println(item.getClass().getName() + ":" + hash(item));
         }
 
-        this.logger.println(Color.LIGHT_CYAN + ">> MONITOR_GROUP_CHAIN" + Color.RESET);
+        System.out.println(Color.LIGHT_CYAN + ">> MONITOR_GROUP_CHAIN" + Color.RESET);
 
         for (EventHandlerMonitor item : this.MONITOR_GROUP_CHAIN) {
-            this.logger.println(item.getClass().getName() + ":" + hash(item));
+            System.out.println(item.getClass().getName() + ":" + hash(item));
         }
 
-        this.logger.println(Color.LIGHT_CYAN + ">> GLOBAL_CHECKER_USERS_POOL" + Color.RESET);
+        System.out.println(Color.LIGHT_CYAN + ">> GLOBAL_CHECKER_USERS_POOL" + Color.RESET);
 
         for (EventHandlerChecker item : this.GLOBAL_CHECKER_USERS_POOL) {
-            this.logger.println(item.getClass().getName() + ":" + hash(item));
+            System.out.println(item.getClass().getName() + ":" + hash(item));
         }
 
-        this.logger.println(Color.LIGHT_CYAN + ">> GLOBAL_CHECKER_GROUP_POOL" + Color.RESET);
+        System.out.println(Color.LIGHT_CYAN + ">> GLOBAL_CHECKER_GROUP_POOL" + Color.RESET);
 
         for (EventHandlerChecker item : this.GLOBAL_CHECKER_GROUP_POOL) {
-            this.logger.println(item.getClass().getName() + ":" + hash(item));
+            System.out.println(item.getClass().getName() + ":" + hash(item));
         }
 
-        this.logger.println(Color.LIGHT_CYAN + ">> COMMAND_CHECKER_USERS_POOL" + Color.RESET);
+        System.out.println(Color.LIGHT_CYAN + ">> COMMAND_CHECKER_USERS_POOL" + Color.RESET);
 
         for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_USERS_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(k + " " + v.size());
+            System.out.println(k + " " + v.size());
             for (EventHandlerChecker checker : v) {
-                this.logger.println(checker.getClass().getName() + ":" + hash(checker));
+                System.out.println(checker.getClass().getName() + ":" + hash(checker));
             }
         }
 
-        this.logger.println(Color.LIGHT_CYAN + ">> COMMAND_CHECKER_GROUP_POOL" + Color.RESET);
+        System.out.println(Color.LIGHT_CYAN + ">> COMMAND_CHECKER_GROUP_POOL" + Color.RESET);
 
         for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_GROUP_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(k + " " + v.size());
+            System.out.println(k + " " + v.size());
             for (EventHandlerChecker checker : v) {
-                this.logger.println(checker.getClass().getName() + ":" + hash(checker));
+                System.out.println(checker.getClass().getName() + ":" + hash(checker));
             }
         }
 
-        this.logger.println(Color.LIGHT_CYAN + ">> EXECUTOR_USERS_POOL" + Color.RESET);
+        System.out.println(Color.LIGHT_CYAN + ">> EXECUTOR_USERS_POOL" + Color.RESET);
 
         for (Map.Entry<String, EventHandlerExecutor> entry : this.EXECUTOR_USERS_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(k + " -> " + v.getClass().getName() + ":" + hash(v));
+            System.out.println(k + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
-        this.logger.println(Color.LIGHT_CYAN + ">> EXECUTOR_GROUP_POOL" + Color.RESET);
+        System.out.println(Color.LIGHT_CYAN + ">> EXECUTOR_GROUP_POOL" + Color.RESET);
 
         for (Map.Entry<String, EventHandlerExecutor> entry : this.EXECUTOR_GROUP_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(k + " -> " + v.getClass().getName() + ":" + hash(v));
+            System.out.println(k + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
-        this.logger.println(Color.LIGHT_CYAN + ">> COMMAND_EXECUTOR_RELATION" + Color.RESET);
+        System.out.println(Color.LIGHT_CYAN + ">> COMMAND_EXECUTOR_RELATION" + Color.RESET);
 
         for (Map.Entry<String, Executor> entry : this.COMMAND_EXECUTOR_RELATION.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            this.logger.println(Color.GREEN + k + Color.RESET + " -> " + v.value() + ":" + hash(v) + " {" + (v.users() ? "U" : "") + (v.group() ? "G" : "") + "} " + v.outline() + ":" + v.description());
+            System.out.println(Color.GREEN + k + Color.RESET + " -> " + v.value() + ":" + hash(v) + " {" + (v.users() ? "U" : "") + (v.group() ? "G" : "") + "} " + v.outline() + ":" + v.description());
             for (String temp : v.usage()) {
-                this.logger.println(temp);
+                System.out.println(temp);
             }
             for (String temp : v.privacy()) {
-                this.logger.println(temp);
+                System.out.println(temp);
             }
         }
 
