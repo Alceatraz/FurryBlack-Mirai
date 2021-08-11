@@ -156,7 +156,7 @@ public final class Schema {
             builder.append(executor.outline());
             builder.append("[");
             builder.append(executor.command());
-            builder.append("] ");
+            builder.append("]");
             builder.append(executor.description());
             builder.append("\r\n");
         }
@@ -177,7 +177,7 @@ public final class Schema {
             builder.append(executor.outline());
             builder.append("[");
             builder.append(executor.command());
-            builder.append("] ");
+            builder.append("]");
             builder.append(executor.description());
             builder.append("\r\n");
         }

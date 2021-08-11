@@ -766,7 +766,7 @@ public final class Driver {
                                 Map<Executor, Boolean> listAllExecutor = systemd.listAllExecutor();
                                 System.out.println(Color.LIGHT_BLUE + ">> 执行器 " + listAllExecutor.size() + Color.RESET);
                                 for (Map.Entry<Executor, Boolean> entry : listAllExecutor.entrySet()) {
-                                    System.out.println((entry.getValue() ? "√ " : "   ") + entry.getKey().value() + "[" + entry.getKey().command() + "]" + (entry.getKey().users() ? " 私" : "  ") + (entry.getKey().users() ? "群" : " "));
+                                    System.out.println((entry.getValue() ? "√ " : "   ") + entry.getKey().value() + "[" + entry.getKey().command() + "]{" + (entry.getKey().users() ? "U" : "  ") + (entry.getKey().users() ? "G" : "") + "}");
                                 }
 
                                 List<Checker> globalUsersChecker = systemd.listGlobalUsersChecker();
