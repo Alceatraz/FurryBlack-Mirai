@@ -730,27 +730,9 @@ public final class Systemd {
     public void shut() {
 
         // ==========================================================================================================================
-        // 关闭模块
-
-        boolean shut;
-
-        try {
-            shut = this.schema.shut();
-        } catch (Exception exception) {
-            shut = false;
-            this.logger.error("关闭模块系统发生异常", exception);
-        }
-
-        if (!shut) {
-            this.schema.verboseStatus();
-        }
-
-        // ==========================================================================================================================
         // 关闭监听
 
-
         this.logger.hint("结束监听通道");
-
 
         this.logger.info("结束私聊监听通道");
         this.userMessageEventListener.complete();
@@ -769,6 +751,23 @@ public final class Systemd {
 
         this.logger.info("结束邀请加群监听通道");
         this.botInvitedJoinGroupRequestEventListener.complete();
+
+
+        // ==========================================================================================================================
+        // 关闭模块
+
+        boolean shut;
+
+        try {
+            shut = this.schema.shut();
+        } catch (Exception exception) {
+            shut = false;
+            this.logger.error("关闭模块系统发生异常", exception);
+        }
+
+        if (!shut) {
+            this.schema.verboseStatus();
+        }
 
 
         // ==========================================================================================================================

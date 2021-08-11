@@ -1322,7 +1322,7 @@ public final class Schema {
         this.logger.hint("关闭过滤器");
 
         ArrayList<Filter> filters = new ArrayList<>(this.COMPONENT_FILTER_INSTANCE.keySet());
-        Collections.reverse(monitors);
+        Collections.reverse(filters);
         for (Filter filter : filters) {
             try {
                 this.shutFilter(filter);
@@ -1403,7 +1403,7 @@ public final class Schema {
 
 
     private static int compare(Runner o1, Runner o2) {
-        if (o1 == o2 || Objects.equals(o1, o2)) {
+        if (Objects.equals(o1, o2)) {
             return 0;
         } else {
             int i = o1.priority() - o2.priority();
@@ -1413,7 +1413,7 @@ public final class Schema {
 
 
     private static int compare(Filter o1, Filter o2) {
-        if (o1 == o2 || Objects.equals(o1, o2)) {
+        if (Objects.equals(o1, o2)) {
             return 0;
         } else {
             int i = o1.priority() - o2.priority();
@@ -1423,7 +1423,7 @@ public final class Schema {
 
 
     private static int compare(Monitor o1, Monitor o2) {
-        if (o1 == o2 || Objects.equals(o1, o2)) {
+        if (Objects.equals(o1, o2)) {
             return 0;
         } else {
             int i = o1.priority() - o2.priority();
@@ -1433,7 +1433,7 @@ public final class Schema {
 
 
     private static int compare(Checker o1, Checker o2) {
-        if (o1 == o2 || Objects.equals(o1, o2)) {
+        if (Objects.equals(o1, o2)) {
             return 0;
         } else {
             int i = o1.priority() - o2.priority();
@@ -1730,7 +1730,6 @@ public final class Schema {
 
     private void shutRunner(Runner annotation) {
         EventHandlerRunner instance = this.COMPONENT_RUNNER_INSTANCE.get(annotation);
-        this.logger.info("关闭定时器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
         try {
             if (Driver.isShutModeDrop()) {
                 new Thread(instance::shutWrapper).start();
@@ -1740,12 +1739,12 @@ public final class Schema {
         } catch (Exception exception) {
             this.logger.warning("关闭定时器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
         }
+        this.logger.info("关闭定时器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
     }
 
 
     private void shutFilter(Filter annotation) {
         EventHandlerFilter instance = this.COMPONENT_FILTER_INSTANCE.get(annotation);
-        this.logger.info("关闭过滤器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
         try {
             if (Driver.isShutModeDrop()) {
                 new Thread(instance::shutWrapper).start();
@@ -1755,21 +1754,24 @@ public final class Schema {
         } catch (Exception exception) {
             this.logger.warning("关闭过滤器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
         }
+        this.logger.info("关闭过滤器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
     }
 
 
     private void shutMonitor(Monitor annotation) {
         EventHandlerMonitor instance = this.COMPONENT_MONITOR_INSTANCE.get(annotation);
-        this.logger.info("关闭监听器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
         try {
             if (Driver.isShutModeDrop()) {
-                new Thread(instance::shutWrapper).start();
+                Thread thread = new Thread(instance::shutWrapper);
+                thread.setDaemon(true);
+                thread.start();
             } else {
                 instance.shutWrapper();
             }
         } catch (Exception exception) {
             this.logger.warning("关闭监听器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
         }
+        this.logger.info("关闭监听器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
     }
 
 
@@ -1778,7 +1780,9 @@ public final class Schema {
         this.logger.info("关闭检查器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
         try {
             if (Driver.isShutModeDrop()) {
-                new Thread(instance::shutWrapper).start();
+                Thread thread = new Thread(instance::shutWrapper);
+                thread.setDaemon(true);
+                thread.start();
             } else {
                 instance.shutWrapper();
             }
@@ -1790,33 +1794,34 @@ public final class Schema {
 
     private void shutExecutor(Executor annotation) {
         EventHandlerExecutor instance = this.COMPONENT_EXECUTOR_INSTANCE.get(annotation);
-        this.logger.info("关闭执行器" + annotation.value() + "[" + annotation.command() + "] -> " + instance.getClass().getName());
         try {
             if (Driver.isShutModeDrop()) {
-                new Thread(instance::shutWrapper).start();
+                Thread thread = new Thread(instance::shutWrapper);
+                thread.setDaemon(true);
+                thread.start();
             } else {
                 instance.shutWrapper();
             }
         } catch (Exception exception) {
             this.logger.warning("关闭执行器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
         }
+        this.logger.info("关闭执行器" + annotation.value() + "[" + annotation.command() + "] -> " + instance.getClass().getName());
     }
 
 
     private void unloadRunnerInstance(Runner annotation) {
         EventHandlerRunner instance = this.COMPONENT_RUNNER_INSTANCE.remove(annotation);
-        this.logger.info("卸载定时器" + annotation.value() + " -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + instance.getClass().getName() + ":" + hash(instance));
         try {
             instance.shutWrapper();
         } catch (Exception exception) {
             this.logger.info("停止定时器失败 " + annotation.value() + " -> " + instance.getClass().getName(), exception);
         }
+        this.logger.info("卸载定时器" + annotation.value() + " -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + instance.getClass().getName() + ":" + hash(instance));
     }
 
 
     private void unloadFilterInstance(Filter annotation) {
         EventHandlerFilter instance = this.COMPONENT_FILTER_INSTANCE.remove(annotation);
-        this.logger.info("卸载过滤器" + annotation.value() + " -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + instance.getClass().getName() + ":" + hash(instance));
         try {
             instance.shutWrapper();
         } catch (Exception exception) {
@@ -1824,12 +1829,12 @@ public final class Schema {
         }
         if (annotation.users()) this.FILTER_USERS_CHAIN.remove(instance);
         if (annotation.group()) this.FILTER_GROUP_CHAIN.remove(instance);
+        this.logger.info("卸载过滤器" + annotation.value() + " -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + instance.getClass().getName() + ":" + hash(instance));
     }
 
 
     private void unloadMonitorInstance(Monitor annotation) {
         EventHandlerMonitor instance = this.COMPONENT_MONITOR_INSTANCE.remove(annotation);
-        this.logger.info("卸载监听器" + annotation.value() + " -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + instance.getClass().getName() + ":" + hash(instance));
         try {
             instance.shutWrapper();
         } catch (Exception exception) {
@@ -1838,12 +1843,12 @@ public final class Schema {
         this.COMPONENT_MONITOR_INSTANCE.remove(annotation);
         if (annotation.users()) this.MONITOR_USERS_CHAIN.remove(instance);
         if (annotation.group()) this.MONITOR_GROUP_CHAIN.remove(instance);
+        this.logger.info("卸载监听器" + annotation.value() + " -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + instance.getClass().getName() + ":" + hash(instance));
     }
 
 
     private void unloadCheckerInstance(Checker annotation) {
         EventHandlerChecker instance = this.COMPONENT_CHECKER_INSTANCE.remove(annotation);
-        this.logger.info("卸载检查器" + annotation.value() + " -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + instance.getClass().getName() + ":" + hash(instance));
         try {
             instance.shutWrapper();
         } catch (Exception exception) {
@@ -1864,12 +1869,12 @@ public final class Schema {
                 checkerList.remove(instance);
             }
         }
+        this.logger.info("卸载检查器" + annotation.value() + " -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + instance.getClass().getName() + ":" + hash(instance));
     }
 
 
     private void unloadExecutorInstance(Executor annotation) {
         EventHandlerExecutor instance = this.COMPONENT_EXECUTOR_INSTANCE.remove(annotation);
-        this.logger.info("卸载执行器" + annotation.value() + " -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + instance.getClass().getName() + ":" + hash(instance));
         try {
             instance.shutWrapper();
         } catch (Exception exception) {
@@ -1877,6 +1882,7 @@ public final class Schema {
         }
         if (annotation.users()) this.EXECUTOR_USERS_POOL.remove(annotation.command());
         if (annotation.group()) this.EXECUTOR_GROUP_POOL.remove(annotation.command());
+        this.logger.info("卸载执行器" + annotation.value() + " -> " + this.MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + instance.getClass().getName() + ":" + hash(instance));
     }
 
 
