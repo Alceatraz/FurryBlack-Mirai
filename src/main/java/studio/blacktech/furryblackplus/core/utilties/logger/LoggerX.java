@@ -234,6 +234,15 @@ public final class LoggerX extends PlatformLogger {
     // ==================================================================================================
 
 
+    public void println(String message) {
+        System.out.println(message);
+        LoggerX.writeLog(message);
+    }
+
+
+    // ==================================================================================================
+
+
     public void bypass(String message) {
         String result = "[" + datetime() + "][BYPS][" + this.name + "]" + message;
         System.out.println(result);

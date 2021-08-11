@@ -895,18 +895,28 @@ public final class Systemd {
                         break;
 
                     default:
+
                         EventHandlerExecutor executor = this.schema.getExecutorUsersPool().get(commandName);
+
                         if (executor == null) {
                             Driver.sendMessage(event, "没有此命令");
                             return;
                         }
+
                         for (EventHandlerChecker checker : this.schema.getGlobalCheckerUsersPool()) {
                             if (checker.handleUsersMessageWrapper(event, command)) return;
                         }
-                        for (EventHandlerChecker checker : this.schema.getCommandCheckerUsersPool(commandName)) {
-                            if (checker.handleUsersMessageWrapper(event, command)) return;
+
+                        List<EventHandlerChecker> commandCheckerUsersPool = this.schema.getCommandCheckerUsersPool(commandName);
+
+                        if (commandCheckerUsersPool != null) {
+                            for (EventHandlerChecker checker : commandCheckerUsersPool) {
+                                if (checker.handleUsersMessageWrapper(event, command)) return;
+                            }
                         }
+
                         executor.handleUsersMessageWrapper(event, command);
+
                         break;
                 }
             }
@@ -990,15 +1000,27 @@ public final class Systemd {
                         break;
 
                     default:
+
                         EventHandlerExecutor executor = this.schema.getExecutorGroupPool().get(commandName);
-                        if (executor == null) return;
-                        executor.handleGroupMessageWrapper(event, command);
+
+                        if (executor == null) {
+                            return;
+                        }
+
                         for (EventHandlerChecker checker : this.schema.getGlobalCheckerGroupPool()) {
                             if (checker.handleGroupMessageWrapper(event, command)) return;
                         }
-                        for (EventHandlerChecker checker : this.schema.getCommandCheckerGroupPool(commandName)) {
-                            if (checker.handleGroupMessageWrapper(event, command)) return;
+
+                        List<EventHandlerChecker> commandCheckerGroupPool = this.schema.getCommandCheckerGroupPool(commandName);
+
+                        if (commandCheckerGroupPool != null) {
+                            for (EventHandlerChecker checker : commandCheckerGroupPool) {
+                                if (checker.handleGroupMessageWrapper(event, command)) return;
+                            }
                         }
+
+                        executor.handleGroupMessageWrapper(event, command);
+
                         break;
                 }
             }
