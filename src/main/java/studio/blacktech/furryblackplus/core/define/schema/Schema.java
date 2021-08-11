@@ -897,7 +897,6 @@ public final class Schema {
             }
         }
 
-
         for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> moduleEntry : pluginItem.getCheckerClassMap().entrySet()) {
             var k = moduleEntry.getKey();
             var v = moduleEntry.getValue();
@@ -1295,13 +1294,11 @@ public final class Schema {
         Collections.reverse(monitors);
         monitors.forEach(this::shutMonitor);
 
-
         this.logger.hint("关闭过滤器");
 
         ArrayList<Filter> filters = new ArrayList<>(this.COMPONENT_FILTER_INSTANCE.keySet());
         Collections.reverse(monitors);
         filters.forEach(this::shutFilter);
-
 
         this.logger.hint("关闭定时器");
 
