@@ -1280,31 +1280,61 @@ public final class Schema {
 
         ArrayList<Executor> executors = new ArrayList<>(this.COMPONENT_EXECUTOR_INSTANCE.keySet());
         Collections.reverse(executors);
-        executors.forEach(this::shutExecutor);
+        for (Executor executor : executors) {
+            try {
+                this.shutExecutor(executor);
+            } catch (Exception exception) {
+                this.logger.warning("关闭定时器发生异常 " + printAnnotation(executor) + ":" + hash(executor), exception);
+            }
+        }
 
         this.logger.hint("关闭监听器");
 
         ArrayList<Checker> checkers = new ArrayList<>(this.COMPONENT_CHECKER_INSTANCE.keySet());
         Collections.reverse(checkers);
-        checkers.forEach(this::shutChecker);
+        for (Checker checker : checkers) {
+            try {
+                this.shutChecker(checker);
+            } catch (Exception exception) {
+                this.logger.warning("关闭定时器发生异常 " + printAnnotation(checker) + ":" + hash(checker), exception);
+            }
+        }
 
         this.logger.hint("关闭监听器");
 
         ArrayList<Monitor> monitors = new ArrayList<>(this.COMPONENT_MONITOR_INSTANCE.keySet());
         Collections.reverse(monitors);
-        monitors.forEach(this::shutMonitor);
+        for (Monitor monitor : monitors) {
+            try {
+                this.shutMonitor(monitor);
+            } catch (Exception exception) {
+                this.logger.warning("关闭定时器发生异常 " + printAnnotation(monitor) + ":" + hash(monitor), exception);
+            }
+        }
 
         this.logger.hint("关闭过滤器");
 
         ArrayList<Filter> filters = new ArrayList<>(this.COMPONENT_FILTER_INSTANCE.keySet());
         Collections.reverse(monitors);
-        filters.forEach(this::shutFilter);
+        for (Filter filter : filters) {
+            try {
+                this.shutFilter(filter);
+            } catch (Exception exception) {
+                this.logger.warning("关闭定时器发生异常 " + printAnnotation(filter) + ":" + hash(filter), exception);
+            }
+        }
 
         this.logger.hint("关闭定时器");
 
         ArrayList<Runner> runners = new ArrayList<>(this.COMPONENT_RUNNER_INSTANCE.keySet());
         Collections.reverse(runners);
-        runners.forEach(this::shutRunner);
+        for (Runner runner : runners) {
+            try {
+                this.shutRunner(runner);
+            } catch (Exception exception) {
+                this.logger.warning("关闭定时器发生异常 " + printAnnotation(runner) + ":" + hash(runner), exception);
+            }
+        }
 
     }
 
@@ -2055,7 +2085,7 @@ public final class Schema {
         for (Map.Entry<String, Executor> entry : this.COMMAND_EXECUTOR_RELATION.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(Color.GREEN + k + Color.RESET + " -> " + v.value() + " " + "{" + (v.users() ? "U" : "") + (v.group() ? "G" : "") + "} " + v.outline() + ":" + v.description());
+            System.out.println(Color.GREEN + k + Color.RESET + " -> " + v.value() + ":" + hash(v) + " {" + (v.users() ? "U" : "") + (v.group() ? "G" : "") + "} " + v.outline() + ":" + v.description());
             for (String temp : v.usage()) {
                 System.out.println(temp);
             }
