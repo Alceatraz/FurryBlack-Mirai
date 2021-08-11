@@ -1276,7 +1276,9 @@ public final class Schema {
     // 执行关闭
 
 
-    public void shut() {
+    public boolean shut() {
+
+        boolean fine = true;
 
         this.logger.hint("关闭执行器");
 
@@ -1286,6 +1288,7 @@ public final class Schema {
             try {
                 this.shutExecutor(executor);
             } catch (Exception exception) {
+                fine = false;
                 this.logger.warning("关闭定时器发生异常 " + printAnnotation(executor) + ":" + hash(executor), exception);
             }
         }
@@ -1298,6 +1301,7 @@ public final class Schema {
             try {
                 this.shutChecker(checker);
             } catch (Exception exception) {
+                fine = false;
                 this.logger.warning("关闭定时器发生异常 " + printAnnotation(checker) + ":" + hash(checker), exception);
             }
         }
@@ -1310,6 +1314,7 @@ public final class Schema {
             try {
                 this.shutMonitor(monitor);
             } catch (Exception exception) {
+                fine = false;
                 this.logger.warning("关闭定时器发生异常 " + printAnnotation(monitor) + ":" + hash(monitor), exception);
             }
         }
@@ -1322,6 +1327,7 @@ public final class Schema {
             try {
                 this.shutFilter(filter);
             } catch (Exception exception) {
+                fine = false;
                 this.logger.warning("关闭定时器发生异常 " + printAnnotation(filter) + ":" + hash(filter), exception);
             }
         }
@@ -1334,9 +1340,12 @@ public final class Schema {
             try {
                 this.shutRunner(runner);
             } catch (Exception exception) {
+                fine = false;
                 this.logger.warning("关闭定时器发生异常 " + printAnnotation(runner) + ":" + hash(runner), exception);
             }
         }
+
+        return fine;
 
     }
 

@@ -732,10 +732,17 @@ public final class Systemd {
         // ==========================================================================================================================
         // 关闭模块
 
+        boolean shut;
+
         try {
-            this.schema.shut();
+            shut = this.schema.shut();
         } catch (Exception exception) {
+            shut = false;
             this.logger.error("关闭模块系统发生异常", exception);
+        }
+
+        if (!shut) {
+            this.schema.verboseStatus();
         }
 
         // ==========================================================================================================================

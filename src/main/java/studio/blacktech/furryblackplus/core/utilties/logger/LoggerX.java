@@ -480,6 +480,7 @@ public final class LoggerX extends PlatformLogger {
 
     }
 
+
     private static synchronized void writeLog(String message) {
         try (FileWriter writer = new FileWriter(FILE_LOGGER, StandardCharsets.UTF_8, true)) {
             writer.append(message);

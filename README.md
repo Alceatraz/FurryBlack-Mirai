@@ -79,6 +79,11 @@ as commercial usage. You is banned if you do it.
 ### 0.9.2
 
 - 修复checker执行的一个BUG
+- 加强关闭错误的输出
+
+#### 已知问题
+
+- shut时极低概率出现NullPointerException
 
 ### 0.9.1 BUG💣
 
