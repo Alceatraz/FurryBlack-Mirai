@@ -25,7 +25,6 @@ import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.NormalMember;
 import net.mamoe.mirai.contact.Stranger;
-import net.mamoe.mirai.data.UserProfile;
 import net.mamoe.mirai.event.GlobalEventChannel;
 import net.mamoe.mirai.event.Listener;
 import net.mamoe.mirai.event.events.BotInvitedJoinGroupRequestEvent;
@@ -34,7 +33,6 @@ import net.mamoe.mirai.event.events.MemberJoinEvent;
 import net.mamoe.mirai.event.events.MemberLeaveEvent;
 import net.mamoe.mirai.event.events.NewFriendRequestEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
-import net.mamoe.mirai.message.data.Image;
 import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.utils.BotConfiguration;
 import studio.blacktech.furryblackplus.Driver;
@@ -1324,34 +1322,21 @@ public final class Systemd {
         contact.sendMessage(message);
     }
 
-    @Api("获取图片的URL")
-    public String getImageURL(Image image) {
-        return Mirai.getInstance().queryImageUrl(this.bot, image);
-    }
-
-    @Api("获取用户名片")
-    public UserProfile getUserProfile(long user) {
-        return Mirai.getInstance().queryProfile(this.bot, user);
-    }
-
     @Api("获取预设昵称")
     public String getMappedNickName(long groupId, long userId) {
-
         if (this.NICKNAME_GROUPS.containsKey(groupId)) {
             Map<Long, String> groupNicks = this.NICKNAME_GROUPS.get(groupId);
             if (groupNicks.containsKey(userId)) {
                 return groupNicks.get(userId);
             }
         }
-
         if (this.NICKNAME_GLOBAL.containsKey(userId)) {
             return this.NICKNAME_GLOBAL.get(userId);
         }
-
         NormalMember member = this.bot.getGroupOrFail(groupId).getOrFail(userId);
         String nameCard = member.getNameCard();
         if (nameCard.isBlank()) {
-            return this.getUserProfile(userId).getNickname();
+            return Mirai.getInstance().queryProfile(this.bot, userId).getNickname();
         } else {
             return nameCard;
         }
@@ -1359,27 +1344,32 @@ public final class Systemd {
 
     @Api("获取预设昵称")
     public String getMappedNickName(GroupMessageEvent event) {
-
         long groupId = event.getGroup().getId();
         long userId = event.getSender().getId();
-
         if (this.NICKNAME_GROUPS.containsKey(groupId)) {
             Map<Long, String> groupNicks = this.NICKNAME_GROUPS.get(groupId);
             if (groupNicks.containsKey(userId)) {
                 return groupNicks.get(userId);
             }
         }
-
         if (this.NICKNAME_GLOBAL.containsKey(userId)) {
             return this.NICKNAME_GLOBAL.get(userId);
         }
-
         String nameCard = event.getSender().getNameCard();
-
         if (nameCard.isBlank()) {
             return event.getSender().getNick();
         } else {
             return nameCard;
         }
     }
+
+
+    // =========================================================================
+
+
+    public Bot getBot() {
+        return this.bot;
+    }
+
+
 }

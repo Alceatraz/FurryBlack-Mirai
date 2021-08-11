@@ -76,6 +76,11 @@ as commercial usage. You is banned if you do it.
 
 ## CHANGELOG
 
+### 0.9.1
+
+- 增加shut的健壮性
+- 调整plugin module schema的控制台显示
+
 ### 0.9.0
 
 - 修复大量热重载导致的BUG
