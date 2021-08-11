@@ -41,6 +41,8 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import static studio.blacktech.furryblackplus.core.utilties.logger.LoggerX.hash;
+
 public class Plugin {
 
     private final LoggerX logger;
@@ -167,7 +169,7 @@ public class Plugin {
                     continue;
                 }
 
-                String clazzHashName = clazz.getName() + ":" + clazz.hashCode();
+                String clazzHashName = clazz.getName() + ":" + hash(clazz);
 
                 if (EventHandlerRunner.class.isAssignableFrom(clazz)) {
 

@@ -52,6 +52,8 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+import static studio.blacktech.furryblackplus.core.utilties.logger.LoggerX.hash;
+
 
 @Api("插件与模块持有")
 public final class Schema {
@@ -1887,11 +1889,6 @@ public final class Schema {
 
     private static String printAnnotation(Executor annotation) {
         return annotation.value() + '(' + annotation.command() + "){" + (annotation.users() ? "U" : "") + (annotation.group() ? "G" : "") + "}";
-    }
-
-
-    private static String hash(Object object) {
-        return Integer.toHexString(object.hashCode());
     }
 
 

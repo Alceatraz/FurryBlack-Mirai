@@ -507,6 +507,14 @@ public final class LoggerX extends PlatformLogger {
     // ==================================================================================================
 
 
+    public static String hash(Object object) {
+        return Integer.toHexString(object.hashCode());
+    }
+
+
+    // ==================================================================================================
+
+
     public enum Color {
 
         RESET("\u001b[0m"),
