@@ -1257,7 +1257,7 @@ public final class Schema {
             } catch (Exception exception) {
                 this.logger.warning("关闭执行器发生异常" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v), exception);
             }
-            this.logger.warning("关闭执行器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+            this.logger.info("关闭执行器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
         this.logger.hint("关闭检查器");
@@ -1276,7 +1276,7 @@ public final class Schema {
             } catch (Exception exception) {
                 this.logger.warning("关闭检查器发生异常" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v), exception);
             }
-            this.logger.warning("关闭检查器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+            this.logger.info("关闭检查器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
         this.logger.hint("关闭监听器");
@@ -1295,7 +1295,7 @@ public final class Schema {
             } catch (Exception exception) {
                 this.logger.warning("关闭监听器发生异常" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v), exception);
             }
-            this.logger.warning("关闭监听器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+            this.logger.info("关闭监听器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
         this.logger.hint("关闭过滤器");
@@ -1314,7 +1314,7 @@ public final class Schema {
             } catch (Exception exception) {
                 this.logger.warning("关闭过滤器发生异常" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v), exception);
             }
-            this.logger.warning("关闭过滤器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+            this.logger.info("关闭过滤器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
         this.logger.hint("关闭定时器");
@@ -1333,7 +1333,7 @@ public final class Schema {
             } catch (Exception exception) {
                 this.logger.warning("关闭定时器发生异常" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v), exception);
             }
-            this.logger.warning("关闭定时器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+            this.logger.info("关闭定时器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
     }
