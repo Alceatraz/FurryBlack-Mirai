@@ -41,6 +41,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -1243,7 +1244,7 @@ public final class Schema {
 
         this.logger.hint("关闭执行器");
 
-        for (Map.Entry<Executor, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.descendingMap().entrySet()) {
+        for (Map.Entry<Executor, EventHandlerExecutor> entry : new LinkedHashSet<>(this.COMPONENT_EXECUTOR_INSTANCE.descendingMap().entrySet())) {
             var k = entry.getKey();
             var v = entry.getValue();
             try {
@@ -1262,7 +1263,7 @@ public final class Schema {
 
         this.logger.hint("关闭检查器");
 
-        for (Map.Entry<Checker, EventHandlerChecker> entry : this.COMPONENT_CHECKER_INSTANCE.descendingMap().entrySet()) {
+        for (Map.Entry<Checker, EventHandlerChecker> entry : new LinkedHashSet<>(this.COMPONENT_CHECKER_INSTANCE.descendingMap().entrySet())) {
             var k = entry.getKey();
             var v = entry.getValue();
             try {
@@ -1281,7 +1282,7 @@ public final class Schema {
 
         this.logger.hint("关闭监听器");
 
-        for (Map.Entry<Monitor, EventHandlerMonitor> entry : this.COMPONENT_MONITOR_INSTANCE.descendingMap().entrySet()) {
+        for (Map.Entry<Monitor, EventHandlerMonitor> entry : new LinkedHashSet<>(this.COMPONENT_MONITOR_INSTANCE.descendingMap().entrySet())) {
             var k = entry.getKey();
             var v = entry.getValue();
             try {
@@ -1300,7 +1301,7 @@ public final class Schema {
 
         this.logger.hint("关闭过滤器");
 
-        for (Map.Entry<Filter, EventHandlerFilter> entry : this.COMPONENT_FILTER_INSTANCE.descendingMap().entrySet()) {
+        for (Map.Entry<Filter, EventHandlerFilter> entry : new LinkedHashSet<>(this.COMPONENT_FILTER_INSTANCE.descendingMap().entrySet())) {
             var k = entry.getKey();
             var v = entry.getValue();
             try {
@@ -1319,7 +1320,7 @@ public final class Schema {
 
         this.logger.hint("关闭定时器");
 
-        for (Map.Entry<Runner, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.descendingMap().entrySet()) {
+        for (Map.Entry<Runner, EventHandlerRunner> entry : new LinkedHashSet<>(this.COMPONENT_RUNNER_INSTANCE.descendingMap().entrySet())) {
             var k = entry.getKey();
             var v = entry.getValue();
             try {
