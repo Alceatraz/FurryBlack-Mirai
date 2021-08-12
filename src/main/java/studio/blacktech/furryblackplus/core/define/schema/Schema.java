@@ -39,9 +39,10 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -1242,101 +1243,245 @@ public final class Schema {
 
     public void shut() {
 
+        int javaBug = 0;
+
         this.logger.hint("关闭执行器");
 
-        for (Map.Entry<Executor, EventHandlerExecutor> entry : new LinkedHashSet<>(this.COMPONENT_EXECUTOR_INSTANCE.descendingMap().entrySet())) {
-            var k = entry.getKey();
-            var v = entry.getValue();
-            try {
-                if (Driver.isShutModeDrop()) {
-                    Thread thread = new Thread(v::shutWrapper);
-                    thread.setDaemon(true);
-                    thread.start();
-                } else {
-                    v.shutWrapper();
-                }
-            } catch (Exception exception) {
-                this.logger.warning("关闭执行器发生异常" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v), exception);
+        LinkedList<Executor> executors = new LinkedList<>(this.COMPONENT_EXECUTOR_INSTANCE.keySet());
+        Collections.reverse(executors);
+        for (Executor k : executors) {
+            EventHandlerExecutor v = this.COMPONENT_EXECUTOR_INSTANCE.get(k);
+            if (v == null) {
+                javaBug++;
+                this.logger.error("倒序执行器出现错误 get=null " + k);
+                continue;
             }
-            this.logger.info("关闭执行器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+            this.shutExecutor(k, v);
         }
 
         this.logger.hint("关闭检查器");
 
-        for (Map.Entry<Checker, EventHandlerChecker> entry : new LinkedHashSet<>(this.COMPONENT_CHECKER_INSTANCE.descendingMap().entrySet())) {
-            var k = entry.getKey();
-            var v = entry.getValue();
-            try {
-                if (Driver.isShutModeDrop()) {
-                    Thread thread = new Thread(v::shutWrapper);
-                    thread.setDaemon(true);
-                    thread.start();
-                } else {
-                    v.shutWrapper();
-                }
-            } catch (Exception exception) {
-                this.logger.warning("关闭检查器发生异常" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v), exception);
+        LinkedList<Checker> checkers = new LinkedList<>(this.COMPONENT_CHECKER_INSTANCE.keySet());
+        Collections.reverse(checkers);
+        for (Checker k : checkers) {
+            EventHandlerChecker v = this.COMPONENT_CHECKER_INSTANCE.get(k);
+            if (v == null) {
+                javaBug++;
+                this.logger.error("倒序检查器出现错误 get=null " + k);
+                continue;
             }
-            this.logger.info("关闭检查器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+            this.shutChecker(k, v);
         }
 
         this.logger.hint("关闭监听器");
 
-        for (Map.Entry<Monitor, EventHandlerMonitor> entry : new LinkedHashSet<>(this.COMPONENT_MONITOR_INSTANCE.descendingMap().entrySet())) {
-            var k = entry.getKey();
-            var v = entry.getValue();
-            try {
-                if (Driver.isShutModeDrop()) {
-                    Thread thread = new Thread(v::shutWrapper);
-                    thread.setDaemon(true);
-                    thread.start();
-                } else {
-                    v.shutWrapper();
-                }
-            } catch (Exception exception) {
-                this.logger.warning("关闭监听器发生异常" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v), exception);
+        LinkedList<Monitor> monitors = new LinkedList<>(this.COMPONENT_MONITOR_INSTANCE.keySet());
+        Collections.reverse(monitors);
+        for (Monitor k : monitors) {
+            EventHandlerMonitor v = this.COMPONENT_MONITOR_INSTANCE.get(k);
+            if (v == null) {
+                javaBug++;
+                this.logger.error("倒序监听器出现错误 get=null " + k);
+                continue;
             }
-            this.logger.info("关闭监听器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+            this.shutMonitor(k, v);
         }
 
         this.logger.hint("关闭过滤器");
 
-        for (Map.Entry<Filter, EventHandlerFilter> entry : new LinkedHashSet<>(this.COMPONENT_FILTER_INSTANCE.descendingMap().entrySet())) {
-            var k = entry.getKey();
-            var v = entry.getValue();
-            try {
-                if (Driver.isShutModeDrop()) {
-                    Thread thread = new Thread(v::shutWrapper);
-                    thread.setDaemon(true);
-                    thread.start();
-                } else {
-                    v.shutWrapper();
-                }
-            } catch (Exception exception) {
-                this.logger.warning("关闭过滤器发生异常" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v), exception);
+        LinkedList<Filter> filters = new LinkedList<>(this.COMPONENT_FILTER_INSTANCE.keySet());
+        Collections.reverse(filters);
+        for (Filter k : filters) {
+            EventHandlerFilter v = this.COMPONENT_FILTER_INSTANCE.get(k);
+            if (v == null) {
+                javaBug++;
+                this.logger.error("倒序过滤器出现错误 get=null " + k);
+                continue;
             }
-            this.logger.info("关闭过滤器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+            this.shutFilter(k, v);
         }
 
         this.logger.hint("关闭定时器");
 
-        for (Map.Entry<Runner, EventHandlerRunner> entry : new LinkedHashSet<>(this.COMPONENT_RUNNER_INSTANCE.descendingMap().entrySet())) {
-            var k = entry.getKey();
-            var v = entry.getValue();
-            try {
-                if (Driver.isShutModeDrop()) {
-                    Thread thread = new Thread(v::shutWrapper);
-                    thread.setDaemon(true);
-                    thread.start();
-                } else {
-                    v.shutWrapper();
-                }
-            } catch (Exception exception) {
-                this.logger.warning("关闭定时器发生异常" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v), exception);
+
+        LinkedList<Runner> runners = new LinkedList<>(this.COMPONENT_RUNNER_INSTANCE.keySet());
+        Collections.reverse(runners);
+        for (Runner k : runners) {
+            EventHandlerRunner v = this.COMPONENT_RUNNER_INSTANCE.get(k);
+            if (v == null) {
+                javaBug++;
+                this.logger.error("倒序定时器出现错误 get=null " + k);
+                continue;
             }
-            this.logger.info("关闭定时器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+            this.shutRunner(k, v);
         }
 
+        if (javaBug > 0) {
+
+            javaBug = 0;
+
+            this.verboseStatus();
+
+            this.logger.error("倒序期间发生JAVA-BUG 进行应急关闭操作 -> " + javaBug);
+
+            for (Map.Entry<Executor, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
+                var k = entry.getKey();
+                var v = entry.getValue();
+                if (v == null) {
+                    this.logger.warning("应急执行器关闭时空指针 " + printAnnotation(k));
+                    javaBug++;
+                    continue;
+                }
+                if (!v.isEnable()) {
+                    this.logger.info("过滤器已关闭" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+                    continue;
+                }
+                this.shutExecutor(k, v);
+            }
+
+            for (Map.Entry<Checker, EventHandlerChecker> entry : this.COMPONENT_CHECKER_INSTANCE.entrySet()) {
+                var k = entry.getKey();
+                var v = entry.getValue();
+                if (v == null) {
+                    this.logger.warning("应急关闭检查器时空指针 " + printAnnotation(k));
+                    javaBug++;
+                    continue;
+                }
+                if (!v.isEnable()) {
+                    this.logger.info("检查器已正常关闭" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+                    continue;
+                }
+                this.shutChecker(k, v);
+            }
+
+            for (Map.Entry<Monitor, EventHandlerMonitor> entry : this.COMPONENT_MONITOR_INSTANCE.entrySet()) {
+                var k = entry.getKey();
+                var v = entry.getValue();
+                if (v == null) {
+                    this.logger.warning("应急关闭监听器时空指针 " + printAnnotation(k));
+                    javaBug++;
+                    continue;
+                }
+                if (!v.isEnable()) {
+                    this.logger.info("监听器已正常关闭" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+                    continue;
+                }
+                this.shutMonitor(k, v);
+            }
+
+            for (Map.Entry<Filter, EventHandlerFilter> entry : this.COMPONENT_FILTER_INSTANCE.entrySet()) {
+                var k = entry.getKey();
+                var v = entry.getValue();
+                if (v == null) {
+                    this.logger.warning("应急关闭过滤器时空指针 " + printAnnotation(k));
+                    javaBug++;
+                    continue;
+                }
+                if (!v.isEnable()) {
+                    this.logger.info("过滤器已正常关闭" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+                    continue;
+                }
+                this.shutFilter(k, v);
+            }
+
+            for (Map.Entry<Runner, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.entrySet()) {
+                var k = entry.getKey();
+                var v = entry.getValue();
+                if (v == null) {
+                    this.logger.warning("应急关闭定时器时空指针 " + printAnnotation(k));
+                    javaBug++;
+                    continue;
+                }
+                if (!v.isEnable()) {
+                    this.logger.info("定时器已正常关闭" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+                    continue;
+                }
+                this.shutRunner(k, v);
+            }
+
+            this.logger.error("应急关闭期间依然迭代为空 -> " + javaBug);
+        }
+
+    }
+
+    private void shutRunner(Runner k, EventHandlerRunner v) {
+        try {
+            if (Driver.isShutModeDrop()) {
+                this.logger.info("丢弃定时器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+                Thread thread = new Thread(v::shutWrapper);
+                thread.setDaemon(true);
+                thread.start();
+            } else {
+                this.logger.info("关闭定时器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+                v.shutWrapper();
+            }
+        } catch (Exception exception) {
+            this.logger.warning("关闭定时器发生异常" + printAnnotation(k) + ":" + hash(k), exception);
+        }
+    }
+
+    private void shutFilter(Filter k, EventHandlerFilter v) {
+        try {
+            if (Driver.isShutModeDrop()) {
+                this.logger.info("丢弃过滤器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+                Thread thread = new Thread(v::shutWrapper);
+                thread.setDaemon(true);
+                thread.start();
+            } else {
+                this.logger.info("关闭过滤器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+                v.shutWrapper();
+            }
+        } catch (Exception exception) {
+            this.logger.warning("关闭过滤器发生异常" + printAnnotation(k) + ":" + hash(k), exception);
+        }
+    }
+
+    private void shutMonitor(Monitor k, EventHandlerMonitor v) {
+        try {
+            if (Driver.isShutModeDrop()) {
+                this.logger.info("丢弃监听器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+                Thread thread = new Thread(v::shutWrapper);
+                thread.setDaemon(true);
+                thread.start();
+            } else {
+                this.logger.info("关闭监听器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+                v.shutWrapper();
+            }
+        } catch (Exception exception) {
+            this.logger.warning("关闭监听器发生异常" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v), exception);
+        }
+    }
+
+    private void shutChecker(Checker k, EventHandlerChecker v) {
+        try {
+            if (Driver.isShutModeDrop()) {
+                this.logger.info("丢弃检查器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+                Thread thread = new Thread(v::shutWrapper);
+                thread.setDaemon(true);
+                thread.start();
+            } else {
+                this.logger.info("关闭检查器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+                v.shutWrapper();
+            }
+        } catch (Exception exception) {
+            this.logger.warning("关闭检查器发生异常" + printAnnotation(k) + ":" + hash(k), exception);
+        }
+    }
+
+    private void shutExecutor(Executor k, EventHandlerExecutor v) {
+        try {
+            if (Driver.isShutModeDrop()) {
+                this.logger.info("丢弃执行器" + printAnnotation(k) + ":" + hash(k) + " -> " + k.getClass().getName() + ":" + hash(v));
+                Thread thread = new Thread(v::shutWrapper);
+                thread.setDaemon(true);
+                thread.start();
+            } else {
+                this.logger.info("关闭执行器" + printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
+                v.shutWrapper();
+            }
+        } catch (Exception exception) {
+            this.logger.warning("关闭执行器发生异常" + printAnnotation(k) + ":" + hash(k), exception);
+        }
     }
 
 
