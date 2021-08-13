@@ -76,19 +76,14 @@ as commercial usage. You is banned if you do it.
 
 ## CHANGELOG
 
-### 0.9.2
+### 0.8.3
 
+- Revoke 0.9.x
+- 更新Mirai-2.7-RC
+- 去掉Hack写法 容易减寿
 - 修复checker执行的一个BUG
-- 加强关闭错误的输出
-- 修复关闭NULL的问题 定位到了问题：使用keySet得到的注解实例，查询INSTANCE在有些时候返回NULL，使用DEBUG标记对象甚至就是同一对象，执行期间并没有修改容器，诡异问题
-
-### 0.9.1 BUG💣
-
-- 增加shut的健壮性
+- 修复filter启动两遍的一个BUG
 - 调整plugin module schema的控制台显示
-
-### 0.9.0
-
 - 修复大量热重载导致的BUG
 - 调整监听器和过滤器的执行顺序
 - 新增检查器，用于检查命令，在执行器前运行

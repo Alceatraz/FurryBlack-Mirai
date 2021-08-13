@@ -123,7 +123,7 @@ public final class Driver {
     // ==========================================================================================================================================================
 
 
-    public static final String APP_VERSION = "0.9.2";
+    public static final String APP_VERSION = "0.8.3";
 
 
     // ==========================================================================================================================================================
@@ -1168,7 +1168,7 @@ public final class Driver {
                                 for (Map.Entry<String, List<Checker>> entry : listCommandUsersChecker.entrySet()) {
                                     System.out.println(entry.getKey() + " " + entry.getValue().size());
                                     for (Checker item : entry.getValue()) {
-                                        System.out.println(item.value());
+                                        System.out.println("  " + item.value());
                                     }
                                 }
 
