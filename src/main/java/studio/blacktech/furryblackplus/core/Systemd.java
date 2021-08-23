@@ -788,6 +788,10 @@ public final class Systemd {
             }
         }
 
+        this.logger.debug("监听线程池已终结 -> " + (this.MONITOR_PROCESS.isTerminated() ? "是" : "否"));
+
+        this.MONITOR_PROCESS = null;
+
 
         if (Driver.isShutModeDrop()) {
 
@@ -808,6 +812,10 @@ public final class Systemd {
                 exception.printStackTrace();
             }
         }
+
+        this.logger.debug("任务线程池已终结 -> " + (this.EXECUTOR_SERVICE.isTerminated() ? "是" : "否"));
+
+        this.EXECUTOR_SERVICE = null;
 
 
         // ==========================================================================================================================

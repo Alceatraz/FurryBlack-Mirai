@@ -469,17 +469,16 @@ public final class Schema {
 
     public List<Checker> listGlobalUsersChecker() {
         return this.GLOBAL_CHECKER_USERS_POOL.stream()
-                   .map(item -> item.getClass().getAnnotation(Checker.class))
-                   .collect(Collectors.toUnmodifiableList());
+            .map(item -> item.getClass().getAnnotation(Checker.class))
+            .collect(Collectors.toUnmodifiableList());
     }
 
 
     public List<Checker> listGlobalGroupChecker() {
         return this.GLOBAL_CHECKER_USERS_POOL.stream()
-                   .map(item -> item.getClass().getAnnotation(Checker.class))
-                   .collect(Collectors.toUnmodifiableList());
+            .map(item -> item.getClass().getAnnotation(Checker.class))
+            .collect(Collectors.toUnmodifiableList());
     }
-
 
     public Map<String, List<Checker>> listCommandsUsersChecker() {
         Map<String, List<Checker>> result = new LinkedHashMap<>();
@@ -582,7 +581,6 @@ public final class Schema {
     }
 
 
-    // TODO : need index instead scan
     public void unloadModule(String name) {
 
         for (Executor annotation : this.COMPONENT_EXECUTOR_INSTANCE.keySet()) {
@@ -623,7 +621,6 @@ public final class Schema {
     }
 
 
-    // TODO : need index instead scan
     @SuppressWarnings("deprecation")
     public void reloadModule(String name) {
 
@@ -809,8 +806,8 @@ public final class Schema {
     @SuppressWarnings("unchecked")
     public <T extends EventHandlerRunner> T getRunner(Class<T> clazz) {
         List<EventHandlerRunner> collect = this.COMPONENT_RUNNER_INSTANCE.values().stream()
-                                               .filter(clazz::isInstance)
-                                               .collect(Collectors.toUnmodifiableList());
+            .filter(clazz::isInstance)
+            .collect(Collectors.toUnmodifiableList());
         if (collect.size() == 1) {
             return (T) collect.get(0);
         } else {
