@@ -76,6 +76,10 @@ as commercial usage. You is banned if you do it.
 
 ## CHANGELOG
 
+### 0.8.4
+
+- 更新Mirai-2.7.0
+
 ### 0.8.3
 
 - Revoke 0.9.x
