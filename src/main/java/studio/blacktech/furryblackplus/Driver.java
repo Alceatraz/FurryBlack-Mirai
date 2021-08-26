@@ -148,7 +148,7 @@ public final class Driver {
     // ==========================================================================================================================================================
 
 
-    public static final String APP_VERSION = "1.0.3";
+    public static final String APP_VERSION = "1.0.4";
 
 
     // ==========================================================================================================================================================
@@ -569,6 +569,11 @@ public final class Driver {
     }
 
     @Api("转发Mirai")
+    public static UserProfile queryProfile(long id) {
+        return Mirai.getInstance().queryProfile(systemd.getBot(), id);
+    }
+
+    @Api("转发Mirai")
     public static List<OtherClientInfo> getOnlineOtherClientsList(boolean mayIncludeSelf) {
         return Mirai.getInstance().getOnlineOtherClientsList(systemd.getBot(), mayIncludeSelf);
     }
@@ -666,14 +671,29 @@ public final class Driver {
         return getNickName(user) + "(" + user + ")";
     }
 
+    @Api("获取用户昵称")
+    public static String getUsersMappedNickName(User user) {
+        return systemd.getUsersMappedNickName(user);
+    }
+
+    @Api("获取用户昵称")
+    public static String getUsersMappedNickName(long userId) {
+        return systemd.getUsersMappedNickName(userId);
+    }
+
     @Api("获取预设昵称")
     public static String getMappedNickName(GroupMessageEvent event) {
-        return systemd.getMappedNickName(event);
+        return Driver.getMemberMappedNickName(event.getSender());
+    }
+
+    @Api("获取预设昵称")
+    public static String getMemberMappedNickName(Member member) {
+        return systemd.getMemberMappedNickName(member);
     }
 
     @Api("获取预设昵称")
     public static String getMappedNickName(long groupId, long userId) {
-        return systemd.getMappedNickName(groupId, userId);
+        return systemd.getMemberMappedNickName(groupId, userId);
     }
 
     @Api("格式化群组信息")
@@ -1492,7 +1512,7 @@ public final class Driver {
                     new ArgumentCompleter(new StringsCompleter("help", "kill", "drop", "stop", "stat", "enable", "disable", "schema")),
                     new ArgumentCompleter(new StringsCompleter("list", "send"), new StringsCompleter("users", "group")),
                     new TreeCompleter(node("level", node("MUTE", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "ALL"))),
-                    new TreeCompleter(node("nickname", node("list", "clean", "reload", "append"))),
+                    new TreeCompleter(node("nickname", node("list", "clean", "reload", "append", "export"))),
                     new TreeCompleter(node("debug", node("enable", "disable"))),
                     new TreeCompleter(node("plugin",
                         node("unload"),

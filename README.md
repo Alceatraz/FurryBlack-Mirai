@@ -76,6 +76,10 @@ as commercial usage. You is banned if you do it.
 
 ## CHANGELOG
 
+### 1.0.4-INCOMPATIBLE
+
+- 调整了获取昵称的接口 二进制兼容但含义改变
+
 ### 1.0.3
 
 - 添加导出昵称

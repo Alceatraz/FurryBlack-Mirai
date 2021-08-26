@@ -23,8 +23,10 @@ import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.ContactList;
 import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.contact.NormalMember;
 import net.mamoe.mirai.contact.Stranger;
+import net.mamoe.mirai.contact.User;
 import net.mamoe.mirai.event.GlobalEventChannel;
 import net.mamoe.mirai.event.Listener;
 import net.mamoe.mirai.event.events.BotInvitedJoinGroupRequestEvent;
@@ -1294,42 +1296,55 @@ public final class Systemd extends BasicModuleUtilities {
         return this.NICKNAME_GROUPS;
     }
 
-    @Api("获取预设昵称")
-    public String getMappedNickName(long groupId, long userId) {
-        if (this.NICKNAME_GROUPS.containsKey(groupId)) {
-            Map<Long, String> groupNicks = this.NICKNAME_GROUPS.get(groupId);
-            if (groupNicks.containsKey(userId)) {
-                return groupNicks.get(userId);
+
+    @Api("获取用户昵称")
+    public String getUsersMappedNickName(User user) {
+        return this.NICKNAME_GLOBAL.getOrDefault(user.getId(), user.getNick());
+    }
+
+    @Api("获取用户昵称")
+    public String getUsersMappedNickName(long userId) {
+        return this.NICKNAME_GLOBAL.getOrDefault(userId, Mirai.getInstance().queryProfile(this.bot, userId).getNickname());
+    }
+
+    @Api("获取成员昵称")
+    public String getMemberMappedNickName(Member member) {
+        Map<Long, String> groupMap = this.NICKNAME_GROUPS.get(member.getGroup().getId());
+        if (groupMap != null) {
+            String nickName = groupMap.get(member.getId());
+            if (nickName != null) {
+                return nickName;
             }
         }
-        if (this.NICKNAME_GLOBAL.containsKey(userId)) {
-            return this.NICKNAME_GLOBAL.get(userId);
+        String nickName = this.NICKNAME_GLOBAL.get(member.getId());
+        if (nickName != null) {
+            return nickName;
         }
-        NormalMember member = this.bot.getGroupOrFail(groupId).getOrFail(userId);
         String nameCard = member.getNameCard();
         if (nameCard.isBlank()) {
-            return Mirai.getInstance().queryProfile(this.bot, userId).getNickname();
+            return member.getNick();
         } else {
             return nameCard;
         }
     }
 
-    @Api("获取预设昵称")
-    public String getMappedNickName(GroupMessageEvent event) {
-        long groupId = event.getGroup().getId();
-        long userId = event.getSender().getId();
-        if (this.NICKNAME_GROUPS.containsKey(groupId)) {
-            Map<Long, String> groupNicks = this.NICKNAME_GROUPS.get(groupId);
-            if (groupNicks.containsKey(userId)) {
-                return groupNicks.get(userId);
+    @Api("获取成员昵称")
+    public String getMemberMappedNickName(long groupId, long userId) {
+        Map<Long, String> groupMap = this.NICKNAME_GROUPS.get(groupId);
+        if (groupMap != null) {
+            String nickName = groupMap.get(userId);
+            if (nickName != null) {
+                return nickName;
             }
         }
-        if (this.NICKNAME_GLOBAL.containsKey(userId)) {
-            return this.NICKNAME_GLOBAL.get(userId);
+        String nickName = this.NICKNAME_GLOBAL.get(userId);
+        if (nickName != null) {
+            return nickName;
         }
-        String nameCard = event.getSender().getNameCard();
+        Member member = this.bot.getGroupOrFail(groupId).getOrFail(userId);
+        String nameCard = member.getNameCard();
         if (nameCard.isBlank()) {
-            return event.getSender().getNick();
+            return member.getNick();
         } else {
             return nameCard;
         }
