@@ -43,6 +43,7 @@ import studio.blacktech.furryblackplus.core.define.annotation.Executor;
 import studio.blacktech.furryblackplus.core.define.annotation.Filter;
 import studio.blacktech.furryblackplus.core.define.annotation.Monitor;
 import studio.blacktech.furryblackplus.core.define.annotation.Runner;
+import studio.blacktech.furryblackplus.core.define.moduel.BasicModuleUtilities;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerChecker;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerExecutor;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerFilter;
@@ -56,16 +57,12 @@ import studio.blacktech.furryblackplus.core.exception.moduels.load.MisConfigExce
 import studio.blacktech.furryblackplus.core.utilties.common.HashTool;
 import studio.blacktech.furryblackplus.core.utilties.logger.LoggerX;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -85,7 +82,7 @@ import java.util.regex.Pattern;
 
 
 @Api("系统核心路由")
-public final class Systemd {
+public final class Systemd extends BasicModuleUtilities {
 
 
     // ==========================================================================================================================================================
@@ -163,8 +160,6 @@ public final class Systemd {
     //
     // ==========================================================================================================================================================
 
-
-    private final LoggerX logger = new LoggerX(this.getClass());
 
     private final Lock lock = new ReentrantLock();
     private final Condition condition = this.lock.newCondition();
@@ -313,13 +308,13 @@ public final class Systemd {
         File FILE_HELP = Paths.get(Driver.getConfigFolder(), "message_help.txt").toFile();
 
         this.logger.info("初始化eula");
-        this.MESSAGE_EULA = this.readFile(FILE_EULA);
+        this.MESSAGE_EULA = this.readFileContent(FILE_EULA);
 
         this.logger.info("初始化info");
-        this.MESSAGE_INFO = this.readFile(FILE_INFO);
+        this.MESSAGE_INFO = this.readFileContent(FILE_INFO);
 
         this.logger.info("初始化help");
-        this.MESSAGE_HELP = this.readFile(FILE_HELP);
+        this.MESSAGE_HELP = this.readFileContent(FILE_HELP);
 
         this.MESSAGE_EULA = this.MESSAGE_EULA.replaceAll("\\$\\{VERSION}", Driver.APP_VERSION);
         this.MESSAGE_INFO = this.MESSAGE_INFO.replaceAll("\\$\\{VERSION}", Driver.APP_VERSION);
@@ -1019,49 +1014,11 @@ public final class Systemd {
     }
 
 
-    private File initFile(File file) throws BootException {
-        try {
-            if (file.createNewFile()) this.logger.hint("创建新的文件 " + file.getAbsolutePath());
-        } catch (IOException exception) {
-            throw new BootException("文件创建失败 " + file.getAbsolutePath(), exception);
-        }
-
-        if (!file.exists()) throw new BootException("文件不存在 " + file.getAbsolutePath());
-        if (!file.canRead()) throw new BootException("文件无权读取 " + file.getAbsolutePath());
-        return file;
-    }
-
-
-    private String readFile(File file) throws BootException {
-
-        this.initFile(file);
-
-        try (
-            FileReader fileReader = new FileReader(file, StandardCharsets.UTF_8);
-            BufferedReader bufferedReader = new BufferedReader(fileReader)
-        ) {
-
-            String temp;
-            StringBuilder builder = new StringBuilder();
-            while ((temp = bufferedReader.readLine()) != null) builder.append(temp).append("\r\n");
-            return builder.toString();
-
-        } catch (FileNotFoundException exception) {
-            throw new BootException("文件不存在 " + file.getAbsolutePath(), exception);
-        } catch (IOException exception) {
-            throw new BootException("文件读取失败 " + file.getAbsolutePath(), exception);
-        }
-    }
-
-
     public void generateListMessage() {
-
         this.logger.info("组装用户list消息");
         this.MESSAGE_LIST_USERS = this.schema.generateUsersExecutorList();
-
         this.logger.info("组装群组list消息");
         this.MESSAGE_LIST_GROUP = this.schema.generateGroupExecutorList();
-
     }
 
     public String getMessageListUsers() {
@@ -1283,58 +1240,33 @@ public final class Systemd {
 
     @Api("加载昵称表")
     public void appendNickname() {
-        File commonNick = this.initFile(Paths.get(Driver.getConfigFolder(), "nickname.txt").toFile());
-        try (
-            FileReader fileReader = new FileReader(commonNick);
-            BufferedReader bufferedReader = new BufferedReader(fileReader)
-        ) {
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                if (!line.contains(":")) {
-                    this.logger.warning("配置无效 " + line);
-                    continue;
-                }
-                String[] temp1 = line.split(":");
-                if (temp1.length != 2) {
-                    this.logger.warning("配置无效 " + line);
-                    continue;
-                }
-                if (!temp1[0].contains("\\.")) {
-                    this.logger.warning("配置无效 " + line);
-                    continue;
-                }
-                String nick = temp1[1].trim();
-                String[] temp2 = temp1[0].split("\\.");
-                long groupId;
-                long userId;
-                try {
-                    userId = Long.parseLong(temp2[1]);
-                } catch (NumberFormatException exception) {
-                    this.logger.warning("配置无效 " + line);
-                    continue;
-                }
-                if (temp2[0].equals("\\*")) {
-                    this.NICKNAME_GLOBAL.put(userId, nick);
-                    this.logger.seek("添加全局昵称 " + userId, nick);
-                } else {
-                    try {
-                        groupId = Long.parseLong(temp2[0]);
-                    } catch (NumberFormatException exception) {
-                        this.logger.warning("配置无效 " + line);
-                        continue;
-                    }
-                    Map<Long, String> groupNicks;
-                    if (this.NICKNAME_GROUPS.containsKey(groupId)) {
-                        groupNicks = this.NICKNAME_GROUPS.get(groupId);
-                    } else {
-                        this.NICKNAME_GROUPS.put(groupId, groupNicks = new HashMap<>());
-                    }
-                    groupNicks.put(userId, nick);
-                    this.logger.seek("添加群内昵称 " + groupId + "." + userId, nick);
-                }
+        File nicknameFile = this.initFile(Paths.get(Driver.getConfigFolder(), "nickname.txt").toFile());
+        List<String> nicknames = this.readFile(nicknameFile);
+        for (String line : nicknames) {
+            String temp = line.trim();
+            int indexOfDot = temp.indexOf(".");
+            int indexOfColon = temp.indexOf(":");
+            if (indexOfDot < 0) {
+                this.logger.warning("配置无效" + line);
+                continue;
             }
-        } catch (Exception exception) {
-            throw new BootException("昵称映射表读取失败", exception);
+            if (indexOfColon < 0) {
+                this.logger.warning("配置无效" + line);
+                continue;
+            }
+            String group = line.substring(0, indexOfDot);
+            String user = line.substring(indexOfDot + 1, indexOfColon);
+            String nickname = line.substring(indexOfColon + 1);
+            long userId = Long.parseLong(user);
+            if ("*".equals(group)) {
+                this.NICKNAME_GLOBAL.put(userId, nickname);
+                this.logger.seek("添加全局昵称 " + userId, nickname);
+            } else {
+                long groupId = Long.parseLong(group);
+                Map<Long, String> groupNicks = this.NICKNAME_GROUPS.computeIfAbsent(groupId, k -> new ConcurrentHashMap<>());
+                groupNicks.put(userId, nickname);
+                this.logger.seek("添加群内昵称 " + groupId + "." + userId, nickname);
+            }
         }
     }
 

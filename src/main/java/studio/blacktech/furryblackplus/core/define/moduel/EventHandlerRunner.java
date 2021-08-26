@@ -25,8 +25,6 @@ public abstract class EventHandlerRunner extends AbstractEventHandler {
 
     private volatile boolean lock;
 
-    @SuppressWarnings("deprecation")
-    @Deprecated
     @Override
     public void internalInit(String name) {
         if (this.lock) {

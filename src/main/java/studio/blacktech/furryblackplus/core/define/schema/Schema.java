@@ -621,7 +621,6 @@ public final class Schema {
     }
 
 
-    @SuppressWarnings("deprecation")
     public void reloadModule(String name) {
 
 
@@ -1594,7 +1593,6 @@ public final class Schema {
     }
 
 
-    @SuppressWarnings("deprecation")
     private void makeRunner(Runner k) {
         Class<? extends EventHandlerRunner> v = this.COMPONENT_RUNNER_CLAZZ.get(k);
         this.logger.info("加载定时器" + k.value() + "[" + k.priority() + "] -> " + v.getName());
@@ -1610,7 +1608,6 @@ public final class Schema {
     }
 
 
-    @SuppressWarnings("deprecation")
     private void makeFilter(Filter k) {
         Class<? extends EventHandlerFilter> v = this.COMPONENT_FILTER_CLAZZ.get(k);
         this.logger.info("加载过滤器" + k.value() + "[" + k.priority() + "] -> " + v.getName());
@@ -1628,7 +1625,6 @@ public final class Schema {
     }
 
 
-    @SuppressWarnings("deprecation")
     private void makeMonitor(Monitor k) {
         Class<? extends EventHandlerMonitor> v = this.COMPONENT_MONITOR_CLAZZ.get(k);
         this.logger.info("加载监听器" + k.value() + "[" + k.priority() + "] -> " + v.getName());
@@ -1646,7 +1642,6 @@ public final class Schema {
     }
 
 
-    @SuppressWarnings("deprecation")
     private void makeChecker(Checker k) {
         Class<? extends EventHandlerChecker> v = this.COMPONENT_CHECKER_CLAZZ.get(k);
         this.logger.info("加载检查器" + k.value() + "[" + k.priority() + "] -> " + v.getName());

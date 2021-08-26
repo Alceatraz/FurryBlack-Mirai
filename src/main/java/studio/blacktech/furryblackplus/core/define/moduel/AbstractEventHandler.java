@@ -20,29 +20,19 @@ import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.exception.BotException;
 import studio.blacktech.furryblackplus.core.exception.moduels.ModuleException;
 import studio.blacktech.furryblackplus.core.exception.moduels.boot.BootException;
-import studio.blacktech.furryblackplus.core.utilties.logger.LoggerX;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 
 @SuppressWarnings("RedundantThrows")
 
 @Api("基础模块类")
-public abstract class AbstractEventHandler {
-
-    protected final LoggerX logger;
+public abstract class AbstractEventHandler extends BasicModuleUtilities {
 
     @Api("插件目录对象") protected File FOLDER_ROOT;
     @Api("配置目录对象") protected File FOLDER_CONF;
@@ -60,14 +50,7 @@ public abstract class AbstractEventHandler {
     @Api("模块名字") protected String name;
     @Api("模块启停") protected volatile boolean enable;
 
-
-    public AbstractEventHandler() {
-        this.logger = new LoggerX(this.getClass());
-    }
-
-
     @Api("这是一个内部使用的方法")
-    @Deprecated
     public void internalInit(String name) {
         this.name = name;
         this.FOLDER_ROOT = Paths.get(Driver.getModuleFolder(), this.name).toFile();
@@ -217,83 +200,11 @@ public abstract class AbstractEventHandler {
         }
     }
 
-    @Api("按行读取文件 删除注释")
-    protected List<String> readFile(File file) {
-        return this.readFile(file, false);
-    }
-
-    @Api("按行读取文件 可选注释")
-    protected List<String> readFile(File file, boolean keepComment) {
-        if (!file.exists()) throw new IllegalArgumentException("文件不存在 -> " + file.getAbsolutePath());
-        if (!file.isFile()) throw new IllegalArgumentException("文件是目录 -> " + file.getAbsolutePath());
-        if (!file.canRead()) throw new IllegalArgumentException("文件无权读取 -> " + file.getAbsolutePath());
-        String line;
-        List<String> temp = new LinkedList<>();
-        try (
-            FileInputStream fileInputStream = new FileInputStream(file);
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
-            BufferedReader reader = new BufferedReader(inputStreamReader)
-        ) {
-            while ((line = reader.readLine()) != null) {
-                temp.add(line);
-            }
-            reader.close();
-            inputStreamReader.close();
-            fileInputStream.close();
-            if (keepComment) {
-                return temp;
-            }
-            return temp
-                       .stream()
-                       .filter(item -> item.length() > 0)
-                       .filter(item -> item.charAt(0) != '#')
-                       .map(item -> item.contains("#") ?
-                                        item.substring(0, item.indexOf("#")).stripTrailing() :
-                                        item)
-                       .collect(Collectors.toList());
-        } catch (IOException exception) {
-            throw new ModuleException(exception);
-        }
-    }
 
     @Api("初始化文件夹")
     protected File initFolder(String folder) {
         return this.initFolder(Paths.get(this.FOLDER_ROOT.getAbsolutePath(), folder).toFile());
     }
 
-    @Api("初始化文件夹")
-    protected File initFolder(File file) {
-        if (file.exists()) {
-            if (!file.isDirectory()) {
-                throw new ModuleException("文件夹被文件占位 -> " + file.getAbsolutePath());
-            }
-        } else {
-            if (file.mkdirs()) {
-                this.logger.seek("创建新目录 -> " + file.getAbsolutePath());
-            }
-        }
-        return file;
-    }
-
-    @Api("初始化文件")
-    protected File initFile(Path path) {
-        return this.initFile(path.toFile());
-    }
-
-    @Api("初始化文件")
-    protected File initFile(File file) {
-        try {
-            if (file.createNewFile()) this.logger.seek("创建新文件 -> " + file.getAbsolutePath());
-        } catch (IOException exception) {
-            throw new ModuleException("创建文件失败 -> " + file.getAbsolutePath(), exception);
-        }
-        if (!file.canRead()) {
-            throw new ModuleException("文件无权读取 -> " + file.getAbsolutePath());
-        }
-        if (!file.canWrite()) {
-            throw new ModuleException("文件无权写入 -> " + file.getAbsolutePath());
-        }
-        return file;
-    }
 
 }
