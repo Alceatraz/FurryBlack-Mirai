@@ -146,7 +146,7 @@ public class BasicModuleUtilities {
                 }
                 int index = line.indexOf("#");
                 if (index > 0) {
-                    line = line.substring(0, index);
+                    line = line.substring(0, index).trim();
                 }
                 temp.add(line);
             }
