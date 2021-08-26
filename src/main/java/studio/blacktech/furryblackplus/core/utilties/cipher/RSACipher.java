@@ -289,7 +289,8 @@ public class RSACipher {
     // =================================================================================================================
 
 
-    private static KeyPair generateKeyPair(int keyLength) {
+    private static KeyPair generateKeyPair(int length) {
+        int keyLength = length;
         if (keyLength < 512) {
             keyLength = 512;
             System.err.println("WARNING: RSA ket length must larger then 512, I set it to 512 for you.");

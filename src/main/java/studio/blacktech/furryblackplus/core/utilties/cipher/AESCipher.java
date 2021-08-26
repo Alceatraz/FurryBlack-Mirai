@@ -270,7 +270,8 @@ public class AESCipher {
         }
 
 
-        public DHExchanger(int keyLength) {
+        public DHExchanger(int length) {
+            int keyLength = length;
             if (keyLength < 512) {
                 keyLength = 512;
                 System.err.println("WARNING: DiffieHellman key length minimal is 512, I set it 512 for you.");
