@@ -25,23 +25,37 @@ import java.util.List;
 import java.util.Map;
 
 
-@Api("命令解析工具")
+@Api("命令模型")
 public final class Command {
 
-    private final String commandName;
-    private final String commandBody;
-    private final int commandBodyLength;
+    @Api("命令名 第一个空格之前的内容 用于搜索执行器") private final String commandName;
+    @Api("命令体 第一个空格之后的内容 用于解析命令模型") private final String commandBody;
+    @Api("命令体 的字符数") private final int commandBodyLength;
 
-    private final String[] commandParameters;
-    private final int commandParameterLength;
+    @Api("命令模型解析后 所有的参数") private final String[] commandParameters;
+    @Api("命令模型解析后 参数的长度") private final int commandParameterLength;
 
-    private final Map<String, String> commandOptions = new LinkedHashMap<>();
+    @Api("命令模型解析后 选项和开关") private final Map<String, String> commandOptions = new LinkedHashMap<>();
 
+
+    @Api(
+        value = "解析命令",
+        usage = {
+            "命令以空格(U+0020)拆分为片段，index号从0开始，但--开头的参数被视为选项会被剔除，不计入index序号",
+            "如果只有一个参数(没有空格)，则为无参数命令，除commandName均为null，commandOptions为空容器",
+
+        },
+        attention = {
+            "命令名解析过程中`转义不起作用(/`A B`会被拆解为/`A和B`)",
+            "选项的分隔符为第一个等号(U+003D)，后续的等号不会被拆分",
+            "不包含参数的选项视为开关(--XXX=XXX.XXX --XXX)，getValue为null",
+        }
+    )
     public Command(String message) {
 
-        int split = message.indexOf(' ');
+        int indexOfFirstSpace = message.indexOf(' ');
 
-        if (split < 0) {
+        if (indexOfFirstSpace < 0) {
             this.commandName = message;
             this.commandBody = null;
             this.commandBodyLength = 0;
@@ -52,15 +66,16 @@ public final class Command {
 
         // 命令名按照第一个空格拆分
 
-        this.commandName = message.substring(0, split);
-        this.commandBody = message.substring(split + 1);
+        this.commandName = message.substring(0, indexOfFirstSpace);
+        this.commandBody = message.substring(indexOfFirstSpace + 1);
+
+        this.commandBodyLength = this.commandBody.length();
 
         // 命令体按照转义规则拆分
 
         boolean isFiled = false;
         boolean isEscape = false;
 
-        this.commandBodyLength = this.commandBody.length();
         StringBuilder builder = new StringBuilder();
         List<String> commandBodySlice = new LinkedList<>();
 
@@ -71,7 +86,9 @@ public final class Command {
             switch (chat) {
 
                 case '\\':
-                    if (isEscape) builder.append("\\"); // 连续两个\\则视为\
+                    if (isEscape) {
+                        builder.append("\\"); // 连续两个\\则视为\
+                    }
                     isEscape = !isEscape; // 启动对下一个字符的转义
                     break;
 
@@ -90,7 +107,9 @@ public final class Command {
                     if (isFiled) {
                         builder.append(chat);
                     } else {
-                        if (builder.length() == 0) continue;
+                        if (builder.length() == 0) {
+                            continue;
+                        }
                         commandBodySlice.add(builder.toString());
                         builder.setLength(0);
                     }
@@ -104,7 +123,6 @@ public final class Command {
         }
 
         commandBodySlice.add(builder.toString());
-        builder.setLength(0);
 
         // 对拆分后的命令分析 提取选项和开关
 
@@ -113,9 +131,9 @@ public final class Command {
         for (String slice : commandBodySlice) {
             if (slice.startsWith("--")) {
                 slice = slice.substring(2);
-                int index = slice.indexOf("=");
-                if (index > 0) {
-                    this.commandOptions.put(slice.substring(0, index), slice.substring(index + 1)); // --XXX=XXX 选项
+                int indexOfEquals = slice.indexOf("=");
+                if (indexOfEquals > 0) {
+                    this.commandOptions.put(slice.substring(0, indexOfEquals), slice.substring(indexOfEquals + 1)); // --XXX=XXX 选项
                 } else {
                     this.commandOptions.put(slice, null); // --XXX 开关
                 }
@@ -130,7 +148,10 @@ public final class Command {
 
     // ===================================================================================
 
-    @Api("从指定位置拼接剩余的内容")
+    @Api(
+        value = "从指定位置拼接剩余的内容",
+        attention = "index从参数开始数,0代表第一个参数而非命令名,此处所说的index与命令解析时的index序号不同"
+    )
     public String join(int index) {
         if (this.commandParameterLength == 0 || index > this.commandParameterLength) {
             return null;

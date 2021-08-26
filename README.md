@@ -76,6 +76,14 @@ as commercial usage. You is banned if you do it.
 
 ## CHANGELOG
 
+### 1.0.2
+
+- 完善注释和`@Api`注释
+- 美化代码
+- 替换Hash工具类
+- 添加AES和RSA的Cipher工具类
+- 放宽command判定为`[a-zA-Z0-9]{2,16}`
+
 ### 1.0.1
 
 - readFile不再trim避免破坏有些设置项目(同一行中后半段有注释的才会trim)

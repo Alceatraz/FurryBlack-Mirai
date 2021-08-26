@@ -17,8 +17,12 @@ package studio.blacktech.furryblackplus.demo;
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
+import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.define.annotation.Filter;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerFilter;
+
+
+@Api("示例过滤器")
 
 
 @Filter(

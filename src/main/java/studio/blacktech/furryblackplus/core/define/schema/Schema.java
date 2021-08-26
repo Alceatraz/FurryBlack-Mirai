@@ -54,10 +54,6 @@ import java.util.stream.Collectors;
 import static studio.blacktech.furryblackplus.core.utilties.logger.LoggerX.hash;
 
 
-/**
- * That become not elegant
- * That make me feel like streaming shit
- */
 @Api("插件与模块持有")
 public final class Schema {
 
@@ -1681,7 +1677,6 @@ public final class Schema {
     }
 
 
-    @SuppressWarnings("deprecation")
     private void makeExecutor(Executor k, Class<? extends EventHandlerExecutor> v) {
         this.logger.info("加载执行器" + k.value() + "[" + k.command() + "] -> " + v.getName());
         EventHandlerExecutor instance;

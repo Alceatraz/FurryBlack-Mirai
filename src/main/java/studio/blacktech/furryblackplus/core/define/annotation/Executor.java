@@ -16,12 +16,26 @@
 package studio.blacktech.furryblackplus.core.define.annotation;
 
 import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.core.define.Command;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+
+@Api(
+    value = "执行器的注解",
+    usage = "消息的处理顺序为 事件->过滤器->监听器->命令判断->检查器->执行器。",
+    attention = {
+        "执行器由消息触发的事件线程执行，不要执行高耗时操作。",
+        "command名称需要遵循^?[a-zA-Z0-9]{2,16}规则(?代表设置的命令前缀)，不符合此规则的消息不会被认定是命令，不会进行执行流程。",
+        "模块重启只执行shut->init->boot，对于类作用域对象(显示或隐式的在构造函数中初始化的对象)无法重新初始化，会导致发生内部状态未知的危险，请勿使用。",
+        "定时器被重载后，旧的实例会被从IoC清除，但是依赖模块内部依然持有旧对象，形成畸形的对象持有关系。需要将所有依赖模块全部按顺序重启才可以正常工作。"
+    },
+    relativeClass = Command.class
+)
 
 
 @Documented

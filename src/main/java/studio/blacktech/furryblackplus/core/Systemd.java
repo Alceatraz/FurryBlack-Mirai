@@ -54,7 +54,7 @@ import studio.blacktech.furryblackplus.core.define.schema.Schema;
 import studio.blacktech.furryblackplus.core.exception.moduels.boot.BootException;
 import studio.blacktech.furryblackplus.core.exception.moduels.load.FirstBootException;
 import studio.blacktech.furryblackplus.core.exception.moduels.load.MisConfigException;
-import studio.blacktech.furryblackplus.core.utilties.common.HashTool;
+import studio.blacktech.furryblackplus.core.utilties.digest.SHA256;
 import studio.blacktech.furryblackplus.core.utilties.logger.LoggerX;
 
 import java.io.File;
@@ -290,7 +290,7 @@ public final class Systemd extends BasicModuleUtilities {
             this.COMMAND_PREFIX = prefix.charAt(0);
         }
 
-        String regex = "^" + this.COMMAND_PREFIX + "[a-z]{3,8}";
+        String regex = "^" + this.COMMAND_PREFIX + "[a-zA-Z0-9]{2,16}";
 
         this.logger.seek("识别前缀 " + this.COMMAND_PREFIX);
         this.logger.info("识别正则 " + regex);
@@ -320,8 +320,8 @@ public final class Systemd extends BasicModuleUtilities {
         this.MESSAGE_INFO = this.MESSAGE_INFO.replaceAll("\\$\\{VERSION}", Driver.APP_VERSION);
         this.MESSAGE_HELP = this.MESSAGE_HELP.replaceAll("\\$\\{VERSION}", Driver.APP_VERSION);
 
-        String SHA_EULA = HashTool.SHA256(this.MESSAGE_EULA);
-        String SHA_INFO = HashTool.SHA256(this.MESSAGE_INFO);
+        String SHA_EULA = SHA256.getInstance().digest(this.MESSAGE_EULA);
+        String SHA_INFO = SHA256.getInstance().digest(this.MESSAGE_INFO);
 
         this.MESSAGE_EULA = this.MESSAGE_EULA + "\r\nSHA-256: " + SHA_EULA;
         this.MESSAGE_INFO = this.MESSAGE_INFO + "\r\nSHA-256: " + SHA_INFO;

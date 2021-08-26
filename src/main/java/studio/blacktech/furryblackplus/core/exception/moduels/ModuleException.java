@@ -20,6 +20,9 @@ import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.exception.BotException;
 
 
+@SuppressWarnings("unused")
+
+
 @Api("模块相关的异常")
 public class ModuleException extends BotException {
 

@@ -19,6 +19,9 @@ package studio.blacktech.furryblackplus.core.exception.moduels.load;
 import studio.blacktech.furryblackplus.common.Api;
 
 
+@SuppressWarnings("unused")
+
+
 @Api("配置错误")
 public class MisConfigException extends LoadException {
 

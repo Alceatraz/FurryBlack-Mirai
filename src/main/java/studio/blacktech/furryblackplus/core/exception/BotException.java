@@ -19,6 +19,9 @@ package studio.blacktech.furryblackplus.core.exception;
 import studio.blacktech.furryblackplus.common.Api;
 
 
+@SuppressWarnings("unused")
+
+
 @Api("基础异常 用于静默异常 避免到处写异常处理，由框架的某个操作做高层处理")
 public class BotException extends RuntimeException {
 

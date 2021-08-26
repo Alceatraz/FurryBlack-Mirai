@@ -16,8 +16,13 @@
 package studio.blacktech.furryblackplus.demo;
 
 
+import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.define.annotation.Runner;
 import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerRunner;
+
+
+@Api("示例定时器")
+
 
 @Runner("demo-runner")
 public class DemoRunner extends EventHandlerRunner {
@@ -38,10 +43,12 @@ public class DemoRunner extends EventHandlerRunner {
         System.out.println("关闭" + this.getClass().getName());
     }
 
+    @Api("自定义的一个方法-1")
     public void demo() {
         this.logger.info("DemoRunner working!");
     }
 
+    @Api("自定义的一个方法-2 检查用户权限")
     public boolean checkPermission(long userId, String permission) {
         return userId == 100000L && "demo.command.demo".equals(permission);
     }

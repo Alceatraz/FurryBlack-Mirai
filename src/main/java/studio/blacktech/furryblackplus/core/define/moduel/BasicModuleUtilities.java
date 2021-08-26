@@ -93,10 +93,8 @@ public class BasicModuleUtilities {
 
     @Api("初始化文件夹")
     protected File initFolder(File file) {
-        if (file.exists()) {
-            if (!file.isDirectory()) {
-                throw new ModuleException("文件夹被文件占位 -> " + file.getAbsolutePath());
-            }
+        if (file.exists() && !file.isDirectory()) {
+            throw new ModuleException("文件夹被文件占位 -> " + file.getAbsolutePath());
         }
         if (file.mkdirs()) {
             this.logger.seek("创建新目录 -> " + file.getAbsolutePath());

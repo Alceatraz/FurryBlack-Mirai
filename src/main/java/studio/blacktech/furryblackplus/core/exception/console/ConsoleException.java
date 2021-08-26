@@ -15,9 +15,14 @@
 
 package studio.blacktech.furryblackplus.core.exception.console;
 
+import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.exception.BotException;
 
 
+@SuppressWarnings("unused")
+
+
+@Api("控制台发生的异常")
 public class ConsoleException extends BotException {
 
 

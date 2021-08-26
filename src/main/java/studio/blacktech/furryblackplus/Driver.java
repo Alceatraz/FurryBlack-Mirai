@@ -101,18 +101,41 @@ import java.util.stream.Collectors;
 
 import static org.jline.builtins.Completers.TreeCompleter.node;
 
+
 // 🔫 🧦 ❌ ✔️ ⭕ 🚧 🀄
 
+
 /**
- * FurryBlack Plus Framework
+ * FurryBlack Plus Framework - based on Mirai
+ * !!!本项目并非使用纯AGPLv3协议，请认真阅读LICENSE!!!
  *
- * 本项目并非使用纯AGPLv3协议，请认真阅读LICENSE
  *
- * @author Alceatraz Warprays alceatraz@blacktech.studio
- * @see Driver 为启动类main方法所在地，初始化日志和目录系统，提供控制台
- * @see Systemd 是整个系统的内核所在
+ * 电子白熊会梦到仿生老黑吗
+ *
+ *
+ * 项目地址 https://github.com/Alceatraz/FurryBlack-Mirai
+ * 插件地址 https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
+ *
+ * 个人主页 https://www.blacktech.studio
+ *
+ * @author Alceatraz Warprays @ BlackTechStudio
  */
-@Api("项目开源地址https://github.com/Alceatraz/FurryBlack-Mirai")
+
+
+@Api(
+    value = "FurryBlack Plus Framework - based on Mirai",
+    usage = {
+        "电子白熊会梦到仿生老黑吗",
+        "项目地址 https://github.com/Alceatraz/FurryBlack-Mirai",
+        "插件地址 https://github.com/Alceatraz/FurryBlack-Mirai-Extensions",
+        "个人主页 https://www.blacktech.studio",
+        "@author Alceatraz Warprays @ BlackTechStudio",
+        "@Api注解可以让你即使阅读反编译后的代码也能看到注释"
+    },
+    attention = {
+        "!!!本项目并非使用纯AGPLv3协议，请认真阅读LICENSE!!!"
+    }
+)
 public final class Driver {
 
 
@@ -123,7 +146,7 @@ public final class Driver {
     // ==========================================================================================================================================================
 
 
-    public static final String APP_VERSION = "1.0.1";
+    public static final String APP_VERSION = "1.0.2";
 
 
     // ==========================================================================================================================================================
