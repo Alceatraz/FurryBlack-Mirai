@@ -76,6 +76,10 @@ as commercial usage. You is banned if you do it.
 
 ## CHANGELOG
 
+### 1.0.1
+
+- 控制台支持重载nickname
+
 ### 1.0.0
 
 - 继承自 0.8.4

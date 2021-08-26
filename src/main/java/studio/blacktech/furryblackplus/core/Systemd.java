@@ -71,6 +71,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
@@ -338,86 +339,11 @@ public final class Systemd {
         // 加载常用昵称
 
 
-        this.NICKNAME_GLOBAL = new HashMap<>();
-        this.NICKNAME_GROUPS = new HashMap<>();
+        this.NICKNAME_GLOBAL = new ConcurrentHashMap<>();
+        this.NICKNAME_GROUPS = new ConcurrentHashMap<>();
 
 
-        File commonNick = this.initFile(Paths.get(Driver.getConfigFolder(), "nickname.txt").toFile());
-
-        try (
-            FileReader fileReader = new FileReader(commonNick);
-            BufferedReader bufferedReader = new BufferedReader(fileReader)
-        ) {
-
-            String line;
-
-            while ((line = bufferedReader.readLine()) != null) {
-
-                if (!line.contains(":")) {
-                    this.logger.warning("配置无效 " + line);
-                    continue;
-                }
-
-                String[] temp1 = line.split(":");
-
-                if (temp1.length != 2) {
-                    this.logger.warning("配置无效 " + line);
-                    continue;
-                }
-
-                if (!temp1[0].contains("\\.")) {
-                    this.logger.warning("配置无效 " + line);
-                    continue;
-                }
-
-                String nick = temp1[1].trim();
-
-                String[] temp2 = temp1[0].split("\\.");
-
-                long groupId;
-                long userId;
-
-                try {
-                    userId = Long.parseLong(temp2[1]);
-                } catch (NumberFormatException exception) {
-                    this.logger.warning("配置无效 " + line);
-                    continue;
-                }
-
-                if (temp2[0].equals("\\*")) {
-
-                    this.NICKNAME_GLOBAL.put(userId, nick);
-
-                    this.logger.seek("添加全局昵称 " + userId, nick);
-
-                } else {
-
-                    try {
-                        groupId = Long.parseLong(temp2[0]);
-                    } catch (NumberFormatException exception) {
-                        this.logger.warning("配置无效 " + line);
-                        continue;
-                    }
-
-                    Map<Long, String> groupNicks;
-
-                    if (this.NICKNAME_GROUPS.containsKey(groupId)) {
-                        groupNicks = this.NICKNAME_GROUPS.get(groupId);
-                    } else {
-                        this.NICKNAME_GROUPS.put(groupId, groupNicks = new HashMap<>());
-                    }
-
-                    groupNicks.put(userId, nick);
-
-                    this.logger.seek("添加群内昵称 " + groupId + "." + userId, nick);
-                }
-
-
-            }
-
-        } catch (Exception exception) {
-            throw new BootException("昵称映射表读取失败", exception);
-        }
+        this.appendNickname();
 
 
         // ==========================================================================================================================
@@ -1347,6 +1273,77 @@ public final class Systemd {
     @Api("发送消息的核心方法")
     public void sendMessage(Contact contact, Message message) {
         contact.sendMessage(message);
+    }
+
+    @Api("清空昵称表")
+    public void cleanNickName() {
+        this.NICKNAME_GLOBAL.clear();
+        this.NICKNAME_GROUPS.clear();
+    }
+
+    @Api("加载昵称表")
+    public void appendNickname() {
+        File commonNick = this.initFile(Paths.get(Driver.getConfigFolder(), "nickname.txt").toFile());
+        try (
+            FileReader fileReader = new FileReader(commonNick);
+            BufferedReader bufferedReader = new BufferedReader(fileReader)
+        ) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                if (!line.contains(":")) {
+                    this.logger.warning("配置无效 " + line);
+                    continue;
+                }
+                String[] temp1 = line.split(":");
+                if (temp1.length != 2) {
+                    this.logger.warning("配置无效 " + line);
+                    continue;
+                }
+                if (!temp1[0].contains("\\.")) {
+                    this.logger.warning("配置无效 " + line);
+                    continue;
+                }
+                String nick = temp1[1].trim();
+                String[] temp2 = temp1[0].split("\\.");
+                long groupId;
+                long userId;
+                try {
+                    userId = Long.parseLong(temp2[1]);
+                } catch (NumberFormatException exception) {
+                    this.logger.warning("配置无效 " + line);
+                    continue;
+                }
+                if (temp2[0].equals("\\*")) {
+                    this.NICKNAME_GLOBAL.put(userId, nick);
+                    this.logger.seek("添加全局昵称 " + userId, nick);
+                } else {
+                    try {
+                        groupId = Long.parseLong(temp2[0]);
+                    } catch (NumberFormatException exception) {
+                        this.logger.warning("配置无效 " + line);
+                        continue;
+                    }
+                    Map<Long, String> groupNicks;
+                    if (this.NICKNAME_GROUPS.containsKey(groupId)) {
+                        groupNicks = this.NICKNAME_GROUPS.get(groupId);
+                    } else {
+                        this.NICKNAME_GROUPS.put(groupId, groupNicks = new HashMap<>());
+                    }
+                    groupNicks.put(userId, nick);
+                    this.logger.seek("添加群内昵称 " + groupId + "." + userId, nick);
+                }
+            }
+        } catch (Exception exception) {
+            throw new BootException("昵称映射表读取失败", exception);
+        }
+    }
+
+    public Map<Long, String> getNicknameGlobal() {
+        return this.NICKNAME_GLOBAL;
+    }
+
+    public Map<Long, Map<Long, String>> getNicknameGroups() {
+        return this.NICKNAME_GROUPS;
     }
 
     @Api("获取预设昵称")

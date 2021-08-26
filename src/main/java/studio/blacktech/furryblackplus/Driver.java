@@ -123,7 +123,7 @@ public final class Driver {
     // ==========================================================================================================================================================
 
 
-    public static final String APP_VERSION = "0.8.3";
+    public static final String APP_VERSION = "1.0.1";
 
 
     // ==========================================================================================================================================================
@@ -1247,6 +1247,40 @@ public final class Driver {
                     // =========================================================
 
 
+                    case "nickname":
+
+                        if (!command.hasCommandBody()) continue console;
+                        switch (command.getParameterSegment(0)) {
+                            case "list":
+                                System.out.println(Color.LIGHT_CYAN + "全局昵称" + Color.RESET);
+                                for (Map.Entry<Long, String> entry : systemd.getNicknameGlobal().entrySet()) {
+                                    System.out.println(entry.getKey() + ":" + entry.getValue());
+                                }
+                                System.out.println(Color.LIGHT_CYAN + "群内昵称" + Color.RESET);
+                                for (Map.Entry<Long, Map<Long, String>> groupsEntry : systemd.getNicknameGroups().entrySet()) {
+                                    System.out.println("> " + groupsEntry.getKey());
+                                    for (Map.Entry<Long, String> nicknameEntry : groupsEntry.getValue().entrySet()) {
+                                        System.out.println(nicknameEntry.getKey() + ":" + nicknameEntry.getValue());
+                                    }
+                                }
+                                break;
+
+                            case "clean":
+                                systemd.cleanNickName();
+                                break;
+
+                            case "reload":
+                                systemd.cleanNickName();
+
+                            case "append":
+                                systemd.appendNickname();
+                                break;
+
+
+                        }
+                        break;
+
+
                     case "list":
                         if (!command.hasCommandBody()) continue console;
                         switch (command.getParameterSegment(0)) {
@@ -1419,6 +1453,7 @@ public final class Driver {
                     new ArgumentCompleter(new StringsCompleter("help", "kill", "drop", "stop", "stat", "enable", "disable", "schema")),
                     new ArgumentCompleter(new StringsCompleter("list", "send"), new StringsCompleter("users", "group")),
                     new TreeCompleter(node("level", node("MUTE", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "ALL"))),
+                    new TreeCompleter(node("nickname", node("list", "clean", "reload", "append"))),
                     new TreeCompleter(node("debug", node("enable", "disable"))),
                     new TreeCompleter(node("plugin",
                         node("unload"),
@@ -1476,6 +1511,12 @@ public final class Driver {
             "list users   (安全) 列出好友\n" +
             "list group   (安全) 列出群组\n" +
             "list <group> (安全) 列出成员\n" +
+
+            Color.EMERALD_GREEN + "# 昵称相关 ==========================================" + Color.RESET + "\n" +
+            "nickname list (安全) 列出昵称\n" +
+            "nickname clean (安全) 清空昵称\n" +
+            "nickname append (安全) 加载且合并昵称\n" +
+            "nickname reload (安全) 清空且加载昵称\n" +
 
             Color.EMERALD_GREEN + "# 发送消息 ==========================================" + Color.RESET + "\n" +
             "send users <users> <消息>  (安全) 向好友发送消息\n" +
