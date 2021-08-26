@@ -63,6 +63,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -1233,7 +1234,7 @@ public final class Systemd extends BasicModuleUtilities {
     }
 
     @Api("清空昵称表")
-    public void cleanNickName() {
+    public void cleanNickname() {
         this.NICKNAME_GLOBAL.clear();
         this.NICKNAME_GROUPS.clear();
     }
@@ -1268,6 +1269,21 @@ public final class Systemd extends BasicModuleUtilities {
                 this.logger.seek("添加群内昵称 " + groupId + "." + userId + " -> " + nickname);
             }
         }
+    }
+
+
+    public List<String> exportNickname() {
+        List<String> result = new LinkedList<>();
+        for (Friend friend : this.bot.getFriends()) {
+            result.add("*." + friend.getId() + ":" + friend.getNick());
+        }
+        for (Group group : this.bot.getGroups()) {
+            long groupId = group.getId();
+            for (NormalMember member : group.getMembers()) {
+                result.add(groupId + "." + member.getId() + ":" + member.getNameCard() + "-" + member.getNick());
+            }
+        }
+        return result;
     }
 
     public Map<Long, String> getNicknameGlobal() {

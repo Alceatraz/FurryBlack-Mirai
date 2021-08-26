@@ -81,8 +81,10 @@ import studio.blacktech.furryblackplus.core.utilties.logger.LoggerX.Color;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -146,7 +148,7 @@ public final class Driver {
     // ==========================================================================================================================================================
 
 
-    public static final String APP_VERSION = "1.0.2";
+    public static final String APP_VERSION = "1.0.3";
 
 
     // ==========================================================================================================================================================
@@ -1273,7 +1275,9 @@ public final class Driver {
                     case "nickname":
 
                         if (!command.hasCommandBody()) continue console;
+
                         switch (command.getParameterSegment(0)) {
+
                             case "list":
                                 System.out.println(Color.LIGHT_CYAN + "全局昵称" + Color.RESET);
                                 for (Map.Entry<Long, String> entry : systemd.getNicknameGlobal().entrySet()) {
@@ -1289,17 +1293,29 @@ public final class Driver {
                                 break;
 
                             case "clean":
-                                systemd.cleanNickName();
+                                systemd.cleanNickname();
                                 break;
 
                             case "reload":
-                                systemd.cleanNickName();
+                                systemd.cleanNickname();
 
                             case "append":
                                 systemd.appendNickname();
                                 break;
 
-
+                            case "export":
+                                List<String> list = systemd.exportNickname();
+                                File file = Paths.get(FOLDER_CONFIG.getAbsolutePath(), "export-nickname-" + LoggerX.format("yyyy-MM-dd HH-mm-ss") + ".txt").toFile();
+                                //noinspection ResultOfMethodCallIgnored
+                                file.createNewFile();
+                                try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+                                    for (String line : list) {
+                                        byte[] bytes = line.getBytes(StandardCharsets.UTF_8);
+                                        fileOutputStream.write(bytes);
+                                        fileOutputStream.write("\n".getBytes(StandardCharsets.UTF_8));
+                                    }
+                                }
+                                break;
                         }
                         break;
 

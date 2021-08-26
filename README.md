@@ -76,6 +76,10 @@ as commercial usage. You is banned if you do it.
 
 ## CHANGELOG
 
+### 1.0.3
+
+- 添加导出昵称
+
 ### 1.0.2
 
 - 完善注释和`@Api`注释
