@@ -313,7 +313,7 @@ public final class LoggerX extends PlatformLogger {
     }
 
     public void seek(String message, String value) {
-        String result = "[" + datetime() + "][SEEK][" + this.name + "]" + message + " `" + value + "`";
+        String result = "[" + datetime() + "][SEEK][" + this.name + "]" + message + " → " + value;
         if (PRINT_SEEK) System.out.println(Color.LIGHT_GREEN + result + Color.RESET);
         LoggerX.writeLog(result);
     }

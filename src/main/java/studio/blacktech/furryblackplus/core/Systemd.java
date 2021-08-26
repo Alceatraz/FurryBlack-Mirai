@@ -1260,12 +1260,12 @@ public final class Systemd extends BasicModuleUtilities {
             long userId = Long.parseLong(user);
             if ("*".equals(group)) {
                 this.NICKNAME_GLOBAL.put(userId, nickname);
-                this.logger.seek("添加全局昵称 " + userId, nickname);
+                this.logger.seek("添加全局昵称 " + userId + " -> " + nickname);
             } else {
                 long groupId = Long.parseLong(group);
                 Map<Long, String> groupNicks = this.NICKNAME_GROUPS.computeIfAbsent(groupId, k -> new ConcurrentHashMap<>());
                 groupNicks.put(userId, nickname);
-                this.logger.seek("添加群内昵称 " + groupId + "." + userId, nickname);
+                this.logger.seek("添加群内昵称 " + groupId + "." + userId + " -> " + nickname);
             }
         }
     }
