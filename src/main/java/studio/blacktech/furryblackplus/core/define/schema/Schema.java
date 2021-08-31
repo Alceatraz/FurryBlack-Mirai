@@ -16,7 +16,6 @@
 package studio.blacktech.furryblackplus.core.define.schema;
 
 import studio.blacktech.furryblackplus.Driver;
-import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.define.annotation.Checker;
 import studio.blacktech.furryblackplus.core.define.annotation.Executor;
 import studio.blacktech.furryblackplus.core.define.annotation.Filter;
@@ -54,7 +53,9 @@ import java.util.stream.Collectors;
 import static studio.blacktech.furryblackplus.core.utilties.logger.LoggerX.hash;
 
 
-@Api("插件与模块持有")
+@SuppressWarnings("unused")
+
+
 public final class Schema {
 
     private final LoggerX logger = new LoggerX(Schema.class);
@@ -123,7 +124,6 @@ public final class Schema {
         this.SORTED_FILTER_CLAZZ = new CopyOnWriteArrayList<>();
         this.SORTED_MONITOR_CLAZZ = new CopyOnWriteArrayList<>();
         this.SORTED_CHECKER_CLAZZ = new CopyOnWriteArrayList<>();
-
 
         this.COMPONENT_RUNNER_INSTANCE = new ConcurrentHashMap<>();
         this.COMPONENT_FILTER_INSTANCE = new ConcurrentHashMap<>();
@@ -235,6 +235,8 @@ public final class Schema {
 
     /**
      * 危险操作
+     *
+     * @param fileName 插件包文件名
      */
     public void importPlugin(String fileName) {
 
@@ -276,6 +278,8 @@ public final class Schema {
 
     /**
      * 危险操作
+     *
+     * @param name 插件名
      */
     public void reloadPlugin(String name) {
 
@@ -306,6 +310,8 @@ public final class Schema {
 
     /**
      * 危险操作
+     *
+     * @param name 插件名
      */
     public void unloadPlugin(String name) {
 
@@ -1376,49 +1382,41 @@ public final class Schema {
     // =================================================================================================================
 
 
-    @SuppressWarnings("unused")
     public List<Runner> getSortedRunnerClazz() {
         return this.SORTED_RUNNER_CLAZZ;
     }
 
 
-    @SuppressWarnings("unused")
     public List<Filter> getSortedFilterClazz() {
         return this.SORTED_FILTER_CLAZZ;
     }
 
 
-    @SuppressWarnings("unused")
     public List<Monitor> getSortedMonitorClazz() {
         return this.SORTED_MONITOR_CLAZZ;
     }
 
 
-    @SuppressWarnings("unused")
     public List<Checker> getSortedCheckerClazz() {
         return this.SORTED_CHECKER_CLAZZ;
     }
 
 
-    @SuppressWarnings("unused")
     public List<Runner> getSortedRunnerInstance() {
         return this.SORTED_RUNNER_INSTANCE;
     }
 
 
-    @SuppressWarnings("unused")
     public List<Filter> getSortedFilterInstance() {
         return this.SORTED_FILTER_INSTANCE;
     }
 
 
-    @SuppressWarnings("unused")
     public List<Monitor> getSortedMonitorInstance() {
         return this.SORTED_MONITOR_INSTANCE;
     }
 
 
-    @SuppressWarnings("unused")
     public List<Checker> getSortedCheckerInstance() {
         return this.SORTED_CHECKER_INSTANCE;
     }
@@ -1981,7 +1979,6 @@ public final class Schema {
             System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getName() + ":" + hash(v));
         }
 
-
         System.out.println(Color.LIGHT_BLUE + ">> SORTED_RUNNER_CLAZZ" + Color.RESET);
 
         for (Runner entry : this.SORTED_RUNNER_CLAZZ) {
@@ -1994,20 +1991,17 @@ public final class Schema {
             System.out.println(printAnnotation(entry) + ":" + hash(entry));
         }
 
-
         System.out.println(Color.LIGHT_BLUE + ">> SORTED_MONITOR_CLAZZ" + Color.RESET);
 
         for (Monitor entry : this.SORTED_MONITOR_CLAZZ) {
             System.out.println(printAnnotation(entry) + ":" + hash(entry));
         }
 
-
         System.out.println(Color.LIGHT_BLUE + ">> SORTED_CHECKER_CLAZZ" + Color.RESET);
 
         for (Checker entry : this.SORTED_CHECKER_CLAZZ) {
             System.out.println(printAnnotation(entry) + ":" + hash(entry));
         }
-
 
         System.out.println(Color.LIGHT_BLUE + ">> COMPONENT_RUNNER_INSTANCE" + Color.RESET);
 
@@ -2049,13 +2043,11 @@ public final class Schema {
             System.out.println(printAnnotation(k) + ":" + hash(k) + " -> " + v.getClass().getName() + ":" + hash(v));
         }
 
-
         System.out.println(Color.LIGHT_BLUE + ">> SORTED_RUNNER_INSTANCE" + Color.RESET);
 
         for (Runner entry : this.SORTED_RUNNER_INSTANCE) {
             System.out.println(printAnnotation(entry) + ":" + hash(entry));
         }
-
 
         System.out.println(Color.LIGHT_BLUE + ">> SORTED_FILTER_INSTANCE" + Color.RESET);
 
@@ -2063,20 +2055,17 @@ public final class Schema {
             System.out.println(printAnnotation(entry) + ":" + hash(entry));
         }
 
-
         System.out.println(Color.LIGHT_BLUE + ">> SORTED_MONITOR_INSTANCE" + Color.RESET);
 
         for (Monitor entry : this.SORTED_MONITOR_INSTANCE) {
             System.out.println(printAnnotation(entry) + ":" + hash(entry));
         }
 
-
         System.out.println(Color.LIGHT_BLUE + ">> SORTED_CHECKER_INSTANCE" + Color.RESET);
 
         for (Checker entry : this.SORTED_CHECKER_INSTANCE) {
             System.out.println(printAnnotation(entry) + ":" + hash(entry));
         }
-
 
         System.out.println(Color.LIGHT_CYAN + ">> FILTER_USERS_CHAIN" + Color.RESET);
 
@@ -2167,6 +2156,5 @@ public final class Schema {
         }
 
     }
-
 
 }

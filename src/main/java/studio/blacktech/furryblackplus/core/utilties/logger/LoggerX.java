@@ -45,6 +45,7 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 
+
 @Api("日志工具")
 public final class LoggerX extends PlatformLogger {
 

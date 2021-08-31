@@ -115,10 +115,10 @@ import static org.jline.builtins.Completers.TreeCompleter.node;
  * 电子白熊会梦到仿生老黑吗
  *
  *
- * 项目地址 https://github.com/Alceatraz/FurryBlack-Mirai
- * 插件地址 https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
+ * 项目地址 <url>https://github.com/Alceatraz/FurryBlack-Mirai</url>
+ * 插件地址 <url>https://github.com/Alceatraz/FurryBlack-Mirai-Extensions</url>
  *
- * 个人主页 https://www.blacktech.studio
+ * 个人主页 <url>https://www.blacktech.studio</url>
  *
  * @author Alceatraz Warprays @ BlackTechStudio
  */
@@ -194,14 +194,14 @@ public final class Driver {
 
     private static volatile boolean enable;
 
-    private static volatile boolean unsafe;
+    private static boolean unsafe;
 
-    private static volatile boolean noLogin;
-    private static volatile boolean noJline;
+    private static boolean noLogin;
+    private static boolean noJline;
 
-    private static volatile boolean shutModeExit;
-    private static volatile boolean shutModeDrop;
-    private static volatile boolean shutBySignal = true;
+    private static boolean shutModeExit;
+    private static boolean shutModeDrop;
+    private static boolean shutBySignal = true;
 
     private static final AtomicReference<String> prompt = new AtomicReference<>("");
 
@@ -255,7 +255,6 @@ public final class Driver {
             System.out.println("[FurryBlack][ARGS]严格模式");
         }
 
-
         // =====================================================================
         // Dry Run 模式
         noLogin = parameters.contains("--no-login");
@@ -292,7 +291,6 @@ public final class Driver {
         } else {
             System.out.println("[FurryBlack][ARGS]使用正常退出");
         }
-
 
         // =====================================================================
         // 日志级别 设置
@@ -950,7 +948,7 @@ public final class Driver {
                     case "info":
                         System.out.println("FurryBlack-Plus");
                         System.out.println("A Mirai wrapper QQ-Bot framework make with love and \uD83E\uDDE6");
-                        System.out.println("Mr.Black is a  with a white bear furry visualize");
+                        System.out.println("Mr.Black is a housekeeper with a white bear furry visualize");
                         System.out.println("Create by Alceatraz Warprays @ Black Tech Studio");
                         System.out.println("https://www.blacktech.studio");
                         break;

@@ -43,6 +43,7 @@ import java.util.jar.JarFile;
 
 import static studio.blacktech.furryblackplus.core.utilties.logger.LoggerX.hash;
 
+
 public class Plugin {
 
     private final LoggerX logger;

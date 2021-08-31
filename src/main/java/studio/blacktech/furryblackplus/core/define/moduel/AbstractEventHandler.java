@@ -31,6 +31,7 @@ import java.util.Properties;
 
 @SuppressWarnings("RedundantThrows")
 
+
 @Api("基础模块类")
 public abstract class AbstractEventHandler extends BasicModuleUtilities {
 
