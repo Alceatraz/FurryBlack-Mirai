@@ -29,14 +29,14 @@
 
     <name>FurryBlack-Mirai-Core</name>
 
-    <version>1.0.4</version>
+    <version>0.8.9</version>
 
     <packaging>jar</packaging>
 
     <properties>
-        <mirai.version>2.7.0</mirai.version>
-        <maven.compiler.target>11</maven.compiler.target>
-        <maven.compiler.source>11</maven.compiler.source>
+        <mirai.version>2.8.0-M1</mirai.version>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>

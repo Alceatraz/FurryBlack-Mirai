@@ -396,29 +396,22 @@ public final class Systemd extends BasicModuleUtilities {
 
 
         switch (DEVICE_TYPE) {
-
-            case "PAD":
-            case "537062409":
+            case "PAD", "537062409" -> {
                 configuration.setProtocol(BotConfiguration.MiraiProtocol.ANDROID_PAD);
                 this.logger.seek("设备模式 " + DEVICE_TYPE + " 安卓平板");
-                break;
-
-            case "PHONE":
-            case "537062845":
+            }
+            case "PHONE", "537062845" -> {
                 configuration.setProtocol(BotConfiguration.MiraiProtocol.ANDROID_PHONE);
                 this.logger.seek("设备模式 " + DEVICE_TYPE + " 安卓手机");
-                break;
-
-            case "WATCH":
-            case "537061176":
+            }
+            case "WATCH", "537061176" -> {
                 configuration.setProtocol(BotConfiguration.MiraiProtocol.ANDROID_WATCH);
                 this.logger.seek("设备模式 " + DEVICE_TYPE + " 安卓手表");
-                break;
-
-            default:
+            }
+            default -> {
                 this.logger.error("设备模式配置错误");
                 throw new MisConfigException(CONF_BOT_DEVICE_TYPE + "必须是填 PAD PHONE WATCH 之一 大写无符号");
-
+            }
         }
 
 

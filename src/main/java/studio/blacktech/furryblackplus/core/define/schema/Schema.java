@@ -471,15 +471,13 @@ public final class Schema {
 
     public List<Checker> listGlobalUsersChecker() {
         return this.GLOBAL_CHECKER_USERS_POOL.stream()
-            .map(item -> item.getClass().getAnnotation(Checker.class))
-            .collect(Collectors.toUnmodifiableList());
+            .map(item -> item.getClass().getAnnotation(Checker.class)).toList();
     }
 
 
     public List<Checker> listGlobalGroupChecker() {
         return this.GLOBAL_CHECKER_USERS_POOL.stream()
-            .map(item -> item.getClass().getAnnotation(Checker.class))
-            .collect(Collectors.toUnmodifiableList());
+            .map(item -> item.getClass().getAnnotation(Checker.class)).toList();
     }
 
     public Map<String, List<Checker>> listCommandsUsersChecker() {
@@ -487,7 +485,7 @@ public final class Schema {
         for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_USERS_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            List<Checker> collect = v.stream().map(item -> item.getClass().getAnnotation(Checker.class)).collect(Collectors.toUnmodifiableList());
+            List<Checker> collect = v.stream().map(item -> item.getClass().getAnnotation(Checker.class)).toList();
             result.put(k, collect);
         }
         return result;
@@ -498,7 +496,7 @@ public final class Schema {
         for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_GROUP_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            List<Checker> collect = v.stream().map(item -> item.getClass().getAnnotation(Checker.class)).collect(Collectors.toUnmodifiableList());
+            List<Checker> collect = v.stream().map(item -> item.getClass().getAnnotation(Checker.class)).toList();
             result.put(k, collect);
         }
         return result;
@@ -807,8 +805,7 @@ public final class Schema {
     @SuppressWarnings("unchecked")
     public <T extends EventHandlerRunner> T getRunner(Class<T> clazz) {
         List<EventHandlerRunner> collect = this.COMPONENT_RUNNER_INSTANCE.values().stream()
-            .filter(clazz::isInstance)
-            .collect(Collectors.toUnmodifiableList());
+            .filter(clazz::isInstance).toList();
         if (collect.size() == 1) {
             return (T) collect.get(0);
         } else {

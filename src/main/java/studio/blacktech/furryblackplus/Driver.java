@@ -148,7 +148,7 @@ public final class Driver {
     // ==========================================================================================================================================================
 
 
-    public static final String APP_VERSION = "1.0.4";
+    public static final String APP_VERSION = "0.8.9";
 
 
     // ==========================================================================================================================================================
@@ -964,21 +964,15 @@ public final class Driver {
                             case 1:
 
                                 switch (command.getParameterSegment(0)) {
-
-                                    case "enable":
+                                    case "enable" -> {
                                         debug = true;
                                         System.out.println("DEBUG模式启动");
-                                        break;
-
-                                    case "disable":
+                                    }
+                                    case "disable" -> {
                                         debug = false;
                                         System.out.println("DEBUG模式关闭");
-                                        break;
-
-                                    default:
-                                        System.out.println(debug ? "DEBUG已开启" : "DEBUG已关闭");
-                                        break;
-
+                                    }
+                                    default -> System.out.println(debug ? "DEBUG已开启" : "DEBUG已关闭");
                                 }
                                 break;
 
@@ -1018,30 +1012,26 @@ public final class Driver {
                                 switch (command.getParameterSegment(0)) {
 
                                     // plugin load <file-name>
-                                    case "import":
+                                    case "import" -> {
                                         systemd.importPlugin(command.getParameterSegment(1));
                                         systemd.generateListMessage();
                                         completerDelegate.update();
-                                        break;
+                                    }
 
                                     // plugin unload <plugin>
-                                    case "unload":
+                                    case "unload" -> {
                                         systemd.unloadPlugin(command.getParameterSegment(1));
                                         systemd.generateListMessage();
                                         completerDelegate.update();
-                                        break;
+                                    }
 
                                     // plugin reload <plugin>
-                                    case "reload":
+                                    case "reload" -> {
                                         systemd.reloadPlugin(command.getParameterSegment(1));
                                         systemd.generateListMessage();
                                         completerDelegate.update();
-                                        break;
-
-                                    default:
-                                        System.out.println("plugin <import|unload|reload> <name|path>");
-                                        break;
-
+                                    }
+                                    default -> System.out.println("plugin <import|unload|reload> <name|path>");
                                 }
                                 break;
 
@@ -1050,18 +1040,14 @@ public final class Driver {
                                 switch (command.getParameterSegment(0)) {
 
                                     // plugin unload
-                                    case "unload":
+                                    case "unload" -> {
                                         for (String name : systemd.listAllPluginName()) {
                                             systemd.unloadPlugin(name);
                                         }
                                         systemd.generateListMessage();
                                         completerDelegate.update();
-                                        break;
-
-                                    default:
-                                        System.out.println("plugin unload");
-                                        break;
-
+                                    }
+                                    default -> System.out.println("plugin unload");
                                 }
                                 break;
 
@@ -1134,35 +1120,27 @@ public final class Driver {
                                 switch (command.getParameterSegment(0)) {
 
                                     // module shut <plugin>
-                                    case "shut":
-                                        systemd.shutModule(command.getParameterSegment(1));
-                                        break;
+                                    case "shut" -> systemd.shutModule(command.getParameterSegment(1));
+
 
                                     // module init <plugin>
-                                    case "init":
-                                        systemd.initModule(command.getParameterSegment(1));
-                                        break;
+                                    case "init" -> systemd.initModule(command.getParameterSegment(1));
+
 
                                     // module boot <plugin>
-                                    case "boot":
-                                        systemd.bootModule(command.getParameterSegment(1));
-                                        break;
+                                    case "boot" -> systemd.bootModule(command.getParameterSegment(1));
+
 
                                     // module reboot <plugin>
-                                    case "reboot":
-                                        systemd.rebootModule(command.getParameterSegment(1));
-                                        break;
+                                    case "reboot" -> systemd.rebootModule(command.getParameterSegment(1));
+
 
                                     // module unload <plugin>
-                                    case "unload":
-                                        systemd.unloadModule(command.getParameterSegment(1));
-                                        break;
+                                    case "unload" -> systemd.unloadModule(command.getParameterSegment(1));
+
 
                                     // module reload <plugin>
-                                    case "reload":
-                                        systemd.reloadModule(command.getParameterSegment(1));
-                                        break;
-
+                                    case "reload" -> systemd.reloadModule(command.getParameterSegment(1));
                                 }
                                 break;
 
@@ -1341,15 +1319,7 @@ public final class Driver {
                     case "list":
                         if (!command.hasCommandBody()) continue console;
                         switch (command.getParameterSegment(0)) {
-
-                            case "u":
-                            case "usr":
-                            case "user":
-                            case "users":
-                            case "f":
-                            case "fri":
-                            case "friend":
-                            case "friends":
+                            case "u", "usr", "user", "users", "f", "fri", "friend", "friends" -> {
                                 List<Friend> friends = Driver.getFriends().stream().filter(item -> item.getId() != systemd.getBotID()).collect(Collectors.toList());
                                 if (friends.size() == 0) {
                                     System.out.println("你没有朋友");
@@ -1358,12 +1328,8 @@ public final class Driver {
                                 friends.stream()
                                     .map(Driver::getFormattedNickName)
                                     .forEach(System.out::println);
-                                break;
-
-                            case "g":
-                            case "grp":
-                            case "group":
-                            case "groups":
+                            }
+                            case "g", "grp", "group", "groups" -> {
                                 ContactList<Group> groups = Driver.getGroups();
                                 if (groups.size() == 0) {
                                     System.out.println("你没有群组");
@@ -1372,9 +1338,8 @@ public final class Driver {
                                 groups.stream()
                                     .map(item -> item.getName() + "(" + item.getId() + ") " + item.getMembers().size() + "人")
                                     .forEach(System.out::println);
-                                break;
-
-                            default:
+                            }
+                            default -> {
                                 long group;
                                 try {
                                     group = Long.parseLong(command.getParameterSegment(0));
@@ -1390,17 +1355,14 @@ public final class Driver {
                                         builder.append(" - ");
                                         builder.append(Driver.getFormattedNickName(item));
                                         switch (item.getPermission().getLevel()) {
-                                            case 2:
-                                                builder.append(" 群主");
-                                                break;
-                                            case 1:
-                                                builder.append(" 管理");
-                                                break;
-                                            default:
-
+                                            case 2 -> builder.append(" 群主");
+                                            case 1 -> builder.append(" 管理");
+                                            default -> {
+                                            }
                                         }
                                         System.out.println(builder);
                                     });
+                            }
                         }
                         break;
 

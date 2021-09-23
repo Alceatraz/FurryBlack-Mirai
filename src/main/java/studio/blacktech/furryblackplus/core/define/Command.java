@@ -84,15 +84,13 @@ public final class Command {
             char chat = this.commandBody.charAt(pointer);
 
             switch (chat) {
-
-                case '\\':
+                case '\\' -> {
                     if (isEscape) {
                         builder.append("\\"); // 连续两个\\则视为\
                     }
                     isEscape = !isEscape; // 启动对下一个字符的转义
-                    break;
-
-                case '`':
+                }
+                case '`' -> {
                     if (isEscape) {
                         // 开启了转义 不对field状态进行操作
                         builder.append('`');
@@ -100,9 +98,8 @@ public final class Command {
                         isFiled = !isFiled;
                     }
                     isEscape = false;
-                    break;
-
-                case ' ':
+                }
+                case ' ' -> {
                     // field范围内不按空格进行拆分
                     if (isFiled) {
                         builder.append(chat);
@@ -114,11 +111,11 @@ public final class Command {
                         builder.setLength(0);
                     }
                     isEscape = false;
-                    break;
-
-                default:
+                }
+                default -> {
                     builder.append(chat);
                     isEscape = false;
+                }
             }
         }
 
