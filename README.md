@@ -76,6 +76,10 @@ as commercial usage. You is banned if you do it.
 
 ## CHANGELOG
 
+
+# 重大预告：下一个版本将会支持插件的依赖类自动加载，但是因为URLClassLoader不close就会占用文件，但是close以后会导致无法继续加载（类的getClassLoader链会被破坏），所以取消插件和模块的热操作功能。
+
+
 ### 0.8.9
 
 **回退版本号是不好的行为，但是我还是回退了，注意将本地maven缓存删除**
