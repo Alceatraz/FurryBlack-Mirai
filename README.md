@@ -78,6 +78,7 @@ as commercial usage. You is banned if you do it.
 
 
 # 重大预告：下一个版本将会支持插件的依赖类自动加载，但是因为URLClassLoader不close就会占用文件，但是close以后会导致无法继续加载（类的getClassLoader链会被破坏），所以取消插件和模块的热操作功能。
+## 预告更新：类加载器如果关闭则会导致某些库无法正常工作，预计会出现严重的设计冲突，考虑完全移除热操作功能（除了模块重启）。
 
 
 ### 0.8.9
