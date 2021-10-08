@@ -17,10 +17,10 @@ package studio.blacktech.furryblackplus.demo;
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
-import studio.blacktech.furryblackplus.Driver;
+import studio.blacktech.furryblackplus.FurryBlack;
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.define.annotation.Monitor;
-import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerMonitor;
+import studio.blacktech.furryblackplus.core.handler.annotation.Monitor;
+import studio.blacktech.furryblackplus.core.handler.EventHandlerMonitor;
 
 
 @Api("示例监视器 监视器")
@@ -36,7 +36,7 @@ public class DemoMonitor extends EventHandlerMonitor {
     @Override
     public void init() {
         System.out.println("加载" + this.getClass().getName());
-        DemoRunner demoRunner = Driver.getRunner(DemoRunner.class);
+        DemoRunner demoRunner = FurryBlack.getRunner(DemoRunner.class);
         demoRunner.demo();
     }
 

@@ -17,11 +17,11 @@ package studio.blacktech.furryblackplus.demo;
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
-import studio.blacktech.furryblackplus.Driver;
+import studio.blacktech.furryblackplus.FurryBlack;
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.define.Command;
-import studio.blacktech.furryblackplus.core.define.annotation.Checker;
-import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerChecker;
+import studio.blacktech.furryblackplus.core.handler.common.Command;
+import studio.blacktech.furryblackplus.core.handler.annotation.Checker;
+import studio.blacktech.furryblackplus.core.handler.EventHandlerChecker;
 
 
 @Api("示例检查器")
@@ -40,7 +40,7 @@ public class DemoChecker extends EventHandlerChecker {
     @Override
     public void init() {
         // 使用getRunner从IoC容器获取定时器实例
-        this.runner = Driver.getRunner(DemoRunner.class);
+        this.runner = FurryBlack.getRunner(DemoRunner.class);
         System.out.println("加载" + this.getClass().getName());
     }
 

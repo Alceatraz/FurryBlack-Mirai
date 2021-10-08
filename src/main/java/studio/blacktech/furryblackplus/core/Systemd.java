@@ -37,27 +37,28 @@ import net.mamoe.mirai.event.events.NewFriendRequestEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.utils.BotConfiguration;
-import studio.blacktech.furryblackplus.Driver;
+import studio.blacktech.furryblackplus.FurryBlack;
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.define.Command;
-import studio.blacktech.furryblackplus.core.define.annotation.Checker;
-import studio.blacktech.furryblackplus.core.define.annotation.Executor;
-import studio.blacktech.furryblackplus.core.define.annotation.Filter;
-import studio.blacktech.furryblackplus.core.define.annotation.Monitor;
-import studio.blacktech.furryblackplus.core.define.annotation.Runner;
-import studio.blacktech.furryblackplus.core.define.moduel.BasicModuleUtilities;
-import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerChecker;
-import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerExecutor;
-import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerFilter;
-import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerMonitor;
-import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerRunner;
-import studio.blacktech.furryblackplus.core.define.schema.Plugin;
-import studio.blacktech.furryblackplus.core.define.schema.Schema;
-import studio.blacktech.furryblackplus.core.exception.moduels.boot.BootException;
-import studio.blacktech.furryblackplus.core.exception.moduels.load.FirstBootException;
-import studio.blacktech.furryblackplus.core.exception.moduels.load.MisConfigException;
-import studio.blacktech.furryblackplus.core.utilties.digest.SHA256;
-import studio.blacktech.furryblackplus.core.utilties.logger.LoggerX;
+import studio.blacktech.furryblackplus.core.common.digest.SHA256;
+import studio.blacktech.furryblackplus.core.common.exception.moduels.boot.BootException;
+import studio.blacktech.furryblackplus.core.common.exception.moduels.load.FirstBootException;
+import studio.blacktech.furryblackplus.core.common.exception.moduels.load.MisConfigException;
+import studio.blacktech.furryblackplus.core.common.logger.LoggerXFactory;
+import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
+import studio.blacktech.furryblackplus.core.handler.EventHandlerChecker;
+import studio.blacktech.furryblackplus.core.handler.EventHandlerExecutor;
+import studio.blacktech.furryblackplus.core.handler.EventHandlerFilter;
+import studio.blacktech.furryblackplus.core.handler.EventHandlerMonitor;
+import studio.blacktech.furryblackplus.core.handler.EventHandlerRunner;
+import studio.blacktech.furryblackplus.core.handler.annotation.Checker;
+import studio.blacktech.furryblackplus.core.handler.annotation.Executor;
+import studio.blacktech.furryblackplus.core.handler.annotation.Filter;
+import studio.blacktech.furryblackplus.core.handler.annotation.Monitor;
+import studio.blacktech.furryblackplus.core.handler.annotation.Runner;
+import studio.blacktech.furryblackplus.core.handler.common.BasicModuleUtilities;
+import studio.blacktech.furryblackplus.core.handler.common.Command;
+import studio.blacktech.furryblackplus.core.schema.Plugin;
+import studio.blacktech.furryblackplus.core.schema.Schema;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -229,11 +230,14 @@ public final class Systemd extends BasicModuleUtilities {
     public void boot() throws BootException {
 
 
+        this.logger.hint("启动核心配置");
+
+
         // ==========================================================================================================================
         // 初始化配置文件
 
 
-        this.logger.info("初始化配置文件");
+        this.logger.info("检查配置文件");
 
 
         File FILE_CONFIG = Paths.get(this.FOLDER_CONFIG.getAbsolutePath(), "application.properties").toFile();
@@ -281,9 +285,16 @@ public final class Systemd extends BasicModuleUtilities {
 
 
         // ==========================================================================================================================
+
+
+        this.logger.hint("配置核心系统");
+
+
+        // ==========================================================================================================================
         // 读取配置
 
-        this.logger.hint("初始化命令过滤器");
+        this.logger.info("加载命令前缀配置");
+
 
         String prefix = config.getProperty(CONF_BOT_COMMAND_PREFIX);
 
@@ -304,24 +315,24 @@ public final class Systemd extends BasicModuleUtilities {
         // 读取模板
 
 
-        this.logger.hint("初始化内置消息");
+        this.logger.hint("加载内置消息");
 
-        File FILE_EULA = Paths.get(Driver.getConfigFolder(), "message_eula.txt").toFile();
-        File FILE_INFO = Paths.get(Driver.getConfigFolder(), "message_info.txt").toFile();
-        File FILE_HELP = Paths.get(Driver.getConfigFolder(), "message_help.txt").toFile();
+        File FILE_EULA = Paths.get(FurryBlack.getConfigFolder(), "message_eula.txt").toFile();
+        File FILE_INFO = Paths.get(FurryBlack.getConfigFolder(), "message_info.txt").toFile();
+        File FILE_HELP = Paths.get(FurryBlack.getConfigFolder(), "message_help.txt").toFile();
 
-        this.logger.info("初始化eula");
+        this.logger.info("加载eula");
         this.MESSAGE_EULA = this.readFileContent(FILE_EULA);
 
-        this.logger.info("初始化info");
+        this.logger.info("加载info");
         this.MESSAGE_INFO = this.readFileContent(FILE_INFO);
 
-        this.logger.info("初始化help");
+        this.logger.info("加载help");
         this.MESSAGE_HELP = this.readFileContent(FILE_HELP);
 
-        this.MESSAGE_EULA = this.MESSAGE_EULA.replaceAll("\\$\\{VERSION}", Driver.APP_VERSION);
-        this.MESSAGE_INFO = this.MESSAGE_INFO.replaceAll("\\$\\{VERSION}", Driver.APP_VERSION);
-        this.MESSAGE_HELP = this.MESSAGE_HELP.replaceAll("\\$\\{VERSION}", Driver.APP_VERSION);
+        this.MESSAGE_EULA = this.MESSAGE_EULA.replaceAll("\\$\\{VERSION}", FurryBlack.APP_VERSION);
+        this.MESSAGE_INFO = this.MESSAGE_INFO.replaceAll("\\$\\{VERSION}", FurryBlack.APP_VERSION);
+        this.MESSAGE_HELP = this.MESSAGE_HELP.replaceAll("\\$\\{VERSION}", FurryBlack.APP_VERSION);
 
         String SHA_EULA = SHA256.getInstance().digest(this.MESSAGE_EULA);
         String SHA_INFO = SHA256.getInstance().digest(this.MESSAGE_INFO);
@@ -329,17 +340,18 @@ public final class Systemd extends BasicModuleUtilities {
         this.MESSAGE_EULA = this.MESSAGE_EULA + "\r\nSHA-256: " + SHA_EULA;
         this.MESSAGE_INFO = this.MESSAGE_INFO + "\r\nSHA-256: " + SHA_INFO;
 
-        this.logger.info("EULA Digest " + SHA_EULA);
-        this.logger.info("INFO Digest " + SHA_INFO);
+        this.logger.seek("签名EULA -> " + SHA_EULA);
+        this.logger.seek("签名INFO -> " + SHA_INFO);
 
 
         // ==========================================================================================================================
         // 加载常用昵称
 
 
+        this.logger.hint("加载常用昵称");
+
         this.NICKNAME_GLOBAL = new ConcurrentHashMap<>();
         this.NICKNAME_GROUPS = new ConcurrentHashMap<>();
-
 
         this.appendNickname();
 
@@ -377,9 +389,12 @@ public final class Systemd extends BasicModuleUtilities {
 
         length = accountConfig.length();
 
-        if (Driver.isDebug()) {
+        if (FurryBlack.isDebug()) {
             this.logger.seek("QQ密码 " + ACCOUNT_PW);
-            this.logger.warning("关闭调试模式以给此条日志打码");
+            this.logger.warning("！！！！！！！！！！！！！！！！！！");
+            this.logger.warning("！调试模式开启时会在日志中记录密码！");
+            this.logger.warning("！关闭调试模式以给日志密码信息打码!");
+            this.logger.warning("！！！！！！！！！！！！！！！！！！");
         } else {
             String shadow_ACCOUNT_PW = ACCOUNT_PW.charAt(0) + "*".repeat(length - 1);
             this.logger.seek("QQ密码 " + shadow_ACCOUNT_PW);
@@ -420,7 +435,7 @@ public final class Systemd extends BasicModuleUtilities {
 
         String DEVICE_INFO = config.getProperty(CONF_BOT_DEVICE_INFO);
 
-        File deviceInfo = Paths.get(Driver.getConfigFolder(), DEVICE_INFO).toFile();
+        File deviceInfo = Paths.get(FurryBlack.getConfigFolder(), DEVICE_INFO).toFile();
 
         if (deviceInfo.exists()) {
 
@@ -454,39 +469,39 @@ public final class Systemd extends BasicModuleUtilities {
 
         // 心跳参数
 
+        Long NET_HEARTBEAT_PERIOD = this.parseLongOrNull(config.getProperty(CONF_NET_HEARTBEAT_PERIOD));
+        if (NET_HEARTBEAT_PERIOD != null) {
+            this.logger.seek("心跳间隔 " + NET_HEARTBEAT_PERIOD);
+            configuration.setHeartbeatPeriodMillis(NET_HEARTBEAT_PERIOD);
+        }
 
-        long NET_HEARTBEAT_PERIOD = this.parseLong(config.getProperty(CONF_NET_HEARTBEAT_PERIOD));
-        long NET_HEARTBEAT_TIMEOUT = this.parseLong(config.getProperty(CONF_NET_HEARTBEAT_TIMEOUT));
-
-        this.logger.seek("心跳间隔 " + NET_HEARTBEAT_PERIOD);
-        this.logger.seek("心跳超时 " + NET_HEARTBEAT_TIMEOUT);
-
-        configuration.setHeartbeatPeriodMillis(NET_HEARTBEAT_PERIOD);
-        configuration.setHeartbeatTimeoutMillis(NET_HEARTBEAT_TIMEOUT);
+        Long NET_HEARTBEAT_TIMEOUT = this.parseLongOrNull(config.getProperty(CONF_NET_HEARTBEAT_TIMEOUT));
+        if (NET_HEARTBEAT_TIMEOUT != null) {
+            this.logger.seek("心跳超时 " + NET_HEARTBEAT_TIMEOUT);
+            configuration.setHeartbeatTimeoutMillis(NET_HEARTBEAT_TIMEOUT);
+        }
 
 
         // 重连参数
 
-
-        int NET_RECONNECT_RETRY = this.parseInteger(config.getProperty(CONF_NET_RECONNECT_RETRY));
-
-        this.logger.seek("重连次数 " + NET_RECONNECT_RETRY);
-
-        configuration.setReconnectionRetryTimes(NET_RECONNECT_RETRY);
+        Integer NET_RECONNECT_RETRY = this.parseIntegerOrNull(config.getProperty(CONF_NET_RECONNECT_RETRY));
+        if (NET_RECONNECT_RETRY != null) {
+            this.logger.seek("重连次数 " + NET_RECONNECT_RETRY);
+            configuration.setReconnectionRetryTimes(NET_RECONNECT_RETRY);
+        }
 
 
         // 传入日志
 
-
-        configuration.setBotLoggerSupplier(i -> new LoggerX("MiraiBot"));
-        configuration.setNetworkLoggerSupplier(i -> new LoggerX("MiraiNet"));
+        configuration.setBotLoggerSupplier(i -> LoggerXFactory.newLogger("MiraiBot"));
+        configuration.setNetworkLoggerSupplier(i -> LoggerXFactory.newLogger("MiraiNet"));
 
 
         // ==========================================================================================================================
         // 创建机器人
 
 
-        this.logger.info("初始化机器人");
+        this.logger.hint("创建机器人");
         this.bot = BotFactory.INSTANCE.newBot(ACCOUNT_QQ, ACCOUNT_PW, configuration);
 
         this.logger.info("机器人类型 " + this.bot.getClass().getName());
@@ -500,6 +515,13 @@ public final class Systemd extends BasicModuleUtilities {
 
 
         this.schema = new Schema(this.FOLDER_PLUGIN);
+
+
+        // ==========================================================================================================================
+        // 扫描插件
+
+
+        this.schema.find();
 
 
         // ==========================================================================================================================
@@ -584,7 +606,7 @@ public final class Systemd extends BasicModuleUtilities {
         // 登录QQ
 
 
-        if (Driver.isNoLogin()) {
+        if (FurryBlack.isNoLogin()) {
             this.logger.warning("指定了--no-login参数 跳过登录");
         } else {
             this.logger.hint("登录");
@@ -620,17 +642,17 @@ public final class Systemd extends BasicModuleUtilities {
         // 列出所有好友和群组
 
 
-        if (!Driver.isNoLogin()) {
+        if (!FurryBlack.isNoLogin()) {
 
             this.logger.seek("机器人账号 " + this.bot.getId());
             this.logger.seek("机器人昵称 " + this.bot.getNick());
             this.logger.seek("机器人头像 " + this.bot.getAvatarUrl());
 
             this.logger.hint("所有好友");
-            this.bot.getFriends().forEach(item -> this.logger.info(Driver.getFormattedNickName(item)));
+            this.bot.getFriends().forEach(item -> this.logger.info(FurryBlack.getFormattedNickName(item)));
 
             this.logger.hint("所有群组");
-            this.bot.getGroups().forEach(item -> this.logger.info(Driver.getGroupInfo(item)));
+            this.bot.getGroups().forEach(item -> this.logger.info(FurryBlack.getGroupInfo(item)));
 
         }
 
@@ -684,7 +706,7 @@ public final class Systemd extends BasicModuleUtilities {
         this.logger.hint("关闭线程池");
 
 
-        if (Driver.isShutModeDrop()) {
+        if (FurryBlack.isShutModeDrop()) {
 
             this.logger.info("强制关闭监听器线程池");
             this.MONITOR_PROCESS.shutdownNow();
@@ -710,7 +732,7 @@ public final class Systemd extends BasicModuleUtilities {
         this.MONITOR_PROCESS = null;
 
 
-        if (Driver.isShutModeDrop()) {
+        if (FurryBlack.isShutModeDrop()) {
 
             this.logger.info("强制关闭异步任务线程池");
             this.EXECUTOR_SERVICE.shutdownNow();
@@ -742,10 +764,10 @@ public final class Systemd extends BasicModuleUtilities {
 
         this.logger.info("通知机器人关闭");
 
-        if (Driver.isNoLogin()) {
+        if (FurryBlack.isNoLogin()) {
             this.logger.warning("调试模式 不需要关闭机器人");
         } else {
-            if (Driver.isShutModeDrop()) {
+            if (FurryBlack.isShutModeDrop()) {
                 this.bot.close(null);
             } else {
                 this.bot.closeAndJoin(null);
@@ -766,7 +788,7 @@ public final class Systemd extends BasicModuleUtilities {
 
     private void handleUsersMessage(UserMessageEvent event) {
 
-        if (!Driver.isEnable()) return;
+        if (!FurryBlack.isEnable()) return;
 
         try {
 
@@ -795,25 +817,25 @@ public final class Systemd extends BasicModuleUtilities {
                             String segment = command.getParameterSegment(0);
                             EventHandlerExecutor executor = this.schema.getExecutorUsersPool().get(segment);
                             if (executor == null) {
-                                Driver.sendMessage(event, "没有此命令");
+                                FurryBlack.sendMessage(event, "没有此命令");
                             } else {
-                                Driver.sendMessage(event, executor.getHelp());
+                                FurryBlack.sendMessage(event, executor.getHelp());
                             }
                         } else {
-                            Driver.sendMessage(event, this.MESSAGE_HELP);
+                            FurryBlack.sendMessage(event, this.MESSAGE_HELP);
                         }
                         break;
 
                     case "list":
-                        Driver.sendMessage(event, this.MESSAGE_LIST_USERS);
+                        FurryBlack.sendMessage(event, this.MESSAGE_LIST_USERS);
                         break;
 
                     case "info":
-                        Driver.sendMessage(event, this.MESSAGE_INFO);
+                        FurryBlack.sendMessage(event, this.MESSAGE_INFO);
                         break;
 
                     case "eula":
-                        Driver.sendMessage(event, this.MESSAGE_EULA);
+                        FurryBlack.sendMessage(event, this.MESSAGE_EULA);
                         break;
 
                     default:
@@ -821,7 +843,7 @@ public final class Systemd extends BasicModuleUtilities {
                         EventHandlerExecutor executor = this.schema.getExecutorUsersPool().get(commandName);
 
                         if (executor == null) {
-                            Driver.sendMessage(event, "没有此命令");
+                            FurryBlack.sendMessage(event, "没有此命令");
                             return;
                         }
 
@@ -844,14 +866,14 @@ public final class Systemd extends BasicModuleUtilities {
             }
 
         } catch (Exception exception) {
-            this.logger.dump(event, exception);
+            this.logger.warning(LoggerX.dumpMessage(event, exception));
         }
     }
 
 
     public void handleGroupMessage(GroupMessageEvent event) {
 
-        if (!Driver.isEnable()) return;
+        if (!FurryBlack.isEnable()) return;
 
         try {
 
@@ -880,19 +902,19 @@ public final class Systemd extends BasicModuleUtilities {
                             String segment = command.getParameterSegment(0);
                             EventHandlerExecutor executor = this.schema.getExecutorGroupPool().get(segment);
                             if (executor == null) {
-                                Driver.sendMessage(event, "没有此命令");
+                                FurryBlack.sendMessage(event, "没有此命令");
                             } else {
                                 try {
-                                    Driver.sendMessage(event, executor.getHelp());
+                                    FurryBlack.sendMessage(event, executor.getHelp());
                                 } catch (Exception exception) {
-                                    Driver.sendMessage(event, "帮助信息发送至私聊失败 请允许临时会话权限");
+                                    FurryBlack.sendMessage(event, "帮助信息发送至私聊失败 请允许临时会话权限");
                                 }
                             }
                         } else {
                             try {
                                 event.getSender().sendMessage(this.MESSAGE_HELP);
                             } catch (Exception exception) {
-                                Driver.sendMessage(event, "帮助信息发送至私聊失败 请允许临时会话权限");
+                                FurryBlack.sendMessage(event, "帮助信息发送至私聊失败 请允许临时会话权限");
                             }
                         }
                         break;
@@ -901,7 +923,7 @@ public final class Systemd extends BasicModuleUtilities {
                         try {
                             event.getSender().sendMessage(this.MESSAGE_LIST_GROUP);
                         } catch (Exception exception) {
-                            Driver.sendMessage(event, "可用命令发送至私聊失败 请允许临时会话权限");
+                            FurryBlack.sendMessage(event, "可用命令发送至私聊失败 请允许临时会话权限");
                         }
                         break;
 
@@ -909,7 +931,7 @@ public final class Systemd extends BasicModuleUtilities {
                         try {
                             event.getSender().sendMessage(this.MESSAGE_INFO);
                         } catch (Exception exception) {
-                            Driver.sendMessage(event, "关于发送至私聊失败 请允许临时会话权限");
+                            FurryBlack.sendMessage(event, "关于发送至私聊失败 请允许临时会话权限");
                         }
                         break;
 
@@ -917,7 +939,7 @@ public final class Systemd extends BasicModuleUtilities {
                         try {
                             event.getSender().sendMessage(this.MESSAGE_EULA);
                         } catch (Exception exception) {
-                            Driver.sendMessage(event, "EULA发送至私聊失败 请允许临时会话权限");
+                            FurryBlack.sendMessage(event, "EULA发送至私聊失败 请允许临时会话权限");
                         }
                         break;
 
@@ -948,7 +970,7 @@ public final class Systemd extends BasicModuleUtilities {
             }
 
         } catch (Exception exception) {
-            this.logger.dump(event, exception);
+            this.logger.warning(LoggerX.dumpMessage(event, exception));
         }
 
     }
@@ -992,24 +1014,6 @@ public final class Systemd extends BasicModuleUtilities {
     }
 
 
-    private int parseInteger(String temp) throws MisConfigException {
-        try {
-            return Integer.parseInt(temp);
-        } catch (Exception exception) {
-            throw new MisConfigException("配置解析错误 " + temp, exception);
-        }
-    }
-
-
-    private long parseLong(String temp) throws MisConfigException {
-        try {
-            return Long.parseLong(temp);
-        } catch (Exception exception) {
-            throw new MisConfigException("配置解析错误 " + temp, exception);
-        }
-    }
-
-
     public void generateListMessage() {
         this.logger.info("组装用户list消息");
         this.MESSAGE_LIST_USERS = this.schema.generateUsersExecutorList();
@@ -1045,18 +1049,6 @@ public final class Systemd extends BasicModuleUtilities {
         return this.schema.listAllPluginName();
     }
 
-
-    public void importPlugin(String name) {
-        this.schema.importPlugin(name);
-    }
-
-    public void unloadPlugin(String name) {
-        this.schema.unloadPlugin(name);
-    }
-
-    public void reloadPlugin(String name) {
-        this.schema.reloadPlugin(name);
-    }
 
     public Map<String, Boolean> listAllModule() {
         return this.schema.listAllModule();
@@ -1115,18 +1107,9 @@ public final class Systemd extends BasicModuleUtilities {
         this.schema.rebootModule(name);
     }
 
-    public void unloadModule(String name) {
-        this.schema.unloadModule(name);
-    }
-
-    public void reloadModule(String name) {
-        this.schema.reloadModule(name);
-    }
-
     public void schemaVerbose() {
         this.schema.verboseStatus();
     }
-
 
     public <T extends EventHandlerRunner> T getRunner(Class<T> clazz) {
         return this.schema.getRunner(clazz);
@@ -1236,7 +1219,7 @@ public final class Systemd extends BasicModuleUtilities {
 
     @Api("加载昵称表")
     public void appendNickname() {
-        File nicknameFile = this.initFile(Paths.get(Driver.getConfigFolder(), "nickname.txt").toFile());
+        File nicknameFile = this.initFile(Paths.get(FurryBlack.getConfigFolder(), "nickname.txt").toFile());
         List<String> nicknames = this.readFile(nicknameFile);
         for (String line : nicknames) {
             String temp = line.trim();
@@ -1256,12 +1239,12 @@ public final class Systemd extends BasicModuleUtilities {
             long userId = Long.parseLong(user);
             if ("*".equals(group)) {
                 this.NICKNAME_GLOBAL.put(userId, nickname);
-                this.logger.seek("添加全局昵称 " + userId + " -> " + nickname);
+                this.logger.seek("全局 " + userId + " -> " + nickname);
             } else {
                 long groupId = Long.parseLong(group);
                 Map<Long, String> groupNicks = this.NICKNAME_GROUPS.computeIfAbsent(groupId, k -> new ConcurrentHashMap<>());
                 groupNicks.put(userId, nickname);
-                this.logger.seek("添加群内昵称 " + groupId + "." + userId + " -> " + nickname);
+                this.logger.seek("群内 " + groupId + "." + userId + " -> " + nickname);
             }
         }
     }

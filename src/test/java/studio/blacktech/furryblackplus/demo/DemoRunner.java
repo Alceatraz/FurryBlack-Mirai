@@ -17,8 +17,8 @@ package studio.blacktech.furryblackplus.demo;
 
 
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.define.annotation.Runner;
-import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerRunner;
+import studio.blacktech.furryblackplus.core.handler.annotation.Runner;
+import studio.blacktech.furryblackplus.core.handler.EventHandlerRunner;
 
 
 @Api("示例定时器")

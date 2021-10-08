@@ -18,9 +18,9 @@ package studio.blacktech.furryblackplus.demo;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.define.Command;
-import studio.blacktech.furryblackplus.core.define.annotation.Executor;
-import studio.blacktech.furryblackplus.core.define.moduel.EventHandlerExecutor;
+import studio.blacktech.furryblackplus.core.handler.common.Command;
+import studio.blacktech.furryblackplus.core.handler.annotation.Executor;
+import studio.blacktech.furryblackplus.core.handler.EventHandlerExecutor;
 
 
 @Api("示例执行器")

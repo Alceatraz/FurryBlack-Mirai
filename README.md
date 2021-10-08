@@ -47,25 +47,86 @@ as commercial usage. You is banned if you do it.
 
 **FurryBlack框架使用模块扫描和事件监听提供功能。**
 
-框架会扫描插件目录，尝试加载插件包（以JarFile读取)，并扫描模块（以JarEntry扫描，以ClassLoader加载），一个类为一个模块，注册到IoC容器中。模块系统按照功能可以分为以下四种类型：
+框架会扫描插件目录，尝试加载插件包（以JarFile读取)，并扫描模块（以JarEntry扫描，以ClassLoader加载），一个类为一个模块，注册到IoC容器中。模块系统按照功能可以分为以下五种类型：
 
 - 定时器：通用模块，用于承载基础业务；
 - 过滤器：过滤用户消息，可以阻止某条消息；
 - 监视器：监听用户消息，在异步线程池中执行；
+- 检查器：执行执行器之前按照指定的命令进行过滤；
 - 执行器：功能的核心，用于处理用户的命令。
 
-编写插件需要依赖模块本身，继承接口并填写注解。`studio.blacktech.furryblackplus.demo`包含示例模块代码。
+### HOW-TO:
+
+- 编写插件需要继承接口并填写注解，`studio.blacktech.furryblackplus.demo`包含示例模块代码；
+- 插件包必须是Jar，需要包含Manifest信息以供框架识别和加载；
+- 插件包的名字写在Manifest中，和文件名无关；
+- 框架会在依赖目录中查找插件同名目录，将其中文件作为依赖，创建URLCLassLoader；
+- 框架会在加载插件包中的类时，再新建一个URLCLassLoader，并将依赖加载器设置为其父级；
+
+```manifest
+Manifest-Version: 1.0
+Created-By: Maven Jar Plugin 3.2.0
+Build-Jdk-Spec: 17
+
+Name: furryblack
+Loader-Version: 1
+Extension-Name: extension-official
+Extension-Author: Alceatraz-BlackTechStudio
+Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
+
+
+```
+
+可以使用maven-jar-plugin自动完成（例子来自于[官方扩展包](https://github.com/Alceatraz/FurryBlack-Mirai-Extensions) ）：
+
+内容：
+
+- Loader-Version 必填，目前值必须为1
+- Extension-Name 必填，插件包的名字，必须满足`^[0-9a-z_-]{8,64}$`
+- Extension-Author 选填，代码不使用此字段，仅作署名
+- Extension-Source 选填，代码不使用此字段，仅作署名
+
+注意：
+
+- 手写Manifest极其容易格式错误，除非你知道你在干什么不然不要手写
+- Manifest不能填写任意字符，注意不要使用非法字符
+- 注意其内容不是MainAttribute组，而是单独的furryblack标签组
+
+如果你不知道我在说什么则请使用maven来精确无误的完成这个操作：
+
+```xml
+
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-jar-plugin</artifactId>
+    <version>3.2.0</version>
+    <configuration>
+        <archive>
+            <manifestSections>
+                <manifestSection>
+                    <name>FurryBlack-Extension</name>
+                    <manifestEntries>
+                        <Loader-Version>1</Loader-Version>
+                        <Extension-Name>extension-official</Extension-Name>
+                        <Extension-Author>Alceatraz-BlackTechStudio</Extension-Author>
+                        <Extension-Source>https://github.com/Alceatraz/FurryBlack-Mirai-Extensions</Extension-Source>
+                    </manifestEntries>
+                </manifestSection>
+            </manifestSections>
+        </archive>
+    </configuration>
+</plugin>
+```
 
 ### 需要注意
 
-- 如果插件包包含依赖，框架不会自动关联，需要自行添加到JVM的classpath或者插件包内用代码动态加载；
 - IoC容器仅允许获取定时器（Runner），其他模块禁止获取。
 
 ### 启停顺序
 
-- 加载顺序为：机器人初始化，定时器，过滤器，监听器，执行器；
-- 启动顺序为：机器人登录，定时器，过滤器，监听器，执行器，开始接收消息；
-- 关闭顺序为：关闭消息接收，执行器，监听器，过滤器，定时器，机器人登出；
+- 加载顺序为：机器人初始化，定时器，过滤器，监听器，检查器，执行器；
+- 启动顺序为：机器人登录，定时器，过滤器，监听器，检查器，执行器，开始接收消息；
+- 关闭顺序为：关闭消息接收，执行器，检查器，监听器，过滤器，定时器，机器人登出；
 
 ### 线程模型
 
@@ -74,14 +135,21 @@ as commercial usage. You is banned if you do it.
 - 监听器池：所有的监听器执行，均由线程池执行`ThreadPoolExecutor`；
 - 计划任务：框架提供了统一的定时任务线程池`ScheduledThreadPoolExecutor`；
 
+## DEVELOPING
+
+- 无
+
 ## CHANGELOG
 
+### 2.0.0
 
-# 重大预告：下一个版本将会支持插件的依赖类自动加载，但是因为URLClassLoader不close就会占用文件，但是close以后会导致无法继续加载（类的getClassLoader链会被破坏），所以取消插件和模块的热操作功能。
-## 预告更新：类加载器如果关闭则会导致某些库无法正常工作，预计会出现严重的设计冲突，考虑完全移除热操作功能（除了模块重启）。
+- 插件二进制不兼容
+- 完全重写插件模型
+- 大规模变动类的包路径
+- 删除插件模型的热操作功能
+- 重命名主类，因为和JDBC的Driver会冲突
 
-
-### 0.8.9
+### 0.8.9 = 1.0.5
 
 **回退版本号是不好的行为，但是我还是回退了，注意将本地maven缓存删除**
 
