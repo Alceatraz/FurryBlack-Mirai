@@ -33,6 +33,8 @@ import java.nio.charset.StandardCharsets;
 public class WriteLogger extends LoggerX {
 
 
+    private static boolean lock;
+
     private static File logger;
 
 
@@ -49,9 +51,6 @@ public class WriteLogger extends LoggerX {
 
 
     // =================================================================================================================
-
-
-    private static boolean lock;
 
 
     public static void setFile(File logger) {

@@ -152,7 +152,7 @@ public final class FurryBlack {
     // ==========================================================================================================================================================
 
 
-    public static final String APP_VERSION = "2.0.0";
+    public static final String APP_VERSION = "2.0.1";
 
 
     // ==========================================================================================================================================================
@@ -352,7 +352,7 @@ public final class FurryBlack {
         if (!FOLDER_MODULE.isDirectory()) throw new BootException("文件夹被文件占位 " + FOLDER_MODULE.getAbsolutePath());
         if (!FOLDER_LOGGER.isDirectory()) throw new BootException("文件夹被文件占位 " + FOLDER_LOGGER.getAbsolutePath());
 
-        if ("studio.blacktech.furryblackplus.core.common.logger.support.WriteLogger".equals(provider)) {
+        if (provider == null || "studio.blacktech.furryblackplus.core.common.logger.support.WriteLogger".equals(provider)) {
             try {
                 if (!loggerFile.createNewFile()) throw new BootException("日志文件创建失败 " + loggerFile.getAbsolutePath());
             } catch (IOException exception) {
@@ -366,6 +366,7 @@ public final class FurryBlack {
         System.out.println("[FurryBlack][INIT]日志系统初始化完成");
 
         logger = LoggerXFactory.newLogger(FurryBlack.class);
+
 
         logger.hint("环境检查完毕");
 

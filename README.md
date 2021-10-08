@@ -141,6 +141,11 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.0.1
+
+- 修复BUG
+- 提升代码质量
+
 ### 2.0.0
 
 - 插件二进制不兼容

@@ -53,6 +53,9 @@ import java.util.stream.Collectors;
 public abstract class LoggerX implements MiraiLogger {
 
 
+    private static Level level = Level.VERBOSE;
+
+
     // =========================================================================
 
 
@@ -413,9 +416,6 @@ public abstract class LoggerX implements MiraiLogger {
     // =========================================================================
 
 
-    private static Level level = Level.VERBOSE;
-
-
     public static Level getLevel() {
         return level;
     }
@@ -452,6 +452,9 @@ public abstract class LoggerX implements MiraiLogger {
 
         ;
 
+        private final int level;
+        private final String name;
+
         private static final HashMap<String, Level> LOOKUP;
 
         static {
@@ -471,9 +474,6 @@ public abstract class LoggerX implements MiraiLogger {
         public static Level getByName(String name) {
             return LOOKUP.get(name);
         }
-
-        private final int level;
-        private final String name;
 
         Level(int level, String name) {
             this.level = level;
