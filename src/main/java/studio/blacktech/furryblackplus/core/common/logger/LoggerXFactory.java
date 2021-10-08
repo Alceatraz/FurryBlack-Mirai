@@ -24,6 +24,8 @@ import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.common.exception.BotException;
 import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
 import studio.blacktech.furryblackplus.core.common.logger.support.NullLogger;
+import studio.blacktech.furryblackplus.core.common.logger.support.PrintLogger;
+import studio.blacktech.furryblackplus.core.common.logger.support.WriteLogger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -37,7 +39,15 @@ public final class LoggerXFactory {
 
 
     private static Class<? extends LoggerX> defaultLogger;
-    private static final Map<String, Class<? extends LoggerX>> registry = new HashMap<>();
+    private static final Map<String, Class<? extends LoggerX>> registry;
+
+    static {
+        registry = new HashMap<>();
+        LoggerXFactory.register(NullLogger.class);
+        LoggerXFactory.register(PrintLogger.class);
+        LoggerXFactory.register(WriteLogger.class);
+        LoggerXFactory.setDefault(WriteLogger.class);
+    }
 
     public static void register(Class<? extends LoggerX> clazz) {
         String name = clazz.getSimpleName();

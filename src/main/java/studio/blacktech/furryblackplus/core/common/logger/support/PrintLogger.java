@@ -24,6 +24,9 @@ import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
 import studio.blacktech.furryblackplus.core.common.time.TimeTool;
 
 
+@SuppressWarnings("unused")
+
+
 public class PrintLogger extends LoggerX {
 
 
@@ -66,20 +69,20 @@ public class PrintLogger extends LoggerX {
     @Override
     public void fatalImpl(String message) {
         if (message == null) return;
-        String result = Color.BRIGHT_RED + "[" + TimeTool.datetime() + "][FATAL][" + this.name + "]" + message + Color.RESET;
+        String result = Color.BRIGHT_MAGENTA + "[" + TimeTool.datetime() + "][FATAL][" + this.name + "]" + message + Color.RESET;
         System.out.println(result);
     }
 
     @Override
     public void fatalImpl(Throwable throwable) {
         if (throwable == null) return;
-        String result = Color.BRIGHT_RED + "[" + TimeTool.datetime() + "][FATAL][" + this.name + "]" + extractTrace(throwable) + Color.RESET;
+        String result = Color.BRIGHT_MAGENTA + "[" + TimeTool.datetime() + "][FATAL][" + this.name + "]" + extractTrace(throwable) + Color.RESET;
         System.out.println(result);
     }
 
     @Override
     public void fatalImpl(String message, Throwable throwable) {
-        String result = Color.BRIGHT_RED + "[" + TimeTool.datetime() + "][FATAL][" + this.name + "]" + message + "\r\n" + extractTrace(throwable) + Color.RESET;
+        String result = Color.BRIGHT_MAGENTA + "[" + TimeTool.datetime() + "][FATAL][" + this.name + "]" + message + "\r\n" + extractTrace(throwable) + Color.RESET;
         System.out.println(result);
     }
 
@@ -90,20 +93,20 @@ public class PrintLogger extends LoggerX {
     @Override
     public void errorImpl(String message) {
         if (message == null) return;
-        String result = Color.BRIGHT_YELLOW + "[" + TimeTool.datetime() + "][ERROR][" + this.name + "]" + message + Color.RESET;
+        String result = Color.BRIGHT_RED + "[" + TimeTool.datetime() + "][ERROR][" + this.name + "]" + message + Color.RESET;
         System.out.println(result);
     }
 
     @Override
     public void errorImpl(Throwable throwable) {
         if (throwable == null) return;
-        String result = Color.BRIGHT_YELLOW + "[" + TimeTool.datetime() + "][ERROR][" + this.name + "]" + extractTrace(throwable) + Color.RESET;
+        String result = Color.BRIGHT_RED + "[" + TimeTool.datetime() + "][ERROR][" + this.name + "]" + extractTrace(throwable) + Color.RESET;
         System.out.println(result);
     }
 
     @Override
     public void errorImpl(String message, Throwable throwable) {
-        String result = Color.BRIGHT_YELLOW + "[" + TimeTool.datetime() + "][ERROR][" + this.name + "]" + message + "\r\n" + extractTrace(throwable) + Color.RESET;
+        String result = Color.BRIGHT_RED + "[" + TimeTool.datetime() + "][ERROR][" + this.name + "]" + message + "\r\n" + extractTrace(throwable) + Color.RESET;
         System.out.println(result);
     }
 
@@ -114,20 +117,20 @@ public class PrintLogger extends LoggerX {
     @Override
     public void warnImpl(String message) {
         if (message == null) return;
-        String result = Color.YELLOW + "[" + TimeTool.datetime() + "][WARN][" + this.name + "]" + message + Color.RESET;
+        String result = Color.BRIGHT_YELLOW + "[" + TimeTool.datetime() + "][WARN][" + this.name + "]" + message + Color.RESET;
         System.out.println(result);
     }
 
     @Override
     public void warnImpl(Throwable throwable) {
         if (throwable == null) return;
-        String result = Color.YELLOW + "[" + TimeTool.datetime() + "][WARN][" + this.name + "]" + extractTrace(throwable) + Color.RESET;
+        String result = Color.BRIGHT_YELLOW + "[" + TimeTool.datetime() + "][WARN][" + this.name + "]" + extractTrace(throwable) + Color.RESET;
         System.out.println(result);
     }
 
     @Override
     public void warnImpl(String message, Throwable throwable) {
-        String result = Color.YELLOW + "[" + TimeTool.datetime() + "][WARN][" + this.name + "]" + message + "\r\n" + extractTrace(throwable) + Color.RESET;
+        String result = Color.BRIGHT_YELLOW + "[" + TimeTool.datetime() + "][WARN][" + this.name + "]" + message + "\r\n" + extractTrace(throwable) + Color.RESET;
         System.out.println(result);
     }
 
@@ -138,20 +141,20 @@ public class PrintLogger extends LoggerX {
     @Override
     public void hintImpl(String message) {
         if (message == null) return;
-        String result = Color.CYAN + "[" + TimeTool.datetime() + "][HINT][" + this.name + "]" + message + Color.RESET;
+        String result = Color.BRIGHT_CYAN + "[" + TimeTool.datetime() + "][HINT][" + this.name + "]" + message + Color.RESET;
         System.out.println(result);
     }
 
     @Override
     public void hintImpl(Throwable throwable) {
         if (throwable == null) return;
-        String result = Color.CYAN + "[" + TimeTool.datetime() + "][HINT][" + this.name + "]" + extractTrace(throwable) + Color.RESET;
+        String result = Color.BRIGHT_CYAN + "[" + TimeTool.datetime() + "][HINT][" + this.name + "]" + extractTrace(throwable) + Color.RESET;
         System.out.println(result);
     }
 
     @Override
     public void hintImpl(String message, Throwable throwable) {
-        String result = Color.CYAN + "[" + TimeTool.datetime() + "][HINT][" + this.name + "]" + message + "\r\n" + extractTrace(throwable) + Color.RESET;
+        String result = Color.BRIGHT_CYAN + "[" + TimeTool.datetime() + "][HINT][" + this.name + "]" + message + "\r\n" + extractTrace(throwable) + Color.RESET;
         System.out.println(result);
     }
 
@@ -162,20 +165,20 @@ public class PrintLogger extends LoggerX {
     @Override
     public void seekImpl(String message) {
         if (message == null) return;
-        String result = Color.GREEN + "[" + TimeTool.datetime() + "][SEEK][" + this.name + "]" + message + Color.RESET;
+        String result = Color.BRIGHT_GREEN + "[" + TimeTool.datetime() + "][SEEK][" + this.name + "]" + message + Color.RESET;
         System.out.println(result);
     }
 
     @Override
     public void seekImpl(Throwable throwable) {
         if (throwable == null) return;
-        String result = Color.GREEN + "[" + TimeTool.datetime() + "][SEEK][" + this.name + "]" + extractTrace(throwable) + Color.RESET;
+        String result = Color.BRIGHT_GREEN + "[" + TimeTool.datetime() + "][SEEK][" + this.name + "]" + extractTrace(throwable) + Color.RESET;
         System.out.println(result);
     }
 
     @Override
     public void seekImpl(String message, Throwable throwable) {
-        String result = Color.GREEN + "[" + TimeTool.datetime() + "][SEEK][" + this.name + "]" + message + "\r\n" + extractTrace(throwable) + Color.RESET;
+        String result = Color.BRIGHT_GREEN + "[" + TimeTool.datetime() + "][SEEK][" + this.name + "]" + message + "\r\n" + extractTrace(throwable) + Color.RESET;
         System.out.println(result);
     }
 
@@ -210,20 +213,20 @@ public class PrintLogger extends LoggerX {
     @Override
     public void debugImpl(String message) {
         if (message == null) return;
-        String result = Color.GRAY + "[" + TimeTool.datetime() + "][DEBG][" + this.name + "]" + message + Color.RESET;
+        String result = Color.BRIGHT_BLACK + "[" + TimeTool.datetime() + "][DEBG][" + this.name + "]" + message + Color.RESET;
         System.out.println(result);
     }
 
     @Override
     public void debugImpl(Throwable throwable) {
         if (throwable == null) return;
-        String result = Color.GRAY + "[" + TimeTool.datetime() + "][DEBG][" + this.name + "]" + extractTrace(throwable) + Color.RESET;
+        String result = Color.BRIGHT_BLACK + "[" + TimeTool.datetime() + "][DEBG][" + this.name + "]" + extractTrace(throwable) + Color.RESET;
         System.out.println(result);
     }
 
     @Override
     public void debugImpl(String message, Throwable throwable) {
-        String result = Color.GRAY + "[" + TimeTool.datetime() + "][DEBG][" + this.name + "]" + message + "\r\n" + extractTrace(throwable) + Color.RESET;
+        String result = Color.BRIGHT_BLACK + "[" + TimeTool.datetime() + "][DEBG][" + this.name + "]" + message + "\r\n" + extractTrace(throwable) + Color.RESET;
         System.out.println(result);
     }
 

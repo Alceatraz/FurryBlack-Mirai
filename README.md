@@ -141,6 +141,10 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.0.2
+
+- 控制台颜色调节
+
 ### 2.0.1
 
 - 修复BUG

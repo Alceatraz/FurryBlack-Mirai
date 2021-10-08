@@ -66,8 +66,6 @@ import studio.blacktech.furryblackplus.core.common.exception.moduels.boot.BootEx
 import studio.blacktech.furryblackplus.core.common.logger.LoggerXFactory;
 import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
 import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color;
-import studio.blacktech.furryblackplus.core.common.logger.support.NullLogger;
-import studio.blacktech.furryblackplus.core.common.logger.support.PrintLogger;
 import studio.blacktech.furryblackplus.core.common.logger.support.WriteLogger;
 import studio.blacktech.furryblackplus.core.common.time.TimeTool;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerChecker;
@@ -310,11 +308,6 @@ public final class FurryBlack {
 
         // =====================================================================
         // 日志模式 设置
-
-        LoggerXFactory.register(NullLogger.class);
-        LoggerXFactory.register(PrintLogger.class);
-        LoggerXFactory.register(WriteLogger.class);
-        LoggerXFactory.setDefault(WriteLogger.class);
 
         String provider = System.getProperty("furryblack.logger.provider");
         if (provider != null) {
@@ -966,16 +959,45 @@ public final class FurryBlack {
                         printHelp();
                         break;
 
+                    // =========================================================
+
+                    case "color":
+
+                        // @formatter:off
+
+                        System.out.println(Color.RED +            "RED ------------ Quick brown fox jump over the lazy dog" + Color.RESET);
+                        System.out.println(Color.GREEN +          "GREEN ---------- Quick brown fox jump over the lazy dog" + Color.RESET);
+                        System.out.println(Color.YELLOW +         "YELLOW --------- Quick brown fox jump over the lazy dog" + Color.RESET);
+                        System.out.println(Color.BLUE +           "BLUE ----------- Quick brown fox jump over the lazy dog" + Color.RESET);
+                        System.out.println(Color.MAGENTA +        "MAGENTA -------- Quick brown fox jump over the lazy dog" + Color.RESET);
+                        System.out.println(Color.CYAN +           "CYAN ----------- Quick brown fox jump over the lazy dog" + Color.RESET);
+                        System.out.println(Color.BRIGHT_RED +     "BRIGHT_RED ----- Quick brown fox jump over the lazy dog" + Color.RESET);
+                        System.out.println(Color.BRIGHT_GREEN +   "BRIGHT_GREEN --- Quick brown fox jump over the lazy dog" + Color.RESET);
+                        System.out.println(Color.BRIGHT_YELLOW +  "BRIGHT_YELLOW -- Quick brown fox jump over the lazy dog" + Color.RESET);
+                        System.out.println(Color.BRIGHT_BLUE +    "BRIGHT_BLUE ---- Quick brown fox jump over the lazy dog" + Color.RESET);
+                        System.out.println(Color.BRIGHT_MAGENTA + "BRIGHT_MAGENTA - Quick brown fox jump over the lazy dog" + Color.RESET);
+                        System.out.println(Color.BRIGHT_CYAN +    "BRIGHT_CYAN ---- Quick brown fox jump over the lazy dog" + Color.RESET);
+                        System.out.println(Color.WHITE +          "WHITE ---------- Quick brown fox jump over the lazy dog" + Color.RESET);
+                        System.out.println(Color.GRAY +           "GRAY ----------- Quick brown fox jump over the lazy dog" + Color.RESET);
+                        System.out.println(Color.BRIGHT_BLACK +   "BRIGHT_BLACK --- Quick brown fox jump over the lazy dog" + Color.RESET);
+                        System.out.println(Color.BRIGHT_WHITE +   "BRIGHT_WHITE --- Quick brown fox jump over the lazy dog" + Color.RESET);
+
+                        // @formatter:on
+
+                        break;
 
                     // =========================================================
 
 
                     case "info":
-                        System.out.println("FurryBlack-Plus");
-                        System.out.println("A Mirai wrapper QQ-Bot framework make with love and \uD83E\uDDE6");
-                        System.out.println("Mr.Black is a housekeeper with a white bear furry visualize");
-                        System.out.println("Create by Alceatraz Warprays @ Black Tech Studio");
-                        System.out.println("https://www.blacktech.studio");
+
+                        System.out.println("""
+                            FurryBlack-Plus
+                            A Mirai wrapper QQ-Bot framework make with love and \\uD83E\\uDDE6
+                            Mr.Black is a housekeeper with a white bear furry visualize
+                            Create by Alceatraz Warprays @ Black Tech Studio
+                            https://www.blacktech.studio""");
+
                         break;
 
 
@@ -1228,7 +1250,8 @@ public final class FurryBlack {
                             }
                         } else {
                             logger.bypass("可用值为 MUTE ERROR WARN HINT SEEK INFO DEBUG VERBOSE ALL");
-                            logger.error("[EXCE]错误 红色 ERROR");
+                            logger.fatal("[FATAL]致命 红色 FATAL");
+                            logger.error("[ERROR]错误 亮黄 ERROR");
                             logger.warning("[WARN]警告 黄色 WARN");
                             logger.hint("[HINT]提示 青色 HINT");
                             logger.seek("[SEEK]配置 绿色 SEEK");
@@ -1443,7 +1466,7 @@ public final class FurryBlack {
 
             public void update() {
                 this.completer = new AggregateCompleter(
-                    new ArgumentCompleter(new StringsCompleter("help", "kill", "drop", "stop", "stat", "enable", "disable", "schema")),
+                    new ArgumentCompleter(new StringsCompleter("help", "kill", "drop", "stop", "stat", "enable", "disable", "schema", "color")),
                     new ArgumentCompleter(new StringsCompleter("list", "send"), new StringsCompleter("users", "group")),
                     new TreeCompleter(node("level", node("MUTE", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "ALL"))),
                     new TreeCompleter(node("nickname", node("list", "clean", "reload", "append", "export"))),

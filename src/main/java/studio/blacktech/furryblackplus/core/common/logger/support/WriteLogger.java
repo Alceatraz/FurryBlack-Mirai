@@ -30,6 +30,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 
+@SuppressWarnings("unused")
+
+
 public class WriteLogger extends LoggerX {
 
 
@@ -109,20 +112,20 @@ public class WriteLogger extends LoggerX {
     public void fatalImpl(String message) {
         if (message == null) return;
         String result = "[" + TimeTool.datetime() + "][FATAL][" + this.name + "]" + message;
-        WriteLogger.handle(Color.BRIGHT_RED, result);
+        WriteLogger.handle(Color.BRIGHT_MAGENTA, result);
     }
 
     @Override
     public void fatalImpl(Throwable throwable) {
         if (throwable == null) return;
         String result = "[" + TimeTool.datetime() + "][FATAL][" + this.name + "]" + extractTrace(throwable);
-        WriteLogger.handle(Color.BRIGHT_RED, result);
+        WriteLogger.handle(Color.BRIGHT_MAGENTA, result);
     }
 
     @Override
     public void fatalImpl(String message, Throwable throwable) {
         String result = "[" + TimeTool.datetime() + "][FATAL][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
-        WriteLogger.handle(Color.BRIGHT_RED, result);
+        WriteLogger.handle(Color.BRIGHT_MAGENTA, result);
     }
 
 
@@ -133,20 +136,20 @@ public class WriteLogger extends LoggerX {
     public void errorImpl(String message) {
         if (message == null) return;
         String result = "[" + TimeTool.datetime() + "][ERROR][" + this.name + "]" + message;
-        WriteLogger.handle(Color.BRIGHT_YELLOW, result);
+        WriteLogger.handle(Color.BRIGHT_RED, result);
     }
 
     @Override
     public void errorImpl(Throwable throwable) {
         if (throwable == null) return;
         String result = "[" + TimeTool.datetime() + "][ERROR][" + this.name + "]" + extractTrace(throwable);
-        WriteLogger.handle(Color.BRIGHT_YELLOW, result);
+        WriteLogger.handle(Color.BRIGHT_RED, result);
     }
 
     @Override
     public void errorImpl(String message, Throwable throwable) {
         String result = "[" + TimeTool.datetime() + "][ERROR][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
-        WriteLogger.handle(Color.BRIGHT_YELLOW, result);
+        WriteLogger.handle(Color.BRIGHT_RED, result);
     }
 
 
@@ -157,20 +160,20 @@ public class WriteLogger extends LoggerX {
     public void warnImpl(String message) {
         if (message == null) return;
         String result = "[" + TimeTool.datetime() + "][WARN][" + this.name + "]" + message;
-        WriteLogger.handle(Color.YELLOW, result);
+        WriteLogger.handle(Color.BRIGHT_YELLOW, result);
     }
 
     @Override
     public void warnImpl(Throwable throwable) {
         if (throwable == null) return;
         String result = "[" + TimeTool.datetime() + "][WARN][" + this.name + "]" + extractTrace(throwable);
-        WriteLogger.handle(Color.YELLOW, result);
+        WriteLogger.handle(Color.BRIGHT_YELLOW, result);
     }
 
     @Override
     public void warnImpl(String message, Throwable throwable) {
         String result = "[" + TimeTool.datetime() + "][WARN][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
-        WriteLogger.handle(Color.YELLOW, result);
+        WriteLogger.handle(Color.BRIGHT_YELLOW, result);
     }
 
 
@@ -205,20 +208,20 @@ public class WriteLogger extends LoggerX {
     public void seekImpl(String message) {
         if (message == null) return;
         String result = "[" + TimeTool.datetime() + "][SEEK][" + this.name + "]" + message;
-        WriteLogger.handle(Color.GREEN, result);
+        WriteLogger.handle(Color.BRIGHT_GREEN, result);
     }
 
     @Override
     public void seekImpl(Throwable throwable) {
         if (throwable == null) return;
         String result = "[" + TimeTool.datetime() + "][SEEK][" + this.name + "]" + extractTrace(throwable);
-        WriteLogger.handle(Color.GREEN, result);
+        WriteLogger.handle(Color.BRIGHT_GREEN, result);
     }
 
     @Override
     public void seekImpl(String message, Throwable throwable) {
         String result = "[" + TimeTool.datetime() + "][SEEK][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
-        WriteLogger.handle(Color.GREEN, result);
+        WriteLogger.handle(Color.BRIGHT_GREEN, result);
     }
 
 
@@ -253,20 +256,20 @@ public class WriteLogger extends LoggerX {
     public void debugImpl(String message) {
         if (message == null) return;
         String result = "[" + TimeTool.datetime() + "][DEBG][" + this.name + "]" + message;
-        WriteLogger.handle(Color.GRAY, result);
+        WriteLogger.handle(Color.BRIGHT_BLACK, result);
     }
 
     @Override
     public void debugImpl(Throwable throwable) {
         if (throwable == null) return;
         String result = "[" + TimeTool.datetime() + "][DEBG][" + this.name + "]" + extractTrace(throwable);
-        WriteLogger.handle(Color.GRAY, result);
+        WriteLogger.handle(Color.BRIGHT_BLACK, result);
     }
 
     @Override
     public void debugImpl(String message, Throwable throwable) {
         String result = "[" + TimeTool.datetime() + "][DEBG][" + this.name + "]" + message + "\r\n" + extractTrace(throwable);
-        WriteLogger.handle(Color.GRAY, result);
+        WriteLogger.handle(Color.BRIGHT_BLACK, result);
     }
 
 
@@ -277,7 +280,7 @@ public class WriteLogger extends LoggerX {
     public void developImpl(String message) {
         if (message == null) return;
         String result = "[" + TimeTool.datetime() + "][DEVL][" + this.name + "]" + message;
-        WriteLogger.handle(null, result);
+        WriteLogger.handle(Color.GRAY, result);
     }
 
     @Override
