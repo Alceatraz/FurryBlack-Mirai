@@ -524,10 +524,7 @@ public class Schema {
 
     public void scan() {
         this.logger.hint("扫描插件包内容");
-        for (Map.Entry<String, Plugin> entry : this.plugins.entrySet()) {
-            this.logger.seek("扫描 -> " + entry.getKey());
-            entry.getValue().scan();
-        }
+        this.plugins.values().forEach(Plugin::scan);
     }
 
 
