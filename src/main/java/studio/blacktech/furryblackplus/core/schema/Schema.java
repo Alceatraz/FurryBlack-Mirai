@@ -41,6 +41,7 @@ import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -686,11 +687,13 @@ public class Schema {
             Class<? extends EventHandlerRunner> clazz = this.COMPONENT_RUNNER_CLAZZ.get(annotation);
             String moduleName = annotation.value();
             String pluginName = this.MODULE_PLUGIN_RELATION.get(moduleName);
+            Plugin plugin = this.plugins.get(pluginName);
+            URLClassLoader dependClassLoader = plugin.getDependClassLoader();
             this.logger.info("加载定时器" + pluginName + ":" + moduleName + "[" + annotation.priority() + "] -> " + clazz.getName());
             EventHandlerRunner instance;
             try {
                 instance = clazz.getConstructor().newInstance();
-                instance.internalInit(pluginName, moduleName);
+                instance.internalInit(pluginName, moduleName, dependClassLoader);
             } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
                 throw new LoadException("加载定时器失败 " + pluginName + ":" + moduleName + "[" + annotation.priority() + "] -> " + clazz.getName());
             }
@@ -705,11 +708,13 @@ public class Schema {
             Class<? extends EventHandlerFilter> clazz = this.COMPONENT_FILTER_CLAZZ.get(annotation);
             String moduleName = annotation.value();
             String pluginName = this.MODULE_PLUGIN_RELATION.get(moduleName);
+            Plugin plugin = this.plugins.get(pluginName);
+            URLClassLoader dependClassLoader = plugin.getDependClassLoader();
             this.logger.info("加载过滤器" + pluginName + ":" + moduleName + "[" + annotation.priority() + "] -> " + clazz.getName());
             EventHandlerFilter instance;
             try {
                 instance = clazz.getConstructor().newInstance();
-                instance.internalInit(pluginName, moduleName);
+                instance.internalInit(pluginName, moduleName, dependClassLoader);
             } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
                 throw new LoadException("加载过滤器失败 " + this.MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
             }
@@ -725,11 +730,13 @@ public class Schema {
             Class<? extends EventHandlerMonitor> clazz = this.COMPONENT_MONITOR_CLAZZ.get(annotation);
             String moduleName = annotation.value();
             String pluginName = this.MODULE_PLUGIN_RELATION.get(moduleName);
+            Plugin plugin = this.plugins.get(pluginName);
+            URLClassLoader dependClassLoader = plugin.getDependClassLoader();
             this.logger.info("加载监听器" + pluginName + ":" + moduleName + "[" + annotation.priority() + "] -> " + clazz.getName());
             EventHandlerMonitor instance;
             try {
                 instance = clazz.getConstructor().newInstance();
-                instance.internalInit(pluginName, moduleName);
+                instance.internalInit(pluginName, moduleName, dependClassLoader);
             } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
                 throw new LoadException("加载监听器失败 " + this.MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
             }
@@ -745,11 +752,13 @@ public class Schema {
             Class<? extends EventHandlerChecker> clazz = this.COMPONENT_CHECKER_CLAZZ.get(annotation);
             String moduleName = annotation.value();
             String pluginName = this.MODULE_PLUGIN_RELATION.get(moduleName);
+            Plugin plugin = this.plugins.get(pluginName);
+            URLClassLoader dependClassLoader = plugin.getDependClassLoader();
             this.logger.info("加载检查器" + pluginName + ":" + moduleName + "[" + annotation.priority() + "] -> " + clazz.getName());
             EventHandlerChecker instance;
             try {
                 instance = clazz.getConstructor().newInstance();
-                instance.internalInit(pluginName, moduleName);
+                instance.internalInit(pluginName, moduleName, dependClassLoader);
             } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
                 throw new LoadException("加载检查器失败 " + this.MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
             }
@@ -787,11 +796,13 @@ public class Schema {
             Class<? extends EventHandlerExecutor> clazz = entry.getValue();
             String moduleName = annotation.value();
             String pluginName = this.MODULE_PLUGIN_RELATION.get(moduleName);
+            Plugin plugin = this.plugins.get(pluginName);
+            URLClassLoader dependClassLoader = plugin.getDependClassLoader();
             this.logger.info("加载执行器" + pluginName + ":" + moduleName + "[" + annotation.command() + "] -> " + clazz.getName());
             EventHandlerExecutor instance;
             try {
                 instance = clazz.getConstructor().newInstance();
-                instance.internalInit(pluginName, moduleName);
+                instance.internalInit(pluginName, moduleName, dependClassLoader);
                 instance.buildHelp(annotation);
             } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
                 throw new LoadException("加载执行器失败 " + this.MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());

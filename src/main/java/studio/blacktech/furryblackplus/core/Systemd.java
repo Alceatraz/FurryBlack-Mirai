@@ -551,8 +551,6 @@ public final class Systemd extends BasicModuleUtilities {
 
         this.logger.hint("生成模板消息");
 
-        this.generateListMessage();
-
 
         // ==========================================================================================================================
         // 执行初始化方法
@@ -657,6 +655,13 @@ public final class Systemd extends BasicModuleUtilities {
         }
 
 
+        // ==========================================================================================================================
+        // 生成模板消息
+
+
+        this.generateListMessage();
+
+        
     }
 
 

@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URLClassLoader;
 import java.nio.file.Paths;
 import java.util.Properties;
 
@@ -39,6 +40,16 @@ import java.util.Properties;
 
 @Api("基础模块类")
 public abstract class AbstractEventHandler extends BasicModuleUtilities {
+
+
+    private boolean internalInitLock;
+
+
+    private URLClassLoader exclusiveClassLoader;
+
+
+    // =================================================================================================================
+
 
     @Api("插件目录对象") protected File FOLDER_ROOT;
     @Api("配置目录对象") protected File FOLDER_CONF;
@@ -57,58 +68,6 @@ public abstract class AbstractEventHandler extends BasicModuleUtilities {
     @Api("模块名字") protected String moduleName;
     @Api("模块启停") protected volatile boolean enable;
 
-    private volatile boolean lock;
-
-    @Api("这是一个内部使用的方法")
-    public final void internalInit(String pluginName, String moduleName) {
-
-        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-
-        StackTraceElement schemaClazz = stackTrace[2];
-
-        if (!"studio.blacktech.furryblackplus.core.schema.Schema".equals(schemaClazz.getClassName())) {
-            BotException botException = new BotException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
-            botException.setStackTrace(stackTrace);
-            throw botException;
-        }
-
-        if (!"make".equals(schemaClazz.getMethodName())) {
-            BotException botException = new BotException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
-            botException.setStackTrace(stackTrace);
-            throw botException;
-        }
-
-        if (this.lock) {
-            BotException botException = new BotException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
-            botException.setStackTrace(stackTrace);
-            throw botException;
-        }
-        this.lock = true;
-
-        this.pluginName = pluginName;
-        this.moduleName = moduleName;
-        this.FOLDER_ROOT = Paths.get(FurryBlack.getModuleFolder(), this.moduleName).toFile();
-        this.FOLDER_CONF = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "conf").toFile();
-        this.FOLDER_DATA = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "data").toFile();
-        this.FOLDER_LOGS = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "logs").toFile();
-        this.FILE_CONFIG = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "config.properties").toFile();
-        this.CONFIG = new Properties();
-    }
-
-
-    public final void initWrapper() throws BotException {
-        this.init();
-    }
-
-    public final void bootWrapper() throws BotException {
-        this.boot();
-        this.enable = true;
-    }
-
-    public final void shutWrapper() throws BotException {
-        this.enable = false;
-        this.shut();
-    }
 
     @Api("生命周期 预载时")
     protected abstract void init() throws BootException;
@@ -248,4 +207,70 @@ public abstract class AbstractEventHandler extends BasicModuleUtilities {
     public final String getModuleName() {
         return this.moduleName;
     }
+
+
+    public final void internalInit(String pluginName, String moduleName, URLClassLoader exclusiveClassLoader) {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        StackTraceElement schemaClazz = stackTrace[2];
+        if (!"studio.blacktech.furryblackplus.core.schema.Schema".equals(schemaClazz.getClassName())) {
+            BotException botException = new BotException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
+            botException.setStackTrace(stackTrace);
+            throw botException;
+        }
+        if (!"make".equals(schemaClazz.getMethodName())) {
+            BotException botException = new BotException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
+            botException.setStackTrace(stackTrace);
+            throw botException;
+        }
+        if (this.internalInitLock) {
+            BotException botException = new BotException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
+            botException.setStackTrace(stackTrace);
+            throw botException;
+        }
+        this.internalInitLock = true;
+        this.pluginName = pluginName;
+        this.moduleName = moduleName;
+        this.exclusiveClassLoader = exclusiveClassLoader;
+        this.FOLDER_ROOT = Paths.get(FurryBlack.getModuleFolder(), this.moduleName).toFile();
+        this.FOLDER_CONF = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "conf").toFile();
+        this.FOLDER_DATA = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "data").toFile();
+        this.FOLDER_LOGS = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "logs").toFile();
+        this.FILE_CONFIG = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "config.properties").toFile();
+        this.CONFIG = new Properties();
+    }
+
+
+    public final void initWrapper() throws BotException {
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(this.exclusiveClassLoader);
+            this.init();
+        } finally {
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
+        }
+    }
+
+    public final void bootWrapper() throws BotException {
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(this.exclusiveClassLoader);
+            this.boot();
+        } finally {
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
+        }
+        this.enable = true;
+    }
+
+    public final void shutWrapper() throws BotException {
+        this.enable = false;
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(this.exclusiveClassLoader);
+            this.shut();
+        } finally {
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
+        }
+    }
+
+
 }

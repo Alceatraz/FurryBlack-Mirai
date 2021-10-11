@@ -47,7 +47,6 @@ public final class Command {
         usage = {
             "命令以空格(U+0020)拆分为片段，index号从0开始，但--开头的参数被视为选项会被剔除，不计入index序号",
             "如果只有一个参数(没有空格)，则为无参数命令，除commandName均为null，commandOptions为空容器",
-
         },
         attention = {
             "命令名解析过程中`转义不起作用(/`A B`会被拆解为/`A和B`)",
