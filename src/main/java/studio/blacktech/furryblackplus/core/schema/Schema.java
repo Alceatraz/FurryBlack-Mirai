@@ -1363,7 +1363,7 @@ public class Schema {
         for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_USERS_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(k + " " + v.size());
+            System.out.println(Color.CYAN + k + Color.RESET + " " + v.size());
             for (EventHandlerChecker checker : v) {
                 System.out.println(checker.getClass().getName() + ":" + hexHash(checker));
             }
@@ -1374,7 +1374,7 @@ public class Schema {
         for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_GROUP_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(k + " " + v.size());
+            System.out.println(Color.CYAN + k + Color.RESET + " " + v.size());
             for (EventHandlerChecker checker : v) {
                 System.out.println(checker.getClass().getName() + ":" + hexHash(checker));
             }

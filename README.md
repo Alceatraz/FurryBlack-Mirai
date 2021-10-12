@@ -141,6 +141,10 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.0.4
+
+- 控制台颜色调节
+
 ### 2.0.3
 
 - 执行init/boot/shut时会将插件的独有的依赖类加载器注入到CurrentThread中
