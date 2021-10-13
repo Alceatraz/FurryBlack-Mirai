@@ -1107,6 +1107,10 @@ public final class Systemd extends BasicModuleUtilities {
         this.schema.rebootModule(name);
     }
 
+    public void unloadModule(String name) {
+        this.schema.unloadModule(name);
+    }
+
     public void schemaVerbose() {
         this.schema.verboseStatus();
     }
@@ -1333,7 +1337,6 @@ public final class Systemd extends BasicModuleUtilities {
     public Bot getBot() {
         return this.bot;
     }
-
 
 
 }

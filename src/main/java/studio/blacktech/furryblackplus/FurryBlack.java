@@ -1064,7 +1064,7 @@ public final class FurryBlack {
                                     System.out.println(Color.BRIGHT_CYAN + pluginName + " " + pluginItem.getModules().size() + Color.RESET);
 
                                     Map<Runner, Class<? extends EventHandlerRunner>> runnerClassMap = pluginItem.getRunnerClassMap();
-                                    System.out.println(Color.GREEN + ">> Runner " + runnerClassMap.size() + Color.RESET);
+                                    System.out.println(Color.GREEN + ">> 定时器 " + runnerClassMap.size() + Color.RESET);
                                     for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> classEntry : runnerClassMap.entrySet()) {
                                         var moduleName = classEntry.getKey();
                                         var moduleItem = classEntry.getValue();
@@ -1072,7 +1072,7 @@ public final class FurryBlack {
                                     }
 
                                     Map<Filter, Class<? extends EventHandlerFilter>> filterClassMap = pluginItem.getFilterClassMap();
-                                    System.out.println(Color.GREEN + ">> Filter " + filterClassMap.size() + Color.RESET);
+                                    System.out.println(Color.GREEN + ">> 过滤器 " + filterClassMap.size() + Color.RESET);
                                     for (Map.Entry<Filter, Class<? extends EventHandlerFilter>> classEntry : filterClassMap.entrySet()) {
                                         var moduleName = classEntry.getKey();
                                         var moduleItem = classEntry.getValue();
@@ -1080,7 +1080,7 @@ public final class FurryBlack {
                                     }
 
                                     Map<Monitor, Class<? extends EventHandlerMonitor>> monitorClassMap = pluginItem.getMonitorClassMap();
-                                    System.out.println(Color.GREEN + ">> Monitor " + monitorClassMap.size() + Color.RESET);
+                                    System.out.println(Color.GREEN + ">> 监听器 " + monitorClassMap.size() + Color.RESET);
                                     for (Map.Entry<Monitor, Class<? extends EventHandlerMonitor>> classEntry : monitorClassMap.entrySet()) {
                                         var moduleName = classEntry.getKey();
                                         var moduleItem = classEntry.getValue();
@@ -1088,7 +1088,7 @@ public final class FurryBlack {
                                     }
 
                                     Map<Checker, Class<? extends EventHandlerChecker>> checkerClassMap = pluginItem.getCheckerClassMap();
-                                    System.out.println(Color.GREEN + ">> Checker " + checkerClassMap.size() + Color.RESET);
+                                    System.out.println(Color.GREEN + ">> 检查器 " + checkerClassMap.size() + Color.RESET);
                                     for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> classEntry : checkerClassMap.entrySet()) {
                                         var moduleName = classEntry.getKey();
                                         var moduleItem = classEntry.getValue();
@@ -1096,7 +1096,7 @@ public final class FurryBlack {
                                     }
 
                                     Map<Executor, Class<? extends EventHandlerExecutor>> executorClassMap = pluginItem.getExecutorClassMap();
-                                    System.out.println(Color.GREEN + ">> Executor " + executorClassMap.size() + Color.RESET);
+                                    System.out.println(Color.GREEN + ">> 执行器 " + executorClassMap.size() + Color.RESET);
                                     for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> classEntry : executorClassMap.entrySet()) {
                                         var moduleName = classEntry.getKey();
                                         var moduleItem = classEntry.getValue();
@@ -1125,17 +1125,17 @@ public final class FurryBlack {
                                     // module shut <plugin>
                                     case "shut" -> systemd.shutModule(command.getParameterSegment(1));
 
-
                                     // module init <plugin>
                                     case "init" -> systemd.initModule(command.getParameterSegment(1));
-
 
                                     // module boot <plugin>
                                     case "boot" -> systemd.bootModule(command.getParameterSegment(1));
 
-
                                     // module reboot <plugin>
                                     case "reboot" -> systemd.rebootModule(command.getParameterSegment(1));
+
+                                    // module unload <plugin>
+                                    case "unload" -> systemd.unloadModule(command.getParameterSegment(1));
 
                                 }
                                 break;
@@ -1147,31 +1147,31 @@ public final class FurryBlack {
                                 Map<Runner, Boolean> listAllRunner = systemd.listAllRunner();
                                 System.out.println(Color.BRIGHT_CYAN + ">> 定时器 " + listAllRunner.size() + Color.RESET);
                                 for (Map.Entry<Runner, Boolean> entry : listAllRunner.entrySet()) {
-                                    System.out.println((entry.getValue() ? "√ " : "   ") + entry.getKey().value());
+                                    System.out.println((entry.getValue() ? "开 " : "关 ") + entry.getKey().value());
                                 }
 
                                 Map<Filter, Boolean> listAllFilter = systemd.listAllFilter();
                                 System.out.println(Color.BRIGHT_CYAN + ">> 过滤器 " + listAllFilter.size() + Color.RESET);
                                 for (Map.Entry<Filter, Boolean> entry : listAllFilter.entrySet()) {
-                                    System.out.println((entry.getValue() ? "√ " : "   ") + entry.getKey().value());
+                                    System.out.println((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
                                 }
 
                                 Map<Monitor, Boolean> listAllMonitor = systemd.listAllMonitor();
                                 System.out.println(Color.BRIGHT_CYAN + ">> 监听器 " + listAllMonitor.size() + Color.RESET);
                                 for (Map.Entry<Monitor, Boolean> entry : listAllMonitor.entrySet()) {
-                                    System.out.println((entry.getValue() ? "√ " : "   ") + entry.getKey().value());
+                                    System.out.println((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
                                 }
 
                                 Map<Checker, Boolean> listAllChecker = systemd.listAllChecker();
                                 System.out.println(Color.BRIGHT_CYAN + ">> 检查器 " + listAllChecker.size() + Color.RESET);
                                 for (Map.Entry<Checker, Boolean> entry : listAllChecker.entrySet()) {
-                                    System.out.println((entry.getValue() ? "√ " : "   ") + entry.getKey().value() + "[" + entry.getKey().command() + "]");
+                                    System.out.println((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]" + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
                                 }
 
                                 Map<Executor, Boolean> listAllExecutor = systemd.listAllExecutor();
                                 System.out.println(Color.BRIGHT_CYAN + ">> 执行器 " + listAllExecutor.size() + Color.RESET);
                                 for (Map.Entry<Executor, Boolean> entry : listAllExecutor.entrySet()) {
-                                    System.out.println((entry.getValue() ? "√ " : "   ") + entry.getKey().value() + "[" + entry.getKey().command() + "]{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
+                                    System.out.println((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
                                 }
 
                                 List<Checker> globalUsersChecker = systemd.listGlobalUsersChecker();
@@ -1180,8 +1180,14 @@ public final class FurryBlack {
                                     System.out.println(annotation.value());
                                 }
 
+                                List<Checker> globalGroupChecker = systemd.listGlobalGroupChecker();
+                                System.out.println(Color.BRIGHT_CYAN + ">> 全局群聊检查器 " + globalGroupChecker.size() + Color.RESET);
+                                for (Checker annotation : globalGroupChecker) {
+                                    System.out.println("  " + annotation.value());
+                                }
+
                                 Map<String, List<Checker>> listCommandUsersChecker = systemd.listCommandUsersChecker();
-                                System.out.println(Color.BRIGHT_CYAN + ">> 指定私聊检查器 " + listCommandUsersChecker.size() + Color.RESET);
+                                System.out.println(Color.BRIGHT_CYAN + ">> 有限私聊检查器 " + listCommandUsersChecker.size() + Color.RESET);
                                 for (Map.Entry<String, List<Checker>> entry : listCommandUsersChecker.entrySet()) {
                                     System.out.println(entry.getKey() + " " + entry.getValue().size());
                                     for (Checker item : entry.getValue()) {
@@ -1189,14 +1195,8 @@ public final class FurryBlack {
                                     }
                                 }
 
-                                List<Checker> globalGroupChecker = systemd.listGlobalGroupChecker();
-                                System.out.println(Color.BRIGHT_CYAN + ">> 全局群聊检查器 " + globalGroupChecker.size() + Color.RESET);
-                                for (Checker annotation : globalGroupChecker) {
-                                    System.out.println("  " + annotation.value());
-                                }
-
                                 Map<String, List<Checker>> listCommandGroupChecker = systemd.listCommandGroupChecker();
-                                System.out.println(Color.BRIGHT_CYAN + ">> 指定群聊检查器 " + listCommandGroupChecker.size() + Color.RESET);
+                                System.out.println(Color.BRIGHT_CYAN + ">> 有限群聊检查器 " + listCommandGroupChecker.size() + Color.RESET);
                                 for (Map.Entry<String, List<Checker>> entry : listCommandGroupChecker.entrySet()) {
                                     System.out.println(entry.getKey() + " " + entry.getValue().size());
                                     for (Checker item : entry.getValue()) {
@@ -1474,7 +1474,7 @@ public final class FurryBlack {
                     new TreeCompleter(node("debug", node("enable", "disable"))),
                     new TreeCompleter(node("plugin")),
                     new TreeCompleter(node("module",
-                        node("init", "boot", "shut", "reboot",
+                        node("init", "boot", "shut", "reboot", "unload",
                             node(new StringsCompleter(systemd.listAllModule().keySet()))
                         )
                     ))
@@ -1545,6 +1545,7 @@ public final class FurryBlack {
             Color.GREEN + "# 模块管理 ==========================================" + Color.RESET + "\n" +
             "module (安全) 列出模块\n" +
             Color.GREEN + "※ Runner可能会被依赖，底层操作框架不检查依赖，有可能导致关联模块崩溃" + Color.RESET + "\n" +
+            "module unload <名称> (风险) 卸载指定模块(执行 shut + 从处理链中移除)\n" +
             "module reboot <名称> (风险) 重启指定模块(执行 shut + init + boot)\n" +
             "module shut   <名称> (风险) 关闭指定模块(执行 shut)\n" +
             "module init   <名称> (风险) 预载指定模块(执行 init)\n" +

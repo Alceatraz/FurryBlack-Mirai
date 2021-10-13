@@ -52,6 +52,8 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.hexHash;
@@ -124,29 +126,29 @@ public class Schema {
         this.SORTED_MONITOR = new LinkedList<>();
         this.SORTED_CHECKER = new LinkedList<>();
 
-        this.COMPONENT_RUNNER_INSTANCE = new HashMap<>();
-        this.COMPONENT_FILTER_INSTANCE = new HashMap<>();
-        this.COMPONENT_MONITOR_INSTANCE = new HashMap<>();
-        this.COMPONENT_CHECKER_INSTANCE = new HashMap<>();
-        this.COMPONENT_EXECUTOR_INSTANCE = new TreeMap<>(Schema::compare);
+        this.COMPONENT_RUNNER_INSTANCE = new ConcurrentHashMap<>();
+        this.COMPONENT_FILTER_INSTANCE = new ConcurrentHashMap<>();
+        this.COMPONENT_MONITOR_INSTANCE = new ConcurrentHashMap<>();
+        this.COMPONENT_CHECKER_INSTANCE = new ConcurrentHashMap<>();
+        this.COMPONENT_EXECUTOR_INSTANCE = new ConcurrentSkipListMap<>(Schema::compare);
 
         this.COMMAND_EXECUTOR_RELATION = new HashMap<>();
         this.MODULE_PLUGIN_RELATION = new HashMap<>();
 
-        this.FILTER_USERS_CHAIN = new LinkedList<>();
-        this.FILTER_GROUP_CHAIN = new LinkedList<>();
+        this.FILTER_USERS_CHAIN = new CopyOnWriteArrayList<>();
+        this.FILTER_GROUP_CHAIN = new CopyOnWriteArrayList<>();
 
-        this.MONITOR_USERS_CHAIN = new LinkedList<>();
-        this.MONITOR_GROUP_CHAIN = new LinkedList<>();
+        this.MONITOR_USERS_CHAIN = new CopyOnWriteArrayList<>();
+        this.MONITOR_GROUP_CHAIN = new CopyOnWriteArrayList<>();
 
-        this.EXECUTOR_USERS_POOL = new HashMap<>();
-        this.EXECUTOR_GROUP_POOL = new HashMap<>();
+        this.EXECUTOR_USERS_POOL = new ConcurrentHashMap<>();
+        this.EXECUTOR_GROUP_POOL = new ConcurrentHashMap<>();
 
-        this.GLOBAL_CHECKER_USERS_POOL = new LinkedList<>();
-        this.GLOBAL_CHECKER_GROUP_POOL = new LinkedList<>();
+        this.GLOBAL_CHECKER_USERS_POOL = new CopyOnWriteArrayList<>();
+        this.GLOBAL_CHECKER_GROUP_POOL = new CopyOnWriteArrayList<>();
 
-        this.COMMAND_CHECKER_USERS_POOL = new HashMap<>();
-        this.COMMAND_CHECKER_GROUP_POOL = new HashMap<>();
+        this.COMMAND_CHECKER_USERS_POOL = new ConcurrentHashMap<>();
+        this.COMMAND_CHECKER_GROUP_POOL = new ConcurrentHashMap<>();
 
     }
 
@@ -379,6 +381,112 @@ public class Schema {
         } catch (Exception exception) {
             this.logger.warning("重启模块发生错误 " + name + " " + instanceName, exception);
         }
+    }
+
+
+    public void unloadModule(String name) {
+
+        Class<? extends AbstractEventHandler> clazz = this.modules.get(name);
+
+        if (clazz == null) {
+            this.logger.warning("不存在此名称的模块 -> " + name);
+            return;
+        }
+
+        for (Map.Entry<Runner, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.entrySet()) {
+            if (entry.getKey().value().equals(name)) {
+                this.unloadModule(entry.getKey());
+                return;
+            }
+        }
+
+        for (Map.Entry<Filter, EventHandlerFilter> entry : this.COMPONENT_FILTER_INSTANCE.entrySet()) {
+            if (entry.getKey().value().equals(name)) {
+                this.unloadModule(entry.getKey());
+                return;
+            }
+        }
+
+        for (Map.Entry<Monitor, EventHandlerMonitor> entry : this.COMPONENT_MONITOR_INSTANCE.entrySet()) {
+            if (entry.getKey().value().equals(name)) {
+                this.unloadModule(entry.getKey());
+                return;
+            }
+        }
+
+        for (Map.Entry<Checker, EventHandlerChecker> entry : this.COMPONENT_CHECKER_INSTANCE.entrySet()) {
+            if (entry.getKey().value().equals(name)) {
+                this.unloadModule(entry.getKey());
+                return;
+            }
+        }
+
+        for (Map.Entry<Executor, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
+            if (entry.getKey().value().equals(name)) {
+                this.unloadModule(entry.getKey());
+                return;
+            }
+        }
+
+        this.logger.warning("此名称的模块未加载 -> " + name);
+
+    }
+
+
+    public void unloadModule(Runner annotation) {
+        EventHandlerRunner instance = this.COMPONENT_RUNNER_INSTANCE.remove(annotation);
+        instance.setEnable(false);
+        instance.shutWrapper();
+        this.logger.info("执行器已卸载 -> " + printAnnotation(annotation));
+    }
+
+    public void unloadModule(Filter annotation) {
+        EventHandlerFilter instance = this.COMPONENT_FILTER_INSTANCE.remove(annotation);
+        instance.setEnable(false);
+        if (annotation.users()) this.FILTER_USERS_CHAIN.remove(instance);
+        if (annotation.group()) this.FILTER_GROUP_CHAIN.remove(instance);
+        instance.shutWrapper();
+        this.logger.info("过滤器已卸载 -> " + printAnnotation(annotation));
+    }
+
+    public void unloadModule(Monitor annotation) {
+        EventHandlerMonitor instance = this.COMPONENT_MONITOR_INSTANCE.remove(annotation);
+        instance.setEnable(false);
+        if (annotation.users()) this.MONITOR_USERS_CHAIN.remove(instance);
+        if (annotation.group()) this.MONITOR_GROUP_CHAIN.remove(instance);
+        instance.shutWrapper();
+        this.logger.info("监听器已卸载 -> " + printAnnotation(annotation));
+    }
+
+    public void unloadModule(Checker annotation) {
+        EventHandlerChecker instance = this.COMPONENT_CHECKER_INSTANCE.remove(annotation);
+        instance.setEnable(false);
+        if (annotation.users()) {
+            if ("*".equals(annotation.command())) {
+                this.GLOBAL_CHECKER_USERS_POOL.remove(instance);
+            } else {
+                this.COMMAND_CHECKER_USERS_POOL.get(annotation.command()).remove(instance);
+            }
+        }
+        if (annotation.group()) {
+            if ("*".equals(annotation.command())) {
+                this.GLOBAL_CHECKER_USERS_POOL.remove(instance);
+            } else {
+                this.COMMAND_CHECKER_USERS_POOL.get(annotation.command()).remove(instance);
+            }
+        }
+        instance.shutWrapper();
+        this.logger.info("检查器已卸载 -> " + printAnnotation(annotation));
+    }
+
+    public void unloadModule(Executor annotation) {
+        EventHandlerExecutor instance = this.COMPONENT_EXECUTOR_INSTANCE.remove(annotation);
+        instance.setEnable(false);
+        if (annotation.users()) this.EXECUTOR_USERS_POOL.remove(annotation.command());
+        if (annotation.group()) this.EXECUTOR_GROUP_POOL.remove(annotation.command());
+        this.COMMAND_EXECUTOR_RELATION.remove(annotation.command());
+        instance.shutWrapper();
+        this.logger.info("执行器已卸载 -> " + printAnnotation(annotation));
     }
 
 

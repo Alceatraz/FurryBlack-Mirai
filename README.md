@@ -141,6 +141,12 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.0.7
+
+- 增加热卸载模块的功能
+- 优化plugin命令的显示
+- 优化module命令的显示
+
 ### 2.0.6
 
 - 去除插件init系列工具的级联mkdir
