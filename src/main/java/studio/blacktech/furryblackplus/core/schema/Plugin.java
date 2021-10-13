@@ -56,9 +56,6 @@ import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 
 
-@SuppressWarnings("unused")
-
-
 public class Plugin {
 
 
@@ -170,8 +167,6 @@ public class Plugin {
                 if (dependFiles == null) {
                     throw new BotException("列出依赖文件失败 -> " + depend.getAbsolutePath());
                 }
-                int size = dependFiles.length;
-
                 for (File dependFile : dependFiles) {
                     if (dependFile.isDirectory()) {
                         continue;
@@ -458,6 +453,7 @@ public class Plugin {
         return this.dependClassLoader;
     }
 
+    @SuppressWarnings("unused")
     public URLClassLoader getPluginClassLoader() {
         return this.pluginClassLoader;
     }

@@ -18,10 +18,11 @@ package studio.blacktech.furryblackplus.core.handler;
 
 
 import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.core.handler.annotation.Runner;
 import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 
 
-@Api("定时器父类")
+@Api(value = "定时器父类", relativeClass = Runner.class)
 public abstract class EventHandlerRunner extends AbstractEventHandler {
 
 

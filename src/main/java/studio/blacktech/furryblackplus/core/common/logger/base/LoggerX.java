@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 public abstract class LoggerX implements MiraiLogger {
 
 
-    private static Level level = Level.VERBOSE;
+    private static Level level = Level.EVERYTHING;
 
 
     // =========================================================================
@@ -449,6 +449,7 @@ public abstract class LoggerX implements MiraiLogger {
         DEBUG(7, "DEBUG"),
         VERBOSE(8, "VERBOSE"),
         DEVELOP(9, "DEVELOP"),
+        EVERYTHING(Integer.MAX_VALUE, "ALL"),
 
         ;
 
@@ -469,6 +470,7 @@ public abstract class LoggerX implements MiraiLogger {
             LOOKUP.put("DEBUG", Level.DEBUG);
             LOOKUP.put("VERBOSE", Level.VERBOSE);
             LOOKUP.put("DEVELOP", Level.DEVELOP);
+            LOOKUP.put("EVERYTHING", Level.EVERYTHING);
         }
 
         public static Level getByName(String name) {

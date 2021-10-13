@@ -25,7 +25,7 @@ import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 import studio.blacktech.furryblackplus.core.handler.common.Command;
 
 
-@Api("执行器父类")
+@Api(value = "执行器父类", relativeClass = Executor.class)
 public abstract class EventHandlerExecutor extends AbstractEventHandler {
 
 

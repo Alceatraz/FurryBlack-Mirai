@@ -150,7 +150,7 @@ public final class FurryBlack {
     // ==========================================================================================================================================================
 
 
-    public static final String APP_VERSION = "2.0.4";
+    public static final String APP_VERSION = "2.0.5";
 
 
     // ==========================================================================================================================================================
@@ -965,22 +965,22 @@ public final class FurryBlack {
 
                         // @formatter:off
 
-                        System.out.println(Color.RED +            "RED ------------ Quick brown fox jump over the lazy dog" + Color.RESET);
-                        System.out.println(Color.GREEN +          "GREEN ---------- Quick brown fox jump over the lazy dog" + Color.RESET);
-                        System.out.println(Color.YELLOW +         "YELLOW --------- Quick brown fox jump over the lazy dog" + Color.RESET);
-                        System.out.println(Color.BLUE +           "BLUE ----------- Quick brown fox jump over the lazy dog" + Color.RESET);
-                        System.out.println(Color.MAGENTA +        "MAGENTA -------- Quick brown fox jump over the lazy dog" + Color.RESET);
-                        System.out.println(Color.CYAN +           "CYAN ----------- Quick brown fox jump over the lazy dog" + Color.RESET);
-                        System.out.println(Color.BRIGHT_RED +     "BRIGHT_RED ----- Quick brown fox jump over the lazy dog" + Color.RESET);
-                        System.out.println(Color.BRIGHT_GREEN +   "BRIGHT_GREEN --- Quick brown fox jump over the lazy dog" + Color.RESET);
-                        System.out.println(Color.BRIGHT_YELLOW +  "BRIGHT_YELLOW -- Quick brown fox jump over the lazy dog" + Color.RESET);
-                        System.out.println(Color.BRIGHT_BLUE +    "BRIGHT_BLUE ---- Quick brown fox jump over the lazy dog" + Color.RESET);
-                        System.out.println(Color.BRIGHT_MAGENTA + "BRIGHT_MAGENTA - Quick brown fox jump over the lazy dog" + Color.RESET);
-                        System.out.println(Color.BRIGHT_CYAN +    "BRIGHT_CYAN ---- Quick brown fox jump over the lazy dog" + Color.RESET);
-                        System.out.println(Color.WHITE +          "WHITE ---------- Quick brown fox jump over the lazy dog" + Color.RESET);
-                        System.out.println(Color.GRAY +           "GRAY ----------- Quick brown fox jump over the lazy dog" + Color.RESET);
-                        System.out.println(Color.BRIGHT_BLACK +   "BRIGHT_BLACK --- Quick brown fox jump over the lazy dog" + Color.RESET);
-                        System.out.println(Color.BRIGHT_WHITE +   "BRIGHT_WHITE --- Quick brown fox jump over the lazy dog" + Color.RESET);
+                        System.out.println(Color.RED +            "RED ------------ The quick brown fox jump over a lazy dog" + Color.RESET);
+                        System.out.println(Color.GREEN +          "GREEN ---------- The quick brown fox jump over a lazy dog" + Color.RESET);
+                        System.out.println(Color.YELLOW +         "YELLOW --------- The quick brown fox jump over a lazy dog" + Color.RESET);
+                        System.out.println(Color.BLUE +           "BLUE ----------- The quick brown fox jump over a lazy dog" + Color.RESET);
+                        System.out.println(Color.MAGENTA +        "MAGENTA -------- The quick brown fox jump over a lazy dog" + Color.RESET);
+                        System.out.println(Color.CYAN +           "CYAN ----------- The quick brown fox jump over a lazy dog" + Color.RESET);
+                        System.out.println(Color.BRIGHT_RED +     "BRIGHT_RED ----- The quick brown fox jump over a lazy dog" + Color.RESET);
+                        System.out.println(Color.BRIGHT_GREEN +   "BRIGHT_GREEN --- The quick brown fox jump over a lazy dog" + Color.RESET);
+                        System.out.println(Color.BRIGHT_YELLOW +  "BRIGHT_YELLOW -- The quick brown fox jump over a lazy dog" + Color.RESET);
+                        System.out.println(Color.BRIGHT_BLUE +    "BRIGHT_BLUE ---- The quick brown fox jump over a lazy dog" + Color.RESET);
+                        System.out.println(Color.BRIGHT_MAGENTA + "BRIGHT_MAGENTA - The quick brown fox jump over a lazy dog" + Color.RESET);
+                        System.out.println(Color.BRIGHT_CYAN +    "BRIGHT_CYAN ---- The quick brown fox jump over a lazy dog" + Color.RESET);
+                        System.out.println(Color.WHITE +          "WHITE ---------- The quick brown fox jump over a lazy dog" + Color.RESET);
+                        System.out.println(Color.GRAY +           "GRAY ----------- The quick brown fox jump over a lazy dog" + Color.RESET);
+                        System.out.println(Color.BRIGHT_BLACK +   "BRIGHT_BLACK --- The quick brown fox jump over a lazy dog" + Color.RESET);
+                        System.out.println(Color.BRIGHT_WHITE +   "BRIGHT_WHITE --- The quick brown fox jump over a lazy dog" + Color.RESET);
 
                         // @formatter:on
 
@@ -1246,18 +1246,19 @@ public final class FurryBlack {
                             if (LoggerX.setLevel(level)) {
                                 logger.bypass("日志级别调整为 " + level);
                             } else {
-                                logger.bypass("修改日志级别失败：不存在此级别，可用值为 MUTE FATAL ERROR WARN HINT SEEK INFO DEBUG VERBOSE DEVELOP");
+                                logger.bypass("修改日志级别失败：不存在此级别，可用值为 MUTE FATAL ERROR WARN HINT SEEK INFO DEBUG VERBOSE DEVELOP EVERYTHING");
                             }
                         } else {
-                            logger.bypass("可用值为 MUTE ERROR WARN HINT SEEK INFO DEBUG VERBOSE ALL");
-                            logger.fatal("[FATAL]致命 红色 FATAL");
-                            logger.error("[ERROR]错误 亮黄 ERROR");
-                            logger.warning("[WARN]警告 黄色 WARN");
-                            logger.hint("[HINT]提示 青色 HINT");
-                            logger.seek("[SEEK]配置 绿色 SEEK");
-                            logger.info("[INFO]信息 白色 INFO");
-                            logger.debug("[DEBG]调试 灰色 DEBUG");
-                            logger.verbose("[VERB]详情 灰色 VERBOSE");
+                            logger.bypass("可用值为 MUTE ERROR WARN HINT SEEK INFO DEBUG VERBOSE EVERYTHING");
+                            logger.fatal("The quick brown fox jump over a lazy dog");
+                            logger.error("The quick brown fox jump over a lazy dog");
+                            logger.warning("The quick brown fox jump over a lazy dog");
+                            logger.hint("The quick brown fox jump over a lazy dog");
+                            logger.seek("The quick brown fox jump over a lazy dog");
+                            logger.info("The quick brown fox jump over a lazy dog");
+                            logger.debug("The quick brown fox jump over a lazy dog");
+                            logger.verbose("The quick brown fox jump over a lazy dog");
+                            logger.develop("The quick brown fox jump over a lazy dog");
                         }
                         break;
 
@@ -1468,7 +1469,7 @@ public final class FurryBlack {
                 this.completer = new AggregateCompleter(
                     new ArgumentCompleter(new StringsCompleter("help", "kill", "drop", "stop", "stat", "enable", "disable", "schema", "color")),
                     new ArgumentCompleter(new StringsCompleter("list", "send"), new StringsCompleter("users", "group")),
-                    new TreeCompleter(node("level", node("MUTE", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "ALL"))),
+                    new TreeCompleter(node("level", node("MUTE", "FATAL", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "DEVELOP", "EVERYTHING"))),
                     new TreeCompleter(node("nickname", node("list", "clean", "reload", "append", "export"))),
                     new TreeCompleter(node("debug", node("enable", "disable"))),
                     new TreeCompleter(node("plugin")),

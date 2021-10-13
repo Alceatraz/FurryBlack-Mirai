@@ -207,10 +207,6 @@ public class Schema {
         return this.plugins.entrySet();
     }
 
-    public Set<String> listAllPluginName() {
-        return this.plugins.keySet();
-    }
-
 
     // =================================================================================================================
 

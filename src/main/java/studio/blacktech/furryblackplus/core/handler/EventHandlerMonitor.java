@@ -20,10 +20,11 @@ package studio.blacktech.furryblackplus.core.handler;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.core.handler.annotation.Monitor;
 import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 
 
-@Api("监听器父类")
+@Api(value = "监听器父类", relativeClass = Monitor.class)
 public abstract class EventHandlerMonitor extends AbstractEventHandler {
 
 

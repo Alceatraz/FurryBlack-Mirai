@@ -661,7 +661,7 @@ public final class Systemd extends BasicModuleUtilities {
 
         this.generateListMessage();
 
-        
+
     }
 
 
@@ -1049,11 +1049,6 @@ public final class Systemd extends BasicModuleUtilities {
     public Set<Map.Entry<String, Plugin>> getAllPlugin() {
         return this.schema.getAllPlugin();
     }
-
-    public Set<String> listAllPluginName() {
-        return this.schema.listAllPluginName();
-    }
-
 
     public Map<String, Boolean> listAllModule() {
         return this.schema.listAllModule();

@@ -20,11 +20,12 @@ package studio.blacktech.furryblackplus.core.handler;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.core.handler.annotation.Checker;
 import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 import studio.blacktech.furryblackplus.core.handler.common.Command;
 
 
-@Api("检查器父类")
+@Api(value = "检查器父类", relativeClass = Checker.class)
 public abstract class EventHandlerChecker extends AbstractEventHandler {
 
 

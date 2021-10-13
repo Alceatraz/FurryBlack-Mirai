@@ -141,6 +141,11 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.0.5
+
+- 添加注释
+- 完善日志打印颜色
+
 ### 2.0.4
 
 - 控制台颜色调节

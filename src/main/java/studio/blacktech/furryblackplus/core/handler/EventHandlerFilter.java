@@ -20,10 +20,11 @@ package studio.blacktech.furryblackplus.core.handler;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.core.handler.annotation.Filter;
 import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 
 
-@Api("过滤器父类")
+@Api(value = "过滤器父类", relativeClass = Filter.class)
 public abstract class EventHandlerFilter extends AbstractEventHandler {
 
 
