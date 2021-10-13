@@ -89,17 +89,17 @@ public class BasicModuleUtilities {
     // =================================================================================================================
 
 
-    @Api("初始化文件")
+    @Api(value = "初始化文件", attention = "此方法会以工作目录为相对路径 慎用")
     protected final File initFile(String path) {
         return this.initFile(Paths.get(path));
     }
 
-    @Api("初始化文件")
+    @Api(value = "初始化文件", attention = "此方法会以工作目录为相对路径 慎用")
     protected final File initFile(Path path) {
         return this.initFile(path.toFile());
     }
 
-    @Api("初始化文件")
+    @Api(value = "初始化文件", attention = "此方法会以工作目录为相对路径 慎用")
     protected final File initFile(File file) {
         if (file.isDirectory()) {
             throw new ModuleException("指定路径已存在文件夹 -> " + file.getAbsolutePath());
@@ -124,17 +124,17 @@ public class BasicModuleUtilities {
     // =================================================================================================================
 
 
-    @Api("初始化文件夹")
+    @Api(value = "初始化文件夹", attention = "此方法会以工作目录为相对路径 慎用")
     protected final File initFolder(String path) {
         return this.initFolder(Paths.get(path));
     }
 
-    @Api("初始化文件夹")
+    @Api(value = "初始化文件夹", attention = "此方法会以工作目录为相对路径 慎用")
     protected final File initFolder(Path path) {
         return this.initFolder(path.toFile());
     }
 
-    @Api("初始化文件夹")
+    @Api(value = "初始化文件夹", attention = "此方法会以工作目录为相对路径 慎用")
     protected final File initFolder(File file) {
         if (file.exists() && !file.isDirectory()) {
             throw new ModuleException("文件夹被文件占位 -> " + file.getAbsolutePath());

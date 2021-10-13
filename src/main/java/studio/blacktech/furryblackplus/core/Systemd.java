@@ -1219,7 +1219,7 @@ public final class Systemd extends BasicModuleUtilities {
 
     @Api("加载昵称表")
     public void appendNickname() {
-        File nicknameFile = this.initFile(Paths.get(FurryBlack.getConfigFolder(), "nickname.txt").toFile());
+        File nicknameFile = this.initFile(Paths.get(FurryBlack.getConfigFolder(), "nickname.txt"));
         List<String> nicknames = this.readFile(nicknameFile);
         for (String line : nicknames) {
             String temp = line.trim();
@@ -1333,6 +1333,7 @@ public final class Systemd extends BasicModuleUtilities {
     public Bot getBot() {
         return this.bot;
     }
+
 
 
 }

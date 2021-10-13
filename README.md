@@ -141,6 +141,11 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.0.6
+
+- 去除插件init系列工具的级联mkdir
+- 添加initModuleFile和initModuleFolder
+
 ### 2.0.5
 
 - 添加注释

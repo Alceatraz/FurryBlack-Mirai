@@ -35,9 +35,6 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 
-@SuppressWarnings("RedundantThrows")
-
-
 @Api("基础模块类")
 public abstract class AbstractEventHandler extends BasicModuleUtilities {
 
@@ -58,10 +55,6 @@ public abstract class AbstractEventHandler extends BasicModuleUtilities {
     @Api("配置文件对象") protected File FILE_CONFIG;
     @Api("配置文件对象") protected Properties CONFIG;
 
-    @Api("初始化过插件目录") protected boolean INIT_ROOT;
-    @Api("初始化过配置目录") protected boolean INIT_CONF;
-    @Api("初始化过数据目录") protected boolean INIT_DATA;
-    @Api("初始化过日志目录") protected boolean INIT_LOGS;
     @Api("初始化过配置文件") protected boolean NEW_CONFIG;
 
     @Api("插件名字") protected String pluginName;
@@ -91,69 +84,50 @@ public abstract class AbstractEventHandler extends BasicModuleUtilities {
     @Api("初始化插件总目录")
     protected final void initRootFolder() {
         this.initFolder(this.FOLDER_ROOT);
-        this.INIT_ROOT = true;
     }
 
     @Api("初始化插件配置文件目录")
     protected final void initConfFolder() {
-        if (!this.INIT_ROOT) this.initRootFolder();
         this.initFolder(this.FOLDER_CONF);
-        this.INIT_CONF = true;
     }
 
     @Api("初始化插件数据目录")
     protected final void initDataFolder() {
-        if (!this.INIT_ROOT) this.initRootFolder();
         this.initFolder(this.FOLDER_DATA);
-        this.INIT_DATA = true;
     }
 
     @Api("初始化插件日志目录")
     protected final void initLogsFolder() {
-        if (!this.INIT_ROOT) this.initRootFolder();
         this.initFolder(this.FOLDER_LOGS);
-        this.INIT_LOGS = true;
     }
 
     @Api("初始化插件配置下的目录")
     protected final File initConfFolder(String folderName) {
-        if (!this.INIT_CONF) this.initConfFolder();
-        File file = this.initFolder(Paths.get(this.FOLDER_CONF.getAbsolutePath(), folderName).toFile());
-        this.INIT_CONF = true;
-        return file;
+        return this.initFolder(Paths.get(this.FOLDER_CONF.getAbsolutePath(), folderName).toFile());
     }
 
     @Api("初始化插件数据下的目录")
     protected final File initDataFolder(String folderName) {
-        if (!this.INIT_DATA) this.initDataFolder();
-        File file = this.initFolder(Paths.get(this.FOLDER_DATA.getAbsolutePath(), folderName).toFile());
-        this.INIT_DATA = true;
-        return file;
+        return this.initFolder(Paths.get(this.FOLDER_DATA.getAbsolutePath(), folderName).toFile());
     }
 
     @Api("初始化插件数据下的目录")
     protected final File initLogsFolder(String folderName) {
-        if (!this.INIT_LOGS) this.initLogsFolder();
-        File file = this.initFolder(Paths.get(this.FOLDER_LOGS.getAbsolutePath(), folderName).toFile());
-        this.INIT_LOGS = true;
-        return file;
+        return this.initFolder(Paths.get(this.FOLDER_LOGS.getAbsolutePath(), folderName).toFile());
     }
 
     @Api("初始化配置文件夹下的文件")
     protected final File initConfFile(String fileName) {
-        if (!this.INIT_CONF) this.initConfFolder();
         return this.initFile(Paths.get(this.FOLDER_CONF.getAbsolutePath(), fileName));
     }
 
     @Api("初始化数据文件夹下的文件")
     protected final File initDataFile(String fileName) {
-        if (!this.INIT_DATA) this.initDataFolder();
         return this.initFile(Paths.get(this.FOLDER_DATA.getAbsolutePath(), fileName));
     }
 
     @Api("初始化日志文件夹下的文件")
     protected final File initLogsFile(String fileName) {
-        if (!this.INIT_LOGS) this.initLogsFolder();
         return this.initFile(Paths.get(this.FOLDER_LOGS.getAbsolutePath(), fileName));
     }
 
@@ -162,7 +136,7 @@ public abstract class AbstractEventHandler extends BasicModuleUtilities {
         if (!this.FILE_CONFIG.exists()) {
             this.logger.seek("配置文件不存在 " + this.FILE_CONFIG.getAbsolutePath());
             try {
-                this.initFile(this.FILE_CONFIG);
+                this.initFile(this.FILE_CONFIG.toPath());
             } catch (Exception exception) {
                 throw new ModuleException("初始化配置错误", exception);
             }
@@ -207,6 +181,26 @@ public abstract class AbstractEventHandler extends BasicModuleUtilities {
     public final String getModuleName() {
         return this.moduleName;
     }
+
+
+    // =================================================================================================================
+
+
+    @Api("初始化文件")
+    protected final File initModuleFile(String path) {
+        File file = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), path).toFile();
+        return this.initFile(file);
+    }
+
+
+    @Api("初始化文件夹")
+    protected final File initModuleFolder(String path) {
+        File file = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), path).toFile();
+        return this.initFolder(file);
+    }
+
+
+    // =================================================================================================================
 
 
     public final void internalInit(String pluginName, String moduleName, URLClassLoader exclusiveClassLoader) {
