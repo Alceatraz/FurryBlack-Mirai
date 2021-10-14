@@ -35,8 +35,6 @@ import studio.blacktech.furryblackplus.core.common.logger.support.WriteLogger;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
-import java.util.Locale;
-import java.util.stream.Collectors;
 
 
 @SuppressWarnings("unused")
@@ -316,26 +314,21 @@ public abstract class LoggerX implements MiraiLogger {
     // 静态工具
 
 
-    public static String hexHash(Object object) {
-        return Integer.toHexString(object.hashCode()).toUpperCase(Locale.ROOT);
-    }
-
-
-    public static String convertUnicode(String content) {
-        return content.chars()
-            .map(item -> item & 0xFFFF)
-            .mapToObj(item -> String.format("%1$4s", item))
-            .map(item -> item.replaceAll(" ", "0"))
-            .collect(Collectors.joining());
-    }
-
-
-    public static String extractTrace(Throwable throwable) {
+    public static String extractStackTrace(Throwable throwable) {
         if (throwable == null) return "";
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
         throwable.printStackTrace(printWriter);
         return stringWriter.toString();
+    }
+
+
+    private static void extractStackTrace(StringBuilder builder, Throwable throwable) {
+        if (throwable == null) return;
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+        throwable.printStackTrace(printWriter);
+        builder.append(stringWriter);
     }
 
 
@@ -353,7 +346,7 @@ public abstract class LoggerX implements MiraiLogger {
         builder.append(") -> ");
         MessageChain messages = event.getMessage();
         extractMessageChain(builder, messages);
-        builder.append(extractTrace(throwable));
+        extractStackTrace(builder, throwable);
         return builder.toString();
     }
 
@@ -376,9 +369,12 @@ public abstract class LoggerX implements MiraiLogger {
         builder.append(") -> ");
         MessageChain messages = event.getMessage();
         extractMessageChain(builder, messages);
-        builder.append(extractTrace(throwable));
+        extractStackTrace(builder, throwable);
         return builder.toString();
     }
+
+
+    // =========================================================================
 
 
     public static String extractMessageChain(MessageChain messages) {

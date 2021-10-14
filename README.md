@@ -141,6 +141,12 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.0.8
+
+- 修复dumpUnicode的BUG
+- 重命名extractTrace方法
+- 提供extractStackTrace重载方法
+
 ### 2.0.7
 
 - 增加热卸载模块的功能
