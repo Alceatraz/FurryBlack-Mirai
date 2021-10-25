@@ -41,28 +41,28 @@ public class DemoChecker extends EventHandlerChecker {
     public void init() {
         // 使用getRunner从IoC容器获取定时器实例
         this.runner = FurryBlack.getRunner(DemoRunner.class);
-        System.out.println("加载" + this.getClass().getName());
+        FurryBlack.terminalPrintLine("加载" + this.getClass().getName());
     }
 
     @Override
     public void boot() {
-        System.out.println("启动" + this.getClass().getName());
+        FurryBlack.terminalPrintLine("启动" + this.getClass().getName());
     }
 
     @Override
     public void shut() {
-        System.out.println("关闭" + this.getClass().getName());
+        FurryBlack.terminalPrintLine("关闭" + this.getClass().getName());
     }
 
     @Override
     public boolean handleUsersMessage(UserMessageEvent event, Command command) {
-        System.out.println("消息" + this.getClass().getName());
+        FurryBlack.terminalPrintLine("消息" + this.getClass().getName());
         return false;
     }
 
     @Override
     public boolean handleGroupMessage(GroupMessageEvent event, Command command) {
-        System.out.println("消息" + this.getClass().getName());
+        FurryBlack.terminalPrintLine("消息" + this.getClass().getName());
         return this.runner.checkPermission(event.getSender().getId(), "demo.command.demo");
 
     }

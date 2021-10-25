@@ -170,12 +170,18 @@ public class Schema {
             if (!this.EXECUTOR_USERS_POOL.containsKey(executor.command())) {
                 continue;
             }
-            builder.append(executor.outline());
-            builder.append("[");
-            builder.append(executor.command());
-            builder.append("]");
-            builder.append(executor.description());
-            builder.append("\r\n");
+            builder
+                .append(executor.outline());
+            builder
+                .append("[");
+            builder
+                .append(executor.command());
+            builder
+                .append("]");
+            builder
+                .append(executor.description());
+            builder
+                .append("\r\n");
         }
         builder.setLength(builder.length() - 2);
         return builder.toString();
@@ -191,12 +197,18 @@ public class Schema {
             if (!this.EXECUTOR_GROUP_POOL.containsKey(executor.command())) {
                 continue;
             }
-            builder.append(executor.outline());
-            builder.append("[");
-            builder.append(executor.command());
-            builder.append("]");
-            builder.append(executor.description());
-            builder.append("\r\n");
+            builder
+                .append(executor.outline());
+            builder
+                .append("[");
+            builder
+                .append(executor.command());
+            builder
+                .append("]");
+            builder
+                .append(executor.description());
+            builder
+                .append("\r\n");
         }
         builder.setLength(builder.length() - 2);
         return builder.toString();
@@ -322,7 +334,7 @@ public class Schema {
     public void shutModule(String name) {
         AbstractEventHandler moduleInstance = this.getModuleInstance(name);
         if (moduleInstance == null) {
-            System.out.println("没有找到模块实例 -> " + name + " " + (this.getModuleClass(name) == null ? "不存在" : "未加载"));
+            this.logger.info("没有找到模块实例 -> " + name + " " + (this.getModuleClass(name) == null ? "不存在" : "未加载"));
             return;
         }
         String instanceName = moduleInstance.getClass().getName();
@@ -338,7 +350,7 @@ public class Schema {
     public void initModule(String name) {
         AbstractEventHandler moduleInstance = this.getModuleInstance(name);
         if (moduleInstance == null) {
-            System.out.println("没有找到模块实例 -> " + name + " " + (this.getModuleClass(name) == null ? "不存在" : "未加载"));
+            this.logger.info("没有找到模块实例 -> " + name + " " + (this.getModuleClass(name) == null ? "不存在" : "未加载"));
             return;
         }
         String instanceName = moduleInstance.getClass().getName();
@@ -354,7 +366,7 @@ public class Schema {
     public void bootModule(String name) {
         AbstractEventHandler moduleInstance = this.getModuleInstance(name);
         if (moduleInstance == null) {
-            System.out.println("没有找到模块实例 -> " + name + " " + (this.getModuleClass(name) == null ? "不存在" : "未加载"));
+            this.logger.info("没有找到模块实例 -> " + name + " " + (this.getModuleClass(name) == null ? "不存在" : "未加载"));
             return;
         }
         String instanceName = moduleInstance.getClass().getName();
@@ -370,7 +382,7 @@ public class Schema {
     public void rebootModule(String name) {
         AbstractEventHandler moduleInstance = this.getModuleInstance(name);
         if (moduleInstance == null) {
-            System.out.println("没有找到模块实例 -> " + name + " " + (this.getModuleClass(name) == null ? "不存在" : "未加载"));
+            this.logger.info("没有找到模块实例 -> " + name + " " + (this.getModuleClass(name) == null ? "不存在" : "未加载"));
             return;
         }
         String instanceName = moduleInstance.getClass().getName();
@@ -1291,229 +1303,483 @@ public class Schema {
     // =================================================================================================================
 
 
-    public void verboseStatus() {
+    @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 
-        System.out.println(Color.BRIGHT_MAGENTA + ">> PLUGINS" + Color.RESET);
+
+    public String verboseStatus() {
+
+        StringBuilder builder = new StringBuilder();
+
+        builder
+            .append(Color.BRIGHT_MAGENTA + ">> PLUGINS" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<String, Plugin> entry : this.plugins.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(Color.BRIGHT_CYAN + k + ":" + hexHash(v) + " " + v.getFile() + Color.RESET);
+            builder
+                .append(Color.BRIGHT_CYAN)
+                .append(k)
+                .append(":")
+                .append(hexHash(v))
+                .append(" ")
+                .append(v.getFile())
+                .append(Color.RESET)
+                .append(FurryBlack.LINE_SPEARATOR);
             for (Map.Entry<String, Class<? extends AbstractEventHandler>> classEntry : v.getModules().entrySet()) {
                 var classK = classEntry.getKey();
                 var classV = classEntry.getValue();
-                System.out.println(classK + " -> " + classV.getName() + ":" + hexHash(classV));
+                builder
+                    .append(classK)
+                    .append(" -> ")
+                    .append(classV.getName())
+                    .append(":")
+                    .append(hexHash(classV))
+                    .append(FurryBlack.LINE_SPEARATOR);
             }
         }
 
-        System.out.println(Color.BRIGHT_MAGENTA + ">> MODULES" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_MAGENTA + ">> MODULES" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<String, Class<? extends AbstractEventHandler>> entry : this.modules.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(k + " -> " + v.getName() + ":" + hexHash(v));
+            builder
+                .append(k)
+                .append(" -> ")
+                .append(v.getName())
+                .append(":")
+                .append(hexHash(v))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_MAGENTA + ">> MODULE_PLUGIN_RELATION" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_MAGENTA + ">> MODULE_PLUGIN_RELATION" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<String, String> entry : this.MODULE_PLUGIN_RELATION.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(k + " -> " + v);
+            builder
+                .append(k)
+                .append(" -> ")
+                .append(v)
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> COMPONENT_RUNNER_CLAZZ" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> COMPONENT_RUNNER_CLAZZ" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> entry : this.COMPONENT_RUNNER_CLAZZ.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(printAnnotation(k) + ":" + hexHash(k) + " -> " + v.getName() + ":" + hexHash(v));
+            builder
+                .append(printAnnotation(k))
+                .append(":")
+                .append(hexHash(k))
+                .append(" -> ")
+                .append(v.getName())
+                .append(":")
+                .append(hexHash(v))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> COMPONENT_FILTER_CLAZZ" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> COMPONENT_FILTER_CLAZZ" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<Filter, Class<? extends EventHandlerFilter>> entry : this.COMPONENT_FILTER_CLAZZ.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(printAnnotation(k) + ":" + hexHash(k) + " -> " + v.getName() + ":" + hexHash(v));
+            builder
+                .append(printAnnotation(k))
+                .append(":")
+                .append(hexHash(k))
+                .append(" -> ")
+                .append(v.getName())
+                .append(":")
+                .append(hexHash(v))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> COMPONENT_MONITOR_CLAZZ" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> COMPONENT_MONITOR_CLAZZ" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<Monitor, Class<? extends EventHandlerMonitor>> entry : this.COMPONENT_MONITOR_CLAZZ.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(printAnnotation(k) + ":" + hexHash(k) + " -> " + v.getName() + ":" + hexHash(v));
+            builder
+                .append(printAnnotation(k))
+                .append(":")
+                .append(hexHash(k))
+                .append(" -> ")
+                .append(v.getName())
+                .append(":")
+                .append(hexHash(v))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> COMPONENT_CHECKER_CLAZZ" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> COMPONENT_CHECKER_CLAZZ" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> entry : this.COMPONENT_CHECKER_CLAZZ.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(printAnnotation(k) + ":" + hexHash(k) + " -> " + v.getName() + ":" + hexHash(v));
+            builder
+                .append(printAnnotation(k))
+                .append(":")
+                .append(hexHash(k))
+                .append(" -> ")
+                .append(v.getName())
+                .append(":")
+                .append(hexHash(v))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> COMPONENT_EXECUTOR_CLAZZ" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> COMPONENT_EXECUTOR_CLAZZ" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> entry : this.COMPONENT_EXECUTOR_CLAZZ.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(printAnnotation(k) + ":" + hexHash(k) + " -> " + v.getName() + ":" + hexHash(v));
+            builder
+                .append(printAnnotation(k))
+                .append(":")
+                .append(hexHash(k))
+                .append(" -> ")
+                .append(v.getName())
+                .append(":")
+                .append(hexHash(v))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> SORTED_RUNNER" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> SORTED_RUNNER" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Runner entry : this.SORTED_RUNNER) {
-            System.out.println(printAnnotation(entry) + ":" + hexHash(entry));
+            builder
+                .append(printAnnotation(entry))
+                .append(":")
+                .append(hexHash(entry))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> SORTED_FILTER" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> SORTED_FILTER" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Filter entry : this.SORTED_FILTER) {
-            System.out.println(printAnnotation(entry) + ":" + hexHash(entry));
+            builder
+                .append(printAnnotation(entry))
+                .append(":")
+                .append(hexHash(entry))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> SORTED_MONITOR" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> SORTED_MONITOR" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Monitor entry : this.SORTED_MONITOR) {
-            System.out.println(printAnnotation(entry) + ":" + hexHash(entry));
+            builder
+                .append(printAnnotation(entry))
+                .append(":")
+                .append(hexHash(entry))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> SORTED_CHECKER" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> SORTED_CHECKER" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Checker entry : this.SORTED_CHECKER) {
-            System.out.println(printAnnotation(entry) + ":" + hexHash(entry));
+            builder
+                .append(printAnnotation(entry))
+                .append(":")
+                .append(hexHash(entry))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> COMPONENT_RUNNER_INSTANCE" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> COMPONENT_RUNNER_INSTANCE" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<Runner, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(printAnnotation(k) + ":" + hexHash(k) + " -> " + v.getClass().getName() + ":" + hexHash(v));
+            builder
+                .append(printAnnotation(k))
+                .append(":")
+                .append(hexHash(k))
+                .append(" -> ")
+                .append(v.getClass().getName())
+                .append(":")
+                .append(hexHash(v))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> COMPONENT_FILTER_INSTANCE" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> COMPONENT_FILTER_INSTANCE" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<Filter, EventHandlerFilter> entry : this.COMPONENT_FILTER_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(printAnnotation(k) + ":" + hexHash(k) + " -> " + v.getClass().getName() + ":" + hexHash(v));
+            builder
+                .append(printAnnotation(k))
+                .append(":")
+                .append(hexHash(k))
+                .append(" -> ")
+                .append(v.getClass().getName())
+                .append(":")
+                .append(hexHash(v))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> COMPONENT_MONITOR_INSTANCE" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> COMPONENT_MONITOR_INSTANCE" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<Monitor, EventHandlerMonitor> entry : this.COMPONENT_MONITOR_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(printAnnotation(k) + ":" + hexHash(k) + " -> " + v.getClass().getName() + ":" + hexHash(v));
+            builder
+                .append(printAnnotation(k))
+                .append(":")
+                .append(hexHash(k))
+                .append(" -> ")
+                .append(v.getClass().getName())
+                .append(":")
+                .append(hexHash(v))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> COMPONENT_CHECKER_INSTANCE" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> COMPONENT_CHECKER_INSTANCE" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<Checker, EventHandlerChecker> entry : this.COMPONENT_CHECKER_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(printAnnotation(k) + ":" + hexHash(k) + " -> " + v.getClass().getName() + ":" + hexHash(v));
+            builder
+                .append(printAnnotation(k))
+                .append(":")
+                .append(hexHash(k))
+                .append(" -> ")
+                .append(v.getClass().getName())
+                .append(":")
+                .append(hexHash(v))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> COMPONENT_EXECUTOR_INSTANCE" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> COMPONENT_EXECUTOR_INSTANCE" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<Executor, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(printAnnotation(k) + ":" + hexHash(k) + " -> " + v.getClass().getName() + ":" + hexHash(v));
+            builder
+                .append(printAnnotation(k))
+                .append(":")
+                .append(hexHash(k))
+                .append(" -> ")
+                .append(v.getClass().getName())
+                .append(":")
+                .append(hexHash(v))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
 
-        System.out.println(Color.BRIGHT_CYAN + ">> FILTER_USERS_CHAIN" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> FILTER_USERS_CHAIN" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (EventHandlerFilter item : this.FILTER_USERS_CHAIN) {
-            System.out.println(item.getClass().getName() + ":" + hexHash(item));
+            builder
+                .append(item.getClass().getName())
+                .append(":")
+                .append(hexHash(item))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> FILTER_GROUP_CHAIN" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> FILTER_GROUP_CHAIN" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (EventHandlerFilter item : this.FILTER_GROUP_CHAIN) {
-            System.out.println(item.getClass().getName() + ":" + hexHash(item));
+            builder
+                .append(item.getClass().getName())
+                .append(":")
+                .append(hexHash(item))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> MONITOR_USERS_CHAIN" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> MONITOR_USERS_CHAIN" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (EventHandlerMonitor item : this.MONITOR_USERS_CHAIN) {
-            System.out.println(item.getClass().getName() + ":" + hexHash(item));
+            builder
+                .append(item.getClass().getName())
+                .append(":")
+                .append(hexHash(item))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> MONITOR_GROUP_CHAIN" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> MONITOR_GROUP_CHAIN" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (EventHandlerMonitor item : this.MONITOR_GROUP_CHAIN) {
-            System.out.println(item.getClass().getName() + ":" + hexHash(item));
+            builder
+                .append(item.getClass().getName())
+                .append(":")
+                .append(hexHash(item))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> GLOBAL_CHECKER_USERS_POOL" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> GLOBAL_CHECKER_USERS_POOL" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (EventHandlerChecker item : this.GLOBAL_CHECKER_USERS_POOL) {
-            System.out.println(item.getClass().getName() + ":" + hexHash(item));
+            builder
+                .append(item.getClass().getName())
+                .append(":")
+                .append(hexHash(item))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> GLOBAL_CHECKER_GROUP_POOL" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> GLOBAL_CHECKER_GROUP_POOL" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (EventHandlerChecker item : this.GLOBAL_CHECKER_GROUP_POOL) {
-            System.out.println(item.getClass().getName() + ":" + hexHash(item));
+            builder
+                .append(item.getClass().getName())
+                .append(":")
+                .append(hexHash(item))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> COMMAND_CHECKER_USERS_POOL" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> COMMAND_CHECKER_USERS_POOL" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_USERS_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(Color.CYAN + k + Color.RESET + " " + v.size());
+            builder
+                .append(Color.CYAN)
+                .append(k)
+                .append(Color.RESET)
+                .append(" ")
+                .append(v.size())
+                .append(FurryBlack.LINE_SPEARATOR);
             for (EventHandlerChecker checker : v) {
-                System.out.println(checker.getClass().getName() + ":" + hexHash(checker));
+                builder
+                    .append(checker.getClass().getName())
+                    .append(":")
+                    .append(hexHash(checker))
+                    .append(FurryBlack.LINE_SPEARATOR);
             }
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> COMMAND_CHECKER_GROUP_POOL" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> COMMAND_CHECKER_GROUP_POOL" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_GROUP_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(Color.CYAN + k + Color.RESET + " " + v.size());
+            builder
+                .append(Color.CYAN)
+                .append(k)
+                .append(Color.RESET)
+                .append(" ")
+                .append(v.size())
+                .append(FurryBlack.LINE_SPEARATOR);
             for (EventHandlerChecker checker : v) {
-                System.out.println(checker.getClass().getName() + ":" + hexHash(checker));
+                builder
+                    .append(checker.getClass().getName())
+                    .append(":")
+                    .append(hexHash(checker))
+                    .append(FurryBlack.LINE_SPEARATOR);
             }
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> EXECUTOR_USERS_POOL" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> EXECUTOR_USERS_POOL" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<String, EventHandlerExecutor> entry : this.EXECUTOR_USERS_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(k + " -> " + v.getClass().getName() + ":" + hexHash(v));
+            builder
+                .append(k)
+                .append(" -> ")
+                .append(v.getClass().getName())
+                .append(":")
+                .append(hexHash(v))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> EXECUTOR_GROUP_POOL" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> EXECUTOR_GROUP_POOL" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<String, EventHandlerExecutor> entry : this.EXECUTOR_GROUP_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(k + " -> " + v.getClass().getName() + ":" + hexHash(v));
+            builder
+                .append(k + " -> " + v.getClass().getName() + ":" + hexHash(v))
+                .append(FurryBlack.LINE_SPEARATOR);
         }
 
-        System.out.println(Color.BRIGHT_CYAN + ">> COMMAND_EXECUTOR_RELATION" + Color.RESET);
+        builder
+            .append(Color.BRIGHT_CYAN + ">> COMMAND_EXECUTOR_RELATION" + Color.RESET)
+            .append(FurryBlack.LINE_SPEARATOR);
 
         for (Map.Entry<String, Executor> entry : this.COMMAND_EXECUTOR_RELATION.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
-            System.out.println(Color.CYAN + k + Color.RESET + " -> " + v.value() + ":" + hexHash(v) + " {" + (v.users() ? "U" : "") + (v.group() ? "G" : "") + "} " + v.outline() + ":" + v.description());
+            builder
+                .append(Color.CYAN)
+                .append(k)
+                .append(Color.RESET)
+                .append(" -> ")
+                .append(v.value())
+                .append(":")
+                .append(hexHash(v))
+                .append(" {")
+                .append(v.users() ? "U" : "")
+                .append(v.group() ? "G" : "")
+                .append("} ")
+                .append(v.outline())
+                .append(":")
+                .append(v.description())
+                .append(FurryBlack.LINE_SPEARATOR);
             for (String temp : v.usage()) {
-                System.out.println(temp);
+                builder
+                    .append(temp)
+                    .append(FurryBlack.LINE_SPEARATOR);
             }
             for (String temp : v.privacy()) {
-                System.out.println(temp);
+                builder
+                    .append(temp)
+                    .append(FurryBlack.LINE_SPEARATOR);
             }
         }
+
+        return builder.toString();
 
     }
 

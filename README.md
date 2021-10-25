@@ -141,6 +141,13 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.0.9
+
+- 为了适配JLine，使用printAbove替代所有stout，除了：
+- FurryBlack.class中初始化完成前
+- WriteLogger写入失败的报错栈
+- common包中的工具类
+
 ### 2.0.8
 
 - 修复dumpUnicode的BUG

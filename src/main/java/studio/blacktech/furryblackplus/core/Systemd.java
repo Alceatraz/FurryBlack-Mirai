@@ -1111,8 +1111,8 @@ public final class Systemd extends BasicModuleUtilities {
         this.schema.unloadModule(name);
     }
 
-    public void schemaVerbose() {
-        this.schema.verboseStatus();
+    public String schemaVerbose() {
+        return this.schema.verboseStatus();
     }
 
     public <T extends EventHandlerRunner> T getRunner(Class<T> clazz) {

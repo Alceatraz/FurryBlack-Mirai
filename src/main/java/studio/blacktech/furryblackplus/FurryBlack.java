@@ -86,6 +86,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -165,6 +166,8 @@ public final class FurryBlack {
     @Api("原始系统时区") public static final ZoneId SYSTEM_ZONEID;
     @Api("原始系统偏差") public static final ZoneOffset SYSTEM_OFFSET;
 
+    @Api("系统换行符") public static final String LINE_SPEARATOR;
+
 
     static {
 
@@ -175,6 +178,8 @@ public final class FurryBlack {
 
         Locale.setDefault(Locale.SIMPLIFIED_CHINESE);
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+
+        LINE_SPEARATOR = System.lineSeparator();
 
     }
 
@@ -189,7 +194,6 @@ public final class FurryBlack {
     private static LoggerX logger;
 
     private static Systemd systemd;
-    private static JLineConsole.CompleterDelegate completerDelegate;
 
     private static volatile boolean debug;
 
@@ -207,6 +211,8 @@ public final class FurryBlack {
     private static final AtomicReference<String> prompt = new AtomicReference<>("");
 
     private static Thread consoleThread;
+
+    private static Terminal terminal;
 
     private static File FOLDER_ROOT;
     private static File FOLDER_CONFIG;
@@ -360,8 +366,11 @@ public final class FurryBlack {
 
         logger = LoggerXFactory.newLogger(FurryBlack.class);
 
+        // =====================================================================
 
-        logger.hint("环境检查完毕");
+        terminal = Terminal.getInstance();
+
+        FurryBlack.terminalPrintLine("[FurryBlack][INIT]终端系统初始化完成");
 
         logger.info("应用工作目录 " + FOLDER_ROOT.getAbsolutePath());
         logger.info("插件扫描目录 " + FOLDER_PLUGIN.getAbsolutePath());
@@ -417,6 +426,8 @@ public final class FurryBlack {
             LoggerX.setLevel(level);
         }
 
+        prompt.set("[console]$ ");
+
         enable = true;
 
         // =====================================================================
@@ -458,8 +469,6 @@ public final class FurryBlack {
     public static long getBootTime() {
         return BOOT_TIME;
     }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
 
     @Api("是否正在监听消息")
     public static boolean isEnable() {
@@ -559,6 +568,23 @@ public final class FurryBlack {
     @Api("提交明天开始的等延迟定时任务")
     public static ScheduledFuture<?> scheduleWithNextDayFixedDelay(Runnable runnable, long delay, TimeUnit unit) {
         return systemd.scheduleWithFixedDelay(runnable, TimeTool.nextDayDuration(), delay, unit);
+    }
+
+
+    // ==========================================================================================================================================================
+
+
+    @Api("在终端打印消息")
+    public static void terminalPrint(Object message) {
+        if (message == null) return;
+        terminal.print(message.toString());
+    }
+
+
+    @Api("在终端打印消息")
+    public static void terminalPrintLine(Object message) {
+        if (message == null) return;
+        terminal.printLine(message.toString());
     }
 
 
@@ -906,34 +932,35 @@ public final class FurryBlack {
     // ==========================================================================================================================================================
 
 
-    @SuppressWarnings("SwitchStatementWithTooFewBranches")
     private static void console() {
-
-        completerDelegate = new JLineConsole.CompleterDelegate();
-        completerDelegate.update();
-
-        Console console = noJline ? new ReaderConsole() : new JLineConsole();
-
-        new Thread(() -> {
-            try {
-                Thread.sleep(10L);
-            } catch (InterruptedException exception) {
-                exception.printStackTrace();
-            }
-            prompt.set("[console]$ ");
-        }).start();
 
         console:
         while (true) {
             try {
-                String temp = console.readLine(prompt.get());
-                if (temp == null || temp.isEmpty() || temp.isBlank()) continue;
+                String temp = terminal.readLine(prompt.get());
+                if (temp == null || temp.isBlank()) continue;
                 Command command = new Command(temp.trim());
                 switch (command.getCommandName()) {
 
+                    // ==========================================================================================================================================================
+
+                    case "?":
+                    case "help":
+                        printHelp();
+                        break;
 
                     // =========================================================
 
+                    case "info":
+                        FurryBlack.terminalPrintLine("""
+                            FurryBlack-Plus
+                            A Mirai wrapper QQ-Bot framework make with love and \\uD83E\\uDDE6
+                            Mr.Black is a housekeeper with a white bear furry visualize
+                            Create by Alceatraz Warprays @ Black Tech Studio
+                            https://www.blacktech.studio""");
+                        break;
+
+                    // =================================================================================================
 
                     case "kill":
                         System.out.println("[FurryBlack] Kill the JVM");
@@ -950,281 +977,21 @@ public final class FurryBlack {
                         systemd.signal();
                         break console;
 
-
-                    // =========================================================
-
-
-                    case "?":
-                    case "help":
-                        printHelp();
-                        break;
-
-                    // =========================================================
-
-                    case "color":
-
-                        // @formatter:off
-
-                        System.out.println(Color.RED +            "RED ------------ The quick brown fox jump over a lazy dog" + Color.RESET);
-                        System.out.println(Color.GREEN +          "GREEN ---------- The quick brown fox jump over a lazy dog" + Color.RESET);
-                        System.out.println(Color.YELLOW +         "YELLOW --------- The quick brown fox jump over a lazy dog" + Color.RESET);
-                        System.out.println(Color.BLUE +           "BLUE ----------- The quick brown fox jump over a lazy dog" + Color.RESET);
-                        System.out.println(Color.MAGENTA +        "MAGENTA -------- The quick brown fox jump over a lazy dog" + Color.RESET);
-                        System.out.println(Color.CYAN +           "CYAN ----------- The quick brown fox jump over a lazy dog" + Color.RESET);
-                        System.out.println(Color.BRIGHT_RED +     "BRIGHT_RED ----- The quick brown fox jump over a lazy dog" + Color.RESET);
-                        System.out.println(Color.BRIGHT_GREEN +   "BRIGHT_GREEN --- The quick brown fox jump over a lazy dog" + Color.RESET);
-                        System.out.println(Color.BRIGHT_YELLOW +  "BRIGHT_YELLOW -- The quick brown fox jump over a lazy dog" + Color.RESET);
-                        System.out.println(Color.BRIGHT_BLUE +    "BRIGHT_BLUE ---- The quick brown fox jump over a lazy dog" + Color.RESET);
-                        System.out.println(Color.BRIGHT_MAGENTA + "BRIGHT_MAGENTA - The quick brown fox jump over a lazy dog" + Color.RESET);
-                        System.out.println(Color.BRIGHT_CYAN +    "BRIGHT_CYAN ---- The quick brown fox jump over a lazy dog" + Color.RESET);
-                        System.out.println(Color.WHITE +          "WHITE ---------- The quick brown fox jump over a lazy dog" + Color.RESET);
-                        System.out.println(Color.GRAY +           "GRAY ----------- The quick brown fox jump over a lazy dog" + Color.RESET);
-                        System.out.println(Color.BRIGHT_BLACK +   "BRIGHT_BLACK --- The quick brown fox jump over a lazy dog" + Color.RESET);
-                        System.out.println(Color.BRIGHT_WHITE +   "BRIGHT_WHITE --- The quick brown fox jump over a lazy dog" + Color.RESET);
-
-                        // @formatter:on
-
-                        break;
-
-                    // =========================================================
-
-
-                    case "info":
-
-                        System.out.println("""
-                            FurryBlack-Plus
-                            A Mirai wrapper QQ-Bot framework make with love and \\uD83E\\uDDE6
-                            Mr.Black is a housekeeper with a white bear furry visualize
-                            Create by Alceatraz Warprays @ Black Tech Studio
-                            https://www.blacktech.studio""");
-
-                        break;
-
-
-                    // =========================================================
-
-
-                    case "debug":
-
-                        switch (command.getParameterLength()) {
-
-                            case 1:
-
-                                switch (command.getParameterSegment(0)) {
-                                    case "enable" -> {
-                                        debug = true;
-                                        System.out.println("DEBUG模式启动");
-                                    }
-                                    case "disable" -> {
-                                        debug = false;
-                                        System.out.println("DEBUG模式关闭");
-                                    }
-                                    default -> System.out.println(debug ? "DEBUG已开启" : "DEBUG已关闭");
-                                }
-                                break;
-
-                            default:
-                                System.out.println(debug ? "DEBUG已开启" : "DEBUG已关闭");
-                                break;
-
-                        }
-
-                        break;
-
-
-                    // =========================================================
-
+                    // ==========================================================================================================================================================
 
                     case "enable":
                         enable = true;
-                        System.out.println("启动事件响应");
+                        FurryBlack.terminalPrintLine("启动事件响应");
                         break;
+
+                    // =========================================================
 
                     case "disable":
                         enable = false;
-                        System.out.println("关闭事件响应");
+                        FurryBlack.terminalPrintLine("关闭事件响应");
                         break;
 
-
                     // =========================================================
-
-
-                    // plugin
-                    case "plugin":
-
-                        switch (command.getParameterLength()) {
-
-                            // plugin
-                            case 0:
-                                for (Map.Entry<String, Plugin> pluginEntry : systemd.getAllPlugin()) {
-
-                                    var pluginName = pluginEntry.getKey();
-                                    var pluginItem = pluginEntry.getValue();
-
-                                    System.out.println(Color.BRIGHT_CYAN + pluginName + " " + pluginItem.getModules().size() + Color.RESET);
-
-                                    Map<Runner, Class<? extends EventHandlerRunner>> runnerClassMap = pluginItem.getRunnerClassMap();
-                                    System.out.println(Color.GREEN + ">> 定时器 " + runnerClassMap.size() + Color.RESET);
-                                    for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> classEntry : runnerClassMap.entrySet()) {
-                                        var moduleName = classEntry.getKey();
-                                        var moduleItem = classEntry.getValue();
-                                        System.out.println(moduleName.value() + '[' + moduleName.priority() + "] -> " + moduleItem.getName());
-                                    }
-
-                                    Map<Filter, Class<? extends EventHandlerFilter>> filterClassMap = pluginItem.getFilterClassMap();
-                                    System.out.println(Color.GREEN + ">> 过滤器 " + filterClassMap.size() + Color.RESET);
-                                    for (Map.Entry<Filter, Class<? extends EventHandlerFilter>> classEntry : filterClassMap.entrySet()) {
-                                        var moduleName = classEntry.getKey();
-                                        var moduleItem = classEntry.getValue();
-                                        System.out.println(moduleName.value() + '[' + moduleName.priority() + "] -> " + moduleItem.getName());
-                                    }
-
-                                    Map<Monitor, Class<? extends EventHandlerMonitor>> monitorClassMap = pluginItem.getMonitorClassMap();
-                                    System.out.println(Color.GREEN + ">> 监听器 " + monitorClassMap.size() + Color.RESET);
-                                    for (Map.Entry<Monitor, Class<? extends EventHandlerMonitor>> classEntry : monitorClassMap.entrySet()) {
-                                        var moduleName = classEntry.getKey();
-                                        var moduleItem = classEntry.getValue();
-                                        System.out.println(moduleName.value() + '[' + moduleName.priority() + "] -> " + moduleItem.getName());
-                                    }
-
-                                    Map<Checker, Class<? extends EventHandlerChecker>> checkerClassMap = pluginItem.getCheckerClassMap();
-                                    System.out.println(Color.GREEN + ">> 检查器 " + checkerClassMap.size() + Color.RESET);
-                                    for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> classEntry : checkerClassMap.entrySet()) {
-                                        var moduleName = classEntry.getKey();
-                                        var moduleItem = classEntry.getValue();
-                                        System.out.println(moduleName.value() + '[' + moduleName.priority() + "](" + moduleName.command() + ") -> " + moduleItem.getName());
-                                    }
-
-                                    Map<Executor, Class<? extends EventHandlerExecutor>> executorClassMap = pluginItem.getExecutorClassMap();
-                                    System.out.println(Color.GREEN + ">> 执行器 " + executorClassMap.size() + Color.RESET);
-                                    for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> classEntry : executorClassMap.entrySet()) {
-                                        var moduleName = classEntry.getKey();
-                                        var moduleItem = classEntry.getValue();
-                                        System.out.println(moduleName.value() + '(' + moduleName.command() + ") -> " + moduleItem.getName());
-                                    }
-
-                                }
-                                break;
-
-                        }
-                        break;
-
-
-                    // =========================================================
-
-
-                    // module
-                    case "module":
-
-                        switch (command.getParameterLength()) {
-
-                            case 2:
-
-                                switch (command.getParameterSegment(0)) {
-
-                                    // module shut <plugin>
-                                    case "shut" -> systemd.shutModule(command.getParameterSegment(1));
-
-                                    // module init <plugin>
-                                    case "init" -> systemd.initModule(command.getParameterSegment(1));
-
-                                    // module boot <plugin>
-                                    case "boot" -> systemd.bootModule(command.getParameterSegment(1));
-
-                                    // module reboot <plugin>
-                                    case "reboot" -> systemd.rebootModule(command.getParameterSegment(1));
-
-                                    // module unload <plugin>
-                                    case "unload" -> systemd.unloadModule(command.getParameterSegment(1));
-
-                                }
-                                break;
-
-
-                            // module
-                            case 0:
-
-                                Map<Runner, Boolean> listAllRunner = systemd.listAllRunner();
-                                System.out.println(Color.BRIGHT_CYAN + ">> 定时器 " + listAllRunner.size() + Color.RESET);
-                                for (Map.Entry<Runner, Boolean> entry : listAllRunner.entrySet()) {
-                                    System.out.println((entry.getValue() ? "开 " : "关 ") + entry.getKey().value());
-                                }
-
-                                Map<Filter, Boolean> listAllFilter = systemd.listAllFilter();
-                                System.out.println(Color.BRIGHT_CYAN + ">> 过滤器 " + listAllFilter.size() + Color.RESET);
-                                for (Map.Entry<Filter, Boolean> entry : listAllFilter.entrySet()) {
-                                    System.out.println((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
-                                }
-
-                                Map<Monitor, Boolean> listAllMonitor = systemd.listAllMonitor();
-                                System.out.println(Color.BRIGHT_CYAN + ">> 监听器 " + listAllMonitor.size() + Color.RESET);
-                                for (Map.Entry<Monitor, Boolean> entry : listAllMonitor.entrySet()) {
-                                    System.out.println((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
-                                }
-
-                                Map<Checker, Boolean> listAllChecker = systemd.listAllChecker();
-                                System.out.println(Color.BRIGHT_CYAN + ">> 检查器 " + listAllChecker.size() + Color.RESET);
-                                for (Map.Entry<Checker, Boolean> entry : listAllChecker.entrySet()) {
-                                    System.out.println((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]" + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
-                                }
-
-                                Map<Executor, Boolean> listAllExecutor = systemd.listAllExecutor();
-                                System.out.println(Color.BRIGHT_CYAN + ">> 执行器 " + listAllExecutor.size() + Color.RESET);
-                                for (Map.Entry<Executor, Boolean> entry : listAllExecutor.entrySet()) {
-                                    System.out.println((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
-                                }
-
-                                List<Checker> globalUsersChecker = systemd.listGlobalUsersChecker();
-                                System.out.println(Color.BRIGHT_CYAN + ">> 全局私聊检查器 " + globalUsersChecker.size() + Color.RESET);
-                                for (Checker annotation : globalUsersChecker) {
-                                    System.out.println(annotation.value());
-                                }
-
-                                List<Checker> globalGroupChecker = systemd.listGlobalGroupChecker();
-                                System.out.println(Color.BRIGHT_CYAN + ">> 全局群聊检查器 " + globalGroupChecker.size() + Color.RESET);
-                                for (Checker annotation : globalGroupChecker) {
-                                    System.out.println("  " + annotation.value());
-                                }
-
-                                Map<String, List<Checker>> listCommandUsersChecker = systemd.listCommandUsersChecker();
-                                System.out.println(Color.BRIGHT_CYAN + ">> 有限私聊检查器 " + listCommandUsersChecker.size() + Color.RESET);
-                                for (Map.Entry<String, List<Checker>> entry : listCommandUsersChecker.entrySet()) {
-                                    System.out.println(entry.getKey() + " " + entry.getValue().size());
-                                    for (Checker item : entry.getValue()) {
-                                        System.out.println("  " + item.value());
-                                    }
-                                }
-
-                                Map<String, List<Checker>> listCommandGroupChecker = systemd.listCommandGroupChecker();
-                                System.out.println(Color.BRIGHT_CYAN + ">> 有限群聊检查器 " + listCommandGroupChecker.size() + Color.RESET);
-                                for (Map.Entry<String, List<Checker>> entry : listCommandGroupChecker.entrySet()) {
-                                    System.out.println(entry.getKey() + " " + entry.getValue().size());
-                                    for (Checker item : entry.getValue()) {
-                                        System.out.println("  " + item.value());
-                                    }
-                                }
-
-                                System.out.println(Color.BRIGHT_CYAN + ">> 私聊命令列表" + Color.RESET);
-                                System.out.println(systemd.getMessageListUsers());
-
-                                System.out.println(Color.BRIGHT_CYAN + ">> 群聊命令列表" + Color.RESET);
-                                System.out.println(systemd.getMessageListGroup());
-
-                                break;
-                        }
-                        break;
-
-
-                    // =========================================================
-
-
-                    case "schema":
-                        systemd.schemaVerbose();
-                        break;
-
-
-                    // =========================================================
-
 
                     case "gc":
                     case "stat":
@@ -1233,12 +1000,71 @@ public final class FurryBlack {
                         long totalMemory = Runtime.getRuntime().totalMemory() / 1024;
                         long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
                         long maxMemory = Runtime.getRuntime().maxMemory() / 1024;
-                        System.out.println("调试模式: " + (debug ? "启用" : "关闭"));
-                        System.out.println("关闭模式: " + (shutModeExit ? "强制" : "正常"));
-                        System.out.println("消息事件: " + (enable ? "启用" : "关闭"));
-                        System.out.println("运行时间: " + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME));
-                        System.out.println("内存占用: " + (totalMemory - freeMemory) + "KB/" + totalMemory + "KB/" + maxMemory + "KB(" + maxMemory / 1024 + "MB)");
+                        FurryBlack.terminalPrintLine(
+
+                            // @formatter:off
+
+                            "调试模式: " + (debug ? "启用" : "关闭") +
+                            "关闭模式: " + (shutModeExit ? "强制" : "正常") +
+                            "消息事件: " + (enable ? "启用" : "关闭") +
+                            "运行时间: " + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME) +
+                            "内存占用: " + (totalMemory - freeMemory) + "KB/" + totalMemory + "KB/" + maxMemory + "KB(" + maxMemory / 1024 + "MB)"
+
+                            // @formatter:on
+
+                        );
                         break;
+
+                    // =================================================================================================
+
+                    case "debug":
+                        if (command.getParameterLength() == 1) {
+                            switch (command.getParameterSegment(0)) {
+                                case "enable" -> {
+                                    debug = true;
+                                    FurryBlack.terminalPrintLine("DEBUG模式启动");
+                                }
+                                case "disable" -> {
+                                    debug = false;
+                                    FurryBlack.terminalPrintLine("DEBUG模式关闭");
+                                }
+                            }
+                        } else {
+                            FurryBlack.terminalPrintLine(debug ? "DEBUG已开启" : "DEBUG已关闭");
+                        }
+                        break;
+
+                    // ==========================================================================================================================================================
+
+                    case "color":
+
+                        FurryBlack.terminalPrintLine(
+
+                            // @formatter:off
+
+                            Color.RED +            "RED ------------ The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
+                            Color.GREEN +          "GREEN ---------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
+                            Color.YELLOW +         "YELLOW --------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
+                            Color.BLUE +           "BLUE ----------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
+                            Color.MAGENTA +        "MAGENTA -------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
+                            Color.CYAN +           "CYAN ----------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
+                            Color.BRIGHT_RED +     "BRIGHT_RED ----- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
+                            Color.BRIGHT_GREEN +   "BRIGHT_GREEN --- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
+                            Color.BRIGHT_YELLOW +  "BRIGHT_YELLOW -- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
+                            Color.BRIGHT_BLUE +    "BRIGHT_BLUE ---- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
+                            Color.BRIGHT_MAGENTA + "BRIGHT_MAGENTA - The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
+                            Color.BRIGHT_CYAN +    "BRIGHT_CYAN ---- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
+                            Color.WHITE +          "WHITE ---------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
+                            Color.GRAY +           "GRAY ----------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
+                            Color.BRIGHT_BLACK +   "BRIGHT_BLACK --- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
+                            Color.BRIGHT_WHITE +   "BRIGHT_WHITE --- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR
+
+                            // @formatter:on
+
+                        );
+                        break;
+
+                    // =========================================================
 
                     case "level":
                         if (command.hasCommandBody()) {
@@ -1262,42 +1088,184 @@ public final class FurryBlack {
                         }
                         break;
 
+                    // ==========================================================================================================================================================
+
+                    case "schema":
+                        FurryBlack.terminalPrintLine(systemd.schemaVerbose());
+                        break;
 
                     // =========================================================
 
+                    case "plugin":
+                        for (Map.Entry<String, Plugin> pluginEntry : systemd.getAllPlugin()) {
+
+                            var pluginName = pluginEntry.getKey();
+                            var pluginItem = pluginEntry.getValue();
+
+                            FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + pluginName + " " + pluginItem.getModules().size() + Color.RESET);
+
+                            Map<Runner, Class<? extends EventHandlerRunner>> runnerClassMap = pluginItem.getRunnerClassMap();
+                            FurryBlack.terminalPrintLine(Color.GREEN + ">> 定时器 " + runnerClassMap.size() + Color.RESET);
+                            for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> classEntry : runnerClassMap.entrySet()) {
+                                var moduleName = classEntry.getKey();
+                                var moduleItem = classEntry.getValue();
+                                FurryBlack.terminalPrintLine(moduleName.value() + '[' + moduleName.priority() + "] -> " + moduleItem.getName());
+                            }
+
+                            Map<Filter, Class<? extends EventHandlerFilter>> filterClassMap = pluginItem.getFilterClassMap();
+                            FurryBlack.terminalPrintLine(Color.GREEN + ">> 过滤器 " + filterClassMap.size() + Color.RESET);
+                            for (Map.Entry<Filter, Class<? extends EventHandlerFilter>> classEntry : filterClassMap.entrySet()) {
+                                var moduleName = classEntry.getKey();
+                                var moduleItem = classEntry.getValue();
+                                FurryBlack.terminalPrintLine(moduleName.value() + '[' + moduleName.priority() + "] -> " + moduleItem.getName());
+                            }
+
+                            Map<Monitor, Class<? extends EventHandlerMonitor>> monitorClassMap = pluginItem.getMonitorClassMap();
+                            FurryBlack.terminalPrintLine(Color.GREEN + ">> 监听器 " + monitorClassMap.size() + Color.RESET);
+                            for (Map.Entry<Monitor, Class<? extends EventHandlerMonitor>> classEntry : monitorClassMap.entrySet()) {
+                                var moduleName = classEntry.getKey();
+                                var moduleItem = classEntry.getValue();
+                                FurryBlack.terminalPrintLine(moduleName.value() + '[' + moduleName.priority() + "] -> " + moduleItem.getName());
+                            }
+
+                            Map<Checker, Class<? extends EventHandlerChecker>> checkerClassMap = pluginItem.getCheckerClassMap();
+                            FurryBlack.terminalPrintLine(Color.GREEN + ">> 检查器 " + checkerClassMap.size() + Color.RESET);
+                            for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> classEntry : checkerClassMap.entrySet()) {
+                                var moduleName = classEntry.getKey();
+                                var moduleItem = classEntry.getValue();
+                                FurryBlack.terminalPrintLine(moduleName.value() + '[' + moduleName.priority() + "](" + moduleName.command() + ") -> " + moduleItem.getName());
+                            }
+
+                            Map<Executor, Class<? extends EventHandlerExecutor>> executorClassMap = pluginItem.getExecutorClassMap();
+                            FurryBlack.terminalPrintLine(Color.GREEN + ">> 执行器 " + executorClassMap.size() + Color.RESET);
+                            for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> classEntry : executorClassMap.entrySet()) {
+                                var moduleName = classEntry.getKey();
+                                var moduleItem = classEntry.getValue();
+                                FurryBlack.terminalPrintLine(moduleName.value() + '(' + moduleName.command() + ") -> " + moduleItem.getName());
+                            }
+                        }
+                        break;
+
+                    // =========================================================
+
+                    case "module":
+
+                        switch (command.getParameterLength()) {
+
+                            case 2:
+
+                                switch (command.getParameterSegment(0)) {
+                                    // module shut <plugin>
+                                    case "shut" -> systemd.shutModule(command.getParameterSegment(1));
+
+                                    // module init <plugin>
+                                    case "init" -> systemd.initModule(command.getParameterSegment(1));
+
+                                    // module boot <plugin>
+                                    case "boot" -> systemd.bootModule(command.getParameterSegment(1));
+
+                                    // module reboot <plugin>
+                                    case "reboot" -> systemd.rebootModule(command.getParameterSegment(1));
+
+                                    // module unload <plugin>
+                                    case "unload" -> {
+                                        systemd.unloadModule(command.getParameterSegment(1));
+                                        terminal.updateCompleter();
+                                    }
+
+                                }
+                                break;
+
+                            case 0:
+                                Map<Runner, Boolean> listAllRunner = systemd.listAllRunner();
+                                FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 定时器 " + listAllRunner.size() + Color.RESET);
+                                for (Map.Entry<Runner, Boolean> entry : listAllRunner.entrySet()) {
+                                    FurryBlack.terminalPrintLine((entry.getValue() ? "开 " : "关 ") + entry.getKey().value());
+                                }
+                                Map<Filter, Boolean> listAllFilter = systemd.listAllFilter();
+                                FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 过滤器 " + listAllFilter.size() + Color.RESET);
+                                for (Map.Entry<Filter, Boolean> entry : listAllFilter.entrySet()) {
+                                    FurryBlack.terminalPrintLine((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
+                                }
+                                Map<Monitor, Boolean> listAllMonitor = systemd.listAllMonitor();
+                                FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 监听器 " + listAllMonitor.size() + Color.RESET);
+                                for (Map.Entry<Monitor, Boolean> entry : listAllMonitor.entrySet()) {
+                                    FurryBlack.terminalPrintLine((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
+                                }
+                                Map<Checker, Boolean> listAllChecker = systemd.listAllChecker();
+                                FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 检查器 " + listAllChecker.size() + Color.RESET);
+                                for (Map.Entry<Checker, Boolean> entry : listAllChecker.entrySet()) {
+                                    FurryBlack.terminalPrintLine((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]" + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
+                                }
+                                Map<Executor, Boolean> listAllExecutor = systemd.listAllExecutor();
+                                FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 执行器 " + listAllExecutor.size() + Color.RESET);
+                                for (Map.Entry<Executor, Boolean> entry : listAllExecutor.entrySet()) {
+                                    FurryBlack.terminalPrintLine((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
+                                }
+                                List<Checker> globalUsersChecker = systemd.listGlobalUsersChecker();
+                                FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 全局私聊检查器 " + globalUsersChecker.size() + Color.RESET);
+                                for (Checker annotation : globalUsersChecker) {
+                                    FurryBlack.terminalPrintLine(annotation.value());
+                                }
+                                List<Checker> globalGroupChecker = systemd.listGlobalGroupChecker();
+                                FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 全局群聊检查器 " + globalGroupChecker.size() + Color.RESET);
+                                for (Checker annotation : globalGroupChecker) {
+                                    FurryBlack.terminalPrintLine("  " + annotation.value());
+                                }
+                                Map<String, List<Checker>> listCommandUsersChecker = systemd.listCommandUsersChecker();
+                                FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 有限私聊检查器 " + listCommandUsersChecker.size() + Color.RESET);
+                                for (Map.Entry<String, List<Checker>> entry : listCommandUsersChecker.entrySet()) {
+                                    FurryBlack.terminalPrintLine(entry.getKey() + " " + entry.getValue().size());
+                                    for (Checker item : entry.getValue()) {
+                                        FurryBlack.terminalPrintLine("  " + item.value());
+                                    }
+                                }
+                                Map<String, List<Checker>> listCommandGroupChecker = systemd.listCommandGroupChecker();
+                                FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 有限群聊检查器 " + listCommandGroupChecker.size() + Color.RESET);
+                                for (Map.Entry<String, List<Checker>> entry : listCommandGroupChecker.entrySet()) {
+                                    FurryBlack.terminalPrintLine(entry.getKey() + " " + entry.getValue().size());
+                                    for (Checker item : entry.getValue()) {
+                                        FurryBlack.terminalPrintLine("  " + item.value());
+                                    }
+                                }
+                                FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 私聊命令列表" + Color.RESET);
+                                FurryBlack.terminalPrintLine(systemd.getMessageListUsers());
+                                FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 群聊命令列表" + Color.RESET);
+                                FurryBlack.terminalPrintLine(systemd.getMessageListGroup());
+                                break;
+                        }
+                        break;
+
+                    // ==========================================================================================================================================================
 
                     case "nickname":
 
-                        if (!command.hasCommandBody()) continue console;
-
                         switch (command.getParameterSegment(0)) {
 
-                            case "list":
-                                System.out.println(Color.BRIGHT_CYAN + "全局昵称" + Color.RESET);
+                            case "list" -> {
+                                FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + "全局昵称" + Color.RESET);
                                 for (Map.Entry<Long, String> entry : systemd.getNicknameGlobal().entrySet()) {
-                                    System.out.println(entry.getKey() + ":" + entry.getValue());
+                                    FurryBlack.terminalPrintLine(entry.getKey() + ":" + entry.getValue());
                                 }
-                                System.out.println(Color.BRIGHT_CYAN + "群内昵称" + Color.RESET);
+                                FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + "群内昵称" + Color.RESET);
                                 for (Map.Entry<Long, Map<Long, String>> groupsEntry : systemd.getNicknameGroups().entrySet()) {
-                                    System.out.println("> " + groupsEntry.getKey());
+                                    FurryBlack.terminalPrintLine("> " + groupsEntry.getKey());
                                     for (Map.Entry<Long, String> nicknameEntry : groupsEntry.getValue().entrySet()) {
-                                        System.out.println(nicknameEntry.getKey() + ":" + nicknameEntry.getValue());
+                                        FurryBlack.terminalPrintLine(nicknameEntry.getKey() + ":" + nicknameEntry.getValue());
                                     }
                                 }
-                                break;
+                            }
 
-                            case "clean":
+                            case "clean" -> systemd.cleanNickname();
+
+                            case "append" -> systemd.appendNickname();
+
+                            case "reload" -> {
                                 systemd.cleanNickname();
-                                break;
-
-                            case "reload":
-                                systemd.cleanNickname();
-
-                            case "append":
                                 systemd.appendNickname();
-                                break;
+                            }
 
-                            case "export":
+                            case "export" -> {
                                 List<String> list = systemd.exportNickname();
                                 File file = Paths.get(FOLDER_CONFIG.getAbsolutePath(), "export-nickname-" + TimeTool.format("yyyy-MM-dd HH-mm-ss") + ".txt").toFile();
                                 //noinspection ResultOfMethodCallIgnored
@@ -1309,40 +1277,43 @@ public final class FurryBlack {
                                         fileOutputStream.write("\n".getBytes(StandardCharsets.UTF_8));
                                     }
                                 }
-                                break;
+                            }
                         }
                         break;
 
+                    // =================================================================================================
 
                     case "list":
-                        if (!command.hasCommandBody()) continue console;
                         switch (command.getParameterSegment(0)) {
+
                             case "u", "usr", "user", "users", "f", "fri", "friend", "friends" -> {
                                 List<Friend> friends = FurryBlack.getFriends().stream().filter(item -> item.getId() != systemd.getBotID()).collect(Collectors.toList());
                                 if (friends.size() == 0) {
-                                    System.out.println("你没有朋友");
+                                    FurryBlack.terminalPrintLine("你没有朋友");
                                     break;
                                 }
                                 friends.stream()
                                     .map(FurryBlack::getFormattedNickName)
-                                    .forEach(System.out::println);
+                                    .forEach(FurryBlack::terminalPrintLine);
                             }
+
                             case "g", "grp", "group", "groups" -> {
                                 ContactList<Group> groups = FurryBlack.getGroups();
                                 if (groups.size() == 0) {
-                                    System.out.println("你没有群组");
+                                    FurryBlack.terminalPrintLine("你没有群组");
                                     break;
                                 }
                                 groups.stream()
                                     .map(item -> item.getName() + "(" + item.getId() + ") " + item.getMembers().size() + "人")
-                                    .forEach(System.out::println);
+                                    .forEach(FurryBlack::terminalPrintLine);
                             }
+
                             default -> {
                                 long group;
                                 try {
                                     group = Long.parseLong(command.getParameterSegment(0));
                                 } catch (Exception exception) {
-                                    System.out.println("命令发生异常 省略group需要指定群号");
+                                    FurryBlack.terminalPrintLine("命令发生异常 省略group需要指定群号");
                                     break;
                                 }
                                 FurryBlack.getGroup(group).getMembers().stream()
@@ -1355,21 +1326,17 @@ public final class FurryBlack {
                                         switch (item.getPermission().getLevel()) {
                                             case 2 -> builder.append(" 群主");
                                             case 1 -> builder.append(" 管理");
-                                            default -> {
-                                            }
                                         }
-                                        System.out.println(builder);
+                                        FurryBlack.terminalPrintLine(builder);
                                     });
                             }
                         }
                         break;
 
-
                     // =========================================================
 
-
                     case "send":
-                        if (command.getParameterLength() < 1) continue;
+
                         switch (command.getParameterSegment(0)) {
 
                             case "u":
@@ -1399,13 +1366,6 @@ public final class FurryBlack {
                         }
                         break;
 
-
-                    // =========================================================
-
-
-                    default:
-                        System.out.println("没有此命令");
-                        break;
                 }
 
             } catch (UserInterruptException exception) {
@@ -1414,80 +1374,13 @@ public final class FurryBlack {
                 logger.error("命令导致了异常", exception);
             }
         }
-    }
-
-
-    public interface Console {
-        String readLine(String prompt);
-    }
-
-
-    public static class ReaderConsole implements Console {
-
-        private final BufferedReader bufferedReader;
-
-        public ReaderConsole() {
-            this.bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-        }
-
-        @Override
-        public String readLine(String prompt) {
-            try {
-                return this.bufferedReader.readLine();
-            } catch (IOException exception) {
-                throw new ConsoleException(exception);
-            }
-        }
-    }
-
-
-    public static class JLineConsole implements Console {
-
-        private final LineReader jlineReader;
-
-        public JLineConsole() {
-            this.jlineReader = LineReaderBuilder.builder().completer(completerDelegate).build();
-            AutopairWidgets autopairWidgets = new AutopairWidgets(this.jlineReader);
-            autopairWidgets.enable();
-        }
-
-        @Override
-        public String readLine(String prompt) {
-            return this.jlineReader.readLine(prompt);
-        }
-
-        public static class CompleterDelegate implements Completer {
-
-            private Completer completer;
-
-            @Override
-            public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
-                this.completer.complete(reader, line, candidates);
-            }
-
-            public void update() {
-                this.completer = new AggregateCompleter(
-                    new ArgumentCompleter(new StringsCompleter("help", "kill", "drop", "stop", "stat", "enable", "disable", "schema", "color")),
-                    new ArgumentCompleter(new StringsCompleter("list", "send"), new StringsCompleter("users", "group")),
-                    new TreeCompleter(node("level", node("MUTE", "FATAL", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "DEVELOP", "EVERYTHING"))),
-                    new TreeCompleter(node("nickname", node("list", "clean", "reload", "append", "export"))),
-                    new TreeCompleter(node("debug", node("enable", "disable"))),
-                    new TreeCompleter(node("plugin")),
-                    new TreeCompleter(node("module",
-                        node("init", "boot", "shut", "reboot", "unload",
-                            node(new StringsCompleter(systemd.listAllModule().keySet()))
-                        )
-                    ))
-                );
-            }
-        }
 
     }
 
 
     public static void printHelp() {
 
-        System.out.println(
+        FurryBlack.terminalPrintLine(
 
             // @formatter:off
 
@@ -1558,4 +1451,149 @@ public final class FurryBlack {
 
         );
     }
+
+
+    public abstract static class Terminal {
+
+
+        public static Terminal getInstance() {
+            if (noJline) {
+                return new SimpleTerminal();
+            } else {
+                return new JlineTerminal();
+            }
+        }
+
+        String readLine(String prompt) {
+            return this.readLineImpl(prompt);
+        }
+
+        void print(String message) {
+            this.printImpl(message);
+        }
+
+        void printLine(String message) {
+            this.printLineImpl(message);
+        }
+
+        void updateCompleter() {
+            this.updateCompleterImpl();
+        }
+
+
+        protected abstract String readLineImpl(String prompt);
+
+        protected abstract void printImpl(String message);
+
+        protected abstract void printLineImpl(String message);
+
+        protected abstract void updateCompleterImpl();
+
+    }
+
+
+    public static class SimpleTerminal extends Terminal {
+
+        private final BufferedReader bufferedReader;
+        private final OutputStreamWriter outputStreamWriter;
+
+        public SimpleTerminal() {
+            InputStreamReader inputStreamReader = new InputStreamReader(System.in, StandardCharsets.UTF_8);
+            this.bufferedReader = new BufferedReader(inputStreamReader);
+            this.outputStreamWriter = new OutputStreamWriter(System.out, StandardCharsets.UTF_8);
+        }
+
+        @Override
+        protected String readLineImpl(String prompt) {
+            this.printImpl(prompt);
+            try {
+                return this.bufferedReader.readLine();
+            } catch (IOException exception) {
+                throw new ConsoleException(exception);
+            }
+        }
+
+        @Override
+        protected synchronized void printImpl(String message) {
+            try {
+                this.outputStreamWriter.write(message);
+                this.outputStreamWriter.flush();
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        }
+
+        @Override
+        protected void printLineImpl(String message) {
+            this.printImpl(message + LINE_SPEARATOR);
+        }
+
+        @Override
+        protected void updateCompleterImpl() {
+            // Do nothing
+        }
+    }
+
+
+    public static class JlineTerminal extends Terminal {
+
+        private final LineReader jlineReader;
+        private final CompleterDelegate completerDelegate;
+
+        public JlineTerminal() {
+            this.completerDelegate = new CompleterDelegate();
+            this.jlineReader = LineReaderBuilder.builder().completer(this.completerDelegate).build();
+            AutopairWidgets autopairWidgets = new AutopairWidgets(this.jlineReader);
+            autopairWidgets.enable();
+        }
+
+        @Override
+        protected String readLineImpl(String prompt) {
+            return this.jlineReader.readLine(prompt);
+        }
+
+        @Override
+        protected synchronized void printImpl(String message) {
+            this.jlineReader.printAbove(message);
+        }
+
+        @Override
+        protected void printLineImpl(String message) {
+            this.printImpl(message + LINE_SPEARATOR);
+        }
+
+        @Override
+        protected void updateCompleterImpl() {
+            this.completerDelegate.update();
+        }
+
+        public static class CompleterDelegate implements Completer {
+
+            private Completer completer;
+
+            @Override
+            public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
+                this.completer.complete(reader, line, candidates);
+            }
+
+            public void update() {
+                this.completer = new AggregateCompleter(
+                    new ArgumentCompleter(new StringsCompleter("help", "kill", "drop", "stop", "stat", "enable", "disable", "schema", "color")),
+                    new ArgumentCompleter(new StringsCompleter("list", "send"), new StringsCompleter("users", "group")),
+                    new TreeCompleter(node("level", node("MUTE", "FATAL", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "DEVELOP", "EVERYTHING"))),
+                    new TreeCompleter(node("nickname", node("list", "clean", "reload", "append", "export"))),
+                    new TreeCompleter(node("debug", node("enable", "disable"))),
+                    new TreeCompleter(node("plugin")),
+                    new TreeCompleter(node("module",
+                        node("init", "boot", "shut", "reboot", "unload",
+                            node(new StringsCompleter(systemd.listAllModule().keySet()))
+                        )
+                    ))
+                );
+            }
+        }
+
+    }
+
+
 }

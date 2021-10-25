@@ -20,6 +20,7 @@
 package studio.blacktech.furryblackplus.core.common.logger.support;
 
 
+import studio.blacktech.furryblackplus.FurryBlack;
 import studio.blacktech.furryblackplus.core.common.exception.moduels.load.LockedException;
 import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
 import studio.blacktech.furryblackplus.core.common.time.TimeTool;
@@ -67,16 +68,16 @@ public class WriteLogger extends LoggerX {
 
     private static synchronized void handle(Color color, String message) {
         if (color == null) {
-            System.out.println(message);
+            FurryBlack.terminalPrintLine(message);
         } else {
-            System.out.println(color + message + Color.RESET);
+            FurryBlack.terminalPrintLine(color + message + Color.RESET);
         }
         try (FileWriter writer = new FileWriter(logger, StandardCharsets.UTF_8, true)) {
             writer.append(message);
             writer.append("\r\n");
             writer.flush();
         } catch (IOException exception) {
-            System.err.println("Writer log failed \n" + extractStackTrace(exception));
+            System.err.println("LoggerX WriteLogger - writer log failed \n" + extractStackTrace(exception));
         }
     }
 

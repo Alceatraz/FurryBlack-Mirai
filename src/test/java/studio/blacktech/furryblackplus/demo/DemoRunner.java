@@ -16,9 +16,10 @@
 package studio.blacktech.furryblackplus.demo;
 
 
+import studio.blacktech.furryblackplus.FurryBlack;
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.handler.annotation.Runner;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerRunner;
+import studio.blacktech.furryblackplus.core.handler.annotation.Runner;
 
 
 @Api("示例定时器")
@@ -30,17 +31,17 @@ public class DemoRunner extends EventHandlerRunner {
 
     @Override
     public void init() {
-        System.out.println("加载" + this.getClass().getName());
+        FurryBlack.terminalPrintLine("加载" + this.getClass().getName());
     }
 
     @Override
     public void boot() {
-        System.out.println("启动" + this.getClass().getName());
+        FurryBlack.terminalPrintLine("启动" + this.getClass().getName());
     }
 
     @Override
     public void shut() {
-        System.out.println("关闭" + this.getClass().getName());
+        FurryBlack.terminalPrintLine("关闭" + this.getClass().getName());
     }
 
     @Api("自定义的一个方法-1")

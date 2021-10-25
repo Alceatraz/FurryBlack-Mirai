@@ -19,8 +19,8 @@ import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import studio.blacktech.furryblackplus.FurryBlack;
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.handler.annotation.Monitor;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerMonitor;
+import studio.blacktech.furryblackplus.core.handler.annotation.Monitor;
 
 
 @Api("示例监视器 监视器")
@@ -35,28 +35,28 @@ public class DemoMonitor extends EventHandlerMonitor {
 
     @Override
     public void init() {
-        System.out.println("加载" + this.getClass().getName());
+        FurryBlack.terminalPrintLine("加载" + this.getClass().getName());
         DemoRunner demoRunner = FurryBlack.getRunner(DemoRunner.class);
         demoRunner.demo();
     }
 
     @Override
     public void boot() {
-        System.out.println("启动" + this.getClass().getName());
+        FurryBlack.terminalPrintLine("启动" + this.getClass().getName());
     }
 
     @Override
     public void shut() {
-        System.out.println("关闭" + this.getClass().getName());
+        FurryBlack.terminalPrintLine("关闭" + this.getClass().getName());
     }
 
     @Override
     public void handleUsersMessage(UserMessageEvent event) {
-        System.out.println("消息" + this.getClass().getName());
+        FurryBlack.terminalPrintLine("消息" + this.getClass().getName());
     }
 
     @Override
     public void handleGroupMessage(GroupMessageEvent event) {
-        System.out.println("消息" + this.getClass().getName());
+        FurryBlack.terminalPrintLine("消息" + this.getClass().getName());
     }
 }

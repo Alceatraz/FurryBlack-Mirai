@@ -269,7 +269,7 @@ public class BasicModuleUtilities {
             throw new IllegalArgumentException("文件是目录 -> " + file.getAbsolutePath());
         }
         if (!file.canRead()) {
-            throw new IllegalArgumentException("文件无权读取 -> " + file.getAbsolutePath());
+            throw new IllegalArgumentException("文件无权读 -> " + file.getAbsolutePath());
         }
     }
 
