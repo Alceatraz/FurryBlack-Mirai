@@ -1571,6 +1571,20 @@ public final class FurryBlack {
 
             private Completer completer;
 
+            public CompleterDelegate() {
+                this.completer = new AggregateCompleter(
+                    new ArgumentCompleter(new StringsCompleter("help", "kill", "drop", "stop", "stat", "enable", "disable", "schema", "color")),
+                    new ArgumentCompleter(new StringsCompleter("list", "send"), new StringsCompleter("users", "group")),
+                    new TreeCompleter(node("level", node("MUTE", "FATAL", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "DEVELOP", "EVERYTHING"))),
+                    new TreeCompleter(node("nickname", node("list", "clean", "reload", "append", "export"))),
+                    new TreeCompleter(node("debug", node("enable", "disable"))),
+                    new TreeCompleter(node("plugin")),
+                    new TreeCompleter(node("module",
+                        node("init", "boot", "shut", "reboot", "unload")
+                    ))
+                );
+            }
+
             @Override
             public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
                 this.completer.complete(reader, line, candidates);
