@@ -426,7 +426,12 @@ public final class FurryBlack {
             LoggerX.setLevel(level);
         }
 
+        // =====================================================================
+
+        terminal.updateCompleter();
         prompt.set("[console]$ ");
+
+        // =====================================================================
 
         enable = true;
 
