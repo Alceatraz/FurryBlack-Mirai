@@ -141,6 +141,11 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.0.10
+
+- 完善NickName的控制台操作
+- 修复控制台某些命令可能报NOE的问题
+
 ### 2.0.9
 
 - 为了适配JLine，使用printAbove替代所有stout，除了：

@@ -24,7 +24,6 @@ import net.mamoe.mirai.contact.ContactList;
 import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
-import net.mamoe.mirai.contact.NormalMember;
 import net.mamoe.mirai.contact.Stranger;
 import net.mamoe.mirai.contact.User;
 import net.mamoe.mirai.event.GlobalEventChannel;
@@ -66,7 +65,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -1253,20 +1251,6 @@ public final class Systemd extends BasicModuleUtilities {
         }
     }
 
-
-    public List<String> exportNickname() {
-        List<String> result = new LinkedList<>();
-        for (Friend friend : this.bot.getFriends()) {
-            result.add("*." + friend.getId() + ":" + friend.getNick());
-        }
-        for (Group group : this.bot.getGroups()) {
-            long groupId = group.getId();
-            for (NormalMember member : group.getMembers()) {
-                result.add(groupId + "." + member.getId() + ":" + member.getNameCard() + "-" + member.getNick());
-            }
-        }
-        return result;
-    }
 
     public Map<Long, String> getNicknameGlobal() {
         return this.NICKNAME_GLOBAL;

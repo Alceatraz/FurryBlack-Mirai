@@ -1312,7 +1312,7 @@ public class Schema {
 
         builder
             .append(Color.BRIGHT_MAGENTA + ">> PLUGINS" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<String, Plugin> entry : this.plugins.entrySet()) {
             var k = entry.getKey();
@@ -1325,7 +1325,7 @@ public class Schema {
                 .append(" ")
                 .append(v.getFile())
                 .append(Color.RESET)
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
             for (Map.Entry<String, Class<? extends AbstractEventHandler>> classEntry : v.getModules().entrySet()) {
                 var classK = classEntry.getKey();
                 var classV = classEntry.getValue();
@@ -1335,13 +1335,13 @@ public class Schema {
                     .append(classV.getName())
                     .append(":")
                     .append(hexHash(classV))
-                    .append(FurryBlack.LINE_SPEARATOR);
+                    .append(FurryBlack.LINE_SEPARATOR);
             }
         }
 
         builder
             .append(Color.BRIGHT_MAGENTA + ">> MODULES" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<String, Class<? extends AbstractEventHandler>> entry : this.modules.entrySet()) {
             var k = entry.getKey();
@@ -1352,12 +1352,12 @@ public class Schema {
                 .append(v.getName())
                 .append(":")
                 .append(hexHash(v))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_MAGENTA + ">> MODULE_PLUGIN_RELATION" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<String, String> entry : this.MODULE_PLUGIN_RELATION.entrySet()) {
             var k = entry.getKey();
@@ -1366,12 +1366,12 @@ public class Schema {
                 .append(k)
                 .append(" -> ")
                 .append(v)
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> COMPONENT_RUNNER_CLAZZ" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> entry : this.COMPONENT_RUNNER_CLAZZ.entrySet()) {
             var k = entry.getKey();
@@ -1384,12 +1384,12 @@ public class Schema {
                 .append(v.getName())
                 .append(":")
                 .append(hexHash(v))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> COMPONENT_FILTER_CLAZZ" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<Filter, Class<? extends EventHandlerFilter>> entry : this.COMPONENT_FILTER_CLAZZ.entrySet()) {
             var k = entry.getKey();
@@ -1402,12 +1402,12 @@ public class Schema {
                 .append(v.getName())
                 .append(":")
                 .append(hexHash(v))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> COMPONENT_MONITOR_CLAZZ" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<Monitor, Class<? extends EventHandlerMonitor>> entry : this.COMPONENT_MONITOR_CLAZZ.entrySet()) {
             var k = entry.getKey();
@@ -1420,12 +1420,12 @@ public class Schema {
                 .append(v.getName())
                 .append(":")
                 .append(hexHash(v))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> COMPONENT_CHECKER_CLAZZ" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> entry : this.COMPONENT_CHECKER_CLAZZ.entrySet()) {
             var k = entry.getKey();
@@ -1438,12 +1438,12 @@ public class Schema {
                 .append(v.getName())
                 .append(":")
                 .append(hexHash(v))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> COMPONENT_EXECUTOR_CLAZZ" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> entry : this.COMPONENT_EXECUTOR_CLAZZ.entrySet()) {
             var k = entry.getKey();
@@ -1456,60 +1456,60 @@ public class Schema {
                 .append(v.getName())
                 .append(":")
                 .append(hexHash(v))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> SORTED_RUNNER" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Runner entry : this.SORTED_RUNNER) {
             builder
                 .append(printAnnotation(entry))
                 .append(":")
                 .append(hexHash(entry))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> SORTED_FILTER" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Filter entry : this.SORTED_FILTER) {
             builder
                 .append(printAnnotation(entry))
                 .append(":")
                 .append(hexHash(entry))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> SORTED_MONITOR" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Monitor entry : this.SORTED_MONITOR) {
             builder
                 .append(printAnnotation(entry))
                 .append(":")
                 .append(hexHash(entry))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> SORTED_CHECKER" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Checker entry : this.SORTED_CHECKER) {
             builder
                 .append(printAnnotation(entry))
                 .append(":")
                 .append(hexHash(entry))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> COMPONENT_RUNNER_INSTANCE" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<Runner, EventHandlerRunner> entry : this.COMPONENT_RUNNER_INSTANCE.entrySet()) {
             var k = entry.getKey();
@@ -1522,12 +1522,12 @@ public class Schema {
                 .append(v.getClass().getName())
                 .append(":")
                 .append(hexHash(v))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> COMPONENT_FILTER_INSTANCE" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<Filter, EventHandlerFilter> entry : this.COMPONENT_FILTER_INSTANCE.entrySet()) {
             var k = entry.getKey();
@@ -1540,12 +1540,12 @@ public class Schema {
                 .append(v.getClass().getName())
                 .append(":")
                 .append(hexHash(v))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> COMPONENT_MONITOR_INSTANCE" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<Monitor, EventHandlerMonitor> entry : this.COMPONENT_MONITOR_INSTANCE.entrySet()) {
             var k = entry.getKey();
@@ -1558,12 +1558,12 @@ public class Schema {
                 .append(v.getClass().getName())
                 .append(":")
                 .append(hexHash(v))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> COMPONENT_CHECKER_INSTANCE" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<Checker, EventHandlerChecker> entry : this.COMPONENT_CHECKER_INSTANCE.entrySet()) {
             var k = entry.getKey();
@@ -1576,12 +1576,12 @@ public class Schema {
                 .append(v.getClass().getName())
                 .append(":")
                 .append(hexHash(v))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> COMPONENT_EXECUTOR_INSTANCE" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<Executor, EventHandlerExecutor> entry : this.COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
             var k = entry.getKey();
@@ -1594,85 +1594,85 @@ public class Schema {
                 .append(v.getClass().getName())
                 .append(":")
                 .append(hexHash(v))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
 
         builder
             .append(Color.BRIGHT_CYAN + ">> FILTER_USERS_CHAIN" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (EventHandlerFilter item : this.FILTER_USERS_CHAIN) {
             builder
                 .append(item.getClass().getName())
                 .append(":")
                 .append(hexHash(item))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> FILTER_GROUP_CHAIN" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (EventHandlerFilter item : this.FILTER_GROUP_CHAIN) {
             builder
                 .append(item.getClass().getName())
                 .append(":")
                 .append(hexHash(item))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> MONITOR_USERS_CHAIN" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (EventHandlerMonitor item : this.MONITOR_USERS_CHAIN) {
             builder
                 .append(item.getClass().getName())
                 .append(":")
                 .append(hexHash(item))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> MONITOR_GROUP_CHAIN" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (EventHandlerMonitor item : this.MONITOR_GROUP_CHAIN) {
             builder
                 .append(item.getClass().getName())
                 .append(":")
                 .append(hexHash(item))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> GLOBAL_CHECKER_USERS_POOL" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (EventHandlerChecker item : this.GLOBAL_CHECKER_USERS_POOL) {
             builder
                 .append(item.getClass().getName())
                 .append(":")
                 .append(hexHash(item))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> GLOBAL_CHECKER_GROUP_POOL" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (EventHandlerChecker item : this.GLOBAL_CHECKER_GROUP_POOL) {
             builder
                 .append(item.getClass().getName())
                 .append(":")
                 .append(hexHash(item))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> COMMAND_CHECKER_USERS_POOL" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_USERS_POOL.entrySet()) {
             var k = entry.getKey();
@@ -1683,19 +1683,19 @@ public class Schema {
                 .append(Color.RESET)
                 .append(" ")
                 .append(v.size())
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
             for (EventHandlerChecker checker : v) {
                 builder
                     .append(checker.getClass().getName())
                     .append(":")
                     .append(hexHash(checker))
-                    .append(FurryBlack.LINE_SPEARATOR);
+                    .append(FurryBlack.LINE_SEPARATOR);
             }
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> COMMAND_CHECKER_GROUP_POOL" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<String, List<EventHandlerChecker>> entry : this.COMMAND_CHECKER_GROUP_POOL.entrySet()) {
             var k = entry.getKey();
@@ -1706,19 +1706,19 @@ public class Schema {
                 .append(Color.RESET)
                 .append(" ")
                 .append(v.size())
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
             for (EventHandlerChecker checker : v) {
                 builder
                     .append(checker.getClass().getName())
                     .append(":")
                     .append(hexHash(checker))
-                    .append(FurryBlack.LINE_SPEARATOR);
+                    .append(FurryBlack.LINE_SEPARATOR);
             }
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> EXECUTOR_USERS_POOL" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<String, EventHandlerExecutor> entry : this.EXECUTOR_USERS_POOL.entrySet()) {
             var k = entry.getKey();
@@ -1729,24 +1729,24 @@ public class Schema {
                 .append(v.getClass().getName())
                 .append(":")
                 .append(hexHash(v))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> EXECUTOR_GROUP_POOL" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<String, EventHandlerExecutor> entry : this.EXECUTOR_GROUP_POOL.entrySet()) {
             var k = entry.getKey();
             var v = entry.getValue();
             builder
                 .append(k + " -> " + v.getClass().getName() + ":" + hexHash(v))
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
         }
 
         builder
             .append(Color.BRIGHT_CYAN + ">> COMMAND_EXECUTOR_RELATION" + Color.RESET)
-            .append(FurryBlack.LINE_SPEARATOR);
+            .append(FurryBlack.LINE_SEPARATOR);
 
         for (Map.Entry<String, Executor> entry : this.COMMAND_EXECUTOR_RELATION.entrySet()) {
             var k = entry.getKey();
@@ -1766,16 +1766,16 @@ public class Schema {
                 .append(v.outline())
                 .append(":")
                 .append(v.description())
-                .append(FurryBlack.LINE_SPEARATOR);
+                .append(FurryBlack.LINE_SEPARATOR);
             for (String temp : v.usage()) {
                 builder
                     .append(temp)
-                    .append(FurryBlack.LINE_SPEARATOR);
+                    .append(FurryBlack.LINE_SEPARATOR);
             }
             for (String temp : v.privacy()) {
                 builder
                     .append(temp)
-                    .append(FurryBlack.LINE_SPEARATOR);
+                    .append(FurryBlack.LINE_SEPARATOR);
             }
         }
 

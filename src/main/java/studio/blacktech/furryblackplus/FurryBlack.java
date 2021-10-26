@@ -166,7 +166,7 @@ public final class FurryBlack {
     @Api("原始系统时区") public static final ZoneId SYSTEM_ZONEID;
     @Api("原始系统偏差") public static final ZoneOffset SYSTEM_OFFSET;
 
-    @Api("系统换行符") public static final String LINE_SPEARATOR;
+    @Api("系统换行符") public static final String LINE_SEPARATOR;
 
 
     static {
@@ -179,7 +179,7 @@ public final class FurryBlack {
         Locale.setDefault(Locale.SIMPLIFIED_CHINESE);
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
 
-        LINE_SPEARATOR = System.lineSeparator();
+        LINE_SEPARATOR = System.lineSeparator();
 
     }
 
@@ -1047,22 +1047,22 @@ public final class FurryBlack {
 
                             // @formatter:off
 
-                            Color.RED +            "RED ------------ The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
-                            Color.GREEN +          "GREEN ---------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
-                            Color.YELLOW +         "YELLOW --------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
-                            Color.BLUE +           "BLUE ----------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
-                            Color.MAGENTA +        "MAGENTA -------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
-                            Color.CYAN +           "CYAN ----------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
-                            Color.BRIGHT_RED +     "BRIGHT_RED ----- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
-                            Color.BRIGHT_GREEN +   "BRIGHT_GREEN --- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
-                            Color.BRIGHT_YELLOW +  "BRIGHT_YELLOW -- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
-                            Color.BRIGHT_BLUE +    "BRIGHT_BLUE ---- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
-                            Color.BRIGHT_MAGENTA + "BRIGHT_MAGENTA - The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
-                            Color.BRIGHT_CYAN +    "BRIGHT_CYAN ---- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
-                            Color.WHITE +          "WHITE ---------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
-                            Color.GRAY +           "GRAY ----------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
-                            Color.BRIGHT_BLACK +   "BRIGHT_BLACK --- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR +
-                            Color.BRIGHT_WHITE +   "BRIGHT_WHITE --- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SPEARATOR
+                            Color.RED +            "RED ------------ The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
+                            Color.GREEN +          "GREEN ---------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
+                            Color.YELLOW +         "YELLOW --------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
+                            Color.BLUE +           "BLUE ----------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
+                            Color.MAGENTA +        "MAGENTA -------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
+                            Color.CYAN +           "CYAN ----------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
+                            Color.BRIGHT_RED +     "BRIGHT_RED ----- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
+                            Color.BRIGHT_GREEN +   "BRIGHT_GREEN --- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
+                            Color.BRIGHT_YELLOW +  "BRIGHT_YELLOW -- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
+                            Color.BRIGHT_BLUE +    "BRIGHT_BLUE ---- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
+                            Color.BRIGHT_MAGENTA + "BRIGHT_MAGENTA - The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
+                            Color.BRIGHT_CYAN +    "BRIGHT_CYAN ---- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
+                            Color.WHITE +          "WHITE ---------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
+                            Color.GRAY +           "GRAY ----------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
+                            Color.BRIGHT_BLACK +   "BRIGHT_BLACK --- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
+                            Color.BRIGHT_WHITE +   "BRIGHT_WHITE --- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR
 
                             // @formatter:on
 
@@ -1245,6 +1245,8 @@ public final class FurryBlack {
 
                     case "nickname":
 
+                        if (!command.hasCommandBody()) break;
+
                         switch (command.getParameterSegment(0)) {
 
                             case "list" -> {
@@ -1261,27 +1263,53 @@ public final class FurryBlack {
                                 }
                             }
 
-                            case "clean" -> systemd.cleanNickname();
+                            case "clean" -> {
+                                systemd.cleanNickname();
+                                FurryBlack.terminalPrintLine("昵称已清空");
+                            }
 
-                            case "append" -> systemd.appendNickname();
+                            case "append" -> {
+                                systemd.appendNickname();
+                                FurryBlack.terminalPrintLine("昵称已续加");
+                            }
 
                             case "reload" -> {
                                 systemd.cleanNickname();
                                 systemd.appendNickname();
+                                FurryBlack.terminalPrintLine("昵称已重载");
                             }
 
                             case "export" -> {
-                                List<String> list = systemd.exportNickname();
                                 File file = Paths.get(FOLDER_CONFIG.getAbsolutePath(), "export-nickname-" + TimeTool.format("yyyy-MM-dd HH-mm-ss") + ".txt").toFile();
                                 //noinspection ResultOfMethodCallIgnored
                                 file.createNewFile();
-                                try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
-                                    for (String line : list) {
-                                        byte[] bytes = line.getBytes(StandardCharsets.UTF_8);
-                                        fileOutputStream.write(bytes);
-                                        fileOutputStream.write("\n".getBytes(StandardCharsets.UTF_8));
+                                try (FileOutputStream fileOutputStream = new FileOutputStream(file);
+                                     OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream)
+                                ) {
+                                    ContactList<Friend> friends = getFriends();
+                                    outputStreamWriter.write("# 好友 " + friends.size() + LINE_SEPARATOR);
+                                    for (Friend friend : friends) {
+                                        outputStreamWriter.write("*." + friend.getId() + ":" + friend.getNick());
+                                        outputStreamWriter.write(LINE_SEPARATOR);
+                                    }
+                                    ContactList<Group> groups = getGroups();
+                                    outputStreamWriter.write("# 群组 " + groups.size() + LINE_SEPARATOR);
+                                    for (Group group : groups) {
+                                        outputStreamWriter.write(LINE_SEPARATOR);
+                                        long groupId = group.getId();
+                                        outputStreamWriter.write("# " + group.getName() + " " + group.getOwner().getId() + LINE_SEPARATOR);
+                                        for (NormalMember member : group.getMembers()) {
+                                            String nameCard = member.getNameCard();
+                                            if (nameCard.isEmpty()) {
+                                                outputStreamWriter.write(groupId + "." + member.getId() + ":" + member.getNick());
+                                            } else {
+                                                outputStreamWriter.write(groupId + "." + member.getId() + ":" + member.getNick() + "[" + nameCard + "]");
+                                            }
+                                            outputStreamWriter.write(LINE_SEPARATOR);
+                                        }
                                     }
                                 }
+                                FurryBlack.terminalPrintLine("昵称已导出 -> " + file.getAbsolutePath());
                             }
                         }
                         break;
@@ -1289,6 +1317,9 @@ public final class FurryBlack {
                     // =================================================================================================
 
                     case "list":
+
+                        if (!command.hasCommandBody()) break;
+
                         switch (command.getParameterSegment(0)) {
 
                             case "u", "usr", "user", "users", "f", "fri", "friend", "friends" -> {
@@ -1341,6 +1372,8 @@ public final class FurryBlack {
                     // =========================================================
 
                     case "send":
+
+                        if (!command.hasCommandBody()) break;
 
                         switch (command.getParameterSegment(0)) {
 
@@ -1530,7 +1563,7 @@ public final class FurryBlack {
 
         @Override
         protected void printLineImpl(String message) {
-            this.printImpl(message + LINE_SPEARATOR);
+            this.printImpl(message + LINE_SEPARATOR);
         }
 
         @Override
@@ -1564,7 +1597,7 @@ public final class FurryBlack {
 
         @Override
         protected void printLineImpl(String message) {
-            this.printImpl(message + LINE_SPEARATOR);
+            this.printImpl(message + LINE_SEPARATOR);
         }
 
         @Override
