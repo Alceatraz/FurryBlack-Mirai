@@ -141,6 +141,11 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.0.12
+
+- 更新jLine
+- 修改关闭线程池的逻辑
+
 ### 2.0.11
 
 - 调节FurryBlack.class并美化代码

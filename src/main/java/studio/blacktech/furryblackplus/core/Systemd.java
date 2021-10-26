@@ -71,8 +71,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -622,14 +622,14 @@ public final class Systemd extends BasicModuleUtilities {
         int monitorPoolSize = this.parseInteger(config.getProperty(CONF_THREADS_SCHEDULE));
         this.logger.seek("监听线程池配置 " + monitorPoolSize);
 
-        this.MONITOR_PROCESS = (ThreadPoolExecutor) Executors.newFixedThreadPool(monitorPoolSize);
+        this.MONITOR_PROCESS = new ThreadPoolExecutor(monitorPoolSize, monitorPoolSize, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
         //
 
         int schedulePoolSize = this.parseInteger(config.getProperty(CONF_THREADS_SCHEDULE));
         this.logger.seek("异步线程池配置 " + schedulePoolSize);
 
-        this.EXECUTOR_SERVICE = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(schedulePoolSize);
+        this.EXECUTOR_SERVICE = new ScheduledThreadPoolExecutor(schedulePoolSize);
 
 
         // ==========================================================================================================================
@@ -704,71 +704,70 @@ public final class Systemd extends BasicModuleUtilities {
         // ==========================================================================================================================
         // 关闭模块
 
-
-        this.schema.shut();
-
+        try {
+            this.schema.shut();
+        } catch (Exception exception) {
+            this.logger.error("关闭插件模型发生异常", exception);
+        }
 
         // ==========================================================================================================================
+        // 关闭线程池
 
 
         this.logger.hint("关闭线程池");
 
 
+        // =====================================================================
+
+
         if (FurryBlack.isShutModeDrop()) {
-
-            this.logger.info("强制关闭监听器线程池");
-            this.MONITOR_PROCESS.shutdownNow();
-
+            this.logger.warning("丢弃监听任务线程池");
+            Thread thread = new Thread(() -> this.MONITOR_PROCESS.shutdownNow());
+            thread.setDaemon(true);
+            thread.start();
         } else {
-
-            this.logger.info("关闭监听器线程池");
+            this.logger.info("关闭监听任务线程池");
             this.MONITOR_PROCESS.shutdown();
-
             try {
-                this.logger.info("等待监听器线程池关闭");
                 //noinspection ResultOfMethodCallIgnored
-                this.MONITOR_PROCESS.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-                this.logger.info("监听器线程池已关闭");
+                this.MONITOR_PROCESS.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
             } catch (InterruptedException exception) {
-                this.logger.error("等待关闭监听器线程池错误", exception);
-                this.MONITOR_PROCESS.shutdownNow();
+                this.logger.error("等待关闭监听任务线程池被中断", exception);
             }
+            this.logger.info("监听任务线程池关闭");
         }
 
-        this.logger.debug("监听线程池已终结 -> " + (this.MONITOR_PROCESS.isTerminated() ? "是" : "否"));
 
-        this.MONITOR_PROCESS = null;
+        // =====================================================================
 
 
         if (FurryBlack.isShutModeDrop()) {
-
-            this.logger.info("强制关闭异步任务线程池");
-            this.EXECUTOR_SERVICE.shutdownNow();
-
+            this.logger.warning("丢弃定时任务线程池");
+            Thread thread = new Thread(() -> this.EXECUTOR_SERVICE.shutdownNow());
+            thread.setDaemon(true);
+            thread.start();
         } else {
-
-            this.logger.info("关闭异步任务线程池");
+            this.logger.info("关闭定时任务线程池");
             this.EXECUTOR_SERVICE.shutdown();
-
             try {
-                this.logger.info("等待异步任务线程池关闭");
                 //noinspection ResultOfMethodCallIgnored
-                this.EXECUTOR_SERVICE.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+                this.EXECUTOR_SERVICE.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
             } catch (InterruptedException exception) {
-                this.logger.error("等待关闭异步任务线程池错误", exception);
-                exception.printStackTrace();
+                this.logger.error("等待关闭定时任务线程池被中断", exception);
             }
+            this.logger.info("定时任务线程池关闭");
         }
-
-        this.logger.debug("任务线程池已终结 -> " + (this.EXECUTOR_SERVICE.isTerminated() ? "是" : "否"));
-
-        this.EXECUTOR_SERVICE = null;
 
 
         // ==========================================================================================================================
+        // 关闭Mirai-Bot
 
 
         this.logger.hint("关闭机器人");
+
+
+        // =====================================================================
+
 
         this.logger.info("通知机器人关闭");
 
@@ -820,7 +819,7 @@ public final class Systemd extends BasicModuleUtilities {
 
                 switch (commandName) {
 
-                    case "help":
+                    case "help" -> {
                         if (command.hasCommandBody()) {
                             String segment = command.getParameterSegment(0);
                             EventHandlerExecutor executor = this.schema.getExecutorUsersPool().get(segment);
@@ -832,44 +831,29 @@ public final class Systemd extends BasicModuleUtilities {
                         } else {
                             FurryBlack.sendMessage(event, this.MESSAGE_HELP);
                         }
-                        break;
+                    }
 
-                    case "list":
-                        FurryBlack.sendMessage(event, this.MESSAGE_LIST_USERS);
-                        break;
+                    case "list" -> FurryBlack.sendMessage(event, this.MESSAGE_LIST_USERS);
+                    case "info" -> FurryBlack.sendMessage(event, this.MESSAGE_INFO);
+                    case "eula" -> FurryBlack.sendMessage(event, this.MESSAGE_EULA);
 
-                    case "info":
-                        FurryBlack.sendMessage(event, this.MESSAGE_INFO);
-                        break;
-
-                    case "eula":
-                        FurryBlack.sendMessage(event, this.MESSAGE_EULA);
-                        break;
-
-                    default:
-
+                    default -> {
                         EventHandlerExecutor executor = this.schema.getExecutorUsersPool().get(commandName);
-
                         if (executor == null) {
                             FurryBlack.sendMessage(event, "没有此命令");
                             return;
                         }
-
                         for (EventHandlerChecker checker : this.schema.getGlobalCheckerUsersPool()) {
                             if (checker.handleUsersMessageWrapper(event, command)) return;
                         }
-
                         List<EventHandlerChecker> commandCheckerUsersPool = this.schema.getCommandCheckerUsersPool(commandName);
-
                         if (commandCheckerUsersPool != null) {
                             for (EventHandlerChecker checker : commandCheckerUsersPool) {
                                 if (checker.handleUsersMessageWrapper(event, command)) return;
                             }
                         }
-
                         executor.handleUsersMessageWrapper(event, command);
-
-                        break;
+                    }
                 }
             }
 
@@ -905,7 +889,7 @@ public final class Systemd extends BasicModuleUtilities {
 
                 switch (commandName) {
 
-                    case "help":
+                    case "help" -> {
                         if (command.hasCommandBody()) {
                             String segment = command.getParameterSegment(0);
                             EventHandlerExecutor executor = this.schema.getExecutorGroupPool().get(segment);
@@ -925,55 +909,48 @@ public final class Systemd extends BasicModuleUtilities {
                                 FurryBlack.sendMessage(event, "帮助信息发送至私聊失败 请允许临时会话权限");
                             }
                         }
-                        break;
+                    }
 
-                    case "list":
+                    case "list" -> {
                         try {
                             event.getSender().sendMessage(this.MESSAGE_LIST_GROUP);
                         } catch (Exception exception) {
                             FurryBlack.sendMessage(event, "可用命令发送至私聊失败 请允许临时会话权限");
                         }
-                        break;
+                    }
 
-                    case "info":
+                    case "info" -> {
                         try {
                             event.getSender().sendMessage(this.MESSAGE_INFO);
                         } catch (Exception exception) {
                             FurryBlack.sendMessage(event, "关于发送至私聊失败 请允许临时会话权限");
                         }
-                        break;
+                    }
 
-                    case "eula":
+                    case "eula" -> {
                         try {
                             event.getSender().sendMessage(this.MESSAGE_EULA);
                         } catch (Exception exception) {
                             FurryBlack.sendMessage(event, "EULA发送至私聊失败 请允许临时会话权限");
                         }
-                        break;
+                    }
 
-                    default:
-
+                    default -> {
                         EventHandlerExecutor executor = this.schema.getExecutorGroupPool().get(commandName);
-
                         if (executor == null) {
                             return;
                         }
-
                         for (EventHandlerChecker checker : this.schema.getGlobalCheckerGroupPool()) {
                             if (checker.handleGroupMessageWrapper(event, command)) return;
                         }
-
                         List<EventHandlerChecker> commandCheckerGroupPool = this.schema.getCommandCheckerGroupPool(commandName);
-
                         if (commandCheckerGroupPool != null) {
                             for (EventHandlerChecker checker : commandCheckerGroupPool) {
                                 if (checker.handleGroupMessageWrapper(event, command)) return;
                             }
                         }
-
                         executor.handleGroupMessageWrapper(event, command);
-
-                        break;
+                    }
                 }
             }
 
@@ -1130,101 +1107,83 @@ public final class Systemd extends BasicModuleUtilities {
     // ==========================================================================================================================================================
 
 
-    @Api("提交异步任务")
     public Future<?> submit(Runnable runnable) {
         return this.EXECUTOR_SERVICE.submit(runnable);
     }
 
-    @Api("提交异步任务")
     public <T> Future<?> submit(Runnable runnable, T t) {
         return this.EXECUTOR_SERVICE.submit(runnable, t);
     }
 
-    @Api("提交异步任务")
     public Future<?> submit(Callable<?> callable) {
         return this.EXECUTOR_SERVICE.submit(callable);
     }
 
-    @Api("提交定时任务")
     public ScheduledFuture<?> schedule(Runnable runnable, long time, TimeUnit timeUnit) {
         return this.EXECUTOR_SERVICE.schedule(runnable, time, timeUnit);
     }
 
-    @Api("提交定时任务")
     public ScheduledFuture<?> schedule(Callable<?> callable, long delay, TimeUnit unit) {
         return this.EXECUTOR_SERVICE.schedule(callable, delay, unit);
     }
 
-    @Api("提交定时任务")
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable runnable, long initialDelay, long period, TimeUnit unit) {
         return this.EXECUTOR_SERVICE.scheduleAtFixedRate(runnable, initialDelay, period, unit);
     }
 
-    @Api("提交定时任务")
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable runnable, long initialDelay, long delay, TimeUnit unit) {
         return this.EXECUTOR_SERVICE.scheduleWithFixedDelay(runnable, initialDelay, delay, unit);
     }
 
+
     // =========================================================================
 
 
-    @Api("获取BOT自身QQ号")
     public long getBotID() {
         return this.bot.getId();
     }
 
-    @Api("列出所有好友")
     public ContactList<Friend> getFriends() {
         return this.bot.getFriends();
     }
 
-    @Api("列出所有群组")
     public ContactList<Group> getGroups() {
         return this.bot.getGroups();
     }
 
-    @Api("根据ID获取陌生人")
     public Stranger getStranger(long id) {
         return this.bot.getStranger(id);
     }
 
-    @Api("根据ID获取陌生人")
     public Stranger getStrangerOrFail(long id) {
         return this.bot.getStrangerOrFail(id);
     }
 
-    @Api("根据ID获取好友")
     public Friend getFriend(long id) {
         return this.bot.getFriend(id);
     }
 
-    @Api("根据ID获取好友")
     public Friend getFriendOrFail(long id) {
         return this.bot.getFriendOrFail(id);
     }
 
-    @Api("根据ID获取群组")
     public Group getGroup(long id) {
         return this.bot.getGroup(id);
     }
 
-    @Api("根据ID获取群组")
     public Group getGroupOrFail(long id) {
         return this.bot.getGroupOrFail(id);
     }
 
-    @Api("发送消息的核心方法")
     public void sendMessage(Contact contact, Message message) {
         contact.sendMessage(message);
     }
 
-    @Api("清空昵称表")
     public void cleanNickname() {
         this.NICKNAME_GLOBAL.clear();
         this.NICKNAME_GROUPS.clear();
     }
 
-    @Api("加载昵称表")
     public void appendNickname() {
         File nicknameFile = this.initFile(Paths.get(FurryBlack.getConfigFolder(), "nickname.txt"));
         List<String> nicknames = this.readFile(nicknameFile);
@@ -1256,7 +1215,6 @@ public final class Systemd extends BasicModuleUtilities {
         }
     }
 
-
     public Map<Long, String> getNicknameGlobal() {
         return this.NICKNAME_GLOBAL;
     }
@@ -1265,18 +1223,14 @@ public final class Systemd extends BasicModuleUtilities {
         return this.NICKNAME_GROUPS;
     }
 
-
-    @Api("获取用户昵称")
     public String getUsersMappedNickName(User user) {
         return this.NICKNAME_GLOBAL.getOrDefault(user.getId(), user.getNick());
     }
 
-    @Api("获取用户昵称")
     public String getUsersMappedNickName(long userId) {
         return this.NICKNAME_GLOBAL.getOrDefault(userId, Mirai.getInstance().queryProfile(this.bot, userId).getNickname());
     }
 
-    @Api("获取成员昵称")
     public String getMemberMappedNickName(Member member) {
         Map<Long, String> groupMap = this.NICKNAME_GROUPS.get(member.getGroup().getId());
         if (groupMap != null) {
@@ -1297,7 +1251,6 @@ public final class Systemd extends BasicModuleUtilities {
         }
     }
 
-    @Api("获取成员昵称")
     public String getMemberMappedNickName(long groupId, long userId) {
         Map<Long, String> groupMap = this.NICKNAME_GROUPS.get(groupId);
         if (groupMap != null) {
@@ -1319,13 +1272,10 @@ public final class Systemd extends BasicModuleUtilities {
         }
     }
 
-
     // =========================================================================
-
 
     public Bot getBot() {
         return this.bot;
     }
-
 
 }
