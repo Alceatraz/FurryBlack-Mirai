@@ -141,6 +141,12 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.0.11
+
+- 调节FurryBlack.class并美化代码
+- 修复drop和kill模式的BUG
+- 调节关闭的逻辑
+
 ### 2.0.10
 
 - 完善NickName的控制台操作

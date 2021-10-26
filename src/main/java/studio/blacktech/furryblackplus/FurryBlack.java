@@ -101,7 +101,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.jline.builtins.Completers.TreeCompleter.node;
@@ -151,7 +150,7 @@ public final class FurryBlack {
     // ==========================================================================================================================================================
 
 
-    public static final String APP_VERSION = "2.0.8";
+    public static final String APP_VERSION = "2.0.11";
 
 
     // ==========================================================================================================================================================
@@ -191,6 +190,9 @@ public final class FurryBlack {
     // ==========================================================================================================================================================
 
 
+    private static final String CONSOLE_PROMPT = "[console]$ ";
+
+
     private static LoggerX logger;
 
     private static Systemd systemd;
@@ -204,13 +206,8 @@ public final class FurryBlack {
     private static boolean noLogin;
     private static boolean noJline;
 
-    private static boolean shutModeExit;
+    private static boolean shutModeHalt;
     private static boolean shutModeDrop;
-    private static boolean shutBySignal = true;
-
-    private static final AtomicReference<String> prompt = new AtomicReference<>("");
-
-    private static Thread consoleThread;
 
     private static Terminal terminal;
 
@@ -293,8 +290,8 @@ public final class FurryBlack {
 
         // =====================================================================
         // 退出模式 设置
-        shutModeExit = parameters.contains("--force-exit");
-        if (shutModeExit) {
+        shutModeHalt = parameters.contains("--force-exit");
+        if (shutModeHalt) {
             System.out.println("[FurryBlack][ARGS]使用强制退出");
         } else {
             System.out.println("[FurryBlack][ARGS]使用正常退出");
@@ -387,49 +384,45 @@ public final class FurryBlack {
         try {
             systemd.boot();
         } catch (Exception exception) {
-            logger.fatal("启动路由系统发生异常 终止启动", exception);
-            System.exit(-1);
+            throw new BootException("[FurryBlack][MAIN]FATAL -> Systemd boot failed.", exception);
         }
-        logger.hint("机器人已启动");
 
         // =====================================================================
 
-        logger.info("注册关闭回调");
-
         Thread mainThread = Thread.currentThread();
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (!shutBySignal) return;
-            consoleThread.interrupt();
             systemd.signal();
             try {
                 mainThread.join();
             } catch (InterruptedException exception) {
-                System.out.println("[FurryBlack][MAIN]FurryBlackPlus shutdown hook interrupted!");
+                System.out.println("[FurryBlack][EXIT]FATAL -> Shutdown hook interrupted, Shutdown process not finished.");
                 exception.printStackTrace();
             }
+            System.out.println("[FurryBlack][EXIT]FurryBlackPlus normally closed, Bye.");
+            if (shutModeHalt) {
+                System.out.println("[FurryBlack][EXIT]FurryBlackPlus normally close with halt, Execute halt now.");
+                Runtime.getRuntime().halt(0);
+            }
         }));
-
-        // =====================================================================
-
-        if (!noConsole) {
-            logger.info("启动终端线程");
-            consoleThread = new Thread(FurryBlack::console);
-            consoleThread.setDaemon(true);
-            consoleThread.start();
-        }
 
 
         // =====================================================================
 
         logger.hint("系统启动完成 耗时" + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME));
+
         if (!debug) {
             LoggerX.setLevel(level);
         }
 
         // =====================================================================
 
-        terminal.updateCompleter();
-        prompt.set("[console]$ ");
+        if (!noConsole) {
+            Thread consoleThread = new Thread(FurryBlack::console);
+            consoleThread.setDaemon(true);
+            consoleThread.start();
+            terminal.updateCompleter();
+        }
 
         // =====================================================================
 
@@ -450,482 +443,12 @@ public final class FurryBlack {
         try {
             systemd.shut();
         } catch (Exception exception) {
-            logger.fatal("关闭路由系统关闭异常", exception);
+            throw new BootException("[FurryBlack][MAIN]FATAL -> Systemd shut failed.", exception);
         }
 
-        if (shutModeExit || shutModeDrop) {
-            System.out.println("[FurryBlack][MAIN]FurryBlackPlus force exit, Bye.");
-            System.exit(0);
-        } else {
-            System.out.println("[FurryBlack][MAIN]FurryBlackPlus closed, Bye.");
-        }
-
-    }
-
-
-    // ==========================================================================================================================================================
-    //
-    // Runtime相关
-    //
-    // ==========================================================================================================================================================
-
-
-    @Api("获取启动时间戳")
-    public static long getBootTime() {
-        return BOOT_TIME;
-    }
-
-    @Api("是否正在监听消息")
-    public static boolean isEnable() {
-        return enable;
-    }
-
-    @Api("否是真的登录账号")
-    public static boolean isNoLogin() {
-        return noLogin;
-    }
-
-    @Api("否是进入调试模式")
-    public static boolean isDebug() {
-        return debug;
-    }
-
-    @Api("是否进入抛弃模式")
-    public static boolean isShutModeDrop() {
-        return shutModeDrop;
-    }
-
-    @Api("获取运行目录 - 不是插件私有目录")
-    public static String getRootFolder() {
-        return FOLDER_ROOT.getAbsolutePath();
-    }
-
-    @Api("获取核心配置目录 - 不是插件私有目录")
-    public static String getConfigFolder() {
-        return FOLDER_CONFIG.getAbsolutePath();
-    }
-
-    @Api("获取插件核心目录 - 不是插件私有目录")
-    public static String getPluginFolder() {
-        return FOLDER_PLUGIN.getAbsolutePath();
-    }
-
-    @Api("获取插件依赖目录 - 不是插件私有目录")
-    public static String getDependFolder() {
-        return FOLDER_DEPEND.getAbsolutePath();
-    }
-
-    @Api("获取模块数据目录 - 不是插件私有目录")
-    public static String getModuleFolder() {
-        return FOLDER_MODULE.getAbsolutePath();
-    }
-
-    @Api("获取核心日志目录 - 不是插件私有目录")
-    public static String getLoggerFolder() {
-        return FOLDER_LOGGER.getAbsolutePath();
-    }
-
-    @Api("获取模块实例")
-    public static <T extends EventHandlerRunner> T getRunner(Class<T> clazz) {
-        return systemd.getRunner(clazz);
-    }
-
-    @Api("提交异步任务")
-    public static Future<?> submit(Runnable runnable) {
-        return systemd.submit(runnable);
-    }
-
-    @Api("提交异步任务")
-    public static <T> Future<?> submit(Runnable runnable, T t) {
-        return systemd.submit(runnable, t);
-    }
-
-    @Api("提交异步任务")
-    public static Future<?> submit(Callable<?> callable) {
-        return systemd.submit(callable);
-    }
-
-    @Api("提交定时任务")
-    public static ScheduledFuture<?> schedule(Runnable runnable, long time, TimeUnit timeUnit) {
-        return systemd.schedule(runnable, time, timeUnit);
-    }
-
-    @Api("提交定时任务")
-    public static ScheduledFuture<?> schedule(Callable<?> callable, long delay, TimeUnit unit) {
-        return systemd.schedule(callable, delay, unit);
-    }
-
-    @Api("提交等间隔定时任务")
-    public static ScheduledFuture<?> scheduleAtFixedRate(Runnable runnable, long initialDelay, long period, TimeUnit unit) {
-        return systemd.scheduleAtFixedRate(runnable, initialDelay, period, unit);
-    }
-
-    @Api("提交等延迟定时任务")
-    public static ScheduledFuture<?> scheduleWithFixedDelay(Runnable runnable, long initialDelay, long delay, TimeUnit unit) {
-        return systemd.scheduleWithFixedDelay(runnable, initialDelay, delay, unit);
-    }
-
-    @Api("提交明天开始的等间隔定时任务")
-    public static ScheduledFuture<?> scheduleAtNextDayFixedRate(Runnable runnable, long period, TimeUnit unit) {
-        return systemd.scheduleAtFixedRate(runnable, TimeTool.nextDayDuration(), period, unit);
-    }
-
-    @Api("提交明天开始的等延迟定时任务")
-    public static ScheduledFuture<?> scheduleWithNextDayFixedDelay(Runnable runnable, long delay, TimeUnit unit) {
-        return systemd.scheduleWithFixedDelay(runnable, TimeTool.nextDayDuration(), delay, unit);
-    }
-
-
-    // ==========================================================================================================================================================
-
-
-    @Api("在终端打印消息")
-    public static void terminalPrint(Object message) {
-        if (message == null) return;
-        terminal.print(message.toString());
-    }
-
-
-    @Api("在终端打印消息")
-    public static void terminalPrintLine(Object message) {
-        if (message == null) return;
-        terminal.printLine(message.toString());
-    }
-
-
-    // ==========================================================================================================================================================
-    //
-    // Mirai转发 - 为了系统安全Bot不允许直接获取 需要对Mirai的方法进行转发
-    //
-    // ==========================================================================================================================================================
-
-
-    @Api("转发Mirai")
-    public static List<ForwardMessage.Node> downloadForwardMessage(String resourceId) {
-        return Mirai.getInstance().downloadForwardMessage(systemd.getBot(), resourceId);
-    }
-
-    @Api("转发Mirai")
-    public static MessageChain downloadLongMessage(String resourceId) {
-        return Mirai.getInstance().downloadLongMessage(systemd.getBot(), resourceId);
-    }
-
-    @Api("转发Mirai")
-    public static String queryImageUrl(Image image) {
-        return Mirai.getInstance().queryImageUrl(systemd.getBot(), image);
-    }
-
-    @Api("转发Mirai")
-    public static UserProfile queryProfile(long id) {
-        return Mirai.getInstance().queryProfile(systemd.getBot(), id);
-    }
-
-    @Api("转发Mirai")
-    public static List<OtherClientInfo> getOnlineOtherClientsList(boolean mayIncludeSelf) {
-        return Mirai.getInstance().getOnlineOtherClientsList(systemd.getBot(), mayIncludeSelf);
-    }
-
-    @Api("转发Mirai")
-    public static void recallMessage(MessageSource messageSource) {
-        Mirai.getInstance().recallMessage(systemd.getBot(), messageSource);
-    }
-
-    @Api("转发Mirai")
-    public static void sendNudge(Nudge nudge, Contact contact) {
-        Mirai.getInstance().sendNudge(systemd.getBot(), nudge, contact);
-    }
-
-    @Api("转发Mirai")
-    public static void getGroupVoiceDownloadUrl(byte[] md5, long groupId, long dstUin) {
-        Mirai.getInstance().getGroupVoiceDownloadUrl(systemd.getBot(), md5, groupId, dstUin);
-    }
-
-    @Api("转发Mirai")
-    public static void muteAnonymousMember(String anonymousId, String anonymousNick, long groupId, int seconds) {
-        Mirai.getInstance().muteAnonymousMember(systemd.getBot(), anonymousId, anonymousNick, groupId, seconds);
-    }
-
-    @Api("转发Mirai")
-    public static UserProfile getUserProfile(long user) {
-        return Mirai.getInstance().queryProfile(systemd.getBot(), user);
-    }
-
-    @Api("转发Mirai")
-    public static GroupActiveData getRawGroupActiveData(long groupId, int page) {
-        return Mirai.getInstance().getRawGroupActiveData(systemd.getBot(), groupId, page);
-    }
-
-    @Api("转发Mirai")
-    public static GroupHonorListData getRawGroupHonorListData(long groupId, GroupHonorType type) {
-        return Mirai.getInstance().getRawGroupHonorListData(systemd.getBot(), groupId, type);
-    }
-
-    @Api("转发Mirai")
-    public static Sequence<Long> getRawGroupList() {
-        return Mirai.getInstance().getRawGroupList(systemd.getBot());
-    }
-
-    @Api("转发Mirai")
-    public static Sequence<MemberInfo> getRawGroupMemberList(long groupUin, long groupCode, long ownerId) {
-        return Mirai.getInstance().getRawGroupMemberList(systemd.getBot(), groupUin, groupCode, ownerId);
-    }
-
-    @Api("转发Mirai")
-    public static Friend getRawGroupMemberList(FriendInfo friendInfo) {
-        return Mirai.getInstance().newFriend(systemd.getBot(), friendInfo);
-    }
-
-    @Api("转发Mirai")
-    public static Stranger getRawGroupMemberList(StrangerInfo strangerInfo) {
-        return Mirai.getInstance().newStranger(systemd.getBot(), strangerInfo);
-    }
-
-    @Api("转发Mirai")
-    public static boolean recallFriendMessageRaw(long targetId, int[] messagesIds, int[] messageInternalIds, int time) {
-        return Mirai.getInstance().recallFriendMessageRaw(systemd.getBot(), targetId, messagesIds, messageInternalIds, time);
-    }
-
-    @Api("转发Mirai")
-    public static boolean recallGroupMessageRaw(long groupCode, int[] messagesIds, int[] messageInternalIds) {
-        return Mirai.getInstance().recallGroupMessageRaw(systemd.getBot(), groupCode, messagesIds, messageInternalIds);
-    }
-
-    @Api("转发Mirai")
-    public static boolean recallGroupTempMessageRaw(long groupUin, long targetId, int[] messagesIds, int[] messageInternalIds, int time) {
-        return Mirai.getInstance().recallGroupTempMessageRaw(systemd.getBot(), groupUin, targetId, messagesIds, messageInternalIds, time);
-    }
-
-
-    // ==========================================================================================================================================================
-    //
-    // Bot相关
-    //
-    // ==========================================================================================================================================================
-
-
-    @Api("获取用户昵称")
-    public static String getNickName(long user) {
-        return getUserProfile(user).getNickname();
-    }
-
-    @Api("获取用户格式化名")
-    public static String getFormattedNickName(User user) {
-        return user.getNick() + "(" + user.getId() + ")";
-    }
-
-    @Api("获取用户格式化名")
-    public static String getFormattedNickName(long user) {
-        return getNickName(user) + "(" + user + ")";
-    }
-
-    @Api("获取用户昵称")
-    public static String getUsersMappedNickName(User user) {
-        return systemd.getUsersMappedNickName(user);
-    }
-
-    @Api("获取用户昵称")
-    public static String getUsersMappedNickName(long userId) {
-        return systemd.getUsersMappedNickName(userId);
-    }
-
-    @Api("获取预设昵称")
-    public static String getMappedNickName(GroupMessageEvent event) {
-        return FurryBlack.getMemberMappedNickName(event.getSender());
-    }
-
-    @Api("获取预设昵称")
-    public static String getMemberMappedNickName(Member member) {
-        return systemd.getMemberMappedNickName(member);
-    }
-
-    @Api("获取预设昵称")
-    public static String getMappedNickName(long groupId, long userId) {
-        return systemd.getMemberMappedNickName(groupId, userId);
-    }
-
-    @Api("格式化群组信息")
-    public static String getGroupInfo(Group group) {
-        return group.getName() + "(" + group.getId() + ") " + group.getMembers().size() + " -> " + group.getOwner().getNameCard() + "(" + group.getOwner().getId() + ")";
-    }
-
-    @Api("获取BOT自身QQ号")
-    public static long getBotID() {
-        return systemd.getBotID();
-    }
-
-    @Api("列出所有好友")
-    public static ContactList<Friend> getFriends() {
-        return systemd.getFriends();
-    }
-
-    @Api("列出所有群组")
-    public static ContactList<Group> getGroups() {
-        return systemd.getGroups();
-    }
-
-    @Api("根据ID获取陌生人")
-    public static Stranger getStranger(long id) {
-        return systemd.getStranger(id);
-    }
-
-    @Api("根据ID获取陌生人")
-    public static Stranger getStrangerOrFail(long id) {
-        return systemd.getStrangerOrFail(id);
-    }
-
-    @Api("根据ID获取好友")
-    public static Friend getFriend(long id) {
-        return systemd.getFriend(id);
-    }
-
-    @Api("根据ID获取好友")
-    public static Friend getFriendOrFail(long id) {
-        return systemd.getFriendOrFail(id);
-    }
-
-    @Api("根据ID获取群组")
-    public static Group getGroup(long id) {
-        return systemd.getGroup(id);
-    }
-
-    @Api("根据ID获取群组")
-    public static Group getGroupOrFail(long id) {
-        return systemd.getGroupOrFail(id);
-    }
-
-    @Api("根据ID获取成员")
-    public static NormalMember getMemberOrFail(long group, long member) {
-        return getGroupOrFail(group).getOrFail(member);
-    }
-
-    @Api("获取图片的URL")
-    public static String getImageURL(Image image) {
-        return queryImageUrl(image);
-    }
-
-    @Api("获取图片的URL")
-    public static String getImageURL(FlashImage flashImage) {
-        return queryImageUrl(flashImage.getImage());
-    }
-
-    // == Systemd仅转发原生方法 Driver负责二次封装
-
-    private static void sendContactMessage(Contact contact, Message message) {
-        systemd.sendMessage(contact, message);
-    }
-
-    // ====
-
-    @Api("发送私聊消息")
-    public static void sendMessage(User user, Message message) {
-        sendContactMessage(user, message);
-    }
-
-    @Api("发送私聊消息")
-    public static void sendMessage(User user, String message) {
-        sendMessage(user, new PlainText(message));
-    }
-
-    @Api("发送私聊消息")
-    public static void sendMessage(UserMessageEvent event, Message message) {
-        sendMessage(event.getSender(), message);
-    }
-
-    @Api("发送私聊消息")
-    public static void sendMessage(UserMessageEvent event, String message) {
-        sendMessage(event, new PlainText(message));
-    }
-
-    @Api("发送私聊消息")
-    public static void sendUserMessage(long id, Message message) {
-        User user = getFriend(id);
-        if (user == null) user = getStrangerOrFail(id);
-        sendMessage(user, message);
-    }
-
-    @Api("发送私聊消息")
-    public static void sendUserMessage(long id, String message) {
-        sendUserMessage(id, new PlainText(message));
-    }
-
-    // ====
-
-    @Api("发送群组消息")
-    public static void sendMessage(Group group, Message message) {
-        sendContactMessage(group, message);
-    }
-
-    @Api("发送群组消息")
-    public static void sendMessage(Group group, String message) {
-        sendMessage(group, new PlainText(message));
-    }
-
-    @Api("发送群组消息")
-    public static void sendMessage(GroupMessageEvent event, Message message) {
-        sendMessage(event.getGroup(), message);
-    }
-
-    @Api("发送群组消息")
-    public static void sendMessage(GroupMessageEvent event, String message) {
-        sendMessage(event, new PlainText(message));
-    }
-
-    @Api("发送群组消息")
-    public static void sendGroupMessage(long group, Message message) {
-        sendMessage(getGroupOrFail(group), message);
-    }
-
-    @Api("发送群组消息")
-    public static void sendGroupMessage(long group, String message) {
-        sendGroupMessage(group, new PlainText(message));
-    }
-
-    // ====
-
-    @Api("发送群组消息")
-    public static void sendAtMessage(Group group, Member member, Message message) {
-        sendMessage(group, new At(member.getId()).plus(message));
-    }
-
-    @Api("发送群组消息")
-    public static void sendAtMessage(Group group, Member member, String message) {
-        sendAtMessage(group, member, new PlainText(message));
-    }
-
-    @Api("发送群组消息")
-    public static void sendAtMessage(GroupMessageEvent event, Message message) {
-        sendAtMessage(event.getGroup(), event.getSender(), message);
-    }
-
-    @Api("发送群组消息")
-    public static void sendAtMessage(GroupMessageEvent event, String message) {
-        sendAtMessage(event, new PlainText(message));
-    }
-
-    @Api("发送群组消息")
-    public static void sendAtMessage(long group, long member, Message message) {
-        Group groupOrFail = getGroupOrFail(group);
-        Member memberOrFail = groupOrFail.getOrFail(member);
-        sendAtMessage(groupOrFail, memberOrFail, message);
-    }
-
-    @Api("发送群组消息")
-    public static void sendAtMessage(long group, long member, String message) {
-        Group groupOrFail = getGroupOrFail(group);
-        Member memberOrFail = groupOrFail.getOrFail(member);
-        sendAtMessage(groupOrFail, memberOrFail, new PlainText(message));
-    }
-
-    @Api("获取Mirai机器人实例 只有--unsafe模式下可以使用")
-    public static Bot getBot() {
-        if (unsafe) {
-            return systemd.getBot();
-        } else {
-            logger.warning("获取机器人实例禁止 只有在unsafe模式下可用");
-            for (StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
-                System.out.println(stackTraceElement);
-            }
-            throw new BotException("Get Mirai-BOT instance only allowed when --unsafe present!");
+        if (shutModeDrop) {
+            System.out.println("[FurryBlack][DROP]Shutdown mode drop, Invoke JVM halt now, Hope nothing broken.");
+            Runtime.getRuntime().halt(0);
         }
     }
 
@@ -942,7 +465,8 @@ public final class FurryBlack {
         console:
         while (true) {
             try {
-                String temp = terminal.readLine(prompt.get());
+
+                String temp = terminal.readLine();
                 if (temp == null || temp.isBlank()) continue;
                 Command command = new Command(temp.trim());
                 switch (command.getCommandName()) {
@@ -967,9 +491,11 @@ public final class FurryBlack {
 
                     // =================================================================================================
 
+                    case "halt":
                     case "kill":
-                        System.out.println("[FurryBlack] Kill the JVM");
-                        System.exit(-1);
+                        System.out.println("[FurryBlack][KILL]Invoke JVM halt now, Good luck.");
+                        Runtime.getRuntime().halt(0);
+                        break console;
 
                     case "drop":
                         shutModeDrop = true;
@@ -977,9 +503,7 @@ public final class FurryBlack {
                     case "stop":
                     case "quit":
                     case "exit":
-                        shutBySignal = false;
-                        prompt.set("");
-                        systemd.signal();
+                        Runtime.getRuntime().exit(0);
                         break console;
 
                     // ==========================================================================================================================================================
@@ -1010,7 +534,7 @@ public final class FurryBlack {
                             // @formatter:off
 
                             "调试模式: " + (debug ? "启用" : "关闭") +
-                            "关闭模式: " + (shutModeExit ? "强制" : "正常") +
+                            "关闭模式: " + (shutModeHalt ? "强制" : "正常") +
                             "消息事件: " + (enable ? "启用" : "关闭") +
                             "运行时间: " + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME) +
                             "内存占用: " + (totalMemory - freeMemory) + "KB/" + totalMemory + "KB/" + maxMemory + "KB(" + maxMemory / 1024 + "MB)"
@@ -1491,8 +1015,10 @@ public final class FurryBlack {
     }
 
 
-    public abstract static class Terminal {
+    // =================================================================================================================
 
+
+    public abstract static class Terminal {
 
         public static Terminal getInstance() {
             if (noJline) {
@@ -1502,8 +1028,8 @@ public final class FurryBlack {
             }
         }
 
-        String readLine(String prompt) {
-            return this.readLineImpl(prompt);
+        String readLine() {
+            return this.readLineImpl();
         }
 
         void print(String message) {
@@ -1518,8 +1044,7 @@ public final class FurryBlack {
             this.updateCompleterImpl();
         }
 
-
-        protected abstract String readLineImpl(String prompt);
+        protected abstract String readLineImpl();
 
         protected abstract void printImpl(String message);
 
@@ -1528,6 +1053,9 @@ public final class FurryBlack {
         protected abstract void updateCompleterImpl();
 
     }
+
+
+    // =========================================================================
 
 
     public static class SimpleTerminal extends Terminal {
@@ -1542,8 +1070,8 @@ public final class FurryBlack {
         }
 
         @Override
-        protected String readLineImpl(String prompt) {
-            this.printImpl(prompt);
+        protected String readLineImpl() {
+            this.printImpl(FurryBlack.CONSOLE_PROMPT);
             try {
                 return this.bufferedReader.readLine();
             } catch (IOException exception) {
@@ -1573,6 +1101,9 @@ public final class FurryBlack {
     }
 
 
+    // =========================================================================
+
+
     public static class JlineTerminal extends Terminal {
 
         private final LineReader jlineReader;
@@ -1586,8 +1117,8 @@ public final class FurryBlack {
         }
 
         @Override
-        protected String readLineImpl(String prompt) {
-            return this.jlineReader.readLine(prompt);
+        protected String readLineImpl() {
+            return this.jlineReader.readLine(FurryBlack.CONSOLE_PROMPT);
         }
 
         @Override
@@ -1645,6 +1176,473 @@ public final class FurryBlack {
             }
         }
 
+    }
+
+
+    // ==========================================================================================================================================================
+    //
+    // Runtime相关
+    //
+    // ==========================================================================================================================================================
+
+
+    @Api("获取启动时间戳")
+    public static long getBootTime() {
+        return BOOT_TIME;
+    }
+
+    @Api("是否正在监听消息")
+    public static boolean isEnable() {
+        return enable;
+    }
+
+    @Api("否是真的登录账号")
+    public static boolean isNoLogin() {
+        return noLogin;
+    }
+
+    @Api("否是进入调试模式")
+    public static boolean isDebug() {
+        return debug;
+    }
+
+    @Api("是否进入抛弃模式")
+    public static boolean isShutModeDrop() {
+        return shutModeDrop;
+    }
+
+    @Api("获取运行目录 - 不是插件私有目录")
+    public static String getRootFolder() {
+        return FOLDER_ROOT.getAbsolutePath();
+    }
+
+    @Api("获取核心配置目录 - 不是插件私有目录")
+    public static String getConfigFolder() {
+        return FOLDER_CONFIG.getAbsolutePath();
+    }
+
+    @Api("获取插件核心目录 - 不是插件私有目录")
+    public static String getPluginFolder() {
+        return FOLDER_PLUGIN.getAbsolutePath();
+    }
+
+    @Api("获取插件依赖目录 - 不是插件私有目录")
+    public static String getDependFolder() {
+        return FOLDER_DEPEND.getAbsolutePath();
+    }
+
+    @Api("获取模块数据目录 - 不是插件私有目录")
+    public static String getModuleFolder() {
+        return FOLDER_MODULE.getAbsolutePath();
+    }
+
+    @Api("获取核心日志目录 - 不是插件私有目录")
+    public static String getLoggerFolder() {
+        return FOLDER_LOGGER.getAbsolutePath();
+    }
+
+    @Api("获取模块实例")
+    public static <T extends EventHandlerRunner> T getRunner(Class<T> clazz) {
+        return systemd.getRunner(clazz);
+    }
+
+    @Api("提交异步任务")
+    public static Future<?> submit(Runnable runnable) {
+        return systemd.submit(runnable);
+    }
+
+    @Api("提交异步任务")
+    public static <T> Future<?> submit(Runnable runnable, T t) {
+        return systemd.submit(runnable, t);
+    }
+
+    @Api("提交异步任务")
+    public static Future<?> submit(Callable<?> callable) {
+        return systemd.submit(callable);
+    }
+
+    @Api("提交定时任务")
+    public static ScheduledFuture<?> schedule(Runnable runnable, long time, TimeUnit timeUnit) {
+        return systemd.schedule(runnable, time, timeUnit);
+    }
+
+    @Api("提交定时任务")
+    public static ScheduledFuture<?> schedule(Callable<?> callable, long delay, TimeUnit unit) {
+        return systemd.schedule(callable, delay, unit);
+    }
+
+    @Api("提交等间隔定时任务")
+    public static ScheduledFuture<?> scheduleAtFixedRate(Runnable runnable, long initialDelay, long period, TimeUnit unit) {
+        return systemd.scheduleAtFixedRate(runnable, initialDelay, period, unit);
+    }
+
+    @Api("提交等延迟定时任务")
+    public static ScheduledFuture<?> scheduleWithFixedDelay(Runnable runnable, long initialDelay, long delay, TimeUnit unit) {
+        return systemd.scheduleWithFixedDelay(runnable, initialDelay, delay, unit);
+    }
+
+    @Api("提交明天开始的等间隔定时任务")
+    public static ScheduledFuture<?> scheduleAtNextDayFixedRate(Runnable runnable, long period, TimeUnit unit) {
+        return systemd.scheduleAtFixedRate(runnable, TimeTool.nextDayDuration(), period, unit);
+    }
+
+    @Api("提交明天开始的等延迟定时任务")
+    public static ScheduledFuture<?> scheduleWithNextDayFixedDelay(Runnable runnable, long delay, TimeUnit unit) {
+        return systemd.scheduleWithFixedDelay(runnable, TimeTool.nextDayDuration(), delay, unit);
+    }
+
+
+    // ==========================================================================================================================================================
+
+
+    @Api("在终端打印消息")
+    public static void terminalPrint(Object message) {
+        if (message == null) return;
+        terminal.print(message.toString());
+    }
+
+
+    @Api("在终端打印消息")
+    public static void terminalPrintLine(Object message) {
+        if (message == null) return;
+        terminal.printLine(message.toString());
+    }
+
+
+    // ==========================================================================================================================================================
+    //
+    // Mirai转发 - 为了系统安全Bot不允许直接获取 需要对Mirai的方法进行转发
+    //
+    // ==========================================================================================================================================================
+
+
+    @Api("转发Mirai")
+    public static List<ForwardMessage.Node> downloadForwardMessage(String resourceId) {
+        return Mirai.getInstance().downloadForwardMessage(systemd.getBot(), resourceId);
+    }
+
+    @Api("转发Mirai")
+    public static MessageChain downloadLongMessage(String resourceId) {
+        return Mirai.getInstance().downloadLongMessage(systemd.getBot(), resourceId);
+    }
+
+    @Api("转发Mirai")
+    public static String queryImageUrl(Image image) {
+        return Mirai.getInstance().queryImageUrl(systemd.getBot(), image);
+    }
+
+    @Api("转发Mirai")
+    public static UserProfile queryProfile(long id) {
+        return Mirai.getInstance().queryProfile(systemd.getBot(), id);
+    }
+
+    @Api("转发Mirai")
+    public static List<OtherClientInfo> getOnlineOtherClientsList(boolean mayIncludeSelf) {
+        return Mirai.getInstance().getOnlineOtherClientsList(systemd.getBot(), mayIncludeSelf);
+    }
+
+    @Api("转发Mirai")
+    public static void recallMessage(MessageSource messageSource) {
+        Mirai.getInstance().recallMessage(systemd.getBot(), messageSource);
+    }
+
+    @Api("转发Mirai")
+    public static void sendNudge(Nudge nudge, Contact contact) {
+        Mirai.getInstance().sendNudge(systemd.getBot(), nudge, contact);
+    }
+
+    @Api("转发Mirai")
+    public static void getGroupVoiceDownloadUrl(byte[] md5, long groupId, long dstUin) {
+        Mirai.getInstance().getGroupVoiceDownloadUrl(systemd.getBot(), md5, groupId, dstUin);
+    }
+
+    @Api("转发Mirai")
+    public static void muteAnonymousMember(String anonymousId, String anonymousNick, long groupId, int seconds) {
+        Mirai.getInstance().muteAnonymousMember(systemd.getBot(), anonymousId, anonymousNick, groupId, seconds);
+    }
+
+    @Api("转发Mirai")
+    public static UserProfile getUserProfile(long user) {
+        return Mirai.getInstance().queryProfile(systemd.getBot(), user);
+    }
+
+    @Api("转发Mirai")
+    public static GroupActiveData getRawGroupActiveData(long groupId, int page) {
+        return Mirai.getInstance().getRawGroupActiveData(systemd.getBot(), groupId, page);
+    }
+
+    @Api("转发Mirai")
+    public static GroupHonorListData getRawGroupHonorListData(long groupId, GroupHonorType type) {
+        return Mirai.getInstance().getRawGroupHonorListData(systemd.getBot(), groupId, type);
+    }
+
+    @Api("转发Mirai")
+    public static Sequence<Long> getRawGroupList() {
+        return Mirai.getInstance().getRawGroupList(systemd.getBot());
+    }
+
+    @Api("转发Mirai")
+    public static Sequence<MemberInfo> getRawGroupMemberList(long groupUin, long groupCode, long ownerId) {
+        return Mirai.getInstance().getRawGroupMemberList(systemd.getBot(), groupUin, groupCode, ownerId);
+    }
+
+    @Api("转发Mirai")
+    public static Friend getRawGroupMemberList(FriendInfo friendInfo) {
+        return Mirai.getInstance().newFriend(systemd.getBot(), friendInfo);
+    }
+
+    @Api("转发Mirai")
+    public static Stranger getRawGroupMemberList(StrangerInfo strangerInfo) {
+        return Mirai.getInstance().newStranger(systemd.getBot(), strangerInfo);
+    }
+
+    @Api("转发Mirai")
+    public static boolean recallFriendMessageRaw(long targetId, int[] messagesIds, int[] messageInternalIds, int time) {
+        return Mirai.getInstance().recallFriendMessageRaw(systemd.getBot(), targetId, messagesIds, messageInternalIds, time);
+    }
+
+    @Api("转发Mirai")
+    public static boolean recallGroupMessageRaw(long groupCode, int[] messagesIds, int[] messageInternalIds) {
+        return Mirai.getInstance().recallGroupMessageRaw(systemd.getBot(), groupCode, messagesIds, messageInternalIds);
+    }
+
+    @Api("转发Mirai")
+    public static boolean recallGroupTempMessageRaw(long groupUin, long targetId, int[] messagesIds, int[] messageInternalIds, int time) {
+        return Mirai.getInstance().recallGroupTempMessageRaw(systemd.getBot(), groupUin, targetId, messagesIds, messageInternalIds, time);
+    }
+
+
+    // ==========================================================================================================================================================
+    //
+    // Bot相关
+    //
+    // ==========================================================================================================================================================
+
+
+    @Api("获取用户昵称")
+    public static String getNickName(long user) {
+        return getUserProfile(user).getNickname();
+    }
+
+    @Api("获取用户格式化名")
+    public static String getFormattedNickName(User user) {
+        return user.getNick() + "(" + user.getId() + ")";
+    }
+
+    @Api("获取用户格式化名")
+    public static String getFormattedNickName(long user) {
+        return getNickName(user) + "(" + user + ")";
+    }
+
+    @Api("获取用户昵称")
+    public static String getUsersMappedNickName(User user) {
+        return systemd.getUsersMappedNickName(user);
+    }
+
+    @Api("获取用户昵称")
+    public static String getUsersMappedNickName(long userId) {
+        return systemd.getUsersMappedNickName(userId);
+    }
+
+    @Api("获取预设昵称")
+    public static String getMappedNickName(GroupMessageEvent event) {
+        return FurryBlack.getMemberMappedNickName(event.getSender());
+    }
+
+    @Api("获取预设昵称")
+    public static String getMemberMappedNickName(Member member) {
+        return systemd.getMemberMappedNickName(member);
+    }
+
+    @Api("获取预设昵称")
+    public static String getMappedNickName(long groupId, long userId) {
+        return systemd.getMemberMappedNickName(groupId, userId);
+    }
+
+    @Api("格式化群组信息")
+    public static String getGroupInfo(Group group) {
+        return group.getName() + "(" + group.getId() + ") " + group.getMembers().size() + " -> " + group.getOwner().getNameCard() + "(" + group.getOwner().getId() + ")";
+    }
+
+    @Api("获取BOT自身QQ号")
+    public static long getBotID() {
+        return systemd.getBotID();
+    }
+
+    @Api("列出所有好友")
+    public static ContactList<Friend> getFriends() {
+        return systemd.getFriends();
+    }
+
+    @Api("列出所有群组")
+    public static ContactList<Group> getGroups() {
+        return systemd.getGroups();
+    }
+
+    @Api("根据ID获取陌生人")
+    public static Stranger getStranger(long id) {
+        return systemd.getStranger(id);
+    }
+
+    @Api("根据ID获取陌生人")
+    public static Stranger getStrangerOrFail(long id) {
+        return systemd.getStrangerOrFail(id);
+    }
+
+    @Api("根据ID获取好友")
+    public static Friend getFriend(long id) {
+        return systemd.getFriend(id);
+    }
+
+    @Api("根据ID获取好友")
+    public static Friend getFriendOrFail(long id) {
+        return systemd.getFriendOrFail(id);
+    }
+
+    @Api("根据ID获取群组")
+    public static Group getGroup(long id) {
+        return systemd.getGroup(id);
+    }
+
+    @Api("根据ID获取群组")
+    public static Group getGroupOrFail(long id) {
+        return systemd.getGroupOrFail(id);
+    }
+
+    @Api("根据ID获取成员")
+    public static NormalMember getMemberOrFail(long group, long member) {
+        return getGroupOrFail(group).getOrFail(member);
+    }
+
+    @Api("获取图片的URL")
+    public static String getImageURL(Image image) {
+        return queryImageUrl(image);
+    }
+
+    @Api("获取图片的URL")
+    public static String getImageURL(FlashImage flashImage) {
+        return queryImageUrl(flashImage.getImage());
+    }
+
+    // == Systemd仅转发原生方法 Driver负责二次封装
+
+    private static void sendContactMessage(Contact contact, Message message) {
+        systemd.sendMessage(contact, message);
+    }
+
+    // ====
+
+    @Api("发送私聊消息")
+    public static void sendMessage(User user, Message message) {
+        sendContactMessage(user, message);
+    }
+
+    @Api("发送私聊消息")
+    public static void sendMessage(User user, String message) {
+        sendMessage(user, new PlainText(message));
+    }
+
+    @Api("发送私聊消息")
+    public static void sendMessage(UserMessageEvent event, Message message) {
+        sendMessage(event.getSender(), message);
+    }
+
+    @Api("发送私聊消息")
+    public static void sendMessage(UserMessageEvent event, String message) {
+        sendMessage(event, new PlainText(message));
+    }
+
+    @Api("发送私聊消息")
+    public static void sendUserMessage(long id, Message message) {
+        User user = getFriend(id);
+        if (user == null) user = getStrangerOrFail(id);
+        sendMessage(user, message);
+    }
+
+    @Api("发送私聊消息")
+    public static void sendUserMessage(long id, String message) {
+        sendUserMessage(id, new PlainText(message));
+    }
+
+    // ====
+
+    @Api("发送群组消息")
+    public static void sendMessage(Group group, Message message) {
+        sendContactMessage(group, message);
+    }
+
+    @Api("发送群组消息")
+    public static void sendMessage(Group group, String message) {
+        sendMessage(group, new PlainText(message));
+    }
+
+    @Api("发送群组消息")
+    public static void sendMessage(GroupMessageEvent event, Message message) {
+        sendMessage(event.getGroup(), message);
+    }
+
+    @Api("发送群组消息")
+    public static void sendMessage(GroupMessageEvent event, String message) {
+        sendMessage(event, new PlainText(message));
+    }
+
+    @Api("发送群组消息")
+    public static void sendGroupMessage(long group, Message message) {
+        sendMessage(getGroupOrFail(group), message);
+    }
+
+    @Api("发送群组消息")
+    public static void sendGroupMessage(long group, String message) {
+        sendGroupMessage(group, new PlainText(message));
+    }
+
+    // ====
+
+    @Api("发送群组消息")
+    public static void sendAtMessage(Group group, Member member, Message message) {
+        sendMessage(group, new At(member.getId()).plus(message));
+    }
+
+    @Api("发送群组消息")
+    public static void sendAtMessage(Group group, Member member, String message) {
+        sendAtMessage(group, member, new PlainText(message));
+    }
+
+    @Api("发送群组消息")
+    public static void sendAtMessage(GroupMessageEvent event, Message message) {
+        sendAtMessage(event.getGroup(), event.getSender(), message);
+    }
+
+    @Api("发送群组消息")
+    public static void sendAtMessage(GroupMessageEvent event, String message) {
+        sendAtMessage(event, new PlainText(message));
+    }
+
+    @Api("发送群组消息")
+    public static void sendAtMessage(long group, long member, Message message) {
+        Group groupOrFail = getGroupOrFail(group);
+        Member memberOrFail = groupOrFail.getOrFail(member);
+        sendAtMessage(groupOrFail, memberOrFail, message);
+    }
+
+    @Api("发送群组消息")
+    public static void sendAtMessage(long group, long member, String message) {
+        Group groupOrFail = getGroupOrFail(group);
+        Member memberOrFail = groupOrFail.getOrFail(member);
+        sendAtMessage(groupOrFail, memberOrFail, new PlainText(message));
+    }
+
+    @Api("获取Mirai机器人实例 只有--unsafe模式下可以使用")
+    public static Bot getBot() {
+        if (unsafe) {
+            return systemd.getBot();
+        } else {
+            logger.warning("获取机器人实例禁止 只有在unsafe模式下可用");
+            for (StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
+                System.out.println(stackTraceElement);
+            }
+            throw new BotException("Get Mirai-BOT instance only allowed when --unsafe present!");
+        }
     }
 
 

@@ -209,7 +209,12 @@ public final class Systemd extends BasicModuleUtilities {
     public Systemd(File folderConfig, File folderPlugin) {
         synchronized (Systemd.class) {
             if (INSTANCE_LOCK) {
-                System.exit(0);
+                BootException bootException = new BootException("Systemd init-lock is on, Invoker stack trace append as suppressed");
+                RuntimeException runtimeException = new RuntimeException();
+                StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+                runtimeException.setStackTrace(stackTrace);
+                bootException.addSuppressed(runtimeException);
+                throw bootException;
             }
             INSTANCE_LOCK = true;
             this.FOLDER_CONFIG = folderConfig;
