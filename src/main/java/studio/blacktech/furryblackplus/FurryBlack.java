@@ -402,10 +402,9 @@ public final class FurryBlack {
             System.out.println("[FurryBlack][EXIT]FurryBlackPlus normally closed, Bye.");
             if (shutModeHalt) {
                 System.out.println("[FurryBlack][EXIT]FurryBlackPlus normally close with halt, Execute halt now.");
-                Runtime.getRuntime().halt(0);
+                Runtime.getRuntime().halt(1);
             }
         }));
-
 
         // =====================================================================
 
@@ -448,7 +447,7 @@ public final class FurryBlack {
 
         if (shutModeDrop) {
             System.out.println("[FurryBlack][DROP]Shutdown mode drop, Invoke JVM halt now, Hope nothing broken.");
-            Runtime.getRuntime().halt(0);
+            Runtime.getRuntime().halt(1);
         }
     }
 
@@ -494,7 +493,7 @@ public final class FurryBlack {
                     case "halt":
                     case "kill":
                         System.out.println("[FurryBlack][KILL]Invoke JVM halt now, Good luck.");
-                        Runtime.getRuntime().halt(0);
+                        Runtime.getRuntime().halt(1);
                         break console;
 
                     case "drop":
@@ -533,10 +532,10 @@ public final class FurryBlack {
 
                             // @formatter:off
 
-                            "调试模式: " + (debug ? "启用" : "关闭") +
-                            "关闭模式: " + (shutModeHalt ? "强制" : "正常") +
-                            "消息事件: " + (enable ? "启用" : "关闭") +
-                            "运行时间: " + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME) +
+                            "调试模式: " + (debug ? "启用" : "关闭") + LINE_SEPARATOR +
+                            "关闭模式: " + (shutModeHalt ? "强制" : "正常") + LINE_SEPARATOR +
+                            "消息事件: " + (enable ? "启用" : "关闭") + LINE_SEPARATOR +
+                            "运行时间: " + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME) + LINE_SEPARATOR +
                             "内存占用: " + (totalMemory - freeMemory) + "KB/" + totalMemory + "KB/" + maxMemory + "KB(" + maxMemory / 1024 + "MB)"
 
                             // @formatter:on
@@ -952,7 +951,7 @@ public final class FurryBlack {
             "--no-login    使用离线模式，仅用于基础调试，功能基本都不可用\n" +
             "--no-console  不使用控制台，唯一正常关闭方式是使用进程信号\n" +
             "--no-jline    不使用jline控制台，使用BufferedReader\n" +
-            "--force-exit  关闭流程执行后，强制结束System.exit(0)\n" +
+            "--force-exit  关闭流程执行后，强制结束JVM(halt)\n" +
 
             Color.BRIGHT_CYAN + "# FurryBlackPlus 系统参数 ===========================" + Color.RESET + "\n" +
             "furryblack.logger.level 日志等级\n" +
@@ -968,8 +967,8 @@ public final class FurryBlack {
             "level (安全) 修改控制台日志打印等级，日志不受影响(可能导致漏掉ERR/WARN信息)\n" +
             "stat  (安全) 查看性能状态\n" +
             "stop  (安全) 正常退出，完整执行关闭流程，等待模块结束，等待线程池结束，等待所有线程\n" +
-            "drop  (高危) 强制退出，不等待插件关闭完成，不等待线程池结束，且最终杀死JVM\n" +
-            "kill  (高危) 命令执行后直接杀死JVM，不会进行任何关闭操作\n" +
+            "drop  (高危) 强制退出，不等待插件关闭完成，不等待线程池结束，且最终强制结束JVM(halt)\n" +
+            "kill  (高危) 命令执行后直接强制结束JVM(halt)，不会进行任何关闭操作\n" +
 
             Color.GREEN + "# 功能管理 ==========================================" + Color.RESET + "\n" +
             "enable  (安全) 启用消息事件处理 正常响应消息\n" +

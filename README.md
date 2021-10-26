@@ -145,6 +145,7 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 - 更新jLine
 - 修改关闭线程池的逻辑
+- 修复exitCode
 
 ### 2.0.11
 
