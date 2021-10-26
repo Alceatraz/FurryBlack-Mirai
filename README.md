@@ -141,6 +141,12 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.0.13
+
+- 整理FurryBlack.class
+- 修复--help导致的错误
+- 添加了--info和--color模式
+
 ### 2.0.12
 
 - 更新jLine

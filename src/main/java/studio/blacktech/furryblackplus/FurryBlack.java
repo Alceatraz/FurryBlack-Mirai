@@ -150,35 +150,179 @@ public final class FurryBlack {
     // ==========================================================================================================================================================
 
 
-    public static final String APP_VERSION = "2.0.12";
+    public static final String APP_VERSION = "2.0.13";
 
 
     // ==========================================================================================================================================================
     //
-    // 系统信息
+    // 公共常量
     //
     // ==========================================================================================================================================================
 
 
-    @Api("系统启动时间") private static final long BOOT_TIME = System.currentTimeMillis();
+    @Api("系统启动时间") private static final long BOOT_TIME;
 
     @Api("原始系统时区") public static final ZoneId SYSTEM_ZONEID;
     @Api("原始系统偏差") public static final ZoneOffset SYSTEM_OFFSET;
 
-    @Api("系统换行符") public static final String LINE_SEPARATOR;
+    @Api("系统换行符") public static final String LINE;
+
+
+    // ==========================================================================================================================================================
+    //
+    // 私有常量
+    //
+    // ==========================================================================================================================================================
+
+    private static final String CONTENT_INFO;
+    private static final String CONTENT_HELP;
+
+    private static final String CONTENT_COLOR;
+
+    private static final String CONSOLE_PROMPT;
+
+
+    // ==========================================================================================================================================================
+    //
+    // 常量语句块
+    //
+    // ==========================================================================================================================================================
 
 
     static {
 
-        System.setProperty("mirai.no-desktop", "");
+        BOOT_TIME = System.currentTimeMillis();
 
         SYSTEM_ZONEID = ZoneId.systemDefault();
         SYSTEM_OFFSET = ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now());
 
+        // =====================================================================
+
+        System.setProperty("mirai.no-desktop", "");
+
         Locale.setDefault(Locale.SIMPLIFIED_CHINESE);
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
 
-        LINE_SEPARATOR = System.lineSeparator();
+        // =====================================================================
+
+        CONSOLE_PROMPT = "[console]$ ";
+
+        LINE = System.lineSeparator();
+
+        CONTENT_COLOR =
+
+            // @formatter:off
+
+            Color.RED +            "RED ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+            Color.GREEN +          "GREEN ---------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+            Color.YELLOW +         "YELLOW --------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+            Color.BLUE +           "BLUE ----------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+            Color.MAGENTA +        "MAGENTA -------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+            Color.CYAN +           "CYAN ----------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+            Color.BRIGHT_RED +     "BRIGHT_RED ----- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+            Color.BRIGHT_GREEN +   "BRIGHT_GREEN --- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+            Color.BRIGHT_YELLOW +  "BRIGHT_YELLOW -- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+            Color.BRIGHT_BLUE +    "BRIGHT_BLUE ---- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+            Color.BRIGHT_MAGENTA + "BRIGHT_MAGENTA - THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+            Color.BRIGHT_CYAN +    "BRIGHT_CYAN ---- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+            Color.WHITE +          "WHITE ---------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+            Color.GRAY +           "GRAY ----------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+            Color.BRIGHT_BLACK +   "BRIGHT_BLACK --- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+            Color.BRIGHT_WHITE +   "BRIGHT_WHITE --- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET
+
+            // @formatter:on
+
+        ;
+
+        CONTENT_INFO =
+
+            // @formatter:off
+
+            Color.YELLOW + "FurryBlackPlus Mirai - ver " + APP_VERSION + Color.RESET + LINE +
+            """
+            A Mirai wrapper QQ-Bot framework make with love and \uD83E\uDDE6
+            电子白熊会梦到仿生老黑吗
+            By - Alceatraz Warprays @ BlackTechStudio
+            项目地址 https://github.com/Alceatraz/FurryBlack-Mirai
+            插件地址 https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
+            个人主页 https://www.blacktech.studio"""
+
+            // @formatter:on
+
+        ;
+
+        CONTENT_HELP =
+
+            // @formatter:off
+
+            Color.YELLOW + "FurryBlackPlus Mirai - ver " + APP_VERSION + Color.RESET + LINE +
+            Color.BRIGHT_CYAN + "# FurryBlackPlus 启动参数 ===========================" + Color.RESET + LINE +
+            "--debug       使用DEBUG模式启动" + LINE +
+            "--unsafe      允许一些危险的调用" + LINE +
+            "--no-login    使用离线模式，仅用于基础调试，功能基本都不可用" + LINE +
+            "--no-console  不使用控制台，唯一正常关闭方式是使用进程信号" + LINE +
+            "--no-jline    不使用jline控制台，使用BufferedReader" + LINE +
+            "--force-exit  关闭流程执行后，强制结束JVM(halt)" + LINE +
+
+            Color.BRIGHT_CYAN + "# FurryBlackPlus 系统参数 ===========================" + Color.RESET + LINE +
+            "furryblack.logger.level 日志等级" + LINE +
+
+            Color.BRIGHT_CYAN + "# FurryBlackPlus 控制台  ===========================" + Color.RESET + LINE +
+            Color.RED + "⚠ 控制台任何操作都属于底层操作可以直接对框架进行不安全和非法的操作" + Color.RESET + LINE +
+            "安全：设计如此，不会导致异常或者不可预测的结果" + LINE +
+            "风险：功能设计上是安全操作，但是具体被操作对象可能导致错误" + LINE +
+            "危险：没有安全性检查的操作，可能会让功能严重异常导致被迫重启或损坏模块的数据存档" + LINE +
+            "高危：后果完全未知的危险操作，或者正常流程中不应该如此操作但是控制台仍然可以强制执行" + LINE +
+
+            Color.GREEN + "# 系统管理 ==========================================" + Color.RESET + LINE +
+            "level (安全) 修改控制台日志打印等级，日志不受影响(可能导致漏掉ERR/WARN信息)" + LINE +
+            "stat  (安全) 查看性能状态" + LINE +
+            "stop  (安全) 正常退出，完整执行关闭流程，等待模块结束，等待线程池结束，等待所有线程" + LINE +
+            "drop  (高危) 强制退出，不等待插件关闭完成，不等待线程池结束，且最终强制结束JVM(halt)" + LINE +
+            "kill  (高危) 命令执行后直接强制结束JVM(halt)，不会进行任何关闭操作" + LINE +
+
+            Color.GREEN + "# 功能管理 ==========================================" + Color.RESET + LINE +
+            "enable  (安全) 启用消息事件处理 正常响应消息" + LINE +
+            "disable (安全) 停用消息事件处理 无视任何消息" + LINE +
+
+            Color.GREEN + "# 好友相关 ==========================================" + Color.RESET + LINE +
+            "list users   (安全) 列出好友" + LINE +
+            "list group   (安全) 列出群组" + LINE +
+            "list <group> (安全) 列出成员" + LINE +
+
+            Color.GREEN + "# 昵称相关 ==========================================" + Color.RESET + LINE +
+            "nickname list (安全) 列出昵称" + LINE +
+            "nickname clean (安全) 清空昵称" + LINE +
+            "nickname append (安全) 加载且合并昵称" + LINE +
+            "nickname reload (安全) 清空且加载昵称" + LINE +
+
+            Color.GREEN + "# 发送消息 ==========================================" + Color.RESET + LINE +
+            "send users <users> <消息>  (安全) 向好友发送消息" + LINE +
+            "send group <group> <消息>  (安全) 向群聊发送消息" + LINE +
+            "send <group> <user> <消息> (安全) 向群聊发送AT消息" + LINE +
+
+            Color.GREEN + "# 模型管理 ==========================================" + Color.RESET + LINE +
+            "schema (安全) 详细显示插件和模块" + LINE +
+
+            Color.GREEN + "# 插件管理 ==========================================" + Color.RESET + LINE +
+            "plugin (安全) 列出插件" + LINE +
+
+            Color.GREEN + "# 模块管理 ==========================================" + Color.RESET + LINE +
+            "module (安全) 列出模块" + LINE +
+
+            Color.GREEN + "※ Runner可能会被依赖，底层操作框架不检查依赖，有可能导致关联模块崩溃" + Color.RESET + LINE +
+            "module unload <名称> (风险) 卸载指定模块(执行 shut + 从处理链中移除)" + LINE +
+            "module reboot <名称> (风险) 重启指定模块(执行 shut + init + boot)" + LINE +
+            "module shut   <名称> (风险) 关闭指定模块(执行 shut)" + LINE +
+            "module init   <名称> (风险) 预载指定模块(执行 init)" + LINE +
+            "module shut   <名称> (风险) 启动指定模块(执行 boot)" + LINE +
+
+            Color.GREEN + "# 调试功能 ==========================================" + Color.RESET + LINE +
+            "debug [enable|disable] (风险) DEBUG开关，打印DEBUG输出和控制某些功能，插件如果不遵守标准开发可能会导致崩溃"
+
+        // @formatter:on
+
+        ;
 
     }
 
@@ -188,9 +332,6 @@ public final class FurryBlack {
     // 私有变量
     //
     // ==========================================================================================================================================================
-
-
-    private static final String CONSOLE_PROMPT = "[console]$ ";
 
 
     private static LoggerX logger;
@@ -235,12 +376,33 @@ public final class FurryBlack {
 
         List<String> parameters = Arrays.asList(args);
 
+        boolean drtRun = false;
+
+        // =====================================================================
+        // color 模式
+        if (parameters.contains("--color")) {
+            System.out.println(CONTENT_COLOR);
+            System.out.println();
+            drtRun = true;
+        }
+
+        // =====================================================================
+        // info 模式
+        if (parameters.contains("--info")) {
+            System.out.println(CONTENT_INFO);
+            System.out.println();
+            drtRun = true;
+        }
+
         // =====================================================================
         // help 模式
         if (parameters.contains("--help")) {
-            printHelp();
-            return;
+            System.out.println(CONTENT_HELP);
+            System.out.println();
+            drtRun = true;
         }
+
+        if (drtRun) return;
 
         // =====================================================================
         // debug 模式
@@ -474,18 +636,13 @@ public final class FurryBlack {
 
                     case "?":
                     case "help":
-                        printHelp();
+                        FurryBlack.terminalPrintLine(CONTENT_HELP);
                         break;
 
                     // =========================================================
 
                     case "info":
-                        FurryBlack.terminalPrintLine("""
-                            FurryBlack-Plus
-                            A Mirai wrapper QQ-Bot framework make with love and \\uD83E\\uDDE6
-                            Mr.Black is a housekeeper with a white bear furry visualize
-                            Create by Alceatraz Warprays @ Black Tech Studio
-                            https://www.blacktech.studio""");
+                        FurryBlack.terminalPrintLine(CONTENT_INFO);
                         break;
 
                     // =================================================================================================
@@ -532,10 +689,11 @@ public final class FurryBlack {
 
                             // @formatter:off
 
-                            "调试模式: " + (debug ? "启用" : "关闭") + LINE_SEPARATOR +
-                            "关闭模式: " + (shutModeHalt ? "强制" : "正常") + LINE_SEPARATOR +
-                            "消息事件: " + (enable ? "启用" : "关闭") + LINE_SEPARATOR +
-                            "运行时间: " + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME) + LINE_SEPARATOR +
+                            "调试模式: " + (debug ? "启用" : "关闭") + LINE +
+                            "严格模式: " + (unsafe ? "启用" : "关闭") + LINE +
+                            "关闭模式: " + (shutModeHalt ? "强制" : "正常") + LINE +
+                            "消息事件: " + (enable ? "启用" : "关闭") + LINE +
+                            "运行时间: " + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME) + LINE +
                             "内存占用: " + (totalMemory - freeMemory) + "KB/" + totalMemory + "KB/" + maxMemory + "KB(" + maxMemory / 1024 + "MB)"
 
                             // @formatter:on
@@ -565,31 +723,7 @@ public final class FurryBlack {
                     // ==========================================================================================================================================================
 
                     case "color":
-
-                        FurryBlack.terminalPrintLine(
-
-                            // @formatter:off
-
-                            Color.RED +            "RED ------------ The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
-                            Color.GREEN +          "GREEN ---------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
-                            Color.YELLOW +         "YELLOW --------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
-                            Color.BLUE +           "BLUE ----------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
-                            Color.MAGENTA +        "MAGENTA -------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
-                            Color.CYAN +           "CYAN ----------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
-                            Color.BRIGHT_RED +     "BRIGHT_RED ----- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
-                            Color.BRIGHT_GREEN +   "BRIGHT_GREEN --- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
-                            Color.BRIGHT_YELLOW +  "BRIGHT_YELLOW -- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
-                            Color.BRIGHT_BLUE +    "BRIGHT_BLUE ---- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
-                            Color.BRIGHT_MAGENTA + "BRIGHT_MAGENTA - The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
-                            Color.BRIGHT_CYAN +    "BRIGHT_CYAN ---- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
-                            Color.WHITE +          "WHITE ---------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
-                            Color.GRAY +           "GRAY ----------- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
-                            Color.BRIGHT_BLACK +   "BRIGHT_BLACK --- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR +
-                            Color.BRIGHT_WHITE +   "BRIGHT_WHITE --- The quick brown fox jump over a lazy dog" + Color.RESET + LINE_SEPARATOR
-
-                            // @formatter:on
-
-                        );
+                        FurryBlack.terminalPrintLine(CONTENT_COLOR);
                         break;
 
                     // =========================================================
@@ -810,17 +944,17 @@ public final class FurryBlack {
                                      OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream)
                                 ) {
                                     ContactList<Friend> friends = getFriends();
-                                    outputStreamWriter.write("# 好友 " + friends.size() + LINE_SEPARATOR);
+                                    outputStreamWriter.write("# 好友 " + friends.size() + LINE);
                                     for (Friend friend : friends) {
                                         outputStreamWriter.write("*." + friend.getId() + ":" + friend.getNick());
-                                        outputStreamWriter.write(LINE_SEPARATOR);
+                                        outputStreamWriter.write(LINE);
                                     }
                                     ContactList<Group> groups = getGroups();
-                                    outputStreamWriter.write("# 群组 " + groups.size() + LINE_SEPARATOR);
+                                    outputStreamWriter.write("# 群组 " + groups.size() + LINE);
                                     for (Group group : groups) {
-                                        outputStreamWriter.write(LINE_SEPARATOR);
+                                        outputStreamWriter.write(LINE);
                                         long groupId = group.getId();
-                                        outputStreamWriter.write("# " + group.getName() + " " + group.getOwner().getId() + LINE_SEPARATOR);
+                                        outputStreamWriter.write("# " + group.getName() + " " + group.getOwner().getId() + LINE);
                                         for (NormalMember member : group.getMembers()) {
                                             String nameCard = member.getNameCard();
                                             if (nameCard.isEmpty()) {
@@ -828,7 +962,7 @@ public final class FurryBlack {
                                             } else {
                                                 outputStreamWriter.write(groupId + "." + member.getId() + ":" + member.getNick() + "[" + nameCard + "]");
                                             }
-                                            outputStreamWriter.write(LINE_SEPARATOR);
+                                            outputStreamWriter.write(LINE);
                                         }
                                     }
                                 }
@@ -939,85 +1073,10 @@ public final class FurryBlack {
     }
 
 
-    public static void printHelp() {
-
-        FurryBlack.terminalPrintLine(
-
-            // @formatter:off
-
-            Color.BRIGHT_CYAN + "# FurryBlackPlus 启动参数 ===========================" + Color.RESET + "\n" +
-            "--debug       使用DEBUG模式启动\n" +
-            "--unsafe      允许一些危险的调用\n" +
-            "--no-login    使用离线模式，仅用于基础调试，功能基本都不可用\n" +
-            "--no-console  不使用控制台，唯一正常关闭方式是使用进程信号\n" +
-            "--no-jline    不使用jline控制台，使用BufferedReader\n" +
-            "--force-exit  关闭流程执行后，强制结束JVM(halt)\n" +
-
-            Color.BRIGHT_CYAN + "# FurryBlackPlus 系统参数 ===========================" + Color.RESET + "\n" +
-            "furryblack.logger.level 日志等级\n" +
-
-            Color.BRIGHT_CYAN + "# FurryBlackPlus 控制台  ===========================" + Color.RESET + "\n" +
-            Color.RED + "⚠ 控制台任何操作都属于底层操作可以直接对框架进行不安全和非法的操作" + Color.RESET + "\n" +
-            "安全：设计如此，不会导致异常或者不可预测的结果\n" +
-            "风险：功能设计上是安全操作，但是具体被操作对象可能导致错误\n" +
-            "危险：没有安全性检查的操作，可能会让功能严重异常导致被迫重启或损坏模块的数据存档\n" +
-            "高危：后果完全未知的危险操作，或者正常流程中不应该如此操作但是控制台仍然可以强制执行\n" +
-
-            Color.GREEN + "# 系统管理 ==========================================" + Color.RESET + "\n" +
-            "level (安全) 修改控制台日志打印等级，日志不受影响(可能导致漏掉ERR/WARN信息)\n" +
-            "stat  (安全) 查看性能状态\n" +
-            "stop  (安全) 正常退出，完整执行关闭流程，等待模块结束，等待线程池结束，等待所有线程\n" +
-            "drop  (高危) 强制退出，不等待插件关闭完成，不等待线程池结束，且最终强制结束JVM(halt)\n" +
-            "kill  (高危) 命令执行后直接强制结束JVM(halt)，不会进行任何关闭操作\n" +
-
-            Color.GREEN + "# 功能管理 ==========================================" + Color.RESET + "\n" +
-            "enable  (安全) 启用消息事件处理 正常响应消息\n" +
-            "disable (安全) 停用消息事件处理 无视任何消息\n" +
-
-            Color.GREEN + "# 好友相关 ==========================================" + Color.RESET + "\n" +
-            "list users   (安全) 列出好友\n" +
-            "list group   (安全) 列出群组\n" +
-            "list <group> (安全) 列出成员\n" +
-
-            Color.GREEN + "# 昵称相关 ==========================================" + Color.RESET + "\n" +
-            "nickname list (安全) 列出昵称\n" +
-            "nickname clean (安全) 清空昵称\n" +
-            "nickname append (安全) 加载且合并昵称\n" +
-            "nickname reload (安全) 清空且加载昵称\n" +
-
-            Color.GREEN + "# 发送消息 ==========================================" + Color.RESET + "\n" +
-            "send users <users> <消息>  (安全) 向好友发送消息\n" +
-            "send group <group> <消息>  (安全) 向群聊发送消息\n" +
-            "send <group> <user> <消息> (安全) 向群聊发送AT消息\n" +
-
-            Color.GREEN + "# 模型管理 ==========================================" + Color.RESET + "\n" +
-            "schema (安全) 详细显示插件和模块\n" +
-
-            Color.GREEN + "# 插件管理 ==========================================" + Color.RESET + "\n" +
-            "plugin (安全) 列出插件\n" +
-
-            Color.GREEN + "# 模块管理 ==========================================" + Color.RESET + "\n" +
-            "module (安全) 列出模块\n" +
-            Color.GREEN + "※ Runner可能会被依赖，底层操作框架不检查依赖，有可能导致关联模块崩溃" + Color.RESET + "\n" +
-            "module unload <名称> (风险) 卸载指定模块(执行 shut + 从处理链中移除)\n" +
-            "module reboot <名称> (风险) 重启指定模块(执行 shut + init + boot)\n" +
-            "module shut   <名称> (风险) 关闭指定模块(执行 shut)\n" +
-            "module init   <名称> (风险) 预载指定模块(执行 init)\n" +
-            "module shut   <名称> (风险) 启动指定模块(执行 boot)\n" +
-
-            Color.GREEN + "# 调试功能 ==========================================" + Color.RESET + "\n" +
-            "debug [enable|disable] (风险) DEBUG开关，打印DEBUG输出和控制某些功能，插件如果不遵守标准开发可能会导致崩溃\n"
-
-            // @formatter:on
-
-        );
-    }
-
-
     // =================================================================================================================
 
 
-    public abstract static class Terminal {
+    private abstract static class Terminal {
 
         public static Terminal getInstance() {
             if (noJline) {
@@ -1057,7 +1116,7 @@ public final class FurryBlack {
     // =========================================================================
 
 
-    public static class SimpleTerminal extends Terminal {
+    private static final class SimpleTerminal extends Terminal {
 
         private final BufferedReader bufferedReader;
         private final OutputStreamWriter outputStreamWriter;
@@ -1090,7 +1149,7 @@ public final class FurryBlack {
 
         @Override
         protected void printLineImpl(String message) {
-            this.printImpl(message + LINE_SEPARATOR);
+            this.printImpl(message + LINE);
         }
 
         @Override
@@ -1103,7 +1162,7 @@ public final class FurryBlack {
     // =========================================================================
 
 
-    public static class JlineTerminal extends Terminal {
+    private static final class JlineTerminal extends Terminal {
 
         private final LineReader jlineReader;
         private final CompleterDelegate completerDelegate;
@@ -1127,7 +1186,7 @@ public final class FurryBlack {
 
         @Override
         protected void printLineImpl(String message) {
-            this.printImpl(message + LINE_SEPARATOR);
+            this.printImpl(message + LINE);
         }
 
         @Override
