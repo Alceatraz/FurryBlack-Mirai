@@ -92,6 +92,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -150,7 +151,7 @@ public final class FurryBlack {
     // ==========================================================================================================================================================
 
 
-    public static final String APP_VERSION = "2.0.13";
+    public static final String APP_VERSION = "2.0.14";
 
 
     // ==========================================================================================================================================================
@@ -202,6 +203,8 @@ public final class FurryBlack {
 
         Locale.setDefault(Locale.SIMPLIFIED_CHINESE);
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+
+        Thread.currentThread().setName("furryblack-main");
 
         // =====================================================================
 
@@ -580,6 +583,7 @@ public final class FurryBlack {
 
         if (!noConsole) {
             Thread consoleThread = new Thread(FurryBlack::console);
+            consoleThread.setName("furryblack-terminal");
             consoleThread.setDaemon(true);
             consoleThread.start();
             terminal.updateCompleter();
@@ -699,6 +703,56 @@ public final class FurryBlack {
                             // @formatter:on
 
                         );
+                        break;
+
+                    // =========================================================
+
+                    case "stack":
+
+                        Map<Thread, StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
+
+                        ArrayList<Map.Entry<Thread, StackTraceElement[]>> entries = new ArrayList<>(stackTraces.entrySet());
+
+                        entries.sort((o1, o2) -> {
+                            if (o1 == o2) return 0;
+                            Thread o1Key = o1.getKey();
+                            Thread o2Key = o2.getKey();
+                            return (int) (o1Key.getId() - o2Key.getId());
+                        });
+
+                        for (Map.Entry<Thread, StackTraceElement[]> entry : entries) {
+                            var k = entry.getKey();
+                            var v = entry.getValue();
+                            StringBuilder builder = new StringBuilder();
+                            if (k.isDaemon()) {
+                                builder.append("Daemon-");
+                            } else {
+                                builder.append("Thread-");
+                            }
+                            builder.append(k.getId());
+                            builder.append(" ");
+                            builder.append(k.getState());
+                            builder.append(" (");
+                            builder.append(k.getName());
+                            builder.append(") ");
+                            builder.append(k.getPriority());
+                            builder.append(" [");
+                            builder.append(k.getThreadGroup().getName());
+                            builder.append("]");
+                            builder.append(LINE);
+                            for (StackTraceElement element : v) {
+                                builder.append("    ");
+                                builder.append(element.getClassName());
+                                builder.append(":");
+                                builder.append(element.getMethodName());
+                                builder.append("(");
+                                builder.append(element.getLineNumber());
+                                builder.append(")");
+                                builder.append(LINE);
+                            }
+                            FurryBlack.terminalPrintLine(builder);
+
+                        }
                         break;
 
                     // =================================================================================================
