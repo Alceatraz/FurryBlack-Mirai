@@ -141,6 +141,10 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.0.15
+
+- 更新Mirai-2.8.0
+
 ### 2.0.14
 
 - 添加stack命令以打印完整线程信息

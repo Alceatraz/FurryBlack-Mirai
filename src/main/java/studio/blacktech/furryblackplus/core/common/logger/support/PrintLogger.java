@@ -28,7 +28,7 @@ import studio.blacktech.furryblackplus.core.common.time.TimeTool;
 @SuppressWarnings("unused")
 
 
-public class PrintLogger extends LoggerX {
+public final class PrintLogger extends LoggerX {
 
 
     public PrintLogger(String name) {

@@ -23,7 +23,7 @@ package studio.blacktech.furryblackplus.core.handler.common;
 import studio.blacktech.furryblackplus.FurryBlack;
 import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.common.exception.BotException;
-import studio.blacktech.furryblackplus.core.common.exception.moduels.ModuleException;
+import studio.blacktech.furryblackplus.core.common.exception.ModuleException;
 import studio.blacktech.furryblackplus.core.common.exception.moduels.boot.BootException;
 
 import java.io.File;

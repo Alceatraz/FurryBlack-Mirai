@@ -18,7 +18,7 @@ package studio.blacktech.furryblackplus.core.common.exception.moduels.scan;
 
 
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.common.exception.moduels.ModuleException;
+import studio.blacktech.furryblackplus.core.common.exception.ModuleException;
 
 
 @SuppressWarnings("unused")

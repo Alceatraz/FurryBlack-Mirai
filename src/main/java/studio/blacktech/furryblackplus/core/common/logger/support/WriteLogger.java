@@ -34,7 +34,7 @@ import java.nio.charset.StandardCharsets;
 @SuppressWarnings("unused")
 
 
-public class WriteLogger extends LoggerX {
+public final class WriteLogger extends LoggerX {
 
 
     private static boolean lock;

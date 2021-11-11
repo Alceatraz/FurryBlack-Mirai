@@ -59,7 +59,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import static studio.blacktech.furryblackplus.core.common.logger.StringTool.hexHash;
 
 
-public class Schema {
+public final class Schema {
 
 
     private final LoggerX logger = LoggerXFactory.newLogger(Schema.class);

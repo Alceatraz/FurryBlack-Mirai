@@ -22,7 +22,7 @@ package studio.blacktech.furryblackplus.core.common.logger.support;
 import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
 
 
-public class NullLogger extends LoggerX {
+public final class NullLogger extends LoggerX {
 
 
     public NullLogger(String name) {

@@ -14,11 +14,10 @@
  */
 
 
-package studio.blacktech.furryblackplus.core.common.exception.moduels;
+package studio.blacktech.furryblackplus.core.common.exception;
 
 
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.common.exception.BotException;
 
 
 @SuppressWarnings("unused")

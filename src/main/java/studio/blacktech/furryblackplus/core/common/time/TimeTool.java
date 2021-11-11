@@ -31,7 +31,7 @@ import java.time.format.DateTimeFormatter;
 
 
 @Api("时间工具")
-public class TimeTool {
+public final class TimeTool {
 
 
     private static final DateTimeFormatter DATETIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());

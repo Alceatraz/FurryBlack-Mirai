@@ -56,7 +56,7 @@ import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 
 
-public class Plugin {
+public final class Plugin {
 
 
     private static final Pattern PATTERN = Pattern.compile("^[0-9a-z_-]{8,64}$");

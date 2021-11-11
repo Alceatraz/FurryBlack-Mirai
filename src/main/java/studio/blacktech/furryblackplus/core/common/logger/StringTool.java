@@ -19,7 +19,7 @@
 package studio.blacktech.furryblackplus.core.common.logger;
 
 
-public class StringTool {
+public final class StringTool {
 
 
     public static String hexHash(Object object) {

@@ -20,7 +20,7 @@
 package studio.blacktech.furryblackplus.core.handler.common;
 
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.common.exception.moduels.ModuleException;
+import studio.blacktech.furryblackplus.core.common.exception.ModuleException;
 import studio.blacktech.furryblackplus.core.common.exception.moduels.load.MisConfigException;
 import studio.blacktech.furryblackplus.core.common.logger.LoggerXFactory;
 import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
@@ -40,7 +40,9 @@ import java.util.List;
 
 public class BasicModuleUtilities {
 
+
     protected final LoggerX logger;
+
 
     public BasicModuleUtilities() {
         this.logger = LoggerXFactory.newLogger(this.getClass());
