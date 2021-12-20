@@ -102,7 +102,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static org.jline.builtins.Completers.TreeCompleter.node;
 
@@ -151,7 +150,7 @@ public final class FurryBlack {
     // =================================================================================================================
 
 
-    public static final String APP_VERSION = "2.0.17";
+    public static final String APP_VERSION = "2.0.19";
 
 
     // =================================================================================================================
@@ -1034,7 +1033,7 @@ public final class FurryBlack {
                         switch (command.getParameterSegment(0)) {
 
                             case "u", "usr", "user", "users", "f", "fri", "friend", "friends" -> {
-                                List<Friend> friends = FurryBlack.getFriends().stream().filter(item -> item.getId() != systemd.getBotID()).collect(Collectors.toList());
+                                List<Friend> friends = FurryBlack.getFriends().stream().filter(item -> item.getId() != systemd.getBotID()).toList();
                                 if (friends.size() == 0) {
                                     FurryBlack.terminalPrintLine("你没有朋友");
                                     break;
@@ -1260,7 +1259,8 @@ public final class FurryBlack {
                     new TreeCompleter(node("nickname", node("list", "clean", "reload", "append", "export"))),
                     new TreeCompleter(node("debug", node("enable", "disable"))),
                     new TreeCompleter(node("plugin")),
-                    new TreeCompleter(node("module",
+                    new TreeCompleter(node(
+                        "module",
                         node("init", "boot", "shut", "reboot", "unload")
                     ))
                 );
@@ -1279,9 +1279,10 @@ public final class FurryBlack {
                     new TreeCompleter(node("nickname", node("list", "clean", "reload", "append", "export"))),
                     new TreeCompleter(node("debug", node("enable", "disable"))),
                     new TreeCompleter(node("plugin")),
-                    new TreeCompleter(node("module",
+                    new TreeCompleter(node(
+                        "module",
                         node("init", "boot", "shut", "reboot", "unload",
-                            node(new StringsCompleter(systemd.listAllModule().keySet()))
+                             node(new StringsCompleter(systemd.listAllModule().keySet()))
                         )
                     ))
                 );

@@ -23,6 +23,8 @@ import studio.blacktech.furryblackplus.core.handler.common.Command;
 import studio.blacktech.furryblackplus.core.handler.annotation.Checker;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerChecker;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 
 @Api("示例检查器")
 
@@ -57,7 +59,7 @@ public class DemoChecker extends EventHandlerChecker {
     @Override
     public boolean handleUsersMessage(UserMessageEvent event, Command command) {
         FurryBlack.terminalPrintLine("消息" + this.getClass().getName());
-        return false;
+        return ThreadLocalRandom.current().nextInt() == 42;
     }
 
     @Override
