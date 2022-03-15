@@ -256,20 +256,20 @@ public final class WriteLogger extends LoggerX {
     @Override
     public void debugImpl(String message) {
         if (message == null) return;
-        String result = "[" + TimeTool.datetime() + "][DEBG][" + this.name + "]" + message;
+        String result = "[" + TimeTool.datetime() + "][DEBUG][" + this.name + "]" + message;
         WriteLogger.handle(Color.BRIGHT_BLACK, result);
     }
 
     @Override
     public void debugImpl(Throwable throwable) {
         if (throwable == null) return;
-        String result = "[" + TimeTool.datetime() + "][DEBG][" + this.name + "]" + extractStackTrace(throwable);
+        String result = "[" + TimeTool.datetime() + "][DEBUG][" + this.name + "]" + extractStackTrace(throwable);
         WriteLogger.handle(Color.BRIGHT_BLACK, result);
     }
 
     @Override
     public void debugImpl(String message, Throwable throwable) {
-        String result = "[" + TimeTool.datetime() + "][DEBG][" + this.name + "]" + message + "\r\n" + extractStackTrace(throwable);
+        String result = "[" + TimeTool.datetime() + "][DEBUG][" + this.name + "]" + message + "\r\n" + extractStackTrace(throwable);
         WriteLogger.handle(Color.BRIGHT_BLACK, result);
     }
 
@@ -280,20 +280,20 @@ public final class WriteLogger extends LoggerX {
     @Override
     public void developImpl(String message) {
         if (message == null) return;
-        String result = "[" + TimeTool.datetime() + "][DEVL][" + this.name + "]" + message;
+        String result = "[" + TimeTool.datetime() + "][DEVEL][" + this.name + "]" + message;
         WriteLogger.handle(Color.GRAY, result);
     }
 
     @Override
     public void developImpl(Throwable throwable) {
         if (throwable == null) return;
-        String result = "[" + TimeTool.datetime() + "][INFO][" + this.name + "]" + extractStackTrace(throwable);
+        String result = "[" + TimeTool.datetime() + "][DEVEL][" + this.name + "]" + extractStackTrace(throwable);
         WriteLogger.handle(Color.GRAY, result);
     }
 
     @Override
     public void developImpl(String message, Throwable throwable) {
-        String result = "[" + TimeTool.datetime() + "][DEVL][" + this.name + "]" + message + "\r\n" + extractStackTrace(throwable);
+        String result = "[" + TimeTool.datetime() + "][DEVEL][" + this.name + "]" + message + "\r\n" + extractStackTrace(throwable);
         WriteLogger.handle(Color.GRAY, result);
     }
 
@@ -304,20 +304,20 @@ public final class WriteLogger extends LoggerX {
     @Override
     public void verboseImpl(String message) {
         if (message == null) return;
-        String result = "[" + TimeTool.datetime() + "][VERB][" + this.name + "]" + message;
+        String result = "[" + TimeTool.datetime() + "][VERBOSE][" + this.name + "]" + message;
         WriteLogger.handle(Color.GRAY, result);
     }
 
     @Override
     public void verboseImpl(Throwable throwable) {
         if (throwable == null) return;
-        String result = "[" + TimeTool.datetime() + "][VERB][" + this.name + "]" + extractStackTrace(throwable);
+        String result = "[" + TimeTool.datetime() + "][VERBOSE][" + this.name + "]" + extractStackTrace(throwable);
         WriteLogger.handle(Color.GRAY, result);
     }
 
     @Override
     public void verboseImpl(String message, Throwable throwable) {
-        String result = "[" + TimeTool.datetime() + "][VERB][" + this.name + "]" + message + "\r\n" + extractStackTrace(throwable);
+        String result = "[" + TimeTool.datetime() + "][VERBOSE][" + this.name + "]" + message + "\r\n" + extractStackTrace(throwable);
         WriteLogger.handle(Color.GRAY, result);
     }
 

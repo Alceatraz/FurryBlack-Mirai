@@ -214,20 +214,20 @@ public final class PrintLogger extends LoggerX {
     @Override
     public void debugImpl(String message) {
         if (message == null) return;
-        String result = Color.BRIGHT_BLACK + "[" + TimeTool.datetime() + "][DEBG][" + this.name + "]" + message + Color.RESET;
+        String result = Color.BRIGHT_BLACK + "[" + TimeTool.datetime() + "][DEBUG][" + this.name + "]" + message + Color.RESET;
         FurryBlack.terminalPrintLine(result);
     }
 
     @Override
     public void debugImpl(Throwable throwable) {
         if (throwable == null) return;
-        String result = Color.BRIGHT_BLACK + "[" + TimeTool.datetime() + "][DEBG][" + this.name + "]" + extractStackTrace(throwable) + Color.RESET;
+        String result = Color.BRIGHT_BLACK + "[" + TimeTool.datetime() + "][DEBUG][" + this.name + "]" + extractStackTrace(throwable) + Color.RESET;
         FurryBlack.terminalPrintLine(result);
     }
 
     @Override
     public void debugImpl(String message, Throwable throwable) {
-        String result = Color.BRIGHT_BLACK + "[" + TimeTool.datetime() + "][DEBG][" + this.name + "]" + message + "\r\n" + extractStackTrace(throwable) + Color.RESET;
+        String result = Color.BRIGHT_BLACK + "[" + TimeTool.datetime() + "][DEBUG][" + this.name + "]" + message + "\r\n" + extractStackTrace(throwable) + Color.RESET;
         FurryBlack.terminalPrintLine(result);
     }
 
@@ -238,20 +238,20 @@ public final class PrintLogger extends LoggerX {
     @Override
     public void developImpl(String message) {
         if (message == null) return;
-        String result = Color.GRAY + "[" + TimeTool.datetime() + "][DEVL][" + this.name + "]" + message + Color.RESET;
+        String result = Color.GRAY + "[" + TimeTool.datetime() + "][DEVEL][" + this.name + "]" + message + Color.RESET;
         FurryBlack.terminalPrintLine(result);
     }
 
     @Override
     public void developImpl(Throwable throwable) {
         if (throwable == null) return;
-        String result = Color.GRAY + "[" + TimeTool.datetime() + "][INFO][" + this.name + "]" + extractStackTrace(throwable) + Color.RESET;
+        String result = Color.GRAY + "[" + TimeTool.datetime() + "][DEVEL][" + this.name + "]" + extractStackTrace(throwable) + Color.RESET;
         FurryBlack.terminalPrintLine(result);
     }
 
     @Override
     public void developImpl(String message, Throwable throwable) {
-        String result = Color.GRAY + "[" + TimeTool.datetime() + "][DEVL][" + this.name + "]" + message + "\r\n" + extractStackTrace(throwable) + Color.RESET;
+        String result = Color.GRAY + "[" + TimeTool.datetime() + "][DEVEL][" + this.name + "]" + message + "\r\n" + extractStackTrace(throwable) + Color.RESET;
         FurryBlack.terminalPrintLine(result);
     }
 
@@ -262,20 +262,20 @@ public final class PrintLogger extends LoggerX {
     @Override
     public void verboseImpl(String message) {
         if (message == null) return;
-        String result = Color.GRAY + "[" + TimeTool.datetime() + "][VERB][" + this.name + "]" + message + Color.RESET;
+        String result = Color.GRAY + "[" + TimeTool.datetime() + "][VERBOSE][" + this.name + "]" + message + Color.RESET;
         FurryBlack.terminalPrintLine(result);
     }
 
     @Override
     public void verboseImpl(Throwable throwable) {
         if (throwable == null) return;
-        String result = Color.GRAY + "[" + TimeTool.datetime() + "][VERB][" + this.name + "]" + extractStackTrace(throwable) + Color.RESET;
+        String result = Color.GRAY + "[" + TimeTool.datetime() + "][VERBOSE][" + this.name + "]" + extractStackTrace(throwable) + Color.RESET;
         FurryBlack.terminalPrintLine(result);
     }
 
     @Override
     public void verboseImpl(String message, Throwable throwable) {
-        String result = Color.GRAY + "[" + TimeTool.datetime() + "][VERB][" + this.name + "]" + message + "\r\n" + extractStackTrace(throwable) + Color.RESET;
+        String result = Color.GRAY + "[" + TimeTool.datetime() + "][VERBOSE][" + this.name + "]" + message + "\r\n" + extractStackTrace(throwable) + Color.RESET;
         FurryBlack.terminalPrintLine(result);
     }
 

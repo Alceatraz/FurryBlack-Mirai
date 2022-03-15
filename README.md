@@ -141,6 +141,10 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.1.0
+
+- 修改日志Tag
+
 ### 2.0.22
 
 - 更新Mirai-2.10.1
