@@ -150,7 +150,7 @@ public final class FurryBlack {
     // =================================================================================================================
 
 
-    public static final String APP_VERSION = "2.1.1";
+    public static final String APP_VERSION = "2.1.2";
 
 
     // =================================================================================================================
@@ -910,12 +910,14 @@ public final class FurryBlack {
                                 Map<Checker, Boolean> listAllChecker = systemd.listAllChecker();
                                 FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 检查器 " + listAllChecker.size() + Color.RESET);
                                 for (Map.Entry<Checker, Boolean> entry : listAllChecker.entrySet()) {
-                                    FurryBlack.terminalPrintLine((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]" + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
+                                    FurryBlack.terminalPrintLine((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]" + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey()
+                                                                                                                                                                                                                      .group() ? "G" : "") + "}");
                                 }
                                 Map<Executor, Boolean> listAllExecutor = systemd.listAllExecutor();
                                 FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 执行器 " + listAllExecutor.size() + Color.RESET);
                                 for (Map.Entry<Executor, Boolean> entry : listAllExecutor.entrySet()) {
-                                    FurryBlack.terminalPrintLine((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
+                                    FurryBlack.terminalPrintLine((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]{" + (entry.getKey().users() ? "U" : "") + (entry.getKey()
+                                                                                                                                                                                                                 .group() ? "G" : "") + "}");
                                 }
                                 List<Checker> globalUsersChecker = systemd.listGlobalUsersChecker();
                                 FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 全局私聊检查器 " + globalUsersChecker.size() + Color.RESET);
@@ -1039,8 +1041,8 @@ public final class FurryBlack {
                                     break;
                                 }
                                 friends.stream()
-                                    .map(FurryBlack::getFormattedNickName)
-                                    .forEach(FurryBlack::terminalPrintLine);
+                                       .map(FurryBlack::getFormattedNickName)
+                                       .forEach(FurryBlack::terminalPrintLine);
                             }
 
                             case "g", "grp", "group", "groups" -> {
@@ -1050,8 +1052,8 @@ public final class FurryBlack {
                                     break;
                                 }
                                 groups.stream()
-                                    .map(item -> item.getName() + "(" + item.getId() + ") " + item.getMembers().size() + "人")
-                                    .forEach(FurryBlack::terminalPrintLine);
+                                      .map(item -> item.getName() + "(" + item.getId() + ") " + item.getMembers().size() + "人")
+                                      .forEach(FurryBlack::terminalPrintLine);
                             }
 
                             default -> {
@@ -1063,18 +1065,18 @@ public final class FurryBlack {
                                     break;
                                 }
                                 FurryBlack.getGroup(group).getMembers().stream()
-                                    .sorted((_$1, _$2) -> _$2.getPermission().getLevel() - _$1.getPermission().getLevel())
-                                    .forEach(item -> {
-                                        StringBuilder builder = new StringBuilder();
-                                        builder.append(item.getNameCard());
-                                        builder.append(" - ");
-                                        builder.append(FurryBlack.getFormattedNickName(item));
-                                        switch (item.getPermission().getLevel()) {
-                                            case 2 -> builder.append(" 群主");
-                                            case 1 -> builder.append(" 管理");
-                                        }
-                                        FurryBlack.terminalPrintLine(builder);
-                                    });
+                                          .sorted((_$1, _$2) -> _$2.getPermission().getLevel() - _$1.getPermission().getLevel())
+                                          .forEach(item -> {
+                                              StringBuilder builder = new StringBuilder();
+                                              builder.append(item.getNameCard());
+                                              builder.append(" - ");
+                                              builder.append(FurryBlack.getFormattedNickName(item));
+                                              switch (item.getPermission().getLevel()) {
+                                                  case 2 -> builder.append(" 群主");
+                                                  case 1 -> builder.append(" 管理");
+                                              }
+                                              FurryBlack.terminalPrintLine(builder);
+                                          });
                             }
                         }
                         break;
