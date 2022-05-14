@@ -141,6 +141,13 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.1.3
+
+- 更新Mirai 2.11.0-RC2
+- 更新maven-dependency-plugin
+- 更新maven-compiler-plugin
+- 更新maven-jar-plugin
+
 ### 2.1.2
 
 - 更新Mirai 2.11.0-RC
