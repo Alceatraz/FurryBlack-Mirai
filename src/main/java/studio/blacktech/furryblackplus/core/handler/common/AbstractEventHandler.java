@@ -211,7 +211,7 @@ public abstract class AbstractEventHandler extends BasicModuleUtilities {
             botException.setStackTrace(stackTrace);
             throw botException;
         }
-        if (!"make".equals(schemaClazz.getMethodName())) {
+        if (!"makeModule".equals(schemaClazz.getMethodName())) {
             BotException botException = new BotException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
             botException.setStackTrace(stackTrace);
             throw botException;

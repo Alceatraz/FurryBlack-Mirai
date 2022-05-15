@@ -39,7 +39,8 @@ public final class TimeTool {
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
 
 
-    private TimeTool() {}
+    private TimeTool() {
+    }
 
 
     // ==================================================================================================

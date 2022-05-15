@@ -19,9 +19,9 @@ import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import studio.blacktech.furryblackplus.FurryBlack;
 import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.handler.common.Command;
-import studio.blacktech.furryblackplus.core.handler.annotation.Checker;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerChecker;
+import studio.blacktech.furryblackplus.core.handler.annotation.Checker;
+import studio.blacktech.furryblackplus.core.handler.common.Command;
 
 import java.util.concurrent.ThreadLocalRandom;
 

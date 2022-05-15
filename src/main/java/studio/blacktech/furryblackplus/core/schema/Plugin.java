@@ -59,7 +59,7 @@ import java.util.regex.Pattern;
 public final class Plugin {
 
 
-    private static final Pattern PATTERN = Pattern.compile("^[0-9a-z_-]{8,64}$");
+    private static final Pattern PATTERN = Pattern.compile("^[\\da-z_-]{8,64}$");
 
 
     private final LoggerX logger;

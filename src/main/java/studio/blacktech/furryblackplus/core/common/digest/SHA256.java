@@ -33,7 +33,8 @@ import java.util.Base64;
 public class SHA256 {
 
 
-    private SHA256() {}
+    private SHA256() {
+    }
 
     public static SHA256Digester getInstance() {
         return new SHA256Digester();

@@ -209,7 +209,7 @@ public final class Systemd extends BasicModuleUtilities {
     public Systemd(File folderConfig, File folderPlugin) {
         synchronized (Systemd.class) {
             if (INSTANCE_LOCK) {
-                BootException bootException = new BootException("Systemd init-lock is on, Invoker stack trace append as suppressed");
+                BootException bootException = new BootException("Systemd initModule-lock is on, Invoker stack trace append as suppressed");
                 RuntimeException runtimeException = new RuntimeException();
                 StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
                 runtimeException.setStackTrace(stackTrace);
@@ -307,7 +307,7 @@ public final class Systemd extends BasicModuleUtilities {
             this.COMMAND_PREFIX = prefix.charAt(0);
         }
 
-        String regex = "^" + this.COMMAND_PREFIX + "[a-zA-Z0-9]{2,16}";
+        String regex = "^" + this.COMMAND_PREFIX + "[a-zA-Z\\d]{2,16}";
 
         this.logger.seek("识别前缀 " + this.COMMAND_PREFIX);
         this.logger.info("识别正则 " + regex);
@@ -524,28 +524,28 @@ public final class Systemd extends BasicModuleUtilities {
         // 扫描插件
 
 
-        this.schema.find();
+        this.schema.scanPlugin();
 
 
         // ==========================================================================================================================
         // 扫描模块
 
 
-        this.schema.scan();
+        this.schema.scanModule();
 
 
         // ==========================================================================================================================
         // 注册模块
 
 
-        this.schema.load();
+        this.schema.loadModule();
 
 
         // ==========================================================================================================================
         // 创建模块
 
 
-        this.schema.make();
+        this.schema.makeModule();
 
 
         // ==========================================================================================================================
@@ -559,7 +559,7 @@ public final class Systemd extends BasicModuleUtilities {
         // 执行初始化方法
 
 
-        this.schema.init();
+        this.schema.initModule();
 
 
         // =============================================================================================================
@@ -636,7 +636,7 @@ public final class Systemd extends BasicModuleUtilities {
         // 启动模块
 
 
-        this.schema.boot();
+        this.schema.bootModule();
 
 
         // ==========================================================================================================================
@@ -705,7 +705,7 @@ public final class Systemd extends BasicModuleUtilities {
         // 关闭模块
 
         try {
-            this.schema.shut();
+            this.schema.shutModule();
         } catch (Exception exception) {
             this.logger.error("关闭插件模型发生异常", exception);
         }
@@ -1035,19 +1035,19 @@ public final class Systemd extends BasicModuleUtilities {
     }
 
     public Map<Runner, Boolean> listAllRunner() {
-        return this.schema.listAllRunner();
+        return this.schema.listRunner();
     }
 
     public Map<Filter, Boolean> listAllFilter() {
-        return this.schema.listAllFilter();
+        return this.schema.listFilter();
     }
 
     public Map<Monitor, Boolean> listAllMonitor() {
-        return this.schema.listAllMonitor();
+        return this.schema.listMonitor();
     }
 
     public Map<Checker, Boolean> listAllChecker() {
-        return this.schema.listAllChecker();
+        return this.schema.listChecker();
     }
 
     public List<Checker> listGlobalUsersChecker() {
@@ -1277,5 +1277,4 @@ public final class Systemd extends BasicModuleUtilities {
     public Bot getBot() {
         return this.bot;
     }
-
 }

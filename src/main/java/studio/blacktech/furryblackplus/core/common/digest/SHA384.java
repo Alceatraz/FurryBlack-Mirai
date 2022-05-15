@@ -33,7 +33,8 @@ import java.util.Base64;
 public class SHA384 {
 
 
-    private SHA384() {}
+    private SHA384() {
+    }
 
     public static SHA384Digester getInstance() {
         return new SHA384Digester();

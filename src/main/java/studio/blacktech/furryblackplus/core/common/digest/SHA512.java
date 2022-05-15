@@ -33,7 +33,8 @@ import java.util.Base64;
 public class SHA512 {
 
 
-    private SHA512() {}
+    private SHA512() {
+    }
 
     public static SHA512Digester getInstance() {
         return new SHA512Digester();

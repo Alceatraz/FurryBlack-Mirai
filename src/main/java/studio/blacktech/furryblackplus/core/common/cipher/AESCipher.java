@@ -79,11 +79,12 @@ public class AESCipher {
     public AESCipher() throws OperationNotSupportedException {
 
 
-        throw new OperationNotSupportedException("""
-            为了安全性，密码和IV不会保存在实例中 初始化后 无法获取
-            所以不提供无参数构造方法 必须传入密码/向量
-            使用 getSecretKey 转换密钥
-            使用 getIVector 将向量转换为IV"""
+        throw new OperationNotSupportedException(
+            """
+                为了安全性，密码和IV不会保存在实例中 初始化后 无法获取
+                所以不提供无参数构造方法 必须传入密码/向量
+                使用 getSecretKey 转换密钥
+                使用 getIVector 将向量转换为IV"""
         );
 
 

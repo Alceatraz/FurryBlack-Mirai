@@ -117,15 +117,16 @@ import static org.jline.builtins.Completers.TreeCompleter.node;
  * 电子白熊会梦到仿生老黑吗
  *
  *
- * 项目地址 <url>https://github.com/Alceatraz/FurryBlack-Mirai</url>
- * 插件地址 <url>https://github.com/Alceatraz/FurryBlack-Mirai-Extensions</url>
+ * 项目地址 https://github.com/Alceatraz/FurryBlack-Mirai
+ * 插件地址 https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
  *
- * 个人主页 <url>https://www.blacktech.studio</url>
+ * 个人主页 https://www.blacktech.studio
  *
  * @author Alceatraz Warprays @ BlackTechStudio
  */
 
 
+@SuppressWarnings("unused")
 @Api(
     value = "FurryBlack Plus Framework - based on Mirai",
     usage = {
@@ -150,7 +151,7 @@ public final class FurryBlack {
     // =================================================================================================================
 
 
-    public static final String APP_VERSION = "2.1.3";
+    public static final String APP_VERSION = "2.1.4";
 
 
     // =================================================================================================================
@@ -317,7 +318,7 @@ public final class FurryBlack {
             "module reboot <名称> (风险) 重启指定模块(执行 shut + init + boot)" + LINE +
             "module shut   <名称> (风险) 关闭指定模块(执行 shut)" + LINE +
             "module init   <名称> (风险) 预载指定模块(执行 init)" + LINE +
-            "module shut   <名称> (风险) 启动指定模块(执行 boot)" + LINE +
+            "module boot   <名称> (风险) 启动指定模块(执行 boot)" + LINE +
 
             Color.GREEN + "# 调试功能 ==========================================" + Color.RESET + LINE +
             "debug [enable|disable] (风险) DEBUG开关，打印DEBUG输出和控制某些功能，插件如果不遵守标准开发可能会导致崩溃"
@@ -548,7 +549,7 @@ public final class FurryBlack {
         try {
             systemd.boot();
         } catch (Exception exception) {
-            throw new BootException("[FurryBlack][MAIN]FATAL -> Systemd boot failed.", exception);
+            throw new BootException("[FurryBlack][MAIN]FATAL -> Systemd bootModule failed.", exception);
         }
 
         // =====================================================================
@@ -873,11 +874,11 @@ public final class FurryBlack {
                                     // module shut <plugin>
                                     case "shut" -> systemd.shutModule(command.getParameterSegment(1));
 
-                                    // module init <plugin>
-                                    case "init" -> systemd.initModule(command.getParameterSegment(1));
+                                    // module initModule <plugin>
+                                    case "initModule" -> systemd.initModule(command.getParameterSegment(1));
 
-                                    // module boot <plugin>
-                                    case "boot" -> systemd.bootModule(command.getParameterSegment(1));
+                                    // module bootModule <plugin>
+                                    case "bootModule" -> systemd.bootModule(command.getParameterSegment(1));
 
                                     // module reboot <plugin>
                                     case "reboot" -> systemd.rebootModule(command.getParameterSegment(1));
@@ -910,14 +911,12 @@ public final class FurryBlack {
                                 Map<Checker, Boolean> listAllChecker = systemd.listAllChecker();
                                 FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 检查器 " + listAllChecker.size() + Color.RESET);
                                 for (Map.Entry<Checker, Boolean> entry : listAllChecker.entrySet()) {
-                                    FurryBlack.terminalPrintLine((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]" + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey()
-                                                                                                                                                                                                                      .group() ? "G" : "") + "}");
+                                    FurryBlack.terminalPrintLine((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]" + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
                                 }
                                 Map<Executor, Boolean> listAllExecutor = systemd.listAllExecutor();
                                 FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 执行器 " + listAllExecutor.size() + Color.RESET);
                                 for (Map.Entry<Executor, Boolean> entry : listAllExecutor.entrySet()) {
-                                    FurryBlack.terminalPrintLine((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]{" + (entry.getKey().users() ? "U" : "") + (entry.getKey()
-                                                                                                                                                                                                                 .group() ? "G" : "") + "}");
+                                    FurryBlack.terminalPrintLine((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
                                 }
                                 List<Checker> globalUsersChecker = systemd.listGlobalUsersChecker();
                                 FurryBlack.terminalPrintLine(Color.BRIGHT_CYAN + ">> 全局私聊检查器 " + globalUsersChecker.size() + Color.RESET);
@@ -1263,7 +1262,7 @@ public final class FurryBlack {
                     new TreeCompleter(node("plugin")),
                     new TreeCompleter(node(
                         "module",
-                        node("init", "boot", "shut", "reboot", "unload")
+                        node("initModule", "bootModule", "shut", "reboot", "unload")
                     ))
                 );
             }
@@ -1283,7 +1282,7 @@ public final class FurryBlack {
                     new TreeCompleter(node("plugin")),
                     new TreeCompleter(node(
                         "module",
-                        node("init", "boot", "shut", "reboot", "unload",
+                        node("initModule", "bootModule", "shut", "reboot", "unload",
                              node(new StringsCompleter(systemd.listAllModule().keySet()))
                         )
                     ))
