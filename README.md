@@ -141,6 +141,10 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.1.5
+
+- 更新Mirai 2.11.0
+
 ### 2.1.4
 
 - 修复检查器注册的BUG
