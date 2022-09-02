@@ -141,6 +141,10 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ## CHANGELOG
 
+### 2.1.9
+
+- 回退 Mirai 2.12.2
+
 ### 2.1.8
 
 - 更新Mirai 2.13.0-M1
