@@ -117,6 +117,7 @@
                             <overWriteReleases>true</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
                             <excludeArtifactIds>
+                                opentest4j,
                                 apiguardian-api,
                                 junit-jupiter,
                                 junit-jupiter-api,
@@ -124,7 +125,6 @@
                                 junit-jupiter-params,
                                 junit-platform-engine,
                                 junit-platform-commons,
-                                opentest4j,
                             </excludeArtifactIds>
                         </configuration>
                     </execution>
