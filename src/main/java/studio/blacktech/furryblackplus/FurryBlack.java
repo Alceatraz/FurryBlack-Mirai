@@ -30,9 +30,6 @@ import net.mamoe.mirai.contact.OtherClientInfo;
 import net.mamoe.mirai.contact.Stranger;
 import net.mamoe.mirai.contact.User;
 import net.mamoe.mirai.data.FriendInfo;
-import net.mamoe.mirai.data.GroupActiveData;
-import net.mamoe.mirai.data.GroupHonorListData;
-import net.mamoe.mirai.data.GroupHonorType;
 import net.mamoe.mirai.data.MemberInfo;
 import net.mamoe.mirai.data.StrangerInfo;
 import net.mamoe.mirai.data.UserProfile;
@@ -151,7 +148,7 @@ public final class FurryBlack {
     // =================================================================================================================
 
 
-    public static final String APP_VERSION = "2.1.9";
+    public static final String APP_VERSION = "2.1.11";
 
 
     // =================================================================================================================
@@ -1429,6 +1426,8 @@ public final class FurryBlack {
     //
     // =================================================================================================================
 
+    //= ========================================================================
+    //= 来自  IMirai.kt
 
     @Api("转发Mirai")
     public static List<ForwardMessage.Node> downloadForwardMessage(String resourceId) {
@@ -1438,6 +1437,16 @@ public final class FurryBlack {
     @Api("转发Mirai")
     public static MessageChain downloadLongMessage(String resourceId) {
         return Mirai.getInstance().downloadLongMessage(systemd.getBot(), resourceId);
+    }
+
+    @Api("转发Mirai")
+    public static List<OtherClientInfo> getOnlineOtherClientsList(boolean mayIncludeSelf) {
+        return Mirai.getInstance().getOnlineOtherClientsList(systemd.getBot(), mayIncludeSelf);
+    }
+
+    @Api("转发Mirai")
+    public static long getUin() {
+        return Mirai.getInstance().getUin(systemd.getBot());
     }
 
     @Api("转发Mirai")
@@ -1451,11 +1460,6 @@ public final class FurryBlack {
     }
 
     @Api("转发Mirai")
-    public static List<OtherClientInfo> getOnlineOtherClientsList(boolean mayIncludeSelf) {
-        return Mirai.getInstance().getOnlineOtherClientsList(systemd.getBot(), mayIncludeSelf);
-    }
-
-    @Api("转发Mirai")
     public static void recallMessage(MessageSource messageSource) {
         Mirai.getInstance().recallMessage(systemd.getBot(), messageSource);
     }
@@ -1465,29 +1469,12 @@ public final class FurryBlack {
         Mirai.getInstance().sendNudge(systemd.getBot(), nudge, contact);
     }
 
+    //= ========================================================================
+    //= 来自 LowLevelApiAccessor.kt
+
     @Api("转发Mirai")
     public static void getGroupVoiceDownloadUrl(byte[] md5, long groupId, long dstUin) {
         Mirai.getInstance().getGroupVoiceDownloadUrl(systemd.getBot(), md5, groupId, dstUin);
-    }
-
-    @Api("转发Mirai")
-    public static void muteAnonymousMember(String anonymousId, String anonymousNick, long groupId, int seconds) {
-        Mirai.getInstance().muteAnonymousMember(systemd.getBot(), anonymousId, anonymousNick, groupId, seconds);
-    }
-
-    @Api("转发Mirai")
-    public static UserProfile getUserProfile(long user) {
-        return Mirai.getInstance().queryProfile(systemd.getBot(), user);
-    }
-
-    @Api("转发Mirai")
-    public static GroupActiveData getRawGroupActiveData(long groupId, int page) {
-        return Mirai.getInstance().getRawGroupActiveData(systemd.getBot(), groupId, page);
-    }
-
-    @Api("转发Mirai")
-    public static GroupHonorListData getRawGroupHonorListData(long groupId, GroupHonorType type) {
-        return Mirai.getInstance().getRawGroupHonorListData(systemd.getBot(), groupId, type);
     }
 
     @Api("转发Mirai")
@@ -1501,12 +1488,17 @@ public final class FurryBlack {
     }
 
     @Api("转发Mirai")
-    public static Friend getRawGroupMemberList(FriendInfo friendInfo) {
+    public static void muteAnonymousMember(String anonymousId, String anonymousNick, long groupId, int seconds) {
+        Mirai.getInstance().muteAnonymousMember(systemd.getBot(), anonymousId, anonymousNick, groupId, seconds);
+    }
+
+    @Api("转发Mirai")
+    public static Friend newFriend(FriendInfo friendInfo) {
         return Mirai.getInstance().newFriend(systemd.getBot(), friendInfo);
     }
 
     @Api("转发Mirai")
-    public static Stranger getRawGroupMemberList(StrangerInfo strangerInfo) {
+    public static Stranger newStranger(StrangerInfo strangerInfo) {
         return Mirai.getInstance().newStranger(systemd.getBot(), strangerInfo);
     }
 
@@ -1525,6 +1517,25 @@ public final class FurryBlack {
         return Mirai.getInstance().recallGroupTempMessageRaw(systemd.getBot(), groupUin, targetId, messagesIds, messageInternalIds, time);
     }
 
+    @Api("转发Mirai")
+    public static void refreshKeys() {
+        Mirai.getInstance().refreshKeys(systemd.getBot());
+    }
+
+    @Api("转发Mirai")
+    public static void solveBotInvitedJoinGroupRequestEvent(long eventId, long invitorId, long groupId, boolean accept) {
+        Mirai.getInstance().solveBotInvitedJoinGroupRequestEvent(systemd.getBot(), eventId, invitorId, groupId, accept);
+    }
+
+    @Api("转发Mirai")
+    public static void solveMemberJoinRequestEvent(long eventId, long fromId, String fromNick, long groupId, boolean accept, boolean blackList, String message) {
+        Mirai.getInstance().solveMemberJoinRequestEvent(systemd.getBot(), eventId, fromId, fromNick, groupId, accept, blackList, message);
+    }
+
+    @Api("转发Mirai")
+    public static void solveNewFriendRequestEvent(long eventId, long fromId, String fromNick, boolean accept, boolean blackList) {
+        Mirai.getInstance().solveNewFriendRequestEvent(systemd.getBot(), eventId, fromId, fromNick, accept, blackList);
+    }
 
     // =================================================================================================================
     //
@@ -1535,7 +1546,7 @@ public final class FurryBlack {
 
     @Api("获取用户昵称")
     public static String getNickName(long user) {
-        return getUserProfile(user).getNickname();
+        return queryProfile(user).getNickname();
     }
 
     @Api("获取用户格式化名")
