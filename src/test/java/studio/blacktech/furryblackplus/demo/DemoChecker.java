@@ -25,47 +25,43 @@ import studio.blacktech.furryblackplus.core.handler.common.Command;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-
 @Api("示例检查器")
 
-
 @Checker(
-    value = "demo-checker",
-    command = "demo"
+  value = "demo-checker",
+  command = "demo"
 )
 public class DemoChecker extends EventHandlerChecker {
 
+  private DemoRunner runner;
 
-    private DemoRunner runner;
+  @Override
+  public void init() {
+    // 使用getRunner从IoC容器获取定时器实例
+    this.runner = FurryBlack.getRunner(DemoRunner.class);
+    FurryBlack.println("加载" + this.getClass().getName());
+  }
 
+  @Override
+  public void boot() {
+    FurryBlack.println("启动" + this.getClass().getName());
+  }
 
-    @Override
-    public void init() {
-        // 使用getRunner从IoC容器获取定时器实例
-        this.runner = FurryBlack.getRunner(DemoRunner.class);
-        FurryBlack.terminalPrintLine("加载" + this.getClass().getName());
-    }
+  @Override
+  public void shut() {
+    FurryBlack.println("关闭" + this.getClass().getName());
+  }
 
-    @Override
-    public void boot() {
-        FurryBlack.terminalPrintLine("启动" + this.getClass().getName());
-    }
+  @Override
+  public boolean handleUsersMessage(UserMessageEvent event, Command command) {
+    FurryBlack.println("消息" + this.getClass().getName());
+    return ThreadLocalRandom.current().nextInt() == 42;
+  }
 
-    @Override
-    public void shut() {
-        FurryBlack.terminalPrintLine("关闭" + this.getClass().getName());
-    }
+  @Override
+  public boolean handleGroupMessage(GroupMessageEvent event, Command command) {
+    FurryBlack.println("消息" + this.getClass().getName());
+    return this.runner.checkPermission(event.getSender().getId(), "demo.command.demo");
 
-    @Override
-    public boolean handleUsersMessage(UserMessageEvent event, Command command) {
-        FurryBlack.terminalPrintLine("消息" + this.getClass().getName());
-        return ThreadLocalRandom.current().nextInt() == 42;
-    }
-
-    @Override
-    public boolean handleGroupMessage(GroupMessageEvent event, Command command) {
-        FurryBlack.terminalPrintLine("消息" + this.getClass().getName());
-        return this.runner.checkPermission(event.getSender().getId(), "demo.command.demo");
-
-    }
+  }
 }

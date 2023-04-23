@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
 <!--
   ~ Copyright (C) 2021 Alceatraz @ BlackTechStudio
   ~
@@ -19,137 +18,204 @@
   ~
   -->
 
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>studio.blacktech.furryblackplus</groupId>
-    <artifactId>core</artifactId>
+  <groupId>studio.blacktech.furryblackplus</groupId>
+  <artifactId>core</artifactId>
 
-    <name>FurryBlack-Mirai-Core</name>
+  <name>FurryBlack-Mirai-Core</name>
 
-    <version>2.1.12</version>
+  <version>2.2.0</version>
 
-    <packaging>jar</packaging>
+  <packaging>jar</packaging>
 
-    <properties>
-        <mirai.version>2.14.0</mirai.version>
-        <maven.compiler.target>17</maven.compiler.target>
-        <maven.compiler.source>17</maven.compiler.source>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    </properties>
+  <properties>
+    <mirai.version>2.14.0</mirai.version>
+    <kotlin.version>1.8.20</kotlin.version>
+    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
 
-    <dependencies>
+  <build>
 
-        <!-- https://mvnrepository.com/artifact/net.mamoe/mirai-core-api-jvm -->
-        <dependency>
-            <groupId>net.mamoe</groupId>
-            <artifactId>mirai-core-api-jvm</artifactId>
-            <version>${mirai.version}</version>
-        </dependency>
+    <finalName>furryblack</finalName>
 
-        <!-- https://mvnrepository.com/artifact/net.mamoe/mirai-core-jvm -->
-        <dependency>
-            <groupId>net.mamoe</groupId>
-            <artifactId>mirai-core-jvm</artifactId>
-            <version>${mirai.version}</version>
-            <scope>runtime</scope>
-        </dependency>
+    <plugins>
 
-        <!-- https://mvnrepository.com/artifact/net.mamoe/mirai-core-utils-jvm -->
-        <dependency>
-            <groupId>net.mamoe</groupId>
-            <artifactId>mirai-core-utils-jvm</artifactId>
-            <version>${mirai.version}</version>
-            <scope>runtime</scope>
-            <type>pom</type>
-        </dependency>
+      <!-- https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-maven-plugin -->
+      <plugin>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-maven-plugin</artifactId>
+        <version>${kotlin.version}</version>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <id>compile</id>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+            <configuration>
+              <sourceDirs>
+                <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
+                <sourceDir>${project.basedir}/src/main/java</sourceDir>
+              </sourceDirs>
+            </configuration>
+          </execution>
+          <execution>
+            <id>test-compile</id>
+            <goals>
+              <goal>test-compile</goal>
+            </goals>
+            <configuration>
+              <sourceDirs>
+                <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
+                <sourceDir>${project.basedir}/src/test/java</sourceDir>
+              </sourceDirs>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
-        <!-- https://mvnrepository.com/artifact/org.jline/jline -->
-        <dependency>
-            <groupId>org.jline</groupId>
-            <artifactId>jline</artifactId>
-            <version>3.22.0</version>
-        </dependency>
+      <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <source>17</source>
+          <target>17</target>
+        </configuration>
+        <executions>
+          <execution>
+            <id>default-compile</id>
+            <phase>none</phase>
+          </execution>
+          <execution>
+            <id>default-testCompile</id>
+            <phase>none</phase>
+          </execution>
+          <execution>
+            <id>java-compile</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>java-test-compile</id>
+            <phase>test-compile</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
-        <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>4.10.0</version>
-        </dependency>
+      <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-jar-plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.3.0</version>
+      </plugin>
 
-        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.9.0</version>
-            <scope>test</scope>
-        </dependency>
+      <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-dependency-plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/library</outputDirectory>
+              <overWriteIfNewer>true</overWriteIfNewer>
+              <overWriteReleases>true</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+              <excludeArtifactIds>
+                junit-jupiter,
+                junit-jupiter-api,
+                junit-jupiter-engine,
+                junit-jupiter-params,
+                junit-platform-engine,
+                junit-platform-commons,
+              </excludeArtifactIds>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
-    </dependencies>
+    </plugins>
 
-    <build>
+  </build>
 
-        <finalName>furryblack</finalName>
+  <dependencies>
 
-        <plugins>
+    <!-- https://mvnrepository.com/artifact/net.mamoe/mirai-core-api-jvm -->
+    <dependency>
+      <groupId>net.mamoe</groupId>
+      <artifactId>mirai-core-api-jvm</artifactId>
+      <version>${mirai.version}</version>
+    </dependency>
 
+    <!-- https://mvnrepository.com/artifact/net.mamoe/mirai-core-jvm -->
+    <dependency>
+      <groupId>net.mamoe</groupId>
+      <artifactId>mirai-core-jvm</artifactId>
+      <version>${mirai.version}</version>
+      <scope>runtime</scope>
+    </dependency>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
-                <configuration>
-                    <source>17</source>
-                    <target>17</target>
-                </configuration>
-            </plugin>
+    <!-- https://mvnrepository.com/artifact/net.mamoe/mirai-core-utils-jvm -->
+    <dependency>
+      <groupId>net.mamoe</groupId>
+      <artifactId>mirai-core-utils-jvm</artifactId>
+      <version>${mirai.version}</version>
+      <scope>runtime</scope>
+      <type>pom</type>
+    </dependency>
 
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib</artifactId>
+      <version>${kotlin.version}</version>
+    </dependency>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.2</version>
-            </plugin>
+    <dependency>
+      <groupId>org.jetbrains.kotlinx</groupId>
+      <artifactId>kotlinx-coroutines-core-jvm</artifactId>
+      <version>1.6.4</version>
+    </dependency>
 
+    <!-- https://mvnrepository.com/artifact/org.jline/jline -->
+    <dependency>
+      <groupId>org.jline</groupId>
+      <artifactId>jline</artifactId>
+      <version>3.23.0</version>
+    </dependency>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.3.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/library</outputDirectory>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                            <overWriteReleases>true</overWriteReleases>
-                            <overWriteSnapshots>true</overWriteSnapshots>
-                            <excludeArtifactIds>
-                                opentest4j,
-                                apiguardian-api,
-                                junit-jupiter,
-                                junit-jupiter-api,
-                                junit-jupiter-engine,
-                                junit-jupiter-params,
-                                junit-platform-engine,
-                                junit-platform-commons,
-                            </excludeArtifactIds>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+    <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>4.10.0</version>
+    </dependency>
 
+    <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.9.2</version>
+      <scope>test</scope>
+    </dependency>
 
-        </plugins>
-
-    </build>
+  </dependencies>
 
 </project>

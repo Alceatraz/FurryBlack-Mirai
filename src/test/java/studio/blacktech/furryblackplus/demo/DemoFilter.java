@@ -22,41 +22,38 @@ import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerFilter;
 import studio.blacktech.furryblackplus.core.handler.annotation.Filter;
 
-
 @Api("示例过滤器")
 
-
 @Filter(
-    value = "demo-filter",
-    priority = 100
+  value = "demo-filter",
+  priority = 100
 )
 public class DemoFilter extends EventHandlerFilter {
 
+  @Override
+  public void init() {
+    FurryBlack.println("加载" + this.getClass().getName());
+  }
 
-    @Override
-    public void init() {
-        FurryBlack.terminalPrintLine("加载" + this.getClass().getName());
-    }
+  @Override
+  public void boot() {
+    FurryBlack.println("启动" + this.getClass().getName());
+  }
 
-    @Override
-    public void boot() {
-        FurryBlack.terminalPrintLine("启动" + this.getClass().getName());
-    }
+  @Override
+  public void shut() {
+    FurryBlack.println("关闭" + this.getClass().getName());
+  }
 
-    @Override
-    public void shut() {
-        FurryBlack.terminalPrintLine("关闭" + this.getClass().getName());
-    }
+  @Override
+  public boolean handleUsersMessage(UserMessageEvent event) {
+    FurryBlack.println("消息" + this.getClass().getName());
+    return false;
+  }
 
-    @Override
-    public boolean handleUsersMessage(UserMessageEvent event) {
-        FurryBlack.terminalPrintLine("消息" + this.getClass().getName());
-        return false;
-    }
-
-    @Override
-    public boolean handleGroupMessage(GroupMessageEvent event) {
-        FurryBlack.terminalPrintLine("消息" + this.getClass().getName());
-        return false;
-    }
+  @Override
+  public boolean handleGroupMessage(GroupMessageEvent event) {
+    FurryBlack.println("消息" + this.getClass().getName());
+    return false;
+  }
 }

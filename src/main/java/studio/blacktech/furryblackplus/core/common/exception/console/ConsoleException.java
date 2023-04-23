@@ -13,34 +13,29 @@
  * General Public License along with this program in README or LICENSE.
  */
 
-
 package studio.blacktech.furryblackplus.core.common.exception.console;
-
 
 import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.common.exception.BotException;
 
-
 @SuppressWarnings("unused")
-
 
 @Api("控制台发生的异常")
 public class ConsoleException extends BotException {
 
+  public ConsoleException() {
 
-    public ConsoleException() {
+  }
 
-    }
+  public ConsoleException(String message) {
+    super(message);
+  }
 
-    public ConsoleException(String message) {
-        super(message);
-    }
+  public ConsoleException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
-    public ConsoleException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ConsoleException(Throwable cause) {
-        super(cause);
-    }
+  public ConsoleException(Throwable cause) {
+    super(cause);
+  }
 }

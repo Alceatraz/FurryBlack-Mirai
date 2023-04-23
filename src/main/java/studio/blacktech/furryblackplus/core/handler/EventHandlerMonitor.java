@@ -13,9 +13,7 @@
  * General Public License along with this program in README or LICENSE.
  */
 
-
 package studio.blacktech.furryblackplus.core.handler;
-
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
@@ -23,23 +21,20 @@ import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.handler.annotation.Monitor;
 import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 
-
 @Api(value = "监听器父类", relativeClass = Monitor.class)
 public abstract class EventHandlerMonitor extends AbstractEventHandler {
 
+  @Api("生命周期 监听私聊消息")
+  protected abstract void handleUsersMessage(UserMessageEvent event);
 
-    @Api("生命周期 监听私聊消息")
-    protected abstract void handleUsersMessage(UserMessageEvent event);
+  @Api("生命周期 监听群聊消息")
+  protected abstract void handleGroupMessage(GroupMessageEvent event);
 
-    @Api("生命周期 监听群聊消息")
-    protected abstract void handleGroupMessage(GroupMessageEvent event);
+  public void handleUsersMessageWrapper(UserMessageEvent event) {
+    handleUsersMessage(event);
+  }
 
-
-    public void handleUsersMessageWrapper(UserMessageEvent event) {
-        this.handleUsersMessage(event);
-    }
-
-    public void handleGroupMessageWrapper(GroupMessageEvent event) {
-        this.handleGroupMessage(event);
-    }
+  public void handleGroupMessageWrapper(GroupMessageEvent event) {
+    handleGroupMessage(event);
+  }
 }

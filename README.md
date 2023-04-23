@@ -97,24 +97,24 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 ```xml
 
 <plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-jar-plugin</artifactId>
-    <version>3.2.0</version>
-    <configuration>
-        <archive>
-            <manifestSections>
-                <manifestSection>
-                    <name>FurryBlack-Extension</name>
-                    <manifestEntries>
-                        <Loader-Version>1</Loader-Version>
-                        <Extension-Name>extension-official</Extension-Name>
-                        <Extension-Author>Alceatraz-BlackTechStudio</Extension-Author>
-                        <Extension-Source>https://github.com/Alceatraz/FurryBlack-Mirai-Extensions</Extension-Source>
-                    </manifestEntries>
-                </manifestSection>
-            </manifestSections>
-        </archive>
-    </configuration>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-jar-plugin</artifactId>
+  <version>3.2.0</version>
+  <configuration>
+    <archive>
+      <manifestSections>
+        <manifestSection>
+          <name>FurryBlack-Extension</name>
+          <manifestEntries>
+            <Loader-Version>1</Loader-Version>
+            <Extension-Name>extension-official</Extension-Name>
+            <Extension-Author>Alceatraz-BlackTechStudio</Extension-Author>
+            <Extension-Source>https://github.com/Alceatraz/FurryBlack-Mirai-Extensions</Extension-Source>
+          </manifestEntries>
+        </manifestSection>
+      </manifestSections>
+    </archive>
+  </configuration>
 </plugin>
 ```
 
@@ -135,11 +135,41 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 - 监听器池：所有的监听器执行，均由线程池执行`ThreadPoolExecutor`；
 - 计划任务：框架提供了统一的定时任务线程池`ScheduledThreadPoolExecutor`；
 
+### 参数传递
+
+```bash
+BOT1_FURRYBLACK_LOGGER_LEVEL=INFO
+java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryBlack --namespace 'bot1'
+
+```
+
+- 程序参数 > 系统参数 > 环境变量
+- namespace只允许以程序参数形式传入
+- 程序参数保持大小写，用减号分割 no login -> --no-login
+- 系统参数保持大小写，用句点分割 bot1 + unsafe -> -Dbot1.unsafe=true
+- 环境变量全转为大写，用下划线分割 bot1 + debug -> BOT1_DEBUG=true
+
 ## DEVELOPING
 
-- 无
-
 ## CHANGELOG
+
+### 2.2.0
+
+- 整理代码
+- 重写参数解析系统
+- 尽可能移除this
+- 退回 Mirai 2.14.0
+- 添加 fix-protocol-version
+- 去掉 mirai.no-desktop=true
+- 添加IPAD和MACOS设备协议
+- 配置文件以UTF8模式读取
+- 配置文件去掉密码引号
+
+### 2.2.0-M1
+
+- 添加 editorconfig
+- 调整代码风格
+- 更新 Mirai 2.15.0-M1
 
 ### 2.1.13
 

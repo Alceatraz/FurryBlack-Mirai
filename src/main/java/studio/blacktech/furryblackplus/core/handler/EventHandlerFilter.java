@@ -13,9 +13,7 @@
  * General Public License along with this program in README or LICENSE.
  */
 
-
 package studio.blacktech.furryblackplus.core.handler;
-
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
@@ -23,23 +21,20 @@ import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.handler.annotation.Filter;
 import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 
-
 @Api(value = "过滤器父类", relativeClass = Filter.class)
 public abstract class EventHandlerFilter extends AbstractEventHandler {
 
+  @Api("生命周期 过滤私聊消息")
+  protected abstract boolean handleUsersMessage(UserMessageEvent event);
 
-    @Api("生命周期 过滤私聊消息")
-    protected abstract boolean handleUsersMessage(UserMessageEvent event);
+  @Api("生命周期 过滤群聊消息")
+  protected abstract boolean handleGroupMessage(GroupMessageEvent event);
 
-    @Api("生命周期 过滤群聊消息")
-    protected abstract boolean handleGroupMessage(GroupMessageEvent event);
+  public boolean handleUsersMessageWrapper(UserMessageEvent event) {
+    return handleUsersMessage(event);
+  }
 
-
-    public boolean handleUsersMessageWrapper(UserMessageEvent event) {
-        return this.handleUsersMessage(event);
-    }
-
-    public boolean handleGroupMessageWrapper(GroupMessageEvent event) {
-        return this.handleGroupMessage(event);
-    }
+  public boolean handleGroupMessageWrapper(GroupMessageEvent event) {
+    return handleGroupMessage(event);
+  }
 }

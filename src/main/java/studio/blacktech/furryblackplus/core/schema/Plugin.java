@@ -1,24 +1,22 @@
 /*
  * Copyright (C) 2021 Alceatraz @ BlackTechStudio
  *
- * This program is free software: you can redistribute it and/or modify
+ *  program is free software: you can redistribute it and/or modify
  * it under the terms of the BTS Anti-Commercial & GNU Affero General
  * Public License as published by the Free Software Foundation, either
  * version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
+ *  program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * BTS Anti-Commercial & GNU Affero General Public License for more details.
  *
  * You should have received a copy of the BTS Anti-Commercial & GNU Affero
- * General Public License along with this program.
+ * General Public License along with  program.
  *
  */
 
-
 package studio.blacktech.furryblackplus.core.schema;
-
 
 import studio.blacktech.furryblackplus.FurryBlack;
 import studio.blacktech.furryblackplus.core.common.exception.BotException;
@@ -55,406 +53,383 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 
-
+@SuppressWarnings("DuplicatedCode")
 public final class Plugin {
 
+  private static final Pattern PATTERN = Pattern.compile("^[\\da-z_-]{8,64}$");
 
-    private static final Pattern PATTERN = Pattern.compile("^[\\da-z_-]{8,64}$");
+  private final LoggerX logger;
 
+  private final File file;
+  private final String name;
 
-    private final LoggerX logger;
+  private URLClassLoader dependClassLoader;
+  private URLClassLoader pluginClassLoader;
 
+  private Map<String, Class<? extends AbstractEventHandler>> modules;
+  private Map<Runner, Class<? extends EventHandlerRunner>> runnerClassMap;
+  private Map<Filter, Class<? extends EventHandlerFilter>> filterClassMap;
+  private Map<Monitor, Class<? extends EventHandlerMonitor>> monitorClassMap;
+  private Map<Checker, Class<? extends EventHandlerChecker>> checkerClassMap;
+  private Map<Executor, Class<? extends EventHandlerExecutor>> executorClassMap;
 
-    private final File file;
-    private final String name;
+  public static Plugin load(File file) {
 
+    String name;
 
-    private URLClassLoader dependClassLoader;
-    private URLClassLoader pluginClassLoader;
+    try (JarFile jarFile = new JarFile(file)) {
 
+      Manifest manifest;
+      try {
+        manifest = jarFile.getManifest();
+      } catch (IOException exception) {
+        throw new ScanException("加载MANIFEST失败 -> " + file.getAbsolutePath(), exception);
+      }
 
-    private Map<String, Class<? extends AbstractEventHandler>> modules;
-    private Map<Runner, Class<? extends EventHandlerRunner>> runnerClassMap;
-    private Map<Filter, Class<? extends EventHandlerFilter>> filterClassMap;
-    private Map<Monitor, Class<? extends EventHandlerMonitor>> monitorClassMap;
-    private Map<Checker, Class<? extends EventHandlerChecker>> checkerClassMap;
-    private Map<Executor, Class<? extends EventHandlerExecutor>> executorClassMap;
+      Attributes attributes = manifest.getAttributes("FurryBlack-Extension");
+      if (attributes == null || attributes.isEmpty()) {
+        throw new ScanException("加载插件失败: MANIFEST不包含FurryBlack-Extension标签组");
+      }
 
+      String loaderVersion = attributes.getValue("Loader-Version");
 
-    public static Plugin load(File file) {
+      if (loaderVersion == null) {
+        throw new ScanException("加载插件失败: MANIFEST中FurryBlack-Extension标签组不含Loader-Version");
+      }
 
-        String name;
+      if (!"1".equals(loaderVersion)) {
+        throw new ScanException("加载插件失败: 加载器版本不符，此插件声明其版本为 " + loaderVersion);
+      }
 
-        try (JarFile jarFile = new JarFile(file)) {
+      name = attributes.getValue("Extension-Name");
 
-            Manifest manifest;
-            try {
-                manifest = jarFile.getManifest();
-            } catch (IOException exception) {
-                throw new ScanException("加载MANIFEST失败 -> " + file.getAbsolutePath(), exception);
-            }
+      if (name == null) {
+        throw new ScanException("加载插件失败: MANIFEST中FurryBlack-Extension标签组不含Extension-Name");
+      }
 
-            Attributes attributes = manifest.getAttributes("FurryBlack-Extension");
-            if (attributes == null || attributes.isEmpty()) {
-                throw new ScanException("加载插件失败: MANIFEST不包含FurryBlack-Extension标签组");
-            }
+      if (!PATTERN.matcher(name).find()) {
+        throw new ScanException("加载插件失败: 插件包名非法，此插件声明其名称为 " + name);
+      }
 
-            String loaderVersion = attributes.getValue("Loader-Version");
+    } catch (IOException exception) {
+      throw new ScanException(exception);
+    }
 
-            if (loaderVersion == null) {
-                throw new ScanException("加载插件失败: MANIFEST中FurryBlack-Extension标签组不含Loader-Version");
-            }
+    Plugin plugin;
+    try {
+      plugin = new Plugin(file, name);
+    } catch (Exception exception) {
+      throw new ScanException(exception);
+    }
+    return plugin;
+  }
 
-            if (!"1".equals(loaderVersion)) {
-                throw new ScanException("加载插件失败: 加载器版本不符，此插件声明其版本为 " + loaderVersion);
-            }
+  //= ==================================================================================================================
 
-            name = attributes.getValue("Extension-Name");
+  private Plugin(File file, String name) {
 
-            if (name == null) {
-                throw new ScanException("加载插件失败: MANIFEST中FurryBlack-Extension标签组不含Extension-Name");
-            }
+    this.file = file;
+    this.name = name;
 
-            if (!PATTERN.matcher(name).find()) {
-                throw new ScanException("加载插件失败: 插件包名非法，此插件声明其名称为 " + name);
-            }
+    logger = LoggerXFactory.newLogger(name);
 
-        } catch (IOException exception) {
-            throw new ScanException(exception);
+  }
+
+  @SuppressWarnings("unchecked")
+  public void scan() {
+
+    //= ==================================================================================================================
+
+    File depend = Paths.get(FurryBlack.getDependFolder(), name).toFile();
+
+    //= ==================================================================================================================
+
+    List<URL> tempURL = new LinkedList<>();
+
+    try (JarFile jarFile = new JarFile(file)) {
+
+      if (depend.exists()) {
+        if (!depend.isDirectory()) {
+          throw new BotException("依赖文件不是目录 -> " + depend.getAbsolutePath());
+        }
+        File[] dependFiles = depend.listFiles();
+        if (dependFiles == null) {
+          throw new BotException("列出依赖文件失败 -> " + depend.getAbsolutePath());
+        }
+        for (File dependFile : dependFiles) {
+          if (dependFile.isDirectory()) {
+            continue;
+          }
+          URL url;
+          try {
+            url = dependFile.toURI().toURL();
+          } catch (MalformedURLException exception) {
+            throw new RuntimeException("That should not possible", exception);
+          }
+          tempURL.add(url);
+        }
+      }
+
+      URL[] urls = tempURL.toArray(new URL[0]);
+
+      logger.seek("加载依赖 -> " + depend.getAbsolutePath() + "[" + urls.length + "]");
+
+      dependClassLoader = new URLClassLoader(urls); // Inject with systemClassLoader in default
+
+      URL pluginURL;
+      try {
+        pluginURL = file.toURI().toURL();
+      } catch (MalformedURLException exception) {
+        throw new RuntimeException("That should not possible", exception);
+      }
+
+      pluginClassLoader = new URLClassLoader(new URL[]{pluginURL}, dependClassLoader);
+
+      Map<String, Class<? extends EventHandlerExecutor>> commands = new HashMap<>();
+
+      Enumeration<JarEntry> entries = jarFile.entries();
+
+      //= ==================================================================================================================
+
+      modules = new LinkedHashMap<>();
+      runnerClassMap = new LinkedHashMap<>();
+      filterClassMap = new LinkedHashMap<>();
+      monitorClassMap = new LinkedHashMap<>();
+      checkerClassMap = new LinkedHashMap<>();
+      executorClassMap = new LinkedHashMap<>();
+
+      //= ==================================================================================================================
+
+      while (entries.hasMoreElements()) {
+
+        JarEntry jarEntry = entries.nextElement();
+
+        if (jarEntry.isDirectory()) {
+          continue;
         }
 
-        Plugin plugin;
+        String jarEntryName = jarEntry.getName();
+
+        if (!jarEntryName.endsWith(".class")) {
+          continue;
+        }
+
+        String className = jarEntryName.substring(0, jarEntryName.length() - 6).replace("/", ".");
+
+        //= ==================================================================================================================
+
+        Class<?> clazz;
+
         try {
-            plugin = new Plugin(file, name);
-        } catch (Exception exception) {
-            throw new ScanException(exception);
+          clazz = Class.forName(className, false, pluginClassLoader);
+        } catch (ClassNotFoundException exception) {
+          logger.warning("加载类失败 " + name + ":" + className, exception);
+          continue;
         }
-        return plugin;
-    }
 
-
-    // =========================================================================
-
-
-    private Plugin(File file, String name) {
-
-        this.file = file;
-        this.name = name;
-
-        this.logger = LoggerXFactory.newLogger(this.name);
-
-    }
-
-
-    @SuppressWarnings("unchecked")
-    public void scan() {
-
-        // =====================================================================
-
-        File depend = Paths.get(FurryBlack.getDependFolder(), this.name).toFile();
-
-        // =====================================================================
-
-        List<URL> tempURL = new LinkedList<>();
-
-        try (JarFile jarFile = new JarFile(this.file)) {
-
-            if (depend.exists()) {
-                if (!depend.isDirectory()) {
-                    throw new BotException("依赖文件不是目录 -> " + depend.getAbsolutePath());
-                }
-                File[] dependFiles = depend.listFiles();
-                if (dependFiles == null) {
-                    throw new BotException("列出依赖文件失败 -> " + depend.getAbsolutePath());
-                }
-                for (File dependFile : dependFiles) {
-                    if (dependFile.isDirectory()) {
-                        continue;
-                    }
-                    URL url;
-                    try {
-                        url = dependFile.toURI().toURL();
-                    } catch (MalformedURLException exception) {
-                        throw new RuntimeException("That should not possible", exception);
-                    }
-                    tempURL.add(url);
-                }
-            }
-
-
-            URL[] urls = tempURL.toArray(new URL[0]);
-
-            this.logger.seek("加载依赖 -> " + depend.getAbsolutePath() + "[" + urls.length + "]");
-
-            this.dependClassLoader = new URLClassLoader(urls); // Inject with systemClassLoader in default
-
-            URL pluginURL;
-            try {
-                pluginURL = this.file.toURI().toURL();
-            } catch (MalformedURLException exception) {
-                throw new RuntimeException("That should not possible", exception);
-            }
-
-
-            this.pluginClassLoader = new URLClassLoader(new URL[]{pluginURL}, this.dependClassLoader);
-
-            Map<String, Class<? extends EventHandlerExecutor>> commands = new HashMap<>();
-
-            Enumeration<JarEntry> entries = jarFile.entries();
-
-            // =====================================================================
-
-            this.modules = new LinkedHashMap<>();
-            this.runnerClassMap = new LinkedHashMap<>();
-            this.filterClassMap = new LinkedHashMap<>();
-            this.monitorClassMap = new LinkedHashMap<>();
-            this.checkerClassMap = new LinkedHashMap<>();
-            this.executorClassMap = new LinkedHashMap<>();
-
-            // =====================================================================
-
-
-            while (entries.hasMoreElements()) {
-
-                JarEntry jarEntry = entries.nextElement();
-
-                if (jarEntry.isDirectory()) {
-                    continue;
-                }
-
-                String jarEntryName = jarEntry.getName();
-
-                if (!jarEntryName.endsWith(".class")) {
-                    continue;
-                }
-
-                String className = jarEntryName.substring(0, jarEntryName.length() - 6).replace("/", ".");
-
-
-                // =========================================================================================================
-
-
-                Class<?> clazz;
-
-                try {
-                    clazz = Class.forName(className, false, this.pluginClassLoader);
-                } catch (ClassNotFoundException exception) {
-                    this.logger.warning("加载类失败 " + this.name + ":" + className, exception);
-                    continue;
-                }
-
-                if (!AbstractEventHandler.class.isAssignableFrom(clazz)) {
-                    continue;
-                }
-
-
-                String clazzName = clazz.getName();
-
-
-                // =========================================================================================================
-
-
-                if (EventHandlerRunner.class.isAssignableFrom(clazz)) {
-
-                    if (!clazz.isAnnotationPresent(Runner.class)) {
-                        this.logger.warning("发现无注解模块 不予注册 " + this.name);
-                        continue;
-                    }
-
-                    Runner annotation = clazz.getAnnotation(Runner.class);
-
-                    String moduleName = annotation.value();
-
-                    if (this.modules.containsKey(moduleName)) {
-                        Class<? extends AbstractEventHandler> exist = this.modules.get(moduleName);
-                        this.logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
-                        this.logger.warning("不予注册插件 " + this.name);
-                        throw new ScanException("发现垃圾插件 包含自冲突");
-                    }
-
-                    this.modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
-                    this.runnerClassMap.put(annotation, (Class<? extends EventHandlerRunner>) clazz);
-                    this.logger.info("定时器 -> " + clazzName);
-
-                    continue;
-
-
-                } else if (EventHandlerFilter.class.isAssignableFrom(clazz)) {
-
-                    if (!clazz.isAnnotationPresent(Filter.class)) {
-                        this.logger.warning("发现无注解模块 不予注册 " + this.name);
-                        continue;
-                    }
-
-                    Filter annotation = clazz.getAnnotation(Filter.class);
-
-                    String moduleName = annotation.value();
-
-                    if (this.modules.containsKey(moduleName)) {
-                        Class<? extends AbstractEventHandler> exist = this.modules.get(moduleName);
-                        this.logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
-                        this.logger.warning("不予注册插件 " + this.name);
-                        throw new ScanException("发现垃圾插件 包含自冲突");
-                    }
-
-                    if (annotation.users() || annotation.group()) {
-                        this.modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
-                        this.filterClassMap.put(annotation, (Class<? extends EventHandlerFilter>) clazz);
-                        this.logger.info("过滤器 -> " + clazzName);
-                    } else {
-                        this.logger.warning("发现未启用过滤器 " + clazzName);
-                    }
-
-                    continue;
-
-
-                } else if (EventHandlerMonitor.class.isAssignableFrom(clazz)) {
-
-                    if (!clazz.isAnnotationPresent(Monitor.class)) {
-                        this.logger.warning("发现无注解模块 不予注册 " + this.name);
-                        continue;
-                    }
-
-                    Monitor annotation = clazz.getAnnotation(Monitor.class);
-
-                    String moduleName = annotation.value();
-
-                    if (this.modules.containsKey(moduleName)) {
-                        Class<? extends AbstractEventHandler> exist = this.modules.get(moduleName);
-                        this.logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
-                        this.logger.warning("不予注册插件 " + this.name);
-                        throw new ScanException("发现垃圾插件 包含自冲突");
-                    }
-
-                    if (annotation.users() || annotation.group()) {
-                        this.modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
-                        this.monitorClassMap.put(annotation, (Class<? extends EventHandlerMonitor>) clazz);
-                        this.logger.info("监视器 -> " + clazzName);
-                    } else {
-                        this.logger.warning("发现未启用监听器 " + clazz.getName());
-                    }
-
-                    continue;
-
-
-                } else if (EventHandlerChecker.class.isAssignableFrom(clazz)) {
-
-                    if (!clazz.isAnnotationPresent(Checker.class)) {
-                        this.logger.warning("发现无注解模块 不予注册 " + this.name);
-                        continue;
-                    }
-
-                    Checker annotation = clazz.getAnnotation(Checker.class);
-
-                    String moduleName = annotation.value();
-
-                    if (this.modules.containsKey(moduleName)) {
-                        Class<? extends AbstractEventHandler> exist = this.modules.get(moduleName);
-                        this.logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
-                        this.logger.warning("不予注册插件 " + this.name);
-                        throw new ScanException("发现垃圾插件 包含自冲突");
-                    }
-
-                    if (annotation.users() || annotation.group()) {
-                        this.modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
-                        this.checkerClassMap.put(annotation, (Class<? extends EventHandlerChecker>) clazz);
-                        this.logger.info("检查器 -> " + clazzName);
-                    } else {
-                        this.logger.warning("发现未启用检查器 " + clazz.getName());
-                    }
-
-                    continue;
-
-
-                } else if (EventHandlerExecutor.class.isAssignableFrom(clazz)) {
-
-                    if (!clazz.isAnnotationPresent(Executor.class)) {
-                        this.logger.warning("发现无注解模块 不予注册 " + this.name);
-                        continue;
-                    }
-
-                    Executor annotation = clazz.getAnnotation(Executor.class);
-
-                    String moduleName = annotation.value();
-
-                    if (this.modules.containsKey(moduleName)) {
-                        Class<? extends AbstractEventHandler> exist = this.modules.get(moduleName);
-                        this.logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
-                        this.logger.warning("不予注册插件 " + this.name);
-                        throw new ScanException("发现垃圾插件 包含自冲突");
-                    }
-
-                    String command = annotation.command();
-
-                    if (commands.containsKey(command)) {
-                        Class<? extends EventHandlerExecutor> exist = commands.get(command);
-                        this.logger.warning("发现自冲突命令 " + command + " " + clazz.getName() + " " + moduleName + " " + exist.getName());
-                        this.logger.warning("不予注册插件 " + this.name);
-                        throw new ScanException("发现垃圾插件 包含自冲突");
-                    }
-
-                    if (annotation.users() || annotation.group()) {
-                        commands.put(command, (Class<? extends EventHandlerExecutor>) clazz);
-                        this.modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
-                        this.executorClassMap.put(annotation, (Class<? extends EventHandlerExecutor>) clazz);
-                        this.logger.info("执行器 -> " + clazzName);
-                    } else {
-                        this.logger.warning("发现未启用执行器 " + clazzName);
-                    }
-
-                    continue;
-
-
-                }
-
-                this.logger.warning("不支持自行创建的分支模块 不予注册 " + this.name + ":" + className);
-
-            }
-
-        } catch (IOException exception) {
-            throw new ScanException(exception);
+        if (!AbstractEventHandler.class.isAssignableFrom(clazz)) {
+          continue;
         }
-    }
 
+        String clazzName = clazz.getName();
 
-    public String getName() {
-        return this.name;
-    }
+        //= ==================================================================================================================
 
-    public File getFile() {
-        return this.file;
-    }
+        if (EventHandlerRunner.class.isAssignableFrom(clazz)) {
 
-    public Map<String, Class<? extends AbstractEventHandler>> getModules() {
-        return this.modules;
-    }
+          if (!clazz.isAnnotationPresent(Runner.class)) {
+            logger.warning("发现无注解模块 不予注册 " + name);
+            continue;
+          }
 
-    public Map<Runner, Class<? extends EventHandlerRunner>> getRunnerClassMap() {
-        return this.runnerClassMap;
-    }
+          Runner annotation = clazz.getAnnotation(Runner.class);
 
-    public Map<Filter, Class<? extends EventHandlerFilter>> getFilterClassMap() {
-        return this.filterClassMap;
-    }
+          String moduleName = annotation.value();
 
-    public Map<Monitor, Class<? extends EventHandlerMonitor>> getMonitorClassMap() {
-        return this.monitorClassMap;
-    }
+          if (modules.containsKey(moduleName)) {
+            Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
+            logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
+            logger.warning("不予注册插件 " + name);
+            throw new ScanException("发现垃圾插件 包含自冲突");
+          }
 
-    public Map<Checker, Class<? extends EventHandlerChecker>> getCheckerClassMap() {
-        return this.checkerClassMap;
-    }
+          modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
+          runnerClassMap.put(annotation, (Class<? extends EventHandlerRunner>) clazz);
+          logger.info("定时器 -> " + clazzName);
 
-    public Map<Executor, Class<? extends EventHandlerExecutor>> getExecutorClassMap() {
-        return this.executorClassMap;
-    }
+          continue;
 
-    public URLClassLoader getDependClassLoader() {
-        return this.dependClassLoader;
-    }
+        } else if (EventHandlerFilter.class.isAssignableFrom(clazz)) {
 
-    @SuppressWarnings("unused")
-    public URLClassLoader getPluginClassLoader() {
-        return this.pluginClassLoader;
+          if (!clazz.isAnnotationPresent(Filter.class)) {
+            logger.warning("发现无注解模块 不予注册 " + name);
+            continue;
+          }
+
+          Filter annotation = clazz.getAnnotation(Filter.class);
+
+          String moduleName = annotation.value();
+
+          if (modules.containsKey(moduleName)) {
+            Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
+            logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
+            logger.warning("不予注册插件 " + name);
+            throw new ScanException("发现垃圾插件 包含自冲突");
+          }
+
+          if (annotation.users() || annotation.group()) {
+            modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
+            filterClassMap.put(annotation, (Class<? extends EventHandlerFilter>) clazz);
+            logger.info("过滤器 -> " + clazzName);
+          } else {
+            logger.warning("发现未启用过滤器 " + clazzName);
+          }
+
+          continue;
+
+        } else if (EventHandlerMonitor.class.isAssignableFrom(clazz)) {
+
+          if (!clazz.isAnnotationPresent(Monitor.class)) {
+            logger.warning("发现无注解模块 不予注册 " + name);
+            continue;
+          }
+
+          Monitor annotation = clazz.getAnnotation(Monitor.class);
+
+          String moduleName = annotation.value();
+
+          if (modules.containsKey(moduleName)) {
+            Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
+            logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
+            logger.warning("不予注册插件 " + name);
+            throw new ScanException("发现垃圾插件 包含自冲突");
+          }
+
+          if (annotation.users() || annotation.group()) {
+            modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
+            monitorClassMap.put(annotation, (Class<? extends EventHandlerMonitor>) clazz);
+            logger.info("监视器 -> " + clazzName);
+          } else {
+            logger.warning("发现未启用监听器 " + clazz.getName());
+          }
+
+          continue;
+
+        } else if (EventHandlerChecker.class.isAssignableFrom(clazz)) {
+
+          if (!clazz.isAnnotationPresent(Checker.class)) {
+            logger.warning("发现无注解模块 不予注册 " + name);
+            continue;
+          }
+
+          Checker annotation = clazz.getAnnotation(Checker.class);
+
+          String moduleName = annotation.value();
+
+          if (modules.containsKey(moduleName)) {
+            Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
+            logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
+            logger.warning("不予注册插件 " + name);
+            throw new ScanException("发现垃圾插件 包含自冲突");
+          }
+
+          if (annotation.users() || annotation.group()) {
+            modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
+            checkerClassMap.put(annotation, (Class<? extends EventHandlerChecker>) clazz);
+            logger.info("检查器 -> " + clazzName);
+          } else {
+            logger.warning("发现未启用检查器 " + clazz.getName());
+          }
+
+          continue;
+
+        } else if (EventHandlerExecutor.class.isAssignableFrom(clazz)) {
+
+          if (!clazz.isAnnotationPresent(Executor.class)) {
+            logger.warning("发现无注解模块 不予注册 " + name);
+            continue;
+          }
+
+          Executor annotation = clazz.getAnnotation(Executor.class);
+
+          String moduleName = annotation.value();
+
+          if (modules.containsKey(moduleName)) {
+            Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
+            logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
+            logger.warning("不予注册插件 " + name);
+            throw new ScanException("发现垃圾插件 包含自冲突");
+          }
+
+          String command = annotation.command();
+
+          if (commands.containsKey(command)) {
+            Class<? extends EventHandlerExecutor> exist = commands.get(command);
+            logger.warning("发现自冲突命令 " + command + " " + clazz.getName() + " " + moduleName + " " + exist.getName());
+            logger.warning("不予注册插件 " + name);
+            throw new ScanException("发现垃圾插件 包含自冲突");
+          }
+
+          if (annotation.users() || annotation.group()) {
+            commands.put(command, (Class<? extends EventHandlerExecutor>) clazz);
+            modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
+            executorClassMap.put(annotation, (Class<? extends EventHandlerExecutor>) clazz);
+            logger.info("执行器 -> " + clazzName);
+          } else {
+            logger.warning("发现未启用执行器 " + clazzName);
+          }
+
+          continue;
+
+        }
+
+        logger.warning("不支持自行创建的分支模块 不予注册 " + name + ":" + className);
+
+      }
+
+    } catch (IOException exception) {
+      throw new ScanException(exception);
     }
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public File getFile() {
+    return file;
+  }
+
+  public Map<String, Class<? extends AbstractEventHandler>> getModules() {
+    return modules;
+  }
+
+  public Map<Runner, Class<? extends EventHandlerRunner>> getRunnerClassMap() {
+    return runnerClassMap;
+  }
+
+  public Map<Filter, Class<? extends EventHandlerFilter>> getFilterClassMap() {
+    return filterClassMap;
+  }
+
+  public Map<Monitor, Class<? extends EventHandlerMonitor>> getMonitorClassMap() {
+    return monitorClassMap;
+  }
+
+  public Map<Checker, Class<? extends EventHandlerChecker>> getCheckerClassMap() {
+    return checkerClassMap;
+  }
+
+  public Map<Executor, Class<? extends EventHandlerExecutor>> getExecutorClassMap() {
+    return executorClassMap;
+  }
+
+  public URLClassLoader getDependClassLoader() {
+    return dependClassLoader;
+  }
+
+  @SuppressWarnings("unused")
+  public URLClassLoader getPluginClassLoader() {
+    return pluginClassLoader;
+  }
 }

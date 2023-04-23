@@ -23,43 +23,40 @@ import studio.blacktech.furryblackplus.core.handler.EventHandlerExecutor;
 import studio.blacktech.furryblackplus.core.handler.annotation.Executor;
 import studio.blacktech.furryblackplus.core.handler.common.Command;
 
-
 @Api("示例执行器")
 
-
 @Executor(
-    value = "demo-executor",
-    outline = "示例",
-    description = "示例执行器",
-    command = "demo",
-    usage = "/demo - 示例执行器",
-    privacy = "获取命令执行人"
+  value = "demo-executor",
+  outline = "示例",
+  description = "示例执行器",
+  command = "demo",
+  usage = "/demo - 示例执行器",
+  privacy = "获取命令执行人"
 )
 public class DemoExecutor extends EventHandlerExecutor {
 
+  @Override
+  public void init() {
+    FurryBlack.println("加载" + this.getClass().getName());
+  }
 
-    @Override
-    public void init() {
-        FurryBlack.terminalPrintLine("加载" + this.getClass().getName());
-    }
+  @Override
+  public void boot() {
+    FurryBlack.println("启动" + this.getClass().getName());
+  }
 
-    @Override
-    public void boot() {
-        FurryBlack.terminalPrintLine("启动" + this.getClass().getName());
-    }
+  @Override
+  public void shut() {
+    FurryBlack.println("关闭" + this.getClass().getName());
+  }
 
-    @Override
-    public void shut() {
-        FurryBlack.terminalPrintLine("关闭" + this.getClass().getName());
-    }
+  @Override
+  public void handleUsersMessage(UserMessageEvent event, Command command) {
+    FurryBlack.println("消息" + this.getClass().getName());
+  }
 
-    @Override
-    public void handleUsersMessage(UserMessageEvent event, Command command) {
-        FurryBlack.terminalPrintLine("消息" + this.getClass().getName());
-    }
-
-    @Override
-    public void handleGroupMessage(GroupMessageEvent event, Command command) {
-        FurryBlack.terminalPrintLine("消息" + this.getClass().getName());
-    }
+  @Override
+  public void handleGroupMessage(GroupMessageEvent event, Command command) {
+    FurryBlack.println("消息" + this.getClass().getName());
+  }
 }

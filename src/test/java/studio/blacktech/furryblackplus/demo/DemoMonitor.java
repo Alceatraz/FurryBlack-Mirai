@@ -22,41 +22,38 @@ import studio.blacktech.furryblackplus.common.Api;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerMonitor;
 import studio.blacktech.furryblackplus.core.handler.annotation.Monitor;
 
-
 @Api("示例监视器 监视器")
 
-
 @Monitor(
-    value = "demo-monitor",
-    users = false
+  value = "demo-monitor",
+  users = false
 )
 public class DemoMonitor extends EventHandlerMonitor {
 
+  @Override
+  public void init() {
+    FurryBlack.println("加载" + this.getClass().getName());
+    DemoRunner demoRunner = FurryBlack.getRunner(DemoRunner.class);
+    demoRunner.demo();
+  }
 
-    @Override
-    public void init() {
-        FurryBlack.terminalPrintLine("加载" + this.getClass().getName());
-        DemoRunner demoRunner = FurryBlack.getRunner(DemoRunner.class);
-        demoRunner.demo();
-    }
+  @Override
+  public void boot() {
+    FurryBlack.println("启动" + this.getClass().getName());
+  }
 
-    @Override
-    public void boot() {
-        FurryBlack.terminalPrintLine("启动" + this.getClass().getName());
-    }
+  @Override
+  public void shut() {
+    FurryBlack.println("关闭" + this.getClass().getName());
+  }
 
-    @Override
-    public void shut() {
-        FurryBlack.terminalPrintLine("关闭" + this.getClass().getName());
-    }
+  @Override
+  public void handleUsersMessage(UserMessageEvent event) {
+    FurryBlack.println("消息" + this.getClass().getName());
+  }
 
-    @Override
-    public void handleUsersMessage(UserMessageEvent event) {
-        FurryBlack.terminalPrintLine("消息" + this.getClass().getName());
-    }
-
-    @Override
-    public void handleGroupMessage(GroupMessageEvent event) {
-        FurryBlack.terminalPrintLine("消息" + this.getClass().getName());
-    }
+  @Override
+  public void handleGroupMessage(GroupMessageEvent event) {
+    FurryBlack.println("消息" + this.getClass().getName());
+  }
 }

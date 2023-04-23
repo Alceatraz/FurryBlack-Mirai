@@ -13,33 +13,29 @@
  * General Public License along with this program in README or LICENSE.
  */
 
-
 package studio.blacktech.furryblackplus.core.common.exception;
-
 
 import studio.blacktech.furryblackplus.common.Api;
 
-
 @SuppressWarnings("unused")
-
 
 @Api("模块相关的异常")
 public class ModuleException extends BotException {
 
-    public ModuleException() {
+  public ModuleException() {
 
-    }
+  }
 
-    public ModuleException(String message) {
-        super(message);
-    }
+  public ModuleException(String message) {
+    super(message);
+  }
 
-    public ModuleException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public ModuleException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
-    public ModuleException(Throwable cause) {
-        super(cause);
-    }
+  public ModuleException(Throwable cause) {
+    super(cause);
+  }
 
 }
