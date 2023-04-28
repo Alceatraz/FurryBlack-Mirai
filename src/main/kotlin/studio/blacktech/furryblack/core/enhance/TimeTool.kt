@@ -105,7 +105,7 @@ object TimeTool {
       builder.toString()
     } else if (mm > 0) {
       builder.append("00:")
-      builder.append(mm)
+      builder.append(String.format("%02d", mm))
       builder.append(":")
       builder.append(String.format("%02d", ss))
       builder.append(".")
@@ -113,7 +113,7 @@ object TimeTool {
       builder.toString()
     } else if (ss > 0) {
       builder.append("00:00:")
-      builder.append(ss)
+      builder.append(String.format("%02d", ss))
       builder.append(".")
       builder.append(String.format("%03d", ms))
       builder.toString()

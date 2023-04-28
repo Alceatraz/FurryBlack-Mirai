@@ -746,9 +746,9 @@ public final class FurryBlack {
           case "stat":
           case "stats":
           case "status":
-            long totalMemory = Runtime.getRuntime().totalMemory() / 1024;
-            long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
-            long maxMemory = Runtime.getRuntime().maxMemory() / 1024;
+            long totalMemory = Runtime.getRuntime().totalMemory();
+            long freeMemory = Runtime.getRuntime().freeMemory();
+            long maxMemory = Runtime.getRuntime().maxMemory();
             long useMemory = totalMemory - freeMemory;
 
             String totalMemoryH = Enhance.toHumanReadable(totalMemory);
