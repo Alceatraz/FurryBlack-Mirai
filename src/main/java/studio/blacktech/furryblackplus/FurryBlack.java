@@ -108,14 +108,14 @@ import static org.jline.builtins.Completers.TreeCompleter.node;
 /**
  * FurryBlack Plus Framework - based on Mirai
  * !!!本项目并非使用纯AGPLv3协议，请认真阅读LICENSE!!!
- *
- *
+ * <p>
+ * <p>
  * 电子白熊会梦到仿生老黑吗
- *
- *
+ * <p>
+ * <p>
  * 项目地址 https://github.com/Alceatraz/FurryBlack-Mirai
  * 插件地址 https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
- *
+ * <p>
  * 个人主页 https://www.blacktech.studio
  *
  * @author Alceatraz Warprays @ BlackTechStudio
@@ -205,7 +205,7 @@ public final class FurryBlack {
       插件地址 https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
       个人主页 https://www.blacktech.studio"""
 
-      // @formatter:on
+    // @formatter:on
 
     ;
 
@@ -278,7 +278,7 @@ public final class FurryBlack {
       Color.GREEN + "# 调试功能 ==========================================" + Color.RESET + LINE +
       "debug [enable|disable] (风险) DEBUG开关，打印DEBUG输出和控制某些功能，插件如果不遵守标准开发可能会导致崩溃"
 
-      // @formatter:on
+    // @formatter:on
 
     ;
 
@@ -286,22 +286,22 @@ public final class FurryBlack {
 
       // @formatter:off
 
-      Color.RED +            "RED ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
-      Color.GREEN +          "GREEN ---------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
-      Color.YELLOW +         "YELLOW --------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
-      Color.BLUE +           "BLUE ----------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
-      Color.MAGENTA +        "MAGENTA -------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
-      Color.CYAN +           "CYAN ----------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
-      Color.BRIGHT_RED +     "BRIGHT_RED ----- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
-      Color.BRIGHT_GREEN +   "BRIGHT_GREEN --- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
-      Color.BRIGHT_YELLOW +  "BRIGHT_YELLOW -- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
-      Color.BRIGHT_BLUE +    "BRIGHT_BLUE ---- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+      Color.RED + "RED ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+      Color.GREEN + "GREEN ---------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+      Color.YELLOW + "YELLOW --------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+      Color.BLUE + "BLUE ----------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+      Color.MAGENTA + "MAGENTA -------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+      Color.CYAN + "CYAN ----------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+      Color.BRIGHT_RED + "BRIGHT_RED ----- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+      Color.BRIGHT_GREEN + "BRIGHT_GREEN --- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+      Color.BRIGHT_YELLOW + "BRIGHT_YELLOW -- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+      Color.BRIGHT_BLUE + "BRIGHT_BLUE ---- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
       Color.BRIGHT_MAGENTA + "BRIGHT_MAGENTA - THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
-      Color.BRIGHT_CYAN +    "BRIGHT_CYAN ---- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
-      Color.WHITE +          "WHITE ---------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
-      Color.GRAY +           "GRAY ----------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
-      Color.BRIGHT_BLACK +   "BRIGHT_BLACK --- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
-      Color.BRIGHT_WHITE +   "BRIGHT_WHITE --- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET
+      Color.BRIGHT_CYAN + "BRIGHT_CYAN ---- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+      Color.WHITE + "WHITE ---------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+      Color.GRAY + "GRAY ----------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+      Color.BRIGHT_BLACK + "BRIGHT_BLACK --- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET + LINE +
+      Color.BRIGHT_WHITE + "BRIGHT_WHITE --- THE QUICK BROWN FOX JUMP OVER A LAZY DOG - the quick brown fox jump over a lazy dog" + Color.RESET
 
     // @formatter:on
 
@@ -768,6 +768,7 @@ public final class FurryBlack {
               "登录模式: " + (noLogin ? "跳过登录" : "真实登录") + LINE +
               "关闭策略: " + (shutModeHalt ? "强制退出" : "正常退出") + LINE +
               "消息事件: " + (enable ? "正常监听" : "忽略消息") + LINE +
+              "核心数量: " + Runtime.getRuntime().availableProcessors() + LINE +
               "最大内存: " + maxMemoryH + "/" + maxMemory + LINE +
               "已用内存: " + useMemoryH + "/" + useMemory + LINE +
               "空闲内存: " + freeMemoryH + "/" + freeMemory + LINE +
@@ -776,7 +777,8 @@ public final class FurryBlack {
 
               // @formatter:on
 
-            );
+                              );
+
             break;
 
           //= ==================================================================================================================
@@ -942,7 +944,7 @@ public final class FurryBlack {
 
             switch (command.getParameterLength()) {
 
-              case 2:
+              case 2 -> {
 
                 switch (command.getParameterSegment(0)) {
                   // module shut <plugin>
@@ -964,44 +966,52 @@ public final class FurryBlack {
                   }
 
                 }
-                break;
+              }
 
-              case 0:
+              case 0 -> {
+
                 Map<Runner, Boolean> listAllRunner = systemd.listAllRunner();
                 FurryBlack.println(Color.BRIGHT_CYAN + ">> 定时器 " + listAllRunner.size() + Color.RESET);
                 for (Map.Entry<Runner, Boolean> entry : listAllRunner.entrySet()) {
                   FurryBlack.println((entry.getValue() ? "开 " : "关 ") + entry.getKey().value());
                 }
+
                 Map<Filter, Boolean> listAllFilter = systemd.listAllFilter();
                 FurryBlack.println(Color.BRIGHT_CYAN + ">> 过滤器 " + listAllFilter.size() + Color.RESET);
                 for (Map.Entry<Filter, Boolean> entry : listAllFilter.entrySet()) {
                   FurryBlack.println((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
                 }
+
                 Map<Monitor, Boolean> listAllMonitor = systemd.listAllMonitor();
                 FurryBlack.println(Color.BRIGHT_CYAN + ">> 监听器 " + listAllMonitor.size() + Color.RESET);
                 for (Map.Entry<Monitor, Boolean> entry : listAllMonitor.entrySet()) {
                   FurryBlack.println((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
                 }
+
                 Map<Checker, Boolean> listAllChecker = systemd.listAllChecker();
                 FurryBlack.println(Color.BRIGHT_CYAN + ">> 检查器 " + listAllChecker.size() + Color.RESET);
                 for (Map.Entry<Checker, Boolean> entry : listAllChecker.entrySet()) {
                   FurryBlack.println((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]" + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
                 }
+
                 Map<Executor, Boolean> listAllExecutor = systemd.listAllExecutor();
                 FurryBlack.println(Color.BRIGHT_CYAN + ">> 执行器 " + listAllExecutor.size() + Color.RESET);
                 for (Map.Entry<Executor, Boolean> entry : listAllExecutor.entrySet()) {
                   FurryBlack.println((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
                 }
+
                 List<Checker> globalUsersChecker = systemd.listGlobalUsersChecker();
                 FurryBlack.println(Color.BRIGHT_CYAN + ">> 全局私聊检查器 " + globalUsersChecker.size() + Color.RESET);
                 for (Checker annotation : globalUsersChecker) {
                   FurryBlack.println(annotation.value());
                 }
+
                 List<Checker> globalGroupChecker = systemd.listGlobalGroupChecker();
                 FurryBlack.println(Color.BRIGHT_CYAN + ">> 全局群聊检查器 " + globalGroupChecker.size() + Color.RESET);
                 for (Checker annotation : globalGroupChecker) {
                   FurryBlack.println("  " + annotation.value());
                 }
+
                 Map<String, List<Checker>> listCommandUsersChecker = systemd.listCommandUsersChecker();
                 FurryBlack.println(Color.BRIGHT_CYAN + ">> 有限私聊检查器 " + listCommandUsersChecker.size() + Color.RESET);
                 for (Map.Entry<String, List<Checker>> entry : listCommandUsersChecker.entrySet()) {
@@ -1010,6 +1020,7 @@ public final class FurryBlack {
                     FurryBlack.println("  " + item.value());
                   }
                 }
+
                 Map<String, List<Checker>> listCommandGroupChecker = systemd.listCommandGroupChecker();
                 FurryBlack.println(Color.BRIGHT_CYAN + ">> 有限群聊检查器 " + listCommandGroupChecker.size() + Color.RESET);
                 for (Map.Entry<String, List<Checker>> entry : listCommandGroupChecker.entrySet()) {
@@ -1018,12 +1029,14 @@ public final class FurryBlack {
                     FurryBlack.println("  " + item.value());
                   }
                 }
+
                 FurryBlack.println(Color.BRIGHT_CYAN + ">> 私聊命令列表" + Color.RESET);
                 FurryBlack.println(systemd.getMessageListUsers());
                 FurryBlack.println(Color.BRIGHT_CYAN + ">> 群聊命令列表" + Color.RESET);
                 FurryBlack.println(systemd.getMessageListGroup());
-                break;
+              }
             }
+
             break;
 
           //= ==================================================================================================================
@@ -1114,8 +1127,8 @@ public final class FurryBlack {
                   break;
                 }
                 friends.stream()
-                       .map(FurryBlack::getFormattedNickName)
-                       .forEach(FurryBlack::println);
+                  .map(FurryBlack::getFormattedNickName)
+                  .forEach(FurryBlack::println);
               }
 
               case "g", "grp", "group", "groups" -> {
@@ -1125,8 +1138,8 @@ public final class FurryBlack {
                   break;
                 }
                 groups.stream()
-                      .map(item -> item.getName() + "(" + item.getId() + ") " + item.getMembers().size() + "人")
-                      .forEach(FurryBlack::println);
+                  .map(item -> item.getName() + "(" + item.getId() + ") " + item.getMembers().size() + "人")
+                  .forEach(FurryBlack::println);
               }
 
               default -> {
@@ -1138,18 +1151,18 @@ public final class FurryBlack {
                   break;
                 }
                 FurryBlack.getGroup(group).getMembers().stream()
-                          .sorted((_$1, _$2) -> _$2.getPermission().getLevel() - _$1.getPermission().getLevel())
-                          .forEach(item -> {
-                            StringBuilder builder = new StringBuilder();
-                            builder.append(item.getNameCard());
-                            builder.append(" - ");
-                            builder.append(FurryBlack.getFormattedNickName(item));
-                            switch (item.getPermission().getLevel()) {
-                              case 2 -> builder.append(" 群主");
-                              case 1 -> builder.append(" 管理");
-                            }
-                            FurryBlack.println(builder);
-                          });
+                  .sorted((_$1, _$2) -> _$2.getPermission().getLevel() - _$1.getPermission().getLevel())
+                  .forEach(item -> {
+                    StringBuilder builder = new StringBuilder();
+                    builder.append(item.getNameCard());
+                    builder.append(" - ");
+                    builder.append(FurryBlack.getFormattedNickName(item));
+                    switch (item.getPermission().getLevel()) {
+                      case 2 -> builder.append(" 群主");
+                      case 1 -> builder.append(" 管理");
+                    }
+                    FurryBlack.println(builder);
+                  });
               }
             }
             break;
@@ -1327,7 +1340,7 @@ public final class FurryBlack {
 
       public CompleterDelegate() {
         completer = new AggregateCompleter(
-          new ArgumentCompleter(new StringsCompleter("help", "kill", "drop", "stop", "stat", "enable", "disable", "schema", "color")),
+          new ArgumentCompleter(new StringsCompleter("help", "kill", "drop", "stop", "gc", "stack", "enable", "disable", "schema", "color")),
           new ArgumentCompleter(new StringsCompleter("list", "send"), new StringsCompleter("users", "group")),
           new TreeCompleter(node("level", node("MUTE", "FATAL", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "DEVELOP", "EVERYTHING"))),
           new TreeCompleter(node("nickname", node("list", "clean", "reload", "append", "export"))),
@@ -1336,7 +1349,7 @@ public final class FurryBlack {
           new TreeCompleter(node(
             "module",
             node("initModule", "bootModule", "shut", "reboot", "unload")
-          ))
+                                ))
         );
       }
 
@@ -1347,7 +1360,7 @@ public final class FurryBlack {
 
       public void update() {
         completer = new AggregateCompleter(
-          new ArgumentCompleter(new StringsCompleter("help", "kill", "drop", "stop", "stat", "enable", "disable", "schema", "color")),
+          new ArgumentCompleter(new StringsCompleter("help", "kill", "drop", "stop", "gc", "stack", "enable", "disable", "schema", "color")),
           new ArgumentCompleter(new StringsCompleter("list", "send"), new StringsCompleter("users", "group")),
           new TreeCompleter(node("level", node("MUTE", "FATAL", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "DEVELOP", "EVERYTHING"))),
           new TreeCompleter(node("nickname", node("list", "clean", "reload", "append", "export"))),
@@ -1356,9 +1369,9 @@ public final class FurryBlack {
           new TreeCompleter(node(
             "module",
             node("initModule", "bootModule", "shut", "reboot", "unload",
-                 node(new StringsCompleter(systemd.listAllModule().keySet()))
-            )
-          ))
+              node(new StringsCompleter(systemd.listAllModule().keySet()))
+                )
+                                ))
         );
       }
     }
