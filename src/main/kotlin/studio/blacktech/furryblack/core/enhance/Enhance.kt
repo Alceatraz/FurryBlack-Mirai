@@ -10,7 +10,9 @@ object Enhance {
 
   @JvmStatic fun Any.hexHash() = Integer.toHexString(hashCode()).uppercase()
 
-  @JvmStatic fun Throwable.extractStackTrace(): String {
+  @JvmStatic fun extractStackTrace(throwable: Throwable?) = throwable?.extractStackTraces() ?: ""
+
+  private fun Throwable.extractStackTraces(): String {
     val stringWriter = StringWriter()
     val printWriter = PrintWriter(stringWriter)
     printStackTrace(printWriter)
