@@ -13,13 +13,25 @@
  * General Public License along with this program in README or LICENSE.
  */
 
-package studio.blacktech.furryblackplus.core.handler;
+package studio.blacktech.furryblackplus.core.exception.schema;
 
 import studio.blacktech.furryblackplus.common.Comment;
-import studio.blacktech.furryblackplus.core.handler.annotation.Runner;
-import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 
-@Comment(value = "定时器父类", relativeClass = Runner.class)
-public abstract class EventHandlerRunner extends AbstractEventHandler {
+@Comment("模块子系统相关的异常")
+public class SchemaException extends RuntimeException {
+
+  public SchemaException() {}
+
+  public SchemaException(String message) {
+    super(message);
+  }
+
+  public SchemaException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public SchemaException(Throwable cause) {
+    super(cause);
+  }
 
 }

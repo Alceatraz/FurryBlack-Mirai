@@ -2,16 +2,16 @@
  * Copyright (C) 2021 Alceatraz @ BlackTechStudio
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the BTS Anti-Commercial & GNU Affero General
+ * it under the terms from the BTS Anti-Commercial & GNU Affero General
  * Public License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
+ * version 3 from the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the implied warranty from
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * BTS Anti-Commercial & GNU Affero General Public License for more details.
  *
- * You should have received a copy of the BTS Anti-Commercial & GNU Affero
+ * You should have received a copy from the BTS Anti-Commercial & GNU Affero
  * General Public License along with this program.
  *
  */
@@ -19,17 +19,15 @@
 package studio.blacktech.furryblackplus.core.schema;
 
 import studio.blacktech.furryblackplus.FurryBlack;
-import studio.blacktech.furryblackplus.core.common.exception.moduels.boot.BootException;
-import studio.blacktech.furryblackplus.core.common.exception.moduels.load.LoadException;
-import studio.blacktech.furryblackplus.core.common.exception.moduels.scan.ScanException;
 import studio.blacktech.furryblackplus.core.common.logger.LoggerXFactory;
 import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
-import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color;
+import studio.blacktech.furryblackplus.core.exception.schema.SchemaException;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerChecker;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerExecutor;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerFilter;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerMonitor;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerRunner;
+import studio.blacktech.furryblackplus.core.handler.annotation.AnnotationEnhance;
 import studio.blacktech.furryblackplus.core.handler.annotation.Checker;
 import studio.blacktech.furryblackplus.core.handler.annotation.Executor;
 import studio.blacktech.furryblackplus.core.handler.annotation.Filter;
@@ -37,9 +35,11 @@ import studio.blacktech.furryblackplus.core.handler.annotation.Monitor;
 import studio.blacktech.furryblackplus.core.handler.annotation.Runner;
 import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 
-import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,16 +53,21 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Stream;
 
-import static studio.blacktech.furryblack.core.enhance.Enhance.hexHash;
-
-@SuppressWarnings("unused")
+import static studio.blacktech.furryblackplus.FurryBlack.LINE;
+import static studio.blacktech.furryblackplus.core.common.enhance.StringEnhance.toHumanHashCode;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_CYAN;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_MAGENTA;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.CYAN;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.RESET;
+import static studio.blacktech.furryblackplus.core.handler.annotation.AnnotationEnhance.printAnnotation;
 
 public final class Schema {
 
   private final LoggerX logger = LoggerXFactory.newLogger(Schema.class);
 
-  private final File folder;
+  private final Path folder;
 
   private final Map<String, Plugin> plugins;
 
@@ -110,7 +115,7 @@ public final class Schema {
   //=
   //= ================================================================================================================
 
-  public Schema(File folder) {
+  public Schema(Path folder) {
 
     this.folder = folder;
 
@@ -123,7 +128,7 @@ public final class Schema {
     COMPONENT_FILTER_CLAZZ = new HashMap<>();
     COMPONENT_MONITOR_CLAZZ = new HashMap<>();
     COMPONENT_CHECKER_CLAZZ = new HashMap<>();
-    COMPONENT_EXECUTOR_CLAZZ = new TreeMap<>(Schema::compare);
+    COMPONENT_EXECUTOR_CLAZZ = new TreeMap<>(AnnotationEnhance::compare);
 
     SORTED_RUNNER = new LinkedList<>();
     SORTED_FILTER = new LinkedList<>();
@@ -134,7 +139,7 @@ public final class Schema {
     COMPONENT_FILTER_INSTANCE = new ConcurrentHashMap<>();
     COMPONENT_MONITOR_INSTANCE = new ConcurrentHashMap<>();
     COMPONENT_CHECKER_INSTANCE = new ConcurrentHashMap<>();
-    COMPONENT_EXECUTOR_INSTANCE = new ConcurrentSkipListMap<>(Schema::compare);
+    COMPONENT_EXECUTOR_INSTANCE = new ConcurrentSkipListMap<>(AnnotationEnhance::compare);
 
     COMMAND_EXECUTOR_RELATION = new HashMap<>();
     MODULE_PLUGIN_RELATION = new HashMap<>();
@@ -278,31 +283,36 @@ public final class Schema {
 
     logger.hint("扫描插件目录");
 
-    File[] listFiles = folder.listFiles();
+    List<Path> listFiles;
 
-    if (listFiles == null) {
-      throw new ScanException("无法扫描模块");
+    try (Stream<Path> stream = Files.list(folder)) {
+      listFiles = stream.toList();
+    } catch (IOException exception) {
+      throw new SchemaException("扫描插件目录失败", exception);
     }
 
-    if (listFiles.length == 0) {
+    if (listFiles.size() == 0) {
       logger.warning("插件目录为空");
+      return;
     }
 
-    logger.seek("发现[" + listFiles.length + "]个文件");
-    for (File file : listFiles) {
-      logger.info("尝试加载 -> " + file.getName());
-      Plugin plugin = Plugin.load(file);
+    logger.seek("发现[" + listFiles.size() + "]个文件");
+
+    for (Path path : listFiles) {
+      logger.info("尝试加载 -> " + path.getFileName());
+      Plugin plugin = Plugin.load(path);
       String name = plugin.getName();
       if (plugins.containsKey(name)) {
         Plugin exist = plugins.get(name);
-        throw new ScanException("发现插件名称冲突 " + plugin.getFile().getAbsolutePath() + "名称" + name + "已被注册" + exist.getFile().getAbsolutePath());
+        throw new SchemaException("发现插件名称冲突 " + plugin.getPath() + "名称" + name + "已被注册" + exist.getPath());
       }
       plugins.put(name, plugin);
     }
 
     logger.seek("发现[" + plugins.size() + "]个插件");
+
     for (Plugin plugin : plugins.values()) {
-      logger.info(plugin.getFile().getName() + " -> " + plugin.getName());
+      logger.info(plugin.getPath().getFileName() + " -> " + plugin.getName());
     }
   }
 
@@ -342,7 +352,7 @@ public final class Schema {
         var v = moduleEntry.getValue();
         if (COMPONENT_RUNNER_CLAZZ.containsKey(k)) {
           Class<? extends AbstractEventHandler> exist = COMPONENT_RUNNER_CLAZZ.get(k);
-          throw new ScanException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + COMPONENT_RUNNER_CLAZZ.get(k) + ":" + exist.getName());
+          throw new SchemaException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + COMPONENT_RUNNER_CLAZZ.get(k) + ":" + exist.getName());
         }
       }
 
@@ -351,7 +361,7 @@ public final class Schema {
         var v = moduleEntry.getValue();
         if (COMPONENT_FILTER_CLAZZ.containsKey(k)) {
           Class<? extends AbstractEventHandler> exist = COMPONENT_FILTER_CLAZZ.get(k);
-          throw new ScanException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + COMPONENT_FILTER_CLAZZ.get(k) + ":" + exist.getName());
+          throw new SchemaException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + COMPONENT_FILTER_CLAZZ.get(k) + ":" + exist.getName());
         }
       }
 
@@ -360,7 +370,7 @@ public final class Schema {
         var v = moduleEntry.getValue();
         if (COMPONENT_MONITOR_CLAZZ.containsKey(k)) {
           Class<? extends AbstractEventHandler> exist = COMPONENT_MONITOR_CLAZZ.get(k);
-          throw new ScanException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + COMPONENT_MONITOR_CLAZZ.get(k) + ":" + exist.getName());
+          throw new SchemaException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + COMPONENT_MONITOR_CLAZZ.get(k) + ":" + exist.getName());
         }
       }
 
@@ -369,7 +379,7 @@ public final class Schema {
         var v = moduleEntry.getValue();
         if (COMPONENT_CHECKER_CLAZZ.containsKey(k)) {
           Class<? extends AbstractEventHandler> exist = COMPONENT_CHECKER_CLAZZ.get(k);
-          throw new ScanException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + COMPONENT_CHECKER_CLAZZ.get(k) + ":" + exist.getName());
+          throw new SchemaException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + COMPONENT_CHECKER_CLAZZ.get(k) + ":" + exist.getName());
         }
       }
 
@@ -378,7 +388,7 @@ public final class Schema {
         var v = moduleEntry.getValue();
         if (COMPONENT_EXECUTOR_CLAZZ.containsKey(k)) {
           Class<? extends AbstractEventHandler> exist = COMPONENT_EXECUTOR_CLAZZ.get(k);
-          throw new ScanException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + COMPONENT_EXECUTOR_CLAZZ.get(k) + ":" + exist.getName());
+          throw new SchemaException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + COMPONENT_EXECUTOR_CLAZZ.get(k) + ":" + exist.getName());
         }
       }
 
@@ -390,7 +400,7 @@ public final class Schema {
           Executor annotation = COMMAND_EXECUTOR_RELATION.get(command);
           Class<? extends EventHandlerExecutor> exist = COMPONENT_EXECUTOR_CLAZZ.get(annotation);
           String existPluginName = MODULE_PLUGIN_RELATION.get(annotation.value());
-          throw new ScanException("发现命令冲突 " + command + " - " + pluginName + ":" + v.getName() + "已注册为" + existPluginName + ":" + exist.getName());
+          throw new SchemaException("发现命令冲突 " + command + " - " + pluginName + ":" + v.getName() + "已注册为" + existPluginName + ":" + exist.getName());
         }
       }
 
@@ -452,10 +462,10 @@ public final class Schema {
       }
     }
 
-    SORTED_RUNNER.sort(Schema::compare);
-    SORTED_FILTER.sort(Schema::compare);
-    SORTED_MONITOR.sort(Schema::compare);
-    SORTED_CHECKER.sort(Schema::compare);
+    SORTED_RUNNER.sort(AnnotationEnhance::compare);
+    SORTED_FILTER.sort(AnnotationEnhance::compare);
+    SORTED_MONITOR.sort(AnnotationEnhance::compare);
+    SORTED_CHECKER.sort(AnnotationEnhance::compare);
 
   }
 
@@ -479,7 +489,7 @@ public final class Schema {
         instance = clazz.getConstructor().newInstance();
         instance.internalInit(pluginName, moduleName, dependClassLoader);
       } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
-        throw new LoadException("加载定时器失败 " + pluginName + ":" + moduleName + "[" + annotation.priority() + "] -> " + clazz.getName());
+        throw new SchemaException("加载定时器失败 " + pluginName + ":" + moduleName + "[" + annotation.priority() + "] -> " + clazz.getName());
       }
 
       COMPONENT_RUNNER_INSTANCE.put(annotation, instance);
@@ -499,7 +509,7 @@ public final class Schema {
         instance = clazz.getConstructor().newInstance();
         instance.internalInit(pluginName, moduleName, dependClassLoader);
       } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
-        throw new LoadException("加载过滤器失败 " + MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
+        throw new SchemaException("加载过滤器失败 " + MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
       }
       COMPONENT_FILTER_INSTANCE.put(annotation, instance);
       if (annotation.users()) FILTER_USERS_CHAIN.add(instance);
@@ -520,7 +530,7 @@ public final class Schema {
         instance = clazz.getConstructor().newInstance();
         instance.internalInit(pluginName, moduleName, dependClassLoader);
       } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
-        throw new LoadException("加载监听器失败 " + MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
+        throw new SchemaException("加载监听器失败 " + MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
       }
       COMPONENT_MONITOR_INSTANCE.put(annotation, instance);
       if (annotation.users()) MONITOR_USERS_CHAIN.add(instance);
@@ -541,7 +551,7 @@ public final class Schema {
         instance = clazz.getConstructor().newInstance();
         instance.internalInit(pluginName, moduleName, dependClassLoader);
       } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
-        throw new LoadException("加载检查器失败 " + MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
+        throw new SchemaException("加载检查器失败 " + MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
       }
       COMPONENT_CHECKER_INSTANCE.put(annotation, instance);
       if (annotation.command().equals("*")) {
@@ -585,7 +595,7 @@ public final class Schema {
         instance.internalInit(pluginName, moduleName, dependClassLoader);
         instance.buildHelp(annotation);
       } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
-        throw new LoadException("加载执行器失败 " + MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
+        throw new SchemaException("加载执行器失败 " + MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
       }
       COMPONENT_EXECUTOR_INSTANCE.put(annotation, instance);
       if (annotation.users()) EXECUTOR_USERS_POOL.put(annotation.command(), instance);
@@ -608,7 +618,7 @@ public final class Schema {
       try {
         instance.initWrapper();
       } catch (Exception exception) {
-        throw new BootException("预载定时器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
+        throw new SchemaException("预载定时器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
       }
     }
 
@@ -620,7 +630,7 @@ public final class Schema {
       try {
         instance.initWrapper();
       } catch (Exception exception) {
-        throw new BootException("预载过滤器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
+        throw new SchemaException("预载过滤器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
       }
     }
 
@@ -632,7 +642,7 @@ public final class Schema {
       try {
         instance.initWrapper();
       } catch (Exception exception) {
-        throw new BootException("预载监听器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
+        throw new SchemaException("预载监听器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
       }
     }
 
@@ -644,7 +654,7 @@ public final class Schema {
       try {
         instance.initWrapper();
       } catch (Exception exception) {
-        throw new BootException("预载检查器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
+        throw new SchemaException("预载检查器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
       }
     }
 
@@ -657,7 +667,7 @@ public final class Schema {
       try {
         instance.initWrapper();
       } catch (Exception exception) {
-        throw new BootException("预载执行器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
+        throw new SchemaException("预载执行器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
       }
     }
   }
@@ -676,7 +686,7 @@ public final class Schema {
       try {
         clazz.bootWrapper();
       } catch (Exception exception) {
-        throw new BootException("启动定时器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
+        throw new SchemaException("启动定时器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
       }
     }
 
@@ -688,7 +698,7 @@ public final class Schema {
       try {
         clazz.bootWrapper();
       } catch (Exception exception) {
-        throw new BootException("启动过滤器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
+        throw new SchemaException("启动过滤器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
       }
     }
 
@@ -700,7 +710,7 @@ public final class Schema {
       try {
         clazz.bootWrapper();
       } catch (Exception exception) {
-        throw new BootException("启动监听器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
+        throw new SchemaException("启动监听器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
       }
     }
 
@@ -712,7 +722,7 @@ public final class Schema {
       try {
         clazz.bootWrapper();
       } catch (Exception exception) {
-        throw new BootException("启动检查器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
+        throw new SchemaException("启动检查器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
       }
     }
 
@@ -725,7 +735,7 @@ public final class Schema {
       try {
         clazz.bootWrapper();
       } catch (Exception exception) {
-        throw new BootException("启动执行器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
+        throw new SchemaException("启动执行器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
       }
     }
   }
@@ -915,7 +925,7 @@ public final class Schema {
     return result;
   }
 
-  public Map<Executor, Boolean> listAllExecutor() {
+  public Map<Executor, Boolean> listExecutor() {
     Map<Executor, Boolean> result = new LinkedHashMap<>();
     for (Executor annotation : COMPONENT_EXECUTOR_CLAZZ.keySet()) {
       result.put(annotation, COMPONENT_EXECUTOR_INSTANCE.containsKey(annotation));
@@ -956,14 +966,6 @@ public final class Schema {
   //= ================================================================================================================
   //=  预载模块模板
   //= ================================================================================================================
-
-  private Class<? extends AbstractEventHandler> getModuleClassEnsure(String name) {
-    Class<? extends AbstractEventHandler> instance = getModuleClass(name);
-    if (instance == null) {
-      logger.info("没有找到模块模板 -> " + name + " " + (getModuleClass(name) == null ? "不存在" : "未加载"));
-    }
-    return instance;
-  }
 
   private Class<? extends AbstractEventHandler> getModuleClass(String name) {
 
@@ -1229,87 +1231,31 @@ public final class Schema {
     logger.info("执行器已卸载 -> " + printAnnotation(annotation));
   }
 
-  //= ================================================================================================================
-  //=
-  //= 内部功能
-  //=
-  //= ================================================================================================================
-
-  //= ================================================================================================================
-  //=  顺序机制
-  //= ================================================================================================================
-
-  private static int compare(Runner o1, Runner o2) {
-    return o1.priority() - o2.priority();
-  }
-
-  private static int compare(Filter o1, Filter o2) {
-    return o1.priority() - o2.priority();
-  }
-
-  private static int compare(Monitor o1, Monitor o2) {
-    return o1.priority() - o2.priority();
-  }
-
-  private static int compare(Checker o1, Checker o2) {
-    return o1.priority() - o2.priority();
-  }
-
-  private static int compare(Executor o1, Executor o2) {
-    return CharSequence.compare(o1.command(), o2.command());
-  }
-
-  //= ================================================================================================================
-  //= 友好打印
-  //= ================================================================================================================
-
-  private static String printAnnotation(Runner annotation) {
-    return annotation.value() + '[' + annotation.priority() + ']';
-  }
-
-  private static String printAnnotation(Filter annotation) {
-    return annotation.value() + '[' + annotation.priority() + "]{" + (annotation.users() ? "U" : "") + (annotation.group() ? "G" : "") + "}";
-  }
-
-  private static String printAnnotation(Monitor annotation) {
-    return annotation.value() + '[' + annotation.priority() + "]{" + (annotation.users() ? "U" : "") + (annotation.group() ? "G" : "") + "}";
-  }
-
-  private static String printAnnotation(Checker annotation) {
-    return annotation.value() + '[' + annotation.priority() + ']' + '(' + annotation.command() + "){" + (annotation.users() ? "U" : "") + (annotation.group() ? "G" : "") + "}";
-  }
-
-  private static String printAnnotation(Executor annotation) {
-    return annotation.value() + '(' + annotation.command() + "){" + (annotation.users() ? "U" : "") + (annotation.group() ? "G" : "") + "}";
-  }
-
   //= ==================================================================================================================
   //
   //
   //
   //= ==================================================================================================================
 
-  @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
+  @SuppressWarnings("DuplicatedCode")
   public String verboseStatus() {
 
     StringBuilder builder = new StringBuilder();
 
-    builder
-      .append(Color.BRIGHT_MAGENTA + ">> PLUGINS" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_MAGENTA).append(">> PLUGINS").append(RESET).append(LINE);
 
     for (Map.Entry<String, Plugin> entry : plugins.entrySet()) {
       var k = entry.getKey();
       var v = entry.getValue();
       builder
-        .append(Color.BRIGHT_CYAN)
+        .append(BRIGHT_CYAN)
         .append(k)
         .append(":")
-        .append(hexHash(v))
+        .append(toHumanHashCode(v))
         .append(" ")
-        .append(v.getFile())
-        .append(Color.RESET)
-        .append(FurryBlack.LINE);
+        .append(v.getPath())
+        .append(RESET)
+        .append(LINE);
       for (Map.Entry<String, Class<? extends AbstractEventHandler>> classEntry : v.getModules().entrySet()) {
         var classK = classEntry.getKey();
         var classV = classEntry.getValue();
@@ -1318,14 +1264,12 @@ public final class Schema {
           .append(" -> ")
           .append(classV.getName())
           .append(":")
-          .append(hexHash(classV))
-          .append(FurryBlack.LINE);
+          .append(toHumanHashCode(classV))
+          .append(LINE);
       }
     }
 
-    builder
-      .append(Color.BRIGHT_MAGENTA + ">> MODULES" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_MAGENTA).append(">> MODULES").append(RESET).append(LINE);
 
     for (Map.Entry<String, Class<? extends AbstractEventHandler>> entry : modules.entrySet()) {
       var k = entry.getKey();
@@ -1335,13 +1279,11 @@ public final class Schema {
         .append(" -> ")
         .append(v.getName())
         .append(":")
-        .append(hexHash(v))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(v))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_MAGENTA + ">> MODULE_PLUGIN_RELATION" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_MAGENTA).append(">> MODULE_PLUGIN_RELATION").append(RESET).append(LINE);
 
     for (Map.Entry<String, String> entry : MODULE_PLUGIN_RELATION.entrySet()) {
       var k = entry.getKey();
@@ -1350,12 +1292,10 @@ public final class Schema {
         .append(k)
         .append(" -> ")
         .append(v)
-        .append(FurryBlack.LINE);
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> COMPONENT_RUNNER_CLAZZ" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> COMPONENT_RUNNER_CLAZZ").append(RESET).append(LINE);
 
     for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> entry : COMPONENT_RUNNER_CLAZZ.entrySet()) {
       var k = entry.getKey();
@@ -1363,17 +1303,15 @@ public final class Schema {
       builder
         .append(printAnnotation(k))
         .append(":")
-        .append(hexHash(k))
+        .append(toHumanHashCode(k))
         .append(" -> ")
         .append(v.getName())
         .append(":")
-        .append(hexHash(v))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(v))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> COMPONENT_FILTER_CLAZZ" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> COMPONENT_FILTER_CLAZZ").append(RESET).append(LINE);
 
     for (Map.Entry<Filter, Class<? extends EventHandlerFilter>> entry : COMPONENT_FILTER_CLAZZ.entrySet()) {
       var k = entry.getKey();
@@ -1381,17 +1319,15 @@ public final class Schema {
       builder
         .append(printAnnotation(k))
         .append(":")
-        .append(hexHash(k))
+        .append(toHumanHashCode(k))
         .append(" -> ")
         .append(v.getName())
         .append(":")
-        .append(hexHash(v))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(v))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> COMPONENT_MONITOR_CLAZZ" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> COMPONENT_MONITOR_CLAZZ").append(RESET).append(LINE);
 
     for (Map.Entry<Monitor, Class<? extends EventHandlerMonitor>> entry : COMPONENT_MONITOR_CLAZZ.entrySet()) {
       var k = entry.getKey();
@@ -1399,17 +1335,15 @@ public final class Schema {
       builder
         .append(printAnnotation(k))
         .append(":")
-        .append(hexHash(k))
+        .append(toHumanHashCode(k))
         .append(" -> ")
         .append(v.getName())
         .append(":")
-        .append(hexHash(v))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(v))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> COMPONENT_CHECKER_CLAZZ" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> COMPONENT_CHECKER_CLAZZ").append(RESET).append(LINE);
 
     for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> entry : COMPONENT_CHECKER_CLAZZ.entrySet()) {
       var k = entry.getKey();
@@ -1417,17 +1351,15 @@ public final class Schema {
       builder
         .append(printAnnotation(k))
         .append(":")
-        .append(hexHash(k))
+        .append(toHumanHashCode(k))
         .append(" -> ")
         .append(v.getName())
         .append(":")
-        .append(hexHash(v))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(v))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> COMPONENT_EXECUTOR_CLAZZ" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> COMPONENT_EXECUTOR_CLAZZ").append(RESET).append(LINE);
 
     for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> entry : COMPONENT_EXECUTOR_CLAZZ.entrySet()) {
       var k = entry.getKey();
@@ -1435,65 +1367,55 @@ public final class Schema {
       builder
         .append(printAnnotation(k))
         .append(":")
-        .append(hexHash(k))
+        .append(toHumanHashCode(k))
         .append(" -> ")
         .append(v.getName())
         .append(":")
-        .append(hexHash(v))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(v))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> SORTED_RUNNER" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> SORTED_RUNNER").append(RESET).append(LINE);
 
     for (Runner entry : SORTED_RUNNER) {
       builder
         .append(printAnnotation(entry))
         .append(":")
-        .append(hexHash(entry))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(entry))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> SORTED_FILTER" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> SORTED_FILTER").append(RESET).append(LINE);
 
     for (Filter entry : SORTED_FILTER) {
       builder
         .append(printAnnotation(entry))
         .append(":")
-        .append(hexHash(entry))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(entry))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> SORTED_MONITOR" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> SORTED_MONITOR").append(RESET).append(LINE);
 
     for (Monitor entry : SORTED_MONITOR) {
       builder
         .append(printAnnotation(entry))
         .append(":")
-        .append(hexHash(entry))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(entry))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> SORTED_CHECKER" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> SORTED_CHECKER").append(RESET).append(LINE);
 
     for (Checker entry : SORTED_CHECKER) {
       builder
         .append(printAnnotation(entry))
         .append(":")
-        .append(hexHash(entry))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(entry))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> COMPONENT_RUNNER_INSTANCE" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> COMPONENT_RUNNER_INSTANCE").append(RESET).append(LINE);
 
     for (Map.Entry<Runner, EventHandlerRunner> entry : COMPONENT_RUNNER_INSTANCE.entrySet()) {
       var k = entry.getKey();
@@ -1501,17 +1423,15 @@ public final class Schema {
       builder
         .append(printAnnotation(k))
         .append(":")
-        .append(hexHash(k))
+        .append(toHumanHashCode(k))
         .append(" -> ")
         .append(v.getClass().getName())
         .append(":")
-        .append(hexHash(v))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(v))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> COMPONENT_FILTER_INSTANCE" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> COMPONENT_FILTER_INSTANCE").append(RESET).append(LINE);
 
     for (Map.Entry<Filter, EventHandlerFilter> entry : COMPONENT_FILTER_INSTANCE.entrySet()) {
       var k = entry.getKey();
@@ -1519,17 +1439,15 @@ public final class Schema {
       builder
         .append(printAnnotation(k))
         .append(":")
-        .append(hexHash(k))
+        .append(toHumanHashCode(k))
         .append(" -> ")
         .append(v.getClass().getName())
         .append(":")
-        .append(hexHash(v))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(v))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> COMPONENT_MONITOR_INSTANCE" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> COMPONENT_MONITOR_INSTANCE").append(RESET).append(LINE);
 
     for (Map.Entry<Monitor, EventHandlerMonitor> entry : COMPONENT_MONITOR_INSTANCE.entrySet()) {
       var k = entry.getKey();
@@ -1537,17 +1455,15 @@ public final class Schema {
       builder
         .append(printAnnotation(k))
         .append(":")
-        .append(hexHash(k))
+        .append(toHumanHashCode(k))
         .append(" -> ")
         .append(v.getClass().getName())
         .append(":")
-        .append(hexHash(v))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(v))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> COMPONENT_CHECKER_INSTANCE" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> COMPONENT_CHECKER_INSTANCE").append(RESET).append(LINE);
 
     for (Map.Entry<Checker, EventHandlerChecker> entry : COMPONENT_CHECKER_INSTANCE.entrySet()) {
       var k = entry.getKey();
@@ -1555,17 +1471,15 @@ public final class Schema {
       builder
         .append(printAnnotation(k))
         .append(":")
-        .append(hexHash(k))
+        .append(toHumanHashCode(k))
         .append(" -> ")
         .append(v.getClass().getName())
         .append(":")
-        .append(hexHash(v))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(v))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> COMPONENT_EXECUTOR_INSTANCE" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> COMPONENT_EXECUTOR_INSTANCE").append(RESET).append(LINE);
 
     for (Map.Entry<Executor, EventHandlerExecutor> entry : COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
       var k = entry.getKey();
@@ -1573,135 +1487,117 @@ public final class Schema {
       builder
         .append(printAnnotation(k))
         .append(":")
-        .append(hexHash(k))
+        .append(toHumanHashCode(k))
         .append(" -> ")
         .append(v.getClass().getName())
         .append(":")
-        .append(hexHash(v))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(v))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> FILTER_USERS_CHAIN" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> FILTER_USERS_CHAIN").append(RESET).append(LINE);
 
     for (EventHandlerFilter item : FILTER_USERS_CHAIN) {
       builder
         .append(item.getClass().getName())
         .append(":")
-        .append(hexHash(item))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(item))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> FILTER_GROUP_CHAIN" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> FILTER_GROUP_CHAIN").append(RESET).append(LINE);
 
     for (EventHandlerFilter item : FILTER_GROUP_CHAIN) {
       builder
         .append(item.getClass().getName())
         .append(":")
-        .append(hexHash(item))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(item))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> MONITOR_USERS_CHAIN" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> MONITOR_USERS_CHAIN").append(RESET).append(LINE);
 
     for (EventHandlerMonitor item : MONITOR_USERS_CHAIN) {
       builder
         .append(item.getClass().getName())
         .append(":")
-        .append(hexHash(item))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(item))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> MONITOR_GROUP_CHAIN" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> MONITOR_GROUP_CHAIN").append(RESET).append(LINE);
 
     for (EventHandlerMonitor item : MONITOR_GROUP_CHAIN) {
       builder
         .append(item.getClass().getName())
         .append(":")
-        .append(hexHash(item))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(item))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> GLOBAL_CHECKER_USERS_POOL" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> GLOBAL_CHECKER_USERS_POOL").append(RESET).append(LINE);
 
     for (EventHandlerChecker item : GLOBAL_CHECKER_USERS_POOL) {
       builder
         .append(item.getClass().getName())
         .append(":")
-        .append(hexHash(item))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(item))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> GLOBAL_CHECKER_GROUP_POOL" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> GLOBAL_CHECKER_GROUP_POOL").append(RESET).append(LINE);
 
     for (EventHandlerChecker item : GLOBAL_CHECKER_GROUP_POOL) {
       builder
         .append(item.getClass().getName())
         .append(":")
-        .append(hexHash(item))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(item))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> COMMAND_CHECKER_USERS_POOL" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> COMMAND_CHECKER_USERS_POOL").append(RESET).append(LINE);
 
     for (Map.Entry<String, List<EventHandlerChecker>> entry : COMMAND_CHECKER_USERS_POOL.entrySet()) {
       var k = entry.getKey();
       var v = entry.getValue();
       builder
-        .append(Color.CYAN)
+        .append(CYAN)
         .append(k)
-        .append(Color.RESET)
+        .append(RESET)
         .append(" ")
         .append(v.size())
-        .append(FurryBlack.LINE);
+        .append(LINE);
       for (EventHandlerChecker checker : v) {
         builder
           .append(checker.getClass().getName())
           .append(":")
-          .append(hexHash(checker))
-          .append(FurryBlack.LINE);
+          .append(toHumanHashCode(checker))
+          .append(LINE);
       }
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> COMMAND_CHECKER_GROUP_POOL" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> COMMAND_CHECKER_GROUP_POOL").append(RESET).append(LINE);
 
     for (Map.Entry<String, List<EventHandlerChecker>> entry : COMMAND_CHECKER_GROUP_POOL.entrySet()) {
       var k = entry.getKey();
       var v = entry.getValue();
       builder
-        .append(Color.CYAN)
+        .append(CYAN)
         .append(k)
-        .append(Color.RESET)
+        .append(RESET)
         .append(" ")
         .append(v.size())
-        .append(FurryBlack.LINE);
+        .append(LINE);
       for (EventHandlerChecker checker : v) {
         builder
           .append(checker.getClass().getName())
           .append(":")
-          .append(hexHash(checker))
-          .append(FurryBlack.LINE);
+          .append(toHumanHashCode(checker))
+          .append(LINE);
       }
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> EXECUTOR_USERS_POOL" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> EXECUTOR_USERS_POOL").append(RESET).append(LINE);
 
     for (Map.Entry<String, EventHandlerExecutor> entry : EXECUTOR_USERS_POOL.entrySet()) {
       var k = entry.getKey();
@@ -1711,37 +1607,37 @@ public final class Schema {
         .append(" -> ")
         .append(v.getClass().getName())
         .append(":")
-        .append(hexHash(v))
-        .append(FurryBlack.LINE);
+        .append(toHumanHashCode(v))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> EXECUTOR_GROUP_POOL" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> EXECUTOR_GROUP_POOL").append(RESET).append(LINE);
 
     for (Map.Entry<String, EventHandlerExecutor> entry : EXECUTOR_GROUP_POOL.entrySet()) {
       var k = entry.getKey();
       var v = entry.getValue();
       builder
-        .append(k + " -> " + v.getClass().getName() + ":" + hexHash(v))
-        .append(FurryBlack.LINE);
+        .append(k)
+        .append(" -> ")
+        .append(v.getClass().getName())
+        .append(":")
+        .append(toHumanHashCode(v))
+        .append(LINE);
     }
 
-    builder
-      .append(Color.BRIGHT_CYAN + ">> COMMAND_EXECUTOR_RELATION" + Color.RESET)
-      .append(FurryBlack.LINE);
+    builder.append(BRIGHT_CYAN).append(">> COMMAND_EXECUTOR_RELATION").append(RESET).append(LINE);
 
     for (Map.Entry<String, Executor> entry : COMMAND_EXECUTOR_RELATION.entrySet()) {
       var k = entry.getKey();
       var v = entry.getValue();
       builder
-        .append(Color.CYAN)
+        .append(CYAN)
         .append(k)
-        .append(Color.RESET)
+        .append(RESET)
         .append(" -> ")
         .append(v.value())
         .append(":")
-        .append(hexHash(v))
+        .append(toHumanHashCode(v))
         .append(" {")
         .append(v.users() ? "U" : "")
         .append(v.group() ? "G" : "")
@@ -1749,16 +1645,16 @@ public final class Schema {
         .append(v.outline())
         .append(":")
         .append(v.description())
-        .append(FurryBlack.LINE);
+        .append(LINE);
       for (String temp : v.usage()) {
         builder
           .append(temp)
-          .append(FurryBlack.LINE);
+          .append(LINE);
       }
       for (String temp : v.privacy()) {
         builder
           .append(temp)
-          .append(FurryBlack.LINE);
+          .append(LINE);
       }
     }
 

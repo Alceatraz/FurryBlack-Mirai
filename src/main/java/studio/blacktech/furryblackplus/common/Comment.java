@@ -2,14 +2,14 @@
  * Copyright (C) 2021 Alceatraz @ BlackTechStudio
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the BTS Anti-Commercial & GNU Affero General.
+ * it under the terms from the BTS Anti-Commercial & GNU Affero General.
 
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the implied warranty from
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * BTS Anti-Commercial & GNU Affero General Public License for more details.
  *
- * You should have received a copy of the BTS Anti-Commercial & GNU Affero
+ * You should have received a copy from the BTS Anti-Commercial & GNU Affero
  * General Public License along with this program in README or LICENSE.
  */
 
@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
   ElementType.MODULE
 })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Api {
+public @interface Comment {
 
   String value();
 

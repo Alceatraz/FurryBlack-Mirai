@@ -2,23 +2,23 @@
  * Copyright (C) 2021 Alceatraz @ BlackTechStudio
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the BTS Anti-Commercial & GNU Affero General
+ * it under the terms from the BTS Anti-Commercial & GNU Affero General
  * Public License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
+ * version 3 from the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the implied warranty from
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * BTS Anti-Commercial & GNU Affero General Public License for more details.
  *
- * You should have received a copy of the BTS Anti-Commercial & GNU Affero
+ * You should have received a copy from the BTS Anti-Commercial & GNU Affero
  * General Public License along with this program.
  *
  */
 
 package studio.blacktech.furryblackplus.core.handler.common;
 
-import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.common.Comment;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -26,19 +26,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-@Api("命令模型")
+@Comment("命令模型")
 public final class Command {
 
-  @Api("命令名 第一个空格之前的内容 用于搜索执行器") private final String commandName;
-  @Api("命令体 第一个空格之后的内容 用于解析命令模型") private final String commandBody;
-  @Api("命令体 的字符数") private final int commandBodyLength;
+  @Comment("命令名 第一个空格之前的内容 用于搜索执行器") private final String commandName;
+  @Comment("命令体 第一个空格之后的内容 用于解析命令模型") private final String commandBody;
+  @Comment("命令体 的字符数") private final int commandBodyLength;
 
-  @Api("命令模型解析后 所有的参数") private final String[] commandParameters;
-  @Api("命令模型解析后 参数的长度") private final int commandParameterLength;
+  @Comment("命令模型解析后 所有的参数") private final String[] commandParameters;
+  @Comment("命令模型解析后 参数的长度") private final int commandParameterLength;
 
-  @Api("命令模型解析后 选项和开关") private final Map<String, String> commandOptions = new LinkedHashMap<>();
+  @Comment("命令模型解析后 选项和开关") private final Map<String, String> commandOptions = new LinkedHashMap<>();
 
-  @Api(
+  @Comment(
     value = "解析命令",
     usage = {
       "命令以空格(U+0020)拆分为片段，index号从0开始，但--开头的参数被视为选项会被剔除，不计入index序号",
@@ -144,7 +144,7 @@ public final class Command {
 
   //= ==================================================================================================================
 
-  @Api(
+  @Comment(
     value = "从指定位置拼接剩余的内容",
     attention = "index从参数开始数,0代表第一个参数而非命令名,此处所说的index与命令解析时的index序号不同"
   )
@@ -159,17 +159,17 @@ public final class Command {
     return builder.toString();
   }
 
-  @Api("获取命令名")
+  @Comment("获取命令名")
   public String getCommandName() {
     return this.commandName;
   }
 
-  @Api("获取命令体")
+  @Comment("获取命令体")
   public String getCommandBody() {
     return this.commandBody;
   }
 
-  @Api("获取命令体 - 最大字符限制")
+  @Comment("获取命令体 - 最大字符限制")
   public String getCommandBody(int length) {
     if (length > this.commandBodyLength) {
       return this.commandBody;
@@ -178,37 +178,37 @@ public final class Command {
     }
   }
 
-  @Api("获取参数长度")
+  @Comment("获取参数长度")
   public int getCommandBodyLength() {
     return this.commandBodyLength;
   }
 
-  @Api("是否有命令体")
+  @Comment("是否有命令体")
   public boolean hasCommandBody() {
     return this.commandParameterLength > 0;
   }
 
-  @Api("获取参数个数")
+  @Comment("获取参数个数")
   public int getParameterLength() {
     return this.commandParameterLength;
   }
 
-  @Api("获取所有参数")
+  @Comment("获取所有参数")
   public String[] getParameterSegment() {
     return this.commandParameters;
   }
 
-  @Api("获取指定位置的参数")
+  @Comment("获取指定位置的参数")
   public String getParameterSegment(int i) {
     return this.commandParameters[i];
   }
 
-  @Api("是否包含选项")
+  @Comment("是否包含选项")
   public boolean hasSwitch(String name) {
     return this.commandOptions.containsKey(name);
   }
 
-  @Api("获取指定选项")
+  @Comment("获取指定选项")
   public String getSwitch(String name) {
     return this.commandOptions.get(name);
   }

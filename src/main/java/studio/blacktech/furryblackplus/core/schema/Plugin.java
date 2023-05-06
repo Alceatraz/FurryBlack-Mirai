@@ -2,16 +2,16 @@
  * Copyright (C) 2021 Alceatraz @ BlackTechStudio
  *
  *  program is free software: you can redistribute it and/or modify
- * it under the terms of the BTS Anti-Commercial & GNU Affero General
+ * it under the terms from the BTS Anti-Commercial & GNU Affero General
  * Public License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
+ * version 3 from the License, or (at your option) any later version.
  *
  *  program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the implied warranty from
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * BTS Anti-Commercial & GNU Affero General Public License for more details.
  *
- * You should have received a copy of the BTS Anti-Commercial & GNU Affero
+ * You should have received a copy from the BTS Anti-Commercial & GNU Affero
  * General Public License along with  program.
  *
  */
@@ -19,10 +19,10 @@
 package studio.blacktech.furryblackplus.core.schema;
 
 import studio.blacktech.furryblackplus.FurryBlack;
-import studio.blacktech.furryblackplus.core.common.exception.BotException;
-import studio.blacktech.furryblackplus.core.common.exception.moduels.scan.ScanException;
+import studio.blacktech.furryblackplus.core.common.enhance.FileEnhance;
 import studio.blacktech.furryblackplus.core.common.logger.LoggerXFactory;
 import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
+import studio.blacktech.furryblackplus.core.exception.schema.SchemaException;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerChecker;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerExecutor;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerFilter;
@@ -35,12 +35,11 @@ import studio.blacktech.furryblackplus.core.handler.annotation.Monitor;
 import studio.blacktech.furryblackplus.core.handler.annotation.Runner;
 import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -52,15 +51,15 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
-@SuppressWarnings("DuplicatedCode")
 public final class Plugin {
 
   private static final Pattern PATTERN = Pattern.compile("^[\\da-z_-]{8,64}$");
 
   private final LoggerX logger;
 
-  private final File file;
+  private final Path path;
   private final String name;
 
   private URLClassLoader dependClassLoader;
@@ -73,62 +72,62 @@ public final class Plugin {
   private Map<Checker, Class<? extends EventHandlerChecker>> checkerClassMap;
   private Map<Executor, Class<? extends EventHandlerExecutor>> executorClassMap;
 
-  public static Plugin load(File file) {
+  public static Plugin load(Path path) {
 
     String name;
 
-    try (JarFile jarFile = new JarFile(file)) {
+    try (JarFile jarFile = new JarFile(path.toFile())) {
 
       Manifest manifest;
       try {
         manifest = jarFile.getManifest();
       } catch (IOException exception) {
-        throw new ScanException("加载MANIFEST失败 -> " + file.getAbsolutePath(), exception);
+        throw new SchemaException("加载MANIFEST失败 -> " + path, exception);
       }
 
       Attributes attributes = manifest.getAttributes("FurryBlack-Extension");
       if (attributes == null || attributes.isEmpty()) {
-        throw new ScanException("加载插件失败: MANIFEST不包含FurryBlack-Extension标签组");
+        throw new SchemaException("加载插件失败: MANIFEST不包含FurryBlack-Extension标签组");
       }
 
       String loaderVersion = attributes.getValue("Loader-Version");
 
       if (loaderVersion == null) {
-        throw new ScanException("加载插件失败: MANIFEST中FurryBlack-Extension标签组不含Loader-Version");
+        throw new SchemaException("加载插件失败: MANIFEST中FurryBlack-Extension标签组不含Loader-Version");
       }
 
       if (!"1".equals(loaderVersion)) {
-        throw new ScanException("加载插件失败: 加载器版本不符，此插件声明其版本为 " + loaderVersion);
+        throw new SchemaException("加载插件失败: 加载器版本不符，此插件声明其版本为 " + loaderVersion);
       }
 
       name = attributes.getValue("Extension-Name");
 
       if (name == null) {
-        throw new ScanException("加载插件失败: MANIFEST中FurryBlack-Extension标签组不含Extension-Name");
+        throw new SchemaException("加载插件失败: MANIFEST中FurryBlack-Extension标签组不含Extension-Name");
       }
 
       if (!PATTERN.matcher(name).find()) {
-        throw new ScanException("加载插件失败: 插件包名非法，此插件声明其名称为 " + name);
+        throw new SchemaException("加载插件失败: 插件包名非法，此插件声明其名称为 " + name);
       }
 
-    } catch (IOException exception) {
-      throw new ScanException(exception);
+    } catch (IOException | SchemaException exception) {
+      throw new SchemaException(exception);
     }
 
     Plugin plugin;
     try {
-      plugin = new Plugin(file, name);
+      plugin = new Plugin(path, name);
     } catch (Exception exception) {
-      throw new ScanException(exception);
+      throw new SchemaException(exception);
     }
     return plugin;
   }
 
   //= ==================================================================================================================
 
-  private Plugin(File file, String name) {
+  private Plugin(Path path, String name) {
 
-    this.file = file;
+    this.path = path;
     this.name = name;
 
     logger = LoggerXFactory.newLogger(name);
@@ -140,48 +139,43 @@ public final class Plugin {
 
     //= ==================================================================================================================
 
-    File depend = Paths.get(FurryBlack.getDependFolder(), name).toFile();
+    Path depend = FileEnhance.get(FurryBlack.getDependFolder(), name);
 
     //= ==================================================================================================================
 
     List<URL> tempURL = new LinkedList<>();
 
-    try (JarFile jarFile = new JarFile(file)) {
+    try (JarFile jarFile = new JarFile(path.toFile())) {
 
-      if (depend.exists()) {
-        if (!depend.isDirectory()) {
-          throw new BotException("依赖文件不是目录 -> " + depend.getAbsolutePath());
+      if (Files.exists(depend)) {
+
+        if (!Files.isDirectory(depend)) {
+          throw new SchemaException("依赖文件不是目录 -> " + depend);
         }
-        File[] dependFiles = depend.listFiles();
-        if (dependFiles == null) {
-          throw new BotException("列出依赖文件失败 -> " + depend.getAbsolutePath());
+
+        List<Path> dependFiles;
+
+        try (Stream<Path> stream = Files.list(depend)) {
+          dependFiles = stream.toList();
+        } catch (IOException exception) {
+          throw new SchemaException("列出依赖文件失败 -> " + depend);
         }
-        for (File dependFile : dependFiles) {
-          if (dependFile.isDirectory()) {
-            continue;
+
+        for (Path dependFile : dependFiles) {
+          if (Files.isRegularFile(dependFile)) {
+            URL url = dependFile.toUri().toURL();
+            tempURL.add(url);
           }
-          URL url;
-          try {
-            url = dependFile.toURI().toURL();
-          } catch (MalformedURLException exception) {
-            throw new RuntimeException("That should not possible", exception);
-          }
-          tempURL.add(url);
         }
       }
 
       URL[] urls = tempURL.toArray(new URL[0]);
 
-      logger.seek("加载依赖 -> " + depend.getAbsolutePath() + "[" + urls.length + "]");
+      logger.seek("加载依赖 -> " + depend + "[" + urls.length + "]");
 
       dependClassLoader = new URLClassLoader(urls); // Inject with systemClassLoader in default
 
-      URL pluginURL;
-      try {
-        pluginURL = file.toURI().toURL();
-      } catch (MalformedURLException exception) {
-        throw new RuntimeException("That should not possible", exception);
-      }
+      URL pluginURL = path.toUri().toURL();
 
       pluginClassLoader = new URLClassLoader(new URL[]{pluginURL}, dependClassLoader);
 
@@ -250,7 +244,7 @@ public final class Plugin {
             Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
             logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
             logger.warning("不予注册插件 " + name);
-            throw new ScanException("发现垃圾插件 包含自冲突");
+            throw new SchemaException("发现垃圾插件 包含自冲突");
           }
 
           modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
@@ -274,7 +268,7 @@ public final class Plugin {
             Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
             logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
             logger.warning("不予注册插件 " + name);
-            throw new ScanException("发现垃圾插件 包含自冲突");
+            throw new SchemaException("发现垃圾插件 包含自冲突");
           }
 
           if (annotation.users() || annotation.group()) {
@@ -302,7 +296,7 @@ public final class Plugin {
             Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
             logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
             logger.warning("不予注册插件 " + name);
-            throw new ScanException("发现垃圾插件 包含自冲突");
+            throw new SchemaException("发现垃圾插件 包含自冲突");
           }
 
           if (annotation.users() || annotation.group()) {
@@ -330,7 +324,7 @@ public final class Plugin {
             Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
             logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
             logger.warning("不予注册插件 " + name);
-            throw new ScanException("发现垃圾插件 包含自冲突");
+            throw new SchemaException("发现垃圾插件 包含自冲突");
           }
 
           if (annotation.users() || annotation.group()) {
@@ -358,7 +352,7 @@ public final class Plugin {
             Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
             logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
             logger.warning("不予注册插件 " + name);
-            throw new ScanException("发现垃圾插件 包含自冲突");
+            throw new SchemaException("发现垃圾插件 包含自冲突");
           }
 
           String command = annotation.command();
@@ -367,7 +361,7 @@ public final class Plugin {
             Class<? extends EventHandlerExecutor> exist = commands.get(command);
             logger.warning("发现自冲突命令 " + command + " " + clazz.getName() + " " + moduleName + " " + exist.getName());
             logger.warning("不予注册插件 " + name);
-            throw new ScanException("发现垃圾插件 包含自冲突");
+            throw new SchemaException("发现垃圾插件 包含自冲突");
           }
 
           if (annotation.users() || annotation.group()) {
@@ -388,7 +382,7 @@ public final class Plugin {
       }
 
     } catch (IOException exception) {
-      throw new ScanException(exception);
+      throw new SchemaException(exception);
     }
   }
 
@@ -396,8 +390,8 @@ public final class Plugin {
     return name;
   }
 
-  public File getFile() {
-    return file;
+  public Path getPath() {
+    return path;
   }
 
   public Map<String, Class<? extends AbstractEventHandler>> getModules() {

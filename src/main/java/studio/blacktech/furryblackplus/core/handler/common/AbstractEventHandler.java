@@ -2,254 +2,446 @@
  * Copyright (C) 2021 Alceatraz @ BlackTechStudio
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the BTS Anti-Commercial & GNU Affero General
+ * it under the terms from the BTS Anti-Commercial & GNU Affero General
  * Public License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
+ * version 3 from the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the implied warranty from
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * BTS Anti-Commercial & GNU Affero General Public License for more details.
  *
- * You should have received a copy of the BTS Anti-Commercial & GNU Affero
+ * You should have received a copy from the BTS Anti-Commercial & GNU Affero
  * General Public License along with this program.
  *
  */
 
 package studio.blacktech.furryblackplus.core.handler.common;
 
+import studio.blacktech.furryblack.core.enhance.TimeTool;
 import studio.blacktech.furryblackplus.FurryBlack;
-import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.common.exception.BotException;
-import studio.blacktech.furryblackplus.core.common.exception.ModuleException;
-import studio.blacktech.furryblackplus.core.common.exception.moduels.boot.BootException;
+import studio.blacktech.furryblackplus.common.Comment;
+import studio.blacktech.furryblackplus.core.common.enhance.FileEnhance;
+import studio.blacktech.furryblackplus.core.common.logger.LoggerXFactory;
+import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
+import studio.blacktech.furryblackplus.core.exception.CoreException;
+import studio.blacktech.furryblackplus.core.exception.moduels.BootException;
+import studio.blacktech.furryblackplus.core.exception.moduels.InitException;
+import studio.blacktech.furryblackplus.core.exception.moduels.ModuleException;
+import studio.blacktech.furryblackplus.core.exception.moduels.ShutException;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URLClassLoader;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Properties;
 
-@Api("基础模块类")
-public abstract class AbstractEventHandler extends BasicModuleUtilities {
+@Comment("基础模块类")
+public abstract class AbstractEventHandler {
 
-  private boolean internalInitLock;
+  protected final LoggerX logger = LoggerXFactory.newLogger(getClass());
+
+  private volatile boolean internalInitLock;
 
   private URLClassLoader exclusiveClassLoader;
 
   //= ==================================================================================================================
 
-  @Api("插件目录对象") protected File FOLDER_ROOT;
-  @Api("配置目录对象") protected File FOLDER_CONF;
-  @Api("数据目录对象") protected File FOLDER_DATA;
-  @Api("日志目录对象") protected File FOLDER_LOGS;
-  @Api("配置文件对象") protected File FILE_CONFIG;
-  @Api("配置文件对象") protected Properties CONFIG;
+  @Comment("插件名字") protected String pluginName;
+  @Comment("模块名字") protected String moduleName;
+  @Comment("模块启停") protected volatile boolean enable;
 
-  @Api("初始化过配置文件") protected boolean NEW_CONFIG;
+  @Comment("插件目录") protected Path FOLDER_ROOT;
+  @Comment("配置目录") protected Path FOLDER_CONF;
+  @Comment("数据目录") protected Path FOLDER_DATA;
+  @Comment("日志目录") protected Path FOLDER_LOGS;
 
-  @Api("插件名字") protected String pluginName;
-  @Api("模块名字") protected String moduleName;
-  @Api("模块启停") protected volatile boolean enable;
+  @Comment("配置文件") protected Path FILE_CONFIG;
 
-  @Api("生命周期 预载时")
-  protected abstract void init() throws BootException;
-
-  @Api("生命周期 启动时")
-  protected abstract void boot() throws BotException;
-
-  @Api("生命周期 关闭时")
-  protected abstract void shut() throws BotException;
-
-  @Api("查询模块的启用状态")
-  public final boolean isEnable() {
-    return this.enable;
-  }
-
-  @Api("改变模块的启用状态")
-  public final void setEnable(boolean enable) {
-    this.enable = enable;
-  }
-
-  @Api("初始化插件总目录")
-  protected final void initRootFolder() {
-    this.initFolder(this.FOLDER_ROOT);
-  }
-
-  @Api("初始化插件配置文件目录")
-  protected final void initConfFolder() {
-    this.initFolder(this.FOLDER_CONF);
-  }
-
-  @Api("初始化插件数据目录")
-  protected final void initDataFolder() {
-    this.initFolder(this.FOLDER_DATA);
-  }
-
-  @Api("初始化插件日志目录")
-  protected final void initLogsFolder() {
-    this.initFolder(this.FOLDER_LOGS);
-  }
-
-  @Api("初始化插件配置下的目录")
-  protected final File initConfFolder(String folderName) {
-    return this.initFolder(Paths.get(this.FOLDER_CONF.getAbsolutePath(), folderName).toFile());
-  }
-
-  @Api("初始化插件数据下的目录")
-  protected final File initDataFolder(String folderName) {
-    return this.initFolder(Paths.get(this.FOLDER_DATA.getAbsolutePath(), folderName).toFile());
-  }
-
-  @Api("初始化插件数据下的目录")
-  protected final File initLogsFolder(String folderName) {
-    return this.initFolder(Paths.get(this.FOLDER_LOGS.getAbsolutePath(), folderName).toFile());
-  }
-
-  @Api("初始化配置文件夹下的文件")
-  protected final File initConfFile(String fileName) {
-    return this.initFile(Paths.get(this.FOLDER_CONF.getAbsolutePath(), fileName));
-  }
-
-  @Api("初始化数据文件夹下的文件")
-  protected final File initDataFile(String fileName) {
-    return this.initFile(Paths.get(this.FOLDER_DATA.getAbsolutePath(), fileName));
-  }
-
-  @Api("初始化日志文件夹下的文件")
-  protected final File initLogsFile(String fileName) {
-    return this.initFile(Paths.get(this.FOLDER_LOGS.getAbsolutePath(), fileName));
-  }
-
-  @Api("初始化默认配置文件")
-  protected final void initConfiguration() {
-    if (!this.FILE_CONFIG.exists()) {
-      this.logger.seek("配置文件不存在 " + this.FILE_CONFIG.getAbsolutePath());
-      try {
-        this.initFile(this.FILE_CONFIG.toPath());
-      } catch (Exception exception) {
-        throw new ModuleException("初始化配置错误", exception);
-      }
-      this.NEW_CONFIG = true;
-    }
-  }
-
-  @Api("加载默认配置文件")
-  protected final void loadConfig() {
-    try (FileInputStream inStream = new FileInputStream(this.FILE_CONFIG)) {
-      this.CONFIG.load(inStream);
-    } catch (IOException exception) {
-      throw new ModuleException("加载配置错误", exception);
-    }
-  }
-
-  @Api("保存默认配置文件")
-  protected final void saveConfig() {
-    this.saveConfig(null);
-  }
-
-  @Api("保存默认配置文件")
-  protected final void saveConfig(String comments) {
-    try (FileOutputStream outputStream = new FileOutputStream(this.FILE_CONFIG)) {
-      this.CONFIG.store(outputStream, comments);
-    } catch (IOException exception) {
-      throw new ModuleException("保存配置错误", exception);
-    }
-  }
-
-  @Api("初始化文件夹")
-  protected final File initPluginFolder(String folder) {
-    return this.initFolder(Paths.get(this.FOLDER_ROOT.getAbsolutePath(), folder).toFile());
-  }
-
-  @Api("获取本模块所属插件包的名字")
-  public final String getPluginName() {
-    return this.pluginName;
-  }
-
-  @Api("获取本模块的名字")
-  public final String getModuleName() {
-    return this.moduleName;
-  }
+  @Comment("配置对象") protected Properties CONFIG;
+  @Comment("全新配置") protected boolean NEW_CONFIG;
 
   //= ==================================================================================================================
-
-  @Api("初始化文件")
-  protected final File initModuleFile(String path) {
-    File file = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), path).toFile();
-    return this.initFile(file);
-  }
-
-  @Api("初始化文件夹")
-  protected final File initModuleFolder(String path) {
-    File file = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), path).toFile();
-    return this.initFolder(file);
-  }
-
+  //= 生命周期
   //= ==================================================================================================================
+
+  //= ==========================================================================
+  //= 实例化
 
   public final void internalInit(String pluginName, String moduleName, URLClassLoader exclusiveClassLoader) {
     StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
     StackTraceElement schemaClazz = stackTrace[2];
     if (!"studio.blacktech.furryblackplus.core.schema.Schema".equals(schemaClazz.getClassName())) {
-      BotException botException = new BotException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
-      botException.setStackTrace(stackTrace);
-      throw botException;
+      CoreException coreException = new CoreException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
+      coreException.setStackTrace(stackTrace);
+      throw coreException;
     }
     if (!"makeModule".equals(schemaClazz.getMethodName())) {
-      BotException botException = new BotException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
-      botException.setStackTrace(stackTrace);
-      throw botException;
+      CoreException coreException = new CoreException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
+      coreException.setStackTrace(stackTrace);
+      throw coreException;
     }
-    if (this.internalInitLock) {
-      BotException botException = new BotException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
-      botException.setStackTrace(stackTrace);
-      throw botException;
+    if (internalInitLock) {
+      CoreException coreException = new CoreException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
+      coreException.setStackTrace(stackTrace);
+      throw coreException;
     }
     this.internalInitLock = true;
     this.pluginName = pluginName;
     this.moduleName = moduleName;
     this.exclusiveClassLoader = exclusiveClassLoader;
-    this.FOLDER_ROOT = Paths.get(FurryBlack.getModuleFolder(), this.moduleName).toFile();
-    this.FOLDER_CONF = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "conf").toFile();
-    this.FOLDER_DATA = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "data").toFile();
-    this.FOLDER_LOGS = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "logs").toFile();
-    this.FILE_CONFIG = Paths.get(this.FOLDER_ROOT.getAbsolutePath(), "config.properties").toFile();
-    this.CONFIG = new Properties();
+    FOLDER_ROOT = FileEnhance.get(FurryBlack.getFolderModule(), moduleName);
+    FOLDER_CONF = FileEnhance.get(FOLDER_ROOT, "conf");
+    FOLDER_DATA = FileEnhance.get(FOLDER_ROOT, "data");
+    FOLDER_LOGS = FileEnhance.get(FOLDER_ROOT, "logs");
+    FILE_CONFIG = FileEnhance.get(FOLDER_ROOT, "config.properties");
+    CONFIG = new Properties();
   }
 
-  public final void initWrapper() throws BotException {
+  //= ==========================================================================
+  //= 初始化
+
+  public final void initWrapper() throws CoreException {
     ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
     try {
-      Thread.currentThread().setContextClassLoader(this.exclusiveClassLoader);
-      this.init();
+      Thread.currentThread().setContextClassLoader(exclusiveClassLoader);
+      init();
+    } catch (ModuleException exception) {
+      throw new CoreException(exception);
     } finally {
       Thread.currentThread().setContextClassLoader(contextClassLoader);
     }
   }
 
-  public final void bootWrapper() throws BotException {
+  //= ==========================================================================
+  //= 启动
+
+  public final void bootWrapper() throws CoreException {
     ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
     try {
-      Thread.currentThread().setContextClassLoader(this.exclusiveClassLoader);
-      this.boot();
+      Thread.currentThread().setContextClassLoader(exclusiveClassLoader);
+      boot();
+    } catch (ModuleException exception) {
+      throw new CoreException(exception);
     } finally {
       Thread.currentThread().setContextClassLoader(contextClassLoader);
     }
-    this.enable = true;
+    enable = true;
   }
 
-  public final void shutWrapper() throws BotException {
-    this.enable = false;
+  //= ==========================================================================
+  //= 关闭
+
+  public final void shutWrapper() throws CoreException {
+    enable = false;
     ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
     try {
-      Thread.currentThread().setContextClassLoader(this.exclusiveClassLoader);
-      this.shut();
+      Thread.currentThread().setContextClassLoader(exclusiveClassLoader);
+      shut();
+    } catch (ModuleException exception) {
+      throw new CoreException(exception);
     } finally {
       Thread.currentThread().setContextClassLoader(contextClassLoader);
     }
   }
+
+  //= ==========================================================================
+  //= 接口
+
+  @Comment("生命周期 预载时")
+  protected abstract void init() throws InitException;
+
+  @Comment("生命周期 启动时")
+  protected abstract void boot() throws BootException;
+
+  @Comment("生命周期 关闭时")
+  protected abstract void shut() throws ShutException;
+
+  //= ==================================================================================================================
+  //= 公共API
+  //= ==================================================================================================================
+
+  //= ==========================================================================
+  //= 模块
+
+  @Comment("查询模块的启用状态")
+  public final boolean isEnable() {
+    return enable;
+  }
+
+  @Comment("改变模块的启用状态")
+  public final void setEnable(boolean enable) {
+    this.enable = enable;
+  }
+
+  @Comment("获取本插件的名字")
+  public final String getPluginName() {
+    return pluginName;
+  }
+
+  @Comment("获取本模块的名字")
+  public final String getModuleName() {
+    return moduleName;
+  }
+
+  //= ==========================================================================
+  //= 文件
+
+  @Comment("初始化插件根目录")
+  protected final void ensureRootFolder() {
+    FileEnhance.ensureFolder(FOLDER_ROOT);
+  }
+
+  @Comment("初始化插件配置目录")
+  protected final void ensureConfFolder() {
+    FileEnhance.ensureFolder(FOLDER_CONF);
+  }
+
+  @Comment("初始化插件数据目录")
+  protected final void ensureDataFolder() {
+    FileEnhance.ensureFolder(FOLDER_DATA);
+  }
+
+  @Comment("初始化插件日志目录")
+  protected final void ensureLogsFolder() {
+    FileEnhance.ensureFolder(FOLDER_LOGS);
+  }
+
+  //= ==========================================================================
+
+  @Comment("初始化目录下的文件")
+  protected final Path ensureFile(String name) {
+    return FileEnhance.ensureFile(FOLDER_ROOT, name);
+  }
+
+  @Comment("初始化配置目录下的文件")
+  protected final Path ensureConfFile(String name) {
+    return FileEnhance.ensureFile(FOLDER_CONF, name);
+  }
+
+  @Comment("初始化数据目录下的文件")
+  protected final Path ensureDataFile(String name) {
+    return FileEnhance.ensureFile(FOLDER_DATA, name);
+  }
+
+  @Comment("初始化日志目录下的文件")
+  protected final Path ensureLogsFile(String name) {
+    return FileEnhance.ensureFile(FOLDER_LOGS, name);
+  }
+
+  //= ==========================================================================
+
+  @Comment("初始化配置目录下的目录")
+  protected final Path ensureConfFolder(String name) {
+    return FileEnhance.ensureFolder(FOLDER_CONF, name);
+  }
+
+  @Comment("初始化数据目录下的目录")
+  protected final Path ensureDataFolder(String name) {
+    return FileEnhance.ensureFolder(FOLDER_DATA, name);
+  }
+
+  @Comment("初始化日志目录下的目录")
+  protected final Path ensureLogsFolder(String name) {
+    return FileEnhance.ensureFolder(FOLDER_LOGS, name);
+  }
+
+//= ==========================================================================
+
+  @Comment("读取文件")
+  protected final String read(Path path) {
+    return FileEnhance.read(path);
+  }
+
+  protected final List<String> readLine(Path path) {
+    return readLine(path, false);
+  }
+
+  protected final List<String> readLine(Path path, boolean keepComment) {
+    List<String> strings = FileEnhance.readLine(path);
+    return keepComment ? strings : removeComment(strings);
+  }
+
+  //= ==========================================================================
+
+  @Comment("读取根目录下的文件")
+  protected final String read(String name) {
+    return FileEnhance.read(FOLDER_ROOT, name);
+  }
+
+  @Comment("读取配置目录下的文件")
+  protected final String readConf(String name) {
+    return FileEnhance.read(FOLDER_CONF, name);
+  }
+
+  @Comment("读取数据目录下的文件")
+  protected final String readData(String name) {
+    return FileEnhance.read(FOLDER_DATA, name);
+  }
+
+  @Comment("读取日志目录下的文件")
+  protected final String readLogs(String name) {
+    return FileEnhance.read(FOLDER_LOGS, name);
+  }
+
+  //= ==========================================================================
+
+  @Comment("读取根目录下的文件")
+  protected final List<String> readLine(String name) {
+    return readLine(name, false);
+  }
+
+  @Comment("读取日志目录下的文件")
+  protected final List<String> readConfLine(String name) {
+    return readConfLine(name, false);
+  }
+
+  @Comment("读取数据目录下的文件")
+  protected final List<String> readDataLine(String name) {
+    return readConfLine(name, false);
+  }
+
+  @Comment("读取日志目录下的文件")
+  protected final List<String> readLogsLine(String name) {
+    return readDataLine(name, false);
+  }
+
+  //= ==========================================================================
+
+  @Comment("读取根目录下的文件")
+  protected final List<String> readLine(String name, boolean keepComment) {
+    List<String> strings = FileEnhance.readLine(FOLDER_ROOT, name);
+    return keepComment ? strings : removeComment(strings);
+  }
+
+  @Comment("读取日志目录下的文件")
+  protected final List<String> readConfLine(String name, boolean keepComment) {
+    List<String> strings = FileEnhance.readLine(FOLDER_CONF, name);
+    return keepComment ? strings : removeComment(strings);
+  }
+
+  @Comment("读取数据目录下的文件")
+  protected final List<String> readDataLine(String name, boolean keepComment) {
+    List<String> strings = FileEnhance.readLine(FOLDER_DATA, name);
+    return keepComment ? strings : removeComment(strings);
+  }
+
+  @Comment("读取日志目录下的文件")
+  protected final List<String> readLogsLine(String name, boolean keepComment) {
+    List<String> strings = FileEnhance.readLine(FOLDER_LOGS, name);
+    return keepComment ? strings : removeComment(strings);
+  }
+
+  //= ==========================================================================
+
+  @Comment("写入根目录下的文件")
+  protected final void write(Path path, String content) {
+    FileEnhance.write(path, content);
+  }
+
+  @Comment("写入根目录下的文件")
+  protected final void write(Path path, List<String> content) {
+    FileEnhance.write(path, content);
+  }
+
+  @Comment("写入根目录下的文件")
+  protected final void write(String name, String content) {
+    FileEnhance.write(FOLDER_ROOT, name, content);
+  }
+
+  @Comment("写入日志目录下的文件")
+  protected final void writeConf(String name, String content) {
+    FileEnhance.write(FOLDER_CONF, name, content);
+  }
+
+  @Comment("写入日志目录下的文件")
+  protected final void writeData(String name, String content) {
+    FileEnhance.write(FOLDER_DATA, name, content);
+  }
+
+  @Comment("写入日志目录下的文件")
+  protected final void writeLogs(String name, String content) {
+    FileEnhance.write(FOLDER_LOGS, name, content);
+  }
+
+  @Comment("写入根目录下的文件")
+  protected final void write(String name, List<String> content) {
+    FileEnhance.write(FOLDER_ROOT, name, content);
+  }
+
+  @Comment("写入日志目录下的文件")
+  protected final void writeConf(String name, List<String> content) {
+    FileEnhance.write(FOLDER_CONF, name, content);
+  }
+
+  @Comment("写入日志目录下的文件")
+  protected final void writeData(String name, List<String> content) {
+    FileEnhance.write(FOLDER_DATA, name, content);
+  }
+
+  @Comment("写入日志目录下的文件")
+  protected final void writeLogs(String name, List<String> content) {
+    FileEnhance.write(FOLDER_LOGS, name, content);
+  }
+
+  private List<String> removeComment(List<String> lines) {
+    return lines.stream()
+      .filter(it -> !it.isBlank())
+      .filter(it -> !it.startsWith("#"))
+      .map(it -> {
+        int index = it.indexOf("#");
+        return index > 0 ? it.substring(0, index).trim() : it;
+      }).toList();
+  }
+
+  //= ==========================================================================
+  //= 配置
+
+  @Comment("初始化默认配置文件")
+  protected final void initConfig() {
+    if (Files.notExists(FILE_CONFIG)) {
+      logger.seek("配置文件不存在 " + FILE_CONFIG);
+      try {
+        FileEnhance.ensureFile(FILE_CONFIG);
+      } catch (Exception exception) {
+        throw new RuntimeException("初始化配置错误", exception);
+      }
+      NEW_CONFIG = true;
+    }
+  }
+
+  @Comment("加载默认配置文件")
+  protected final void loadConfig() {
+    try (
+      InputStream stream = Files.newInputStream(FILE_CONFIG);
+      Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)
+    ) {
+      CONFIG.load(reader);
+    } catch (IOException exception) {
+      throw new RuntimeException("加载配置错误", exception);
+    }
+  }
+
+  @Comment("保存默认配置文件")
+  protected final void saveConfig() {
+    try (
+      OutputStream stream = Files.newOutputStream(FILE_CONFIG);
+      Writer writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8)
+    ) {
+      CONFIG.store(writer, "Saved by FurryBlack at " + TimeTool.datetime());
+    } catch (IOException exception) {
+      throw new RuntimeException("保存配置错误", exception);
+    }
+  }
+
+  //= ==========================================================================
 
 }

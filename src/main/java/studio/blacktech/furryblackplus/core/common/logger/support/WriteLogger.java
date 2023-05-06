@@ -2,35 +2,38 @@
  * Copyright (C) 2021 Alceatraz @ BlackTechStudio
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the BTS Anti-Commercial & GNU Affero General
+ * it under the terms from the BTS Anti-Commercial & GNU Affero General
  * Public License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
+ * version 3 from the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the implied warranty from
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * BTS Anti-Commercial & GNU Affero General Public License for more details.
  *
- * You should have received a copy of the BTS Anti-Commercial & GNU Affero
+ * You should have received a copy from the BTS Anti-Commercial & GNU Affero
  * General Public License along with this program.
  *
  */
 
 package studio.blacktech.furryblackplus.core.common.logger.support;
 
-import studio.blacktech.furryblack.core.enhance.Enhance;
 import studio.blacktech.furryblack.core.enhance.TimeTool;
 import studio.blacktech.furryblackplus.FurryBlack;
-import studio.blacktech.furryblackplus.core.common.exception.moduels.load.LockedException;
+import studio.blacktech.furryblackplus.core.common.logger.LoggerXConfig;
 import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
+import studio.blacktech.furryblackplus.core.exception.CoreException;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import static studio.blacktech.furryblackplus.core.common.enhance.StringEnhance.extractStackTrace;
+
 @SuppressWarnings("unused")
 
+@LoggerXConfig(needLoggerFile = true)
 public final class WriteLogger extends LoggerX {
 
   private static boolean lock;
@@ -49,12 +52,12 @@ public final class WriteLogger extends LoggerX {
 
   //= ==================================================================================================================
 
-  public static void init(File logger) {
-    if (WriteLogger.lock) {
-      throw new LockedException();
+  public static void initLoggerFile(File file) {
+    if (lock) {
+      throw new CoreException("Do not init twice");
     }
-    WriteLogger.lock = true;
-    WriteLogger.logger = logger;
+    lock = true;
+    logger = file;
   }
 
   private static synchronized void handle(Color color, String message) {
@@ -68,7 +71,7 @@ public final class WriteLogger extends LoggerX {
       writer.append("\n");
       writer.flush();
     } catch (IOException exception) {
-      System.err.println("LoggerX WriteLogger - writer log failed \n" + Enhance.extractStackTrace(exception));
+      System.err.println("LoggerX WriteLogger - writer log failed \n" + extractStackTrace(exception));
     }
   }
 
@@ -84,13 +87,13 @@ public final class WriteLogger extends LoggerX {
   @Override
   public void bypassImpl(Throwable throwable) {
     if (throwable == null) return;
-    String result = "[" + TimeTool.datetime() + "][BYPASS][" + name + "]" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][BYPASS][" + name + "]" + extractStackTrace(throwable);
     WriteLogger.handle(null, result);
   }
 
   @Override
   public void bypassImpl(String message, Throwable throwable) {
-    String result = "[" + TimeTool.datetime() + "][BYPASS][" + name + "]" + message + "\n" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][BYPASS][" + name + "]" + message + "\n" + extractStackTrace(throwable);
     WriteLogger.handle(null, result);
   }
 
@@ -106,13 +109,13 @@ public final class WriteLogger extends LoggerX {
   @Override
   public void fatalImpl(Throwable throwable) {
     if (throwable == null) return;
-    String result = "[" + TimeTool.datetime() + "][FATAL][" + name + "]" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][FATAL][" + name + "]" + extractStackTrace(throwable);
     WriteLogger.handle(Color.BRIGHT_MAGENTA, result);
   }
 
   @Override
   public void fatalImpl(String message, Throwable throwable) {
-    String result = "[" + TimeTool.datetime() + "][FATAL][" + name + "]" + message + "\n" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][FATAL][" + name + "]" + message + "\n" + extractStackTrace(throwable);
     WriteLogger.handle(Color.BRIGHT_MAGENTA, result);
   }
 
@@ -128,13 +131,13 @@ public final class WriteLogger extends LoggerX {
   @Override
   public void errorImpl(Throwable throwable) {
     if (throwable == null) return;
-    String result = "[" + TimeTool.datetime() + "][ERROR][" + name + "]" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][ERROR][" + name + "]" + extractStackTrace(throwable);
     WriteLogger.handle(Color.BRIGHT_RED, result);
   }
 
   @Override
   public void errorImpl(String message, Throwable throwable) {
-    String result = "[" + TimeTool.datetime() + "][ERROR][" + name + "]" + message + "\n" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][ERROR][" + name + "]" + message + "\n" + extractStackTrace(throwable);
     WriteLogger.handle(Color.BRIGHT_RED, result);
   }
 
@@ -150,13 +153,13 @@ public final class WriteLogger extends LoggerX {
   @Override
   public void warnImpl(Throwable throwable) {
     if (throwable == null) return;
-    String result = "[" + TimeTool.datetime() + "][WARN][" + name + "]" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][WARN][" + name + "]" + extractStackTrace(throwable);
     WriteLogger.handle(Color.BRIGHT_YELLOW, result);
   }
 
   @Override
   public void warnImpl(String message, Throwable throwable) {
-    String result = "[" + TimeTool.datetime() + "][WARN][" + name + "]" + message + "\n" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][WARN][" + name + "]" + message + "\n" + extractStackTrace(throwable);
     WriteLogger.handle(Color.BRIGHT_YELLOW, result);
   }
 
@@ -172,13 +175,13 @@ public final class WriteLogger extends LoggerX {
   @Override
   public void hintImpl(Throwable throwable) {
     if (throwable == null) return;
-    String result = "[" + TimeTool.datetime() + "][HINT][" + name + "]" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][HINT][" + name + "]" + extractStackTrace(throwable);
     WriteLogger.handle(Color.BRIGHT_CYAN, result);
   }
 
   @Override
   public void hintImpl(String message, Throwable throwable) {
-    String result = "[" + TimeTool.datetime() + "][HINT][" + name + "]" + message + "\n" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][HINT][" + name + "]" + message + "\n" + extractStackTrace(throwable);
     WriteLogger.handle(Color.BRIGHT_CYAN, result);
   }
 
@@ -194,13 +197,13 @@ public final class WriteLogger extends LoggerX {
   @Override
   public void seekImpl(Throwable throwable) {
     if (throwable == null) return;
-    String result = "[" + TimeTool.datetime() + "][SEEK][" + name + "]" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][SEEK][" + name + "]" + extractStackTrace(throwable);
     WriteLogger.handle(Color.BRIGHT_GREEN, result);
   }
 
   @Override
   public void seekImpl(String message, Throwable throwable) {
-    String result = "[" + TimeTool.datetime() + "][SEEK][" + name + "]" + message + "\n" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][SEEK][" + name + "]" + message + "\n" + extractStackTrace(throwable);
     WriteLogger.handle(Color.BRIGHT_GREEN, result);
   }
 
@@ -216,13 +219,13 @@ public final class WriteLogger extends LoggerX {
   @Override
   public void infoImpl(Throwable throwable) {
     if (throwable == null) return;
-    String result = "[" + TimeTool.datetime() + "][INFO][" + name + "]" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][INFO][" + name + "]" + extractStackTrace(throwable);
     WriteLogger.handle(null, result);
   }
 
   @Override
   public void infoImpl(String message, Throwable throwable) {
-    String result = "[" + TimeTool.datetime() + "][INFO][" + name + "]" + message + "\n" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][INFO][" + name + "]" + message + "\n" + extractStackTrace(throwable);
     WriteLogger.handle(null, result);
   }
 
@@ -238,13 +241,13 @@ public final class WriteLogger extends LoggerX {
   @Override
   public void debugImpl(Throwable throwable) {
     if (throwable == null) return;
-    String result = "[" + TimeTool.datetime() + "][DEBUG][" + name + "]" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][DEBUG][" + name + "]" + extractStackTrace(throwable);
     WriteLogger.handle(Color.BRIGHT_BLACK, result);
   }
 
   @Override
   public void debugImpl(String message, Throwable throwable) {
-    String result = "[" + TimeTool.datetime() + "][DEBUG][" + name + "]" + message + "\n" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][DEBUG][" + name + "]" + message + "\n" + extractStackTrace(throwable);
     WriteLogger.handle(Color.BRIGHT_BLACK, result);
   }
 
@@ -260,13 +263,13 @@ public final class WriteLogger extends LoggerX {
   @Override
   public void developImpl(Throwable throwable) {
     if (throwable == null) return;
-    String result = "[" + TimeTool.datetime() + "][DEVEL][" + name + "]" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][DEVEL][" + name + "]" + extractStackTrace(throwable);
     WriteLogger.handle(Color.GRAY, result);
   }
 
   @Override
   public void developImpl(String message, Throwable throwable) {
-    String result = "[" + TimeTool.datetime() + "][DEVEL][" + name + "]" + message + "\n" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][DEVEL][" + name + "]" + message + "\n" + extractStackTrace(throwable);
     WriteLogger.handle(Color.GRAY, result);
   }
 
@@ -282,13 +285,13 @@ public final class WriteLogger extends LoggerX {
   @Override
   public void verboseImpl(Throwable throwable) {
     if (throwable == null) return;
-    String result = "[" + TimeTool.datetime() + "][VERBOSE][" + name + "]" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][VERBOSE][" + name + "]" + extractStackTrace(throwable);
     WriteLogger.handle(Color.GRAY, result);
   }
 
   @Override
   public void verboseImpl(String message, Throwable throwable) {
-    String result = "[" + TimeTool.datetime() + "][VERBOSE][" + name + "]" + message + "\n" + Enhance.extractStackTrace(throwable);
+    String result = "[" + TimeTool.datetime() + "][VERBOSE][" + name + "]" + message + "\n" + extractStackTrace(throwable);
     WriteLogger.handle(Color.GRAY, result);
   }
 

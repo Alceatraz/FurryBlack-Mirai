@@ -13,13 +13,34 @@
  * General Public License along with this program in README or LICENSE.
  */
 
-package studio.blacktech.furryblackplus.core.handler;
+package studio.blacktech.furryblackplus.core.exception;
 
 import studio.blacktech.furryblackplus.common.Comment;
-import studio.blacktech.furryblackplus.core.handler.annotation.Runner;
-import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 
-@Comment(value = "定时器父类", relativeClass = Runner.class)
-public abstract class EventHandlerRunner extends AbstractEventHandler {
+@Comment(value = "基础异常", attention = "RuntimeException")
+public class CoreException extends RuntimeException {
 
+  public CoreException() {}
+
+  public CoreException(String message) {
+    super(message);
+  }
+
+  public CoreException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public CoreException(Throwable cause) {
+    super(cause);
+  }
+
+  public static void check(String value) {
+    if (value == null) return;
+    throw new CoreException(value);
+  }
+
+  public static void check(String message, String value) {
+    if (value == null) return;
+    throw new CoreException(message + value);
+  }
 }

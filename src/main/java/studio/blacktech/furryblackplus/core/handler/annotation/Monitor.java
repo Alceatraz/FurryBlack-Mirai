@@ -2,23 +2,23 @@
  * Copyright (C) 2021 Alceatraz @ BlackTechStudio
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the BTS Anti-Commercial & GNU Affero General
+ * it under the terms from the BTS Anti-Commercial & GNU Affero General
  * Public License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
+ * version 3 from the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the implied warranty from
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * BTS Anti-Commercial & GNU Affero General Public License for more details.
  *
- * You should have received a copy of the BTS Anti-Commercial & GNU Affero
+ * You should have received a copy from the BTS Anti-Commercial & GNU Affero
  * General Public License along with this program.
  *
  */
 
 package studio.blacktech.furryblackplus.core.handler.annotation;
 
-import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.common.Comment;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -26,7 +26,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Api(
+@Comment(
   value = "监听器的注解",
   usage = "消息的处理顺序为 事件->过滤器->监听器->命令判断->检查器->执行器",
   attention = {
@@ -41,15 +41,15 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Monitor {
 
-  @Api("模块名")
+  @Comment("模块名")
   String value();
 
-  @Api("模块权重")
+  @Comment("模块权重")
   int priority() default 0;
 
-  @Api("对私聊启用 默认启用")
+  @Comment("对私聊启用 默认启用")
   boolean users() default true;
 
-  @Api("对群聊启用 默认启用")
+  @Comment("对群聊启用 默认启用")
   boolean group() default true;
 }

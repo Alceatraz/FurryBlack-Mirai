@@ -2,14 +2,14 @@
  * Copyright (C) 2021 Alceatraz @ BlackTechStudio
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the BTS Anti-Commercial & GNU Affero General.
+ * it under the terms from the BTS Anti-Commercial & GNU Affero General.
 
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the implied warranty from
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * BTS Anti-Commercial & GNU Affero General Public License for more details.
  *
- * You should have received a copy of the BTS Anti-Commercial & GNU Affero
+ * You should have received a copy from the BTS Anti-Commercial & GNU Affero
  * General Public License along with this program in README or LICENSE.
  */
 
@@ -18,12 +18,12 @@ package studio.blacktech.furryblackplus.demo;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
 import studio.blacktech.furryblackplus.FurryBlack;
-import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.common.Comment;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerExecutor;
 import studio.blacktech.furryblackplus.core.handler.annotation.Executor;
 import studio.blacktech.furryblackplus.core.handler.common.Command;
 
-@Api("示例执行器")
+@Comment("示例执行器")
 
 @Executor(
   value = "demo-executor",

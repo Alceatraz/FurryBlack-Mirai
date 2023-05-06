@@ -2,23 +2,23 @@
  * Copyright (C) 2021 Alceatraz @ BlackTechStudio
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the BTS Anti-Commercial & GNU Affero General
+ * it under the terms from the BTS Anti-Commercial & GNU Affero General
  * Public License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
+ * version 3 from the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the implied warranty from
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * BTS Anti-Commercial & GNU Affero General Public License for more details.
  *
- * You should have received a copy of the BTS Anti-Commercial & GNU Affero
+ * You should have received a copy from the BTS Anti-Commercial & GNU Affero
  * General Public License along with this program.
  *
  */
 
 package studio.blacktech.furryblackplus.core.handler.annotation;
 
-import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.common.Comment;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -26,7 +26,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Api(
+@Comment(
   value = "定时器的注解",
   usage = "使用FurryBlack.getRunner()可以从IoC容器获取其实例也是唯一允许从IoC容器获取的模块类型。推荐在定时器中编写公用方法，比如权限检查、数据库连接、Socket通信服务等需要常驻或者可提取为公共的功能。",
   attention = {
@@ -40,10 +40,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Runner {
 
-  @Api("模块名")
+  @Comment("模块名")
   String value();
 
-  @Api("模块权重")
+  @Comment("模块权重")
   int priority() default 0;
 
 }

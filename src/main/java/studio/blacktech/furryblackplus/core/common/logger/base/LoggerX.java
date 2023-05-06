@@ -2,16 +2,16 @@
  * Copyright (C) 2021 Alceatraz @ BlackTechStudio
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the BTS Anti-Commercial & GNU Affero General
+ * it under the terms from the BTS Anti-Commercial & GNU Affero General
  * Public License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
+ * version 3 from the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the implied warranty from
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * BTS Anti-Commercial & GNU Affero General Public License for more details.
  *
- * You should have received a copy of the BTS Anti-Commercial & GNU Affero
+ * You should have received a copy from the BTS Anti-Commercial & GNU Affero
  * General Public License along with this program.
  *
  */
@@ -19,27 +19,36 @@
 package studio.blacktech.furryblackplus.core.common.logger.base;
 
 import net.mamoe.mirai.utils.MiraiLogger;
-import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.common.Comment;
 import studio.blacktech.furryblackplus.core.common.logger.LoggerXFactory;
+import studio.blacktech.furryblackplus.core.common.logger.support.NullLogger;
+import studio.blacktech.furryblackplus.core.common.logger.support.PrintLogger;
 import studio.blacktech.furryblackplus.core.common.logger.support.WriteLogger;
 
+import java.io.File;
 import java.util.HashMap;
 
 @SuppressWarnings("unused")
 
-@Api(
+@Comment(
   value = "基础日志工具类 请使用工厂方法创建实例",
   relativeClass = {
     LoggerXFactory.class,
+    NullLogger.class,
+    PrintLogger.class,
     WriteLogger.class,
-    WriteLogger.class
   }
 )
 public abstract class LoggerX implements MiraiLogger {
 
   private static Level level = Level.EVERYTHING;
 
+  public static void initLoggerFile(File file) {
+    throw new UnsupportedOperationException("LoggerX后端必须重写此方法");
+  }
+
   //= ==================================================================================================================
+  //= 内部实现
 
   protected final String name;
 
@@ -52,7 +61,9 @@ public abstract class LoggerX implements MiraiLogger {
   }
 
   //= ==================================================================================================================
-  // 提供包装
+  //= 提供包装
+
+  //= ==========================================================================
 
   public final void bypass(String message) {
     bypassImpl(message);
@@ -66,7 +77,7 @@ public abstract class LoggerX implements MiraiLogger {
     bypassImpl(message, throwable);
   }
 
-  //
+  //= ==========================================================================
 
   public final void fatal(String message) {
     if (Level.FATAL.shouldPrint(level)) fatalImpl(message);
@@ -80,7 +91,7 @@ public abstract class LoggerX implements MiraiLogger {
     if (Level.FATAL.shouldPrint(level)) fatalImpl(message, throwable);
   }
 
-  //
+  //= ==========================================================================
 
   @Override
   public void error(String message) {
@@ -97,7 +108,7 @@ public abstract class LoggerX implements MiraiLogger {
     if (Level.ERROR.shouldPrint(level)) errorImpl(message, throwable);
   }
 
-  //
+  //= ==========================================================================
 
   public final void warning(String message) {
     if (Level.WARN.shouldPrint(level)) warnImpl(message);
@@ -111,7 +122,7 @@ public abstract class LoggerX implements MiraiLogger {
     if (Level.WARN.shouldPrint(level)) warnImpl(message, throwable);
   }
 
-  //
+  //= ==========================================================================
 
   public final void hint(String message) {
     if (Level.HINT.shouldPrint(level)) hintImpl(message);
@@ -125,7 +136,7 @@ public abstract class LoggerX implements MiraiLogger {
     if (Level.ERROR.shouldPrint(level)) hintImpl(message, throwable);
   }
 
-  //
+  //= ==========================================================================
 
   public final void seek(String message) {
     if (Level.ERROR.shouldPrint(level)) seekImpl(message);
@@ -139,7 +150,7 @@ public abstract class LoggerX implements MiraiLogger {
     if (Level.ERROR.shouldPrint(level)) seekImpl(message, throwable);
   }
 
-  //
+  //= ==========================================================================
 
   public final void info(String message) {
     if (Level.ERROR.shouldPrint(level)) infoImpl(message);
@@ -153,7 +164,7 @@ public abstract class LoggerX implements MiraiLogger {
     if (Level.ERROR.shouldPrint(level)) infoImpl(message, throwable);
   }
 
-  //
+  //= ==========================================================================
 
   public final void debug(String message) {
     if (Level.DEBUG.shouldPrint(level)) debugImpl(message);
@@ -167,7 +178,7 @@ public abstract class LoggerX implements MiraiLogger {
     if (Level.DEBUG.shouldPrint(level)) debugImpl(message, throwable);
   }
 
-  //
+  //= ==========================================================================
 
   public final void develop(String message) {
     if (Level.DEVELOP.shouldPrint(level)) developImpl(message);
@@ -181,7 +192,7 @@ public abstract class LoggerX implements MiraiLogger {
     if (Level.DEVELOP.shouldPrint(level)) developImpl(message, throwable);
   }
 
-  //
+  //= ==========================================================================
 
   public final void verbose(String message) {
     if (Level.VERBOSE.shouldPrint(level)) verboseImpl(message);
@@ -265,6 +276,9 @@ public abstract class LoggerX implements MiraiLogger {
   }
 
   public static void setLevel(Level level) {
+    if (level == null) {
+      throw new IllegalArgumentException("Can't set logging level to null !");
+    }
     LoggerX.level = level;
   }
 
@@ -295,29 +309,29 @@ public abstract class LoggerX implements MiraiLogger {
 
     ;
 
-    private final int level;
-    private final String name;
-
     private static final HashMap<String, Level> LOOKUP;
 
     static {
       LOOKUP = new HashMap<>();
-      LOOKUP.put("MUTE", Level.MUTE);
-      LOOKUP.put("FATAL", Level.FATAL);
-      LOOKUP.put("ERROR", Level.ERROR);
-      LOOKUP.put("WARN", Level.WARN);
-      LOOKUP.put("HINT", Level.HINT);
-      LOOKUP.put("SEEK", Level.SEEK);
-      LOOKUP.put("INFO", Level.INFO);
-      LOOKUP.put("DEBUG", Level.DEBUG);
-      LOOKUP.put("VERBOSE", Level.VERBOSE);
-      LOOKUP.put("DEVELOP", Level.DEVELOP);
-      LOOKUP.put("EVERYTHING", Level.EVERYTHING);
+      LOOKUP.put("mute", Level.MUTE);
+      LOOKUP.put("fatal", Level.FATAL);
+      LOOKUP.put("error", Level.ERROR);
+      LOOKUP.put("warn", Level.WARN);
+      LOOKUP.put("hint", Level.HINT);
+      LOOKUP.put("seek", Level.SEEK);
+      LOOKUP.put("info", Level.INFO);
+      LOOKUP.put("debug", Level.DEBUG);
+      LOOKUP.put("verbose", Level.VERBOSE);
+      LOOKUP.put("develop", Level.DEVELOP);
+      LOOKUP.put("everything", Level.EVERYTHING);
     }
 
     public static Level getByName(String name) {
-      return LOOKUP.get(name);
+      return LOOKUP.get(name.toLowerCase());
     }
+
+    private final int level;
+    private final String name;
 
     Level(int level, String name) {
       this.level = level;

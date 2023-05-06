@@ -13,13 +13,27 @@
  * General Public License along with this program in README or LICENSE.
  */
 
-package studio.blacktech.furryblackplus.core.handler;
+package studio.blacktech.furryblackplus.core.exception.system;
 
 import studio.blacktech.furryblackplus.common.Comment;
-import studio.blacktech.furryblackplus.core.handler.annotation.Runner;
-import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
+import studio.blacktech.furryblackplus.core.exception.CoreException;
 
-@Comment(value = "定时器父类", relativeClass = Runner.class)
-public abstract class EventHandlerRunner extends AbstractEventHandler {
+@Comment("控制台发生的异常")
+public class TerminalException extends CoreException {
 
+  public TerminalException() {
+
+  }
+
+  public TerminalException(String message) {
+    super(message);
+  }
+
+  public TerminalException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public TerminalException(Throwable cause) {
+    super(cause);
+  }
 }

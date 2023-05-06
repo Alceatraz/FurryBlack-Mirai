@@ -153,6 +153,15 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryB
 
 ## CHANGELOG
 
+### 3.0.0
+
+新内核从工程角度是退化，但是尽量单类全局使用private结合JDK17后的强制封装极大的提升了安全性。
+
+- 更新 Mirai 2.15.0-M1
+- 重写内核
+- 重写参数系统
+- 重写配置系统
+
 ### 2.2.0
 
 - 整理代码

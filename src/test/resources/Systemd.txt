@@ -2,18 +2,16 @@
  * Copyright (C) 2021 Alceatraz @ BlackTechStudio
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the BTS Anti-Commercial & GNU Affero General.
+ * it under the terms from the BTS Anti-Commercial & GNU Affero General.
 
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the implied warranty from
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * BTS Anti-Commercial & GNU Affero General Public License for more details.
  *
- * You should have received a copy of the BTS Anti-Commercial & GNU Affero
+ * You should have received a copy from the BTS Anti-Commercial & GNU Affero
  * General Public License along with this program in README or LICENSE.
  */
-
-package studio.blacktech.furryblackplus.core;
 
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactory;
@@ -37,12 +35,12 @@ import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.utils.BotConfiguration;
 import net.mamoe.mirai.utils.DeviceInfo;
-import studio.blacktech.furryblack.core.enhance.MessageDigest;
+import studio.blacktech.furryblack.core.enhance.DigestTool;
 import studio.blacktech.furryblackplus.FurryBlack;
-import studio.blacktech.furryblackplus.common.Api;
-import studio.blacktech.furryblackplus.core.common.exception.moduels.boot.BootException;
-import studio.blacktech.furryblackplus.core.common.exception.moduels.load.FirstBootException;
-import studio.blacktech.furryblackplus.core.common.exception.moduels.load.MisConfigException;
+import studio.blacktech.furryblackplus.common.Comment;
+import studio.blacktech.furryblackplus.core.common.exception.system.BootException;
+import studio.blacktech.furryblackplus.core.common.exception.system.FirstBootException;
+import studio.blacktech.furryblackplus.core.common.exception.system.InvalidConfigException;
 import studio.blacktech.furryblackplus.core.common.logger.LoggerXFactory;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerChecker;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerExecutor;
@@ -74,6 +72,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
@@ -85,7 +84,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
-@Api("系统核心路由")
+import static java.lang.Long.parseLong;
+import static studio.blacktech.furryblackplus.core.common.enhance.JavaEnhance.Data.parseInt;
+import static studio.blacktech.furryblackplus.core.common.enhance.JavaEnhance.Data.parseIntOrNull;
+import static studio.blacktech.furryblackplus.core.common.enhance.JavaEnhance.Data.parseLongOrNull;
+
+@Comment("系统核心路由")
 public final class Systemd extends BasicModuleUtilities {
 
   //= ==================================================================================================================
@@ -112,8 +116,7 @@ public final class Systemd extends BasicModuleUtilities {
 
   // @formatter:off
 
-
-    private static final String DEFAULT_CONFIG =
+  private static final String DEFAULT_CONFIG =
 
     "# =====================================\n" +
     "# 账号设置\n" +
@@ -126,11 +129,11 @@ public final class Systemd extends BasicModuleUtilities {
     "# 功能设置\n" +
     "# =====================================\n" +
     "# 监听器线程池\n" +
-    CONF_THREADS_MONITOR+ "=4\n"+
+    CONF_THREADS_MONITOR + "=4\n" +
     "# 异步任务线程池\n" +
-    CONF_THREADS_SCHEDULE+ "=4\n"+
+    CONF_THREADS_SCHEDULE + "=4\n" +
     "# 命令识别前缀\n" +
-    CONF_BOT_COMMAND_PREFIX + "=\"/\"\n" +
+    CONF_BOT_COMMAND_PREFIX + "=/\n" +
     "# =====================================\n" +
     "# 设备设置\n" +
     "# =====================================\n" +
@@ -146,13 +149,9 @@ public final class Systemd extends BasicModuleUtilities {
     "# 心跳超时\n" +
     CONF_NET_HEARTBEAT_TIMEOUT + "=5000\n" +
     "# 重连次数\n" +
-    CONF_NET_RECONNECT_RETRY + "=10\n"
+    CONF_NET_RECONNECT_RETRY + "=10\n";
 
-
-    ;
-
-
-    // @formatter:on
+  // @formatter:on
 
   //= ==================================================================================================================
   //
@@ -319,12 +318,12 @@ public final class Systemd extends BasicModuleUtilities {
     MESSAGE_INFO = MESSAGE_INFO.replaceAll("\\$\\{VERSION}", FurryBlack.APP_VERSION);
     MESSAGE_HELP = MESSAGE_HELP.replaceAll("\\$\\{VERSION}", FurryBlack.APP_VERSION);
 
-    String SHA256_EULA = MessageDigest.sha256(MESSAGE_EULA);
-    String SHA256_INFO = MessageDigest.sha256(MESSAGE_INFO);
-    String SHA384_EULA = MessageDigest.sha384(MESSAGE_EULA);
-    String SHA384_INFO = MessageDigest.sha384(MESSAGE_INFO);
-    String SHA512_EULA = MessageDigest.sha512(MESSAGE_EULA);
-    String SHA512_INFO = MessageDigest.sha512(MESSAGE_INFO);
+    String SHA256_EULA = DigestTool.sha256(MESSAGE_EULA);
+    String SHA256_INFO = DigestTool.sha256(MESSAGE_INFO);
+    String SHA384_EULA = DigestTool.sha384(MESSAGE_EULA);
+    String SHA384_INFO = DigestTool.sha384(MESSAGE_INFO);
+    String SHA512_EULA = DigestTool.sha512(MESSAGE_EULA);
+    String SHA512_INFO = DigestTool.sha512(MESSAGE_INFO);
 
     MESSAGE_EULA = MESSAGE_EULA + "\r\nSHA-256: " + SHA256_EULA + "\r\nSHA-384: " + SHA384_EULA + "\r\nSHA-256: " + SHA512_EULA;
     MESSAGE_INFO = MESSAGE_INFO + "\r\nSHA-256: " + SHA256_INFO + "\r\nSHA-384: " + SHA384_INFO + "\r\nSHA-256: " + SHA512_INFO;
@@ -425,19 +424,19 @@ public final class Systemd extends BasicModuleUtilities {
     if (!deviceInfoFile.exists()) {
       String temp = "设备信息配置错误 指定的文件不存在 请使用Aoki生成 " + deviceInfoFile.getAbsolutePath();
       logger.error(temp);
-      throw new MisConfigException(temp);
+      throw new InvalidConfigException(temp);
     }
 
     if (!deviceInfoFile.isFile()) {
       String temp = "设备信息配置错误 指定的路径不是文件 " + deviceInfoFile.getAbsolutePath();
       logger.error(temp);
-      throw new MisConfigException(temp);
+      throw new InvalidConfigException(temp);
     }
 
     if (!deviceInfoFile.canRead()) {
       String temp = "设备信息配置错误 指定的文件无权读取 " + deviceInfoFile.getAbsolutePath();
       logger.error(temp);
-      throw new MisConfigException(temp);
+      throw new InvalidConfigException(temp);
     }
 
     logger.seek("设备信息文件 " + deviceInfoFile.getAbsolutePath());
@@ -465,7 +464,7 @@ public final class Systemd extends BasicModuleUtilities {
 
     // 重连参数
 
-    Integer NET_RECONNECT_RETRY = parseIntegerOrNull(config.getProperty(CONF_NET_RECONNECT_RETRY));
+    Integer NET_RECONNECT_RETRY = parseIntOrNull(config.getProperty(CONF_NET_RECONNECT_RETRY));
     if (NET_RECONNECT_RETRY != null) {
       logger.seek("重连次数 " + NET_RECONNECT_RETRY);
       configuration.setReconnectionRetryTimes(NET_RECONNECT_RETRY);
@@ -632,17 +631,19 @@ public final class Systemd extends BasicModuleUtilities {
     //= ==================================================================================================================
     // 启动线程池
 
-    int monitorPoolSize = parseInteger(config.getProperty(CONF_THREADS_SCHEDULE));
+    int monitorPoolSize = parseInt(config.getProperty(CONF_THREADS_SCHEDULE), FurryBlack.CPU_CORES);
     logger.seek("监听线程池配置 " + monitorPoolSize);
 
     MONITOR_PROCESS = new ThreadPoolExecutor(monitorPoolSize, monitorPoolSize, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
     //
 
-    int schedulePoolSize = parseInteger(config.getProperty(CONF_THREADS_SCHEDULE));
+    int schedulePoolSize = parseInt(config.getProperty(CONF_THREADS_SCHEDULE), FurryBlack.CPU_CORES);
     logger.seek("异步线程池配置 " + schedulePoolSize);
 
-    EXECUTOR_SERVICE = new ScheduledThreadPoolExecutor(schedulePoolSize);
+    EXECUTOR_SERVICE = new ScheduledThreadPoolExecutor(schedulePoolSize, Executors.defaultThreadFactory(), (runnable, executor) -> {
+      throw new RuntimeException("添加计划任务到线程池失败  " + runnable.toString() + " -> " + executor.toString());
+    });
 
     //= ==================================================================================================================
     // 启动模块
@@ -957,25 +958,6 @@ public final class Systemd extends BasicModuleUtilities {
   //
   //= ==================================================================================================================
 
-  public void await() {
-    lock.lock();
-    try {
-      condition.await();
-    } catch (InterruptedException exception) {
-      exception.printStackTrace();
-    } finally {
-      lock.unlock();
-    }
-  }
-
-  public void signal() {
-    lock.lock();
-    try {
-      condition.signal();
-    } finally {
-      lock.unlock();
-    }
-  }
 
   private boolean isCommand(String content) {
     if (content.length() < 3) return false;
@@ -1094,7 +1076,7 @@ public final class Systemd extends BasicModuleUtilities {
   }
 
   public Map<Executor, Boolean> listAllExecutor() {
-    return schema.listAllExecutor();
+    return schema.listExecutor();
   }
 
   public void shutModule(String name) {
@@ -1224,12 +1206,12 @@ public final class Systemd extends BasicModuleUtilities {
       String group = line.substring(0, indexOfDot);
       String user = line.substring(indexOfDot + 1, indexOfColon);
       String nickname = line.substring(indexOfColon + 1);
-      long userId = Long.parseLong(user);
+      long userId = parseLong(user);
       if ("*".equals(group)) {
         NICKNAME_GLOBAL.put(userId, nickname);
         logger.seek("全局 " + userId + " -> " + nickname);
       } else {
-        long groupId = Long.parseLong(group);
+        long groupId = parseLong(group);
         Map<Long, String> groupNicks = NICKNAME_GROUPS.computeIfAbsent(groupId, k -> new ConcurrentHashMap<>());
         groupNicks.put(userId, nickname);
         logger.seek("群内 " + groupId + "." + userId + " -> " + nickname);

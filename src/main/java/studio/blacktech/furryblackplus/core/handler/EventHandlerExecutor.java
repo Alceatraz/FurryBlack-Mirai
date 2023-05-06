@@ -2,14 +2,14 @@
  * Copyright (C) 2021 Alceatraz @ BlackTechStudio
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the BTS Anti-Commercial & GNU Affero General.
+ * it under the terms from the BTS Anti-Commercial & GNU Affero General.
 
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the implied warranty from
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * BTS Anti-Commercial & GNU Affero General Public License for more details.
  *
- * You should have received a copy of the BTS Anti-Commercial & GNU Affero
+ * You should have received a copy from the BTS Anti-Commercial & GNU Affero
  * General Public License along with this program in README or LICENSE.
  */
 
@@ -17,12 +17,12 @@ package studio.blacktech.furryblackplus.core.handler;
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
-import studio.blacktech.furryblackplus.common.Api;
+import studio.blacktech.furryblackplus.common.Comment;
 import studio.blacktech.furryblackplus.core.handler.annotation.Executor;
 import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 import studio.blacktech.furryblackplus.core.handler.common.Command;
 
-@Api(value = "执行器父类", relativeClass = Executor.class)
+@Comment(value = "执行器父类", relativeClass = Executor.class)
 public abstract class EventHandlerExecutor extends AbstractEventHandler {
 
   private String help;
@@ -54,10 +54,10 @@ public abstract class EventHandlerExecutor extends AbstractEventHandler {
     this.help = builder.substring(0, builder.length() - 2);
   }
 
-  @Api("生命周期 处理私聊命令")
+  @Comment("生命周期 处理私聊命令")
   protected abstract void handleUsersMessage(UserMessageEvent event, Command command);
 
-  @Api("生命周期 处理群聊命令")
+  @Comment("生命周期 处理群聊命令")
   protected abstract void handleGroupMessage(GroupMessageEvent event, Command command);
 
   public void handleUsersMessageWrapper(UserMessageEvent event, Command command) {
