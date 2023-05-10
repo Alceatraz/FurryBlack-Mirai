@@ -2254,7 +2254,7 @@ public class FurryBlack {
   //= 命令体
   //= ================================================================================================================
 
-  public static class ConsoleCommand {
+  private static class ConsoleCommand {
 
     private final String[] args;
 
@@ -2349,7 +2349,7 @@ public class FurryBlack {
     }
   }
 
-  public static class ConsoleSubCommand {
+  private static class ConsoleSubCommand {
 
     private final String[] args;
 
@@ -2389,7 +2389,7 @@ public class FurryBlack {
   //= 调度器
   //= ================================================================================================================
 
-  public static class Dispatcher {
+  private static class Dispatcher {
 
     private final Tree tree = new Tree(null, 0);
 
@@ -2455,7 +2455,7 @@ public class FurryBlack {
   //= 存储体
   //= ================================================================================================================
 
-  public static class Tree {
+  private static class Tree {
 
     private final Tree parent;
     private final int depth;
@@ -2571,7 +2571,7 @@ public class FurryBlack {
   //= ==================================================================================================================
   //= 插件系统
 
-  public static final class Schema {
+  private static final class Schema {
 
     private final LoggerX logger = LoggerXFactory.newLogger(Schema.class);
 

@@ -79,7 +79,7 @@ public abstract class AbstractEventHandler {
   public final void internalInit(String pluginName, String moduleName, URLClassLoader exclusiveClassLoader) {
     StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
     StackTraceElement schemaClazz = stackTrace[2];
-    if (!"studio.blacktech.furryblackplus.core.system.Schema".equals(schemaClazz.getClassName())) {
+    if (internalInitLock) {
       CoreException coreException = new CoreException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
       coreException.setStackTrace(stackTrace);
       throw coreException;
@@ -89,7 +89,7 @@ public abstract class AbstractEventHandler {
       coreException.setStackTrace(stackTrace);
       throw coreException;
     }
-    if (internalInitLock) {
+    if (!"studio.blacktech.furryblackplus.FurryBlack$Schema".equals(schemaClazz.getClassName())) {
       CoreException coreException = new CoreException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
       coreException.setStackTrace(stackTrace);
       throw coreException;
