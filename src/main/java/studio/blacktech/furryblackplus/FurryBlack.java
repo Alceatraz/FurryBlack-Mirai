@@ -1839,6 +1839,10 @@ public class FurryBlack {
 
     //= ========================================================================
 
+    terminal.updateCompleter();
+
+    //= ========================================================================
+
     Thread consoleThread = new Thread(() -> {
       while (true) {
         String readLine = terminal.readLine();
@@ -1858,8 +1862,6 @@ public class FurryBlack {
     consoleThread.setName("furryblack-terminal");
     consoleThread.setDaemon(true);
     consoleThread.start();
-
-    terminal.updateCompleter();
 
     //= ================================================================================================================
     //= 系统启动成功
@@ -2192,9 +2194,7 @@ public class FurryBlack {
 
       private Completer completer;
 
-      private CompleterDelegate() {
-        completer = buildCompleter();
-      }
+      private CompleterDelegate() {}
 
       @Override
       public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
