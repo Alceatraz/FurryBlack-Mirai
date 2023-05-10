@@ -1384,7 +1384,6 @@ public class FurryBlack {
 
     dispather.registerFunction()
       .command("system", "status")
-      .command("system")
       .command("status")
       .command("gc")
       .function(it -> {
@@ -1425,8 +1424,6 @@ public class FurryBlack {
 
     dispather.registerFunction()
       .command("system", "dump")
-      .command("stack")
-      .command("dump")
       .function(it -> {
 
         Map<Thread, StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
@@ -1464,8 +1461,6 @@ public class FurryBlack {
     dispather.registerFunction()
       .command("system", "power-off")
       .command("stop")
-      .command("exit")
-      .command("quit")
       .function(it -> {
         FurryBlack.println(YELLOW + "CONSOLE invoke -> shutdown" + RESET);
         Runtime.getRuntime().exit(0);
@@ -1475,7 +1470,6 @@ public class FurryBlack {
 
     dispather.registerExclusive()
       .command("system", "debug")
-      .command("debug")
       .function(it -> {
         if (it == null) {
           FurryBlack.println("DEBUG模式 -> " + (KERNEL_DEBUG ? "已开启" : "已关闭"));
@@ -1497,8 +1491,7 @@ public class FurryBlack {
     //= ========================================================================
 
     dispather.registerFunction()
-      .command("system", "rapid-exit")
-      .command("drop")
+      .command("system", "rapid-stop")
       .function(it -> {
         SHUTDOWN_DROP = true;
         FurryBlack.println(RED + "⚠ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ⚠" + RESET);
@@ -1516,7 +1509,7 @@ public class FurryBlack {
     //= ========================================================================
 
     dispather.registerFunction()
-      .command("kill", "kill")
+      .command("kill")
       .function(command -> {
         FurryBlack.println(RED + "💀 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 💀" + RESET);
         FurryBlack.println(RED + "💀 FATAL FATAL FATAL FATAL FATAL FATAL 💀" + RESET);
@@ -1535,7 +1528,6 @@ public class FurryBlack {
 
     dispather.registerFunction()
       .command("system", "force-exit")
-      .command("kill")
       .function(command -> {
         if (SHUTDOWN_KILL) {
           FurryBlack.println(RED + "💀 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 💀" + RESET);
@@ -1566,7 +1558,6 @@ public class FurryBlack {
 
     dispather.registerExclusive()
       .command("logger", "level")
-      .command("level")
       .function(it -> {
         if (it == null) {
           FurryBlack.println("当前日志级别 -> " + LoggerX.getLevel().getName());
@@ -1603,9 +1594,7 @@ public class FurryBlack {
 
     dispather.registerFunction()
       .command("schema")
-      .function(it -> {
-        FurryBlack.println(schema.verboseStatus());
-      });
+      .function(it -> FurryBlack.println(schema.verboseStatus()));
 
     //= ========================================================================
 
@@ -2204,7 +2193,7 @@ public class FurryBlack {
       private Completer completer;
 
       private CompleterDelegate() {
-        completer = buildCompleter(null);
+        completer = buildCompleter();
       }
 
       @Override
@@ -2213,35 +2202,55 @@ public class FurryBlack {
       }
 
       private void update() {
-        if (schema != null) {
-          Set<String> moduleName = schema.listModuleName();
-          TreeCompleter.Node node = node(new StringsCompleter(moduleName));
-          completer = buildCompleter(node);
-        } else {
-          completer = buildCompleter(null);
-        }
+        completer = buildCompleter();
       }
 
-      private AggregateCompleter buildCompleter(TreeCompleter.Node node) {
-        TreeCompleter.Node temp;
-        if (node == null) {
-          temp = node("init", "boot", "shut", "reboot", "unload");
-        } else {
-          temp = node("init", "boot", "shut", "reboot", "unload", node);
-        }
+      private AggregateCompleter buildCompleter() {
+
         return new AggregateCompleter(
-          new ArgumentCompleter(new StringsCompleter("help", "kill", "drop", "stop", "gc", "stack", "enable", "disable", "schema", "color")),
-          new ArgumentCompleter(new StringsCompleter("list", "send"), new StringsCompleter("users", "group")),
-          new TreeCompleter(node("level", node("MUTE", "FATAL", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "DEVELOP", "EVERYTHING"))),
-          new TreeCompleter(node("nickname", node("list", "clean", "reload", "append", "export"))),
-          new TreeCompleter(node("debug", node("enable", "disable"))),
-          new TreeCompleter(node("plugin")),
-          new TreeCompleter(node("module", temp))
+
+          // system dump
+          // system status
+          // system power-off
+          // system rapid-stop
+          // system force-exit
+          new TreeCompleter(node("system", node("status", "dump", "power-off", "rapid-stop", "force-exit"))),
+
+          // system debug
+          // system debug enable|disable
+          new TreeCompleter(node("system", node("debug", node("enable", "disable")))),
+
+          // schema plugin
+          new TreeCompleter(node("schema", node("plugin"))),
+
+          // schema module
+          // schema module init xxx
+          // schema module boot xxx
+          // schema module shut xxx
+          // schema module reboot xxx
+          // schema module unload xxx
+          new TreeCompleter(node("schema", node("module", node("init", "boot", "shut", "reboot", "unload", node(new StringsCompleter(schema.listModuleName())))))),
+
+          // nickname list
+          // nickname clean
+          // nickname append
+          // nickname reload
+          // nickname export
+          new TreeCompleter(node("nickname", node("list", "clean", "append", "reload", "export"))),
+
+          // logger level xxx
+          new TreeCompleter(node("logger", node("level", node("MUTE", "FATAL", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "DEVELOP", "EVERYTHING")))),
+
+          // ?
+          // help
+          // info
+          // gc
+          // status
+          // stop
+          new ArgumentCompleter(new StringsCompleter("?", "help", "info", "status", "gc", "stop"))
         );
       }
-
     }
-
   }
 
   //= ==================================================================================================================
@@ -2349,16 +2358,14 @@ public class FurryBlack {
     }
   }
 
-  private static class ConsoleSubCommand {
+  private record ConsoleSubCommand(String[] args) {
 
-    private final String[] args;
-
-    private ConsoleSubCommand(String[] args) {
-      this.args = args;
+    public String getOrNull(int i) {
+      return i < args.length ? args[i] : null;
     }
 
-    public int length() {
-      return args.length;
+    public String getOrEmpty(int i) {
+      return i < args.length ? args[i] : "";
     }
 
     @Override
@@ -2374,14 +2381,6 @@ public class FurryBlack {
       }
       builder.setLength(builder.length() - 1);
       return builder.toString();
-    }
-
-    public String getOrNull(int i) {
-      return i < args.length ? args[i] : null;
-    }
-
-    public String getOrEmpty(int i) {
-      return i < args.length ? args[i] : "";
     }
   }
 
@@ -2431,7 +2430,7 @@ public class FurryBlack {
     public static class RegisterExclusiveAccessor {
 
       private final Dispatcher dispatcher;
-      private final List<String[]> comamnds = new LinkedList<>();
+      private final List<String[]> commands = new LinkedList<>();
 
       private RegisterExclusiveAccessor(Dispatcher dispatcher) {
         this.dispatcher = dispatcher;
@@ -2441,12 +2440,12 @@ public class FurryBlack {
         if (dispatcher.tree.isAdopted()) {
           throw new IllegalArgumentException("Can't register this command -> " + String.join(".", command));
         }
-        comamnds.add(command);
+        commands.add(command);
         return this;
       }
 
       public void function(Consumer<ConsoleSubCommand> function) {
-        dispatcher.tree.registerExclusive(comamnds, function);
+        dispatcher.tree.registerExclusive(commands, function);
       }
     }
   }
