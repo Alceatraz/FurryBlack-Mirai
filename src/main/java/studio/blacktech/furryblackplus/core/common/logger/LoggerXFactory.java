@@ -18,7 +18,7 @@
 
 package studio.blacktech.furryblackplus.core.common.logger;
 
-import studio.blacktech.furryblackplus.common.Comment;
+import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
 import studio.blacktech.furryblackplus.core.common.logger.support.NullLogger;
 import studio.blacktech.furryblackplus.core.common.logger.support.PrintLogger;

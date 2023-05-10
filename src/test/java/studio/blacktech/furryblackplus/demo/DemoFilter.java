@@ -17,8 +17,7 @@ package studio.blacktech.furryblackplus.demo;
 
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.UserMessageEvent;
-import studio.blacktech.furryblackplus.FurryBlack;
-import studio.blacktech.furryblackplus.common.Comment;
+import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerFilter;
 import studio.blacktech.furryblackplus.core.handler.annotation.Filter;
 
@@ -32,28 +31,28 @@ public class DemoFilter extends EventHandlerFilter {
 
   @Override
   public void init() {
-    FurryBlack.println("加载" + this.getClass().getName());
+    logger.info("加载" + this.getClass().getName());
   }
 
   @Override
   public void boot() {
-    FurryBlack.println("启动" + this.getClass().getName());
+    logger.info("启动" + this.getClass().getName());
   }
 
   @Override
   public void shut() {
-    FurryBlack.println("关闭" + this.getClass().getName());
+    logger.info("关闭" + this.getClass().getName());
   }
 
   @Override
   public boolean handleUsersMessage(UserMessageEvent event) {
-    FurryBlack.println("消息" + this.getClass().getName());
+    logger.info("消息" + this.getClass().getName());
     return false;
   }
 
   @Override
   public boolean handleGroupMessage(GroupMessageEvent event) {
-    FurryBlack.println("消息" + this.getClass().getName());
+    logger.info("消息" + this.getClass().getName());
     return false;
   }
 }

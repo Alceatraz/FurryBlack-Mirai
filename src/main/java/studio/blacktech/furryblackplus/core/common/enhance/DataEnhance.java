@@ -1,7 +1,7 @@
 package studio.blacktech.furryblackplus.core.common.enhance;
 
 import org.jetbrains.annotations.Nullable;
-import studio.blacktech.furryblackplus.common.Comment;
+import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 
 import java.util.Locale;
 import java.util.function.Supplier;

@@ -15,7 +15,7 @@
 
 package studio.blacktech.furryblackplus.core.exception.moduels;
 
-import studio.blacktech.furryblackplus.common.Comment;
+import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 
 @Comment("启动过程发生的异常")
 public class InitException extends ModuleException {

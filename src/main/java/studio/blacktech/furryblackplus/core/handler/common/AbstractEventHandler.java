@@ -18,10 +18,10 @@
 
 package studio.blacktech.furryblackplus.core.handler.common;
 
-import studio.blacktech.furryblack.core.enhance.TimeTool;
 import studio.blacktech.furryblackplus.FurryBlack;
-import studio.blacktech.furryblackplus.common.Comment;
+import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 import studio.blacktech.furryblackplus.core.common.enhance.FileEnhance;
+import studio.blacktech.furryblackplus.core.common.enhance.TimeEnhance;
 import studio.blacktech.furryblackplus.core.common.logger.LoggerXFactory;
 import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
 import studio.blacktech.furryblackplus.core.exception.CoreException;
@@ -79,7 +79,7 @@ public abstract class AbstractEventHandler {
   public final void internalInit(String pluginName, String moduleName, URLClassLoader exclusiveClassLoader) {
     StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
     StackTraceElement schemaClazz = stackTrace[2];
-    if (!"studio.blacktech.furryblackplus.core.schema.Schema".equals(schemaClazz.getClassName())) {
+    if (!"studio.blacktech.furryblackplus.core.system.Schema".equals(schemaClazz.getClassName())) {
       CoreException coreException = new CoreException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
       coreException.setStackTrace(stackTrace);
       throw coreException;
@@ -254,7 +254,7 @@ public abstract class AbstractEventHandler {
     return FileEnhance.ensureFolder(FOLDER_LOGS, name);
   }
 
-//= ==========================================================================
+  //= ==========================================================================
 
   @Comment("读取文件")
   protected final String read(Path path) {
@@ -436,7 +436,7 @@ public abstract class AbstractEventHandler {
       OutputStream stream = Files.newOutputStream(FILE_CONFIG);
       Writer writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8)
     ) {
-      CONFIG.store(writer, "Saved by FurryBlack at " + TimeTool.datetime());
+      CONFIG.store(writer, "Saved by FurryBlack at " + TimeEnhance.datetime());
     } catch (IOException exception) {
       throw new RuntimeException("保存配置错误", exception);
     }

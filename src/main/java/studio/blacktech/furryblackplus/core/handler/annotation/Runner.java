@@ -18,7 +18,7 @@
 
 package studio.blacktech.furryblackplus.core.handler.annotation;
 
-import studio.blacktech.furryblackplus.common.Comment;
+import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

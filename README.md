@@ -41,6 +41,16 @@ Commercial GNU AFFERO GENERAL PUBLIC LICENSE, Using another LICENSE equivalent
 as commercial usage. You is banned if you do it.
 ```
 
+## 如何运行
+
+```shell
+java -cp "binary/*.jar" 'studio.blacktech.furryblackplus.core.Bootstrap'
+```
+
+- 框架于代码中强制使用UTF-8,建议 `-Dfile.encoding=UTF-8`
+- 按需添加 `-Dmirai.no-desktop=true`
+- `FurryBlack`是API主类而非启动类
+
 ## 如何开发
 
 ### 基本概念
@@ -155,12 +165,11 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryB
 
 ### 3.0.0
 
-新内核从工程角度是退化，但是尽量单类全局使用private结合JDK17后的强制封装极大的提升了安全性。
-
 - 更新 Mirai 2.15.0-M1
 - 重写内核
 - 重写参数系统
 - 重写配置系统
+- 移动主类
 
 ### 2.2.0
 

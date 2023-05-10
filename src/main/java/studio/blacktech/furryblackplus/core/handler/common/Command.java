@@ -18,7 +18,7 @@
 
 package studio.blacktech.furryblackplus.core.handler.common;
 
-import studio.blacktech.furryblackplus.common.Comment;
+import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -38,6 +38,10 @@ public final class Command {
 
   @Comment("命令模型解析后 选项和开关") private final Map<String, String> commandOptions = new LinkedHashMap<>();
 
+  public static Command parse(String message) {
+    return new Command(message);
+  }
+
   @Comment(
     value = "解析命令",
     usage = {
@@ -55,20 +59,20 @@ public final class Command {
     int indexOfFirstSpace = message.indexOf(' ');
 
     if (indexOfFirstSpace < 0) {
-      this.commandName = message;
-      this.commandBody = null;
-      this.commandBodyLength = 0;
-      this.commandParameters = null;
-      this.commandParameterLength = 0;
+      commandName = message;
+      commandBody = null;
+      commandBodyLength = 0;
+      commandParameters = null;
+      commandParameterLength = 0;
       return;
     }
 
     // 命令名按照第一个空格拆分
 
-    this.commandName = message.substring(0, indexOfFirstSpace);
-    this.commandBody = message.substring(indexOfFirstSpace + 1);
+    commandName = message.substring(0, indexOfFirstSpace);
+    commandBody = message.substring(indexOfFirstSpace + 1);
 
-    this.commandBodyLength = this.commandBody.length();
+    commandBodyLength = commandBody.length();
 
     // 命令体按照转义规则拆分
 
@@ -78,9 +82,9 @@ public final class Command {
     StringBuilder builder = new StringBuilder();
     List<String> commandBodySlice = new LinkedList<>();
 
-    for (int pointer = 0; pointer < this.commandBodyLength; pointer++) {
+    for (int pointer = 0; pointer < commandBodyLength; pointer++) {
 
-      char chat = this.commandBody.charAt(pointer);
+      char chat = commandBody.charAt(pointer);
 
       switch (chat) {
         case '\\' -> {
@@ -129,17 +133,17 @@ public final class Command {
         slice = slice.substring(2);
         int indexOfEquals = slice.indexOf("=");
         if (indexOfEquals > 0) {
-          this.commandOptions.put(slice.substring(0, indexOfEquals), slice.substring(indexOfEquals + 1)); // --XXX=XXX 选项
+          commandOptions.put(slice.substring(0, indexOfEquals), slice.substring(indexOfEquals + 1)); // --XXX=XXX 选项
         } else {
-          this.commandOptions.put(slice, null); // --XXX 开关
+          commandOptions.put(slice, null); // --XXX 开关
         }
       } else {
         commandParameterList.add(slice); // 提取所有其他内容为参数列表
       }
     }
 
-    this.commandParameters = commandParameterList.toArray(new String[0]);
-    this.commandParameterLength = this.commandParameters.length;
+    commandParameters = commandParameterList.toArray(new String[0]);
+    commandParameterLength = commandParameters.length;
   }
 
   //= ==================================================================================================================
@@ -149,79 +153,79 @@ public final class Command {
     attention = "index从参数开始数,0代表第一个参数而非命令名,此处所说的index与命令解析时的index序号不同"
   )
   public String join(int index) {
-    if (this.commandParameterLength == 0 || index > this.commandParameterLength) {
+    if (commandParameterLength == 0 || index > commandParameterLength) {
       return null;
     }
     StringBuilder builder = new StringBuilder();
-    for (int i = index; i < this.commandParameterLength; i++) {
-      builder.append(this.commandParameters[index]).append(" ");
+    for (int i = index; i < commandParameterLength; i++) {
+      builder.append(commandParameters[index]).append(" ");
     }
     return builder.toString();
   }
 
   @Comment("获取命令名")
   public String getCommandName() {
-    return this.commandName;
+    return commandName;
   }
 
   @Comment("获取命令体")
   public String getCommandBody() {
-    return this.commandBody;
+    return commandBody;
   }
 
   @Comment("获取命令体 - 最大字符限制")
   public String getCommandBody(int length) {
-    if (length > this.commandBodyLength) {
-      return this.commandBody;
+    if (length > commandBodyLength) {
+      return commandBody;
     } else {
-      return this.commandBody.substring(0, length);
+      return commandBody.substring(0, length);
     }
   }
 
   @Comment("获取参数长度")
   public int getCommandBodyLength() {
-    return this.commandBodyLength;
+    return commandBodyLength;
   }
 
   @Comment("是否有命令体")
   public boolean hasCommandBody() {
-    return this.commandParameterLength > 0;
+    return commandParameterLength > 0;
   }
 
   @Comment("获取参数个数")
   public int getParameterLength() {
-    return this.commandParameterLength;
+    return commandParameterLength;
   }
 
   @Comment("获取所有参数")
   public String[] getParameterSegment() {
-    return this.commandParameters;
+    return commandParameters;
   }
 
   @Comment("获取指定位置的参数")
   public String getParameterSegment(int i) {
-    return this.commandParameters[i];
+    return commandParameters[i];
   }
 
   @Comment("是否包含选项")
   public boolean hasSwitch(String name) {
-    return this.commandOptions.containsKey(name);
+    return commandOptions.containsKey(name);
   }
 
   @Comment("获取指定选项")
   public String getSwitch(String name) {
-    return this.commandOptions.get(name);
+    return commandOptions.get(name);
   }
 
   @Override
   public String toString() {
     return "Command{" +
-      "commandName='" + this.commandName + '\'' +
-      ", commandBody='" + this.commandBody + '\'' +
-      ", commandBodyLength=" + this.commandBodyLength +
-      ", commandParameters=" + Arrays.toString(this.commandParameters) +
-      ", commandParameterLength=" + this.commandParameterLength +
-      ", commandOptions=" + this.commandOptions +
+      "commandName='" + commandName + '\'' +
+      ", commandBody='" + commandBody + '\'' +
+      ", commandBodyLength=" + commandBodyLength +
+      ", commandParameters=" + Arrays.toString(commandParameters) +
+      ", commandParameterLength=" + commandParameterLength +
+      ", commandOptions=" + commandOptions +
       '}';
   }
 }

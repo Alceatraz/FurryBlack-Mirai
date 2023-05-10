@@ -15,7 +15,7 @@
 
 package studio.blacktech.furryblackplus.core.handler;
 
-import studio.blacktech.furryblackplus.common.Comment;
+import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 import studio.blacktech.furryblackplus.core.handler.annotation.Runner;
 import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 

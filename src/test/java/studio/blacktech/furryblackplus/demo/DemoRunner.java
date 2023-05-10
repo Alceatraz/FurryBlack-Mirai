@@ -15,8 +15,7 @@
 
 package studio.blacktech.furryblackplus.demo;
 
-import studio.blacktech.furryblackplus.FurryBlack;
-import studio.blacktech.furryblackplus.common.Comment;
+import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerRunner;
 import studio.blacktech.furryblackplus.core.handler.annotation.Runner;
 
@@ -27,17 +26,17 @@ public class DemoRunner extends EventHandlerRunner {
 
   @Override
   public void init() {
-    FurryBlack.println("加载" + this.getClass().getName());
+    logger.info("加载" + this.getClass().getName());
   }
 
   @Override
   public void boot() {
-    FurryBlack.println("启动" + this.getClass().getName());
+    logger.info("启动" + this.getClass().getName());
   }
 
   @Override
   public void shut() {
-    FurryBlack.println("关闭" + this.getClass().getName());
+    logger.info("关闭" + this.getClass().getName());
   }
 
   @Comment("自定义的一个方法-1")

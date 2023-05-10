@@ -1,18 +1,3 @@
-/*
- * Copyright (C) 2021 Alceatraz @ BlackTechStudio
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms parse the BTS Anti-Commercial & GNU Affero General.
-
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty parse
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * BTS Anti-Commercial & GNU Affero General Public License for more details.
- *
- * You should have received a copy parse the BTS Anti-Commercial & GNU Affero
- * General Public License along with this program in README or LICENSE.
- */
-
 package studio.blacktech.furryblackplus;
 
 import kotlin.sequences.Sequence;
@@ -57,21 +42,20 @@ import org.jline.reader.Completer;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.ParsedLine;
-import org.jline.reader.UserInterruptException;
 import org.jline.reader.impl.completer.AggregateCompleter;
 import org.jline.reader.impl.completer.ArgumentCompleter;
 import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.widget.AutopairWidgets;
-import studio.blacktech.furryblack.core.enhance.DigestTool;
-import studio.blacktech.furryblack.core.enhance.TimeTool;
-import studio.blacktech.furryblackplus.common.Comment;
+import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 import studio.blacktech.furryblackplus.core.common.enhance.FileEnhance;
-import studio.blacktech.furryblackplus.core.common.enhance.LockEnhance.Latch;
-import studio.blacktech.furryblackplus.core.common.enhance.StringEnhance.LineBuilder;
+import studio.blacktech.furryblackplus.core.common.enhance.LockEnhance;
+import studio.blacktech.furryblackplus.core.common.enhance.StringEnhance;
+import studio.blacktech.furryblackplus.core.common.enhance.TimeEnhance;
 import studio.blacktech.furryblackplus.core.common.logger.LoggerXConfig;
 import studio.blacktech.furryblackplus.core.common.logger.LoggerXFactory;
 import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
 import studio.blacktech.furryblackplus.core.exception.CoreException;
+import studio.blacktech.furryblackplus.core.exception.schema.SchemaException;
 import studio.blacktech.furryblackplus.core.exception.system.FirstBootException;
 import studio.blacktech.furryblackplus.core.exception.system.InvalidConfigException;
 import studio.blacktech.furryblackplus.core.exception.system.TerminalException;
@@ -80,14 +64,14 @@ import studio.blacktech.furryblackplus.core.handler.EventHandlerExecutor;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerFilter;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerMonitor;
 import studio.blacktech.furryblackplus.core.handler.EventHandlerRunner;
+import studio.blacktech.furryblackplus.core.handler.annotation.AnnotationEnhance;
 import studio.blacktech.furryblackplus.core.handler.annotation.Checker;
 import studio.blacktech.furryblackplus.core.handler.annotation.Executor;
 import studio.blacktech.furryblackplus.core.handler.annotation.Filter;
 import studio.blacktech.furryblackplus.core.handler.annotation.Monitor;
 import studio.blacktech.furryblackplus.core.handler.annotation.Runner;
+import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 import studio.blacktech.furryblackplus.core.handler.common.Command;
-import studio.blacktech.furryblackplus.core.schema.Plugin;
-import studio.blacktech.furryblackplus.core.schema.Schema;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -98,25 +82,37 @@ import java.io.Reader;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TimeZone;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -125,12 +121,19 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static org.jline.builtins.Completers.TreeCompleter.node;
 import static studio.blacktech.furryblackplus.core.common.enhance.DataEnhance.parseInt;
 import static studio.blacktech.furryblackplus.core.common.enhance.DataEnhance.parseLong;
 import static studio.blacktech.furryblackplus.core.common.enhance.StringEnhance.toHumanBytes;
+import static studio.blacktech.furryblackplus.core.common.enhance.StringEnhance.toHumanHashCode;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BLUE;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_BLACK;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_BLUE;
@@ -148,11 +151,10 @@ import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Co
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.RESET;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.WHITE;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.YELLOW;
-
-// 🔫 🧦 ❌ ✔️ ⭕ 🚧 🀄
+import static studio.blacktech.furryblackplus.core.handler.annotation.AnnotationEnhance.printAnnotation;
 
 @Comment(
-  value = "FurryBlack Plus Framework - based on Mirai",
+  value = "FurryBlack - Mirai",
   usage = {
     "电子白熊会梦到仿生老黑吗",
     "Alceatraz Warprays @ BlackTechStudio",
@@ -164,15 +166,17 @@ import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Co
     "!!!本项目并非使用纯AGPLv3协议，请认真阅读LICENSE!!!"
   }
 )
-public final class FurryBlack {
+public class FurryBlack {
 
   //= ==================================================================================================================
-  //
-  //  常量信息
-  //
+  //=
+  //= 静态数据
+  //=
   //= ==================================================================================================================
 
-  @Comment("框架版本") public static final String APP_VERSION = "3.0.0";
+  public static final String APP_VERSION = "3.0.0";
+
+  //= ==========================================================================
 
   private static final String[] ARGS_DEBUG = {"debug"};
   private static final String[] ARGS_UNSAFE = {"unsafe"};
@@ -193,49 +197,29 @@ public final class FurryBlack {
   private static final String[] CONF_THREADS_MONITOR = {"threads", "monitor"};
   private static final String[] CONF_THREADS_SCHEDULE = {"threads", "schedule"};
 
+  //= ==========================================================================
+
+  private static final DateTimeFormatter FORMATTER;
+
+  //= ==========================================================================
+
+  @Comment("QQ用换行符") public static final String CRLF = "\r\n";
+  @Comment("系统换行符") public static final String LINE;
+
+  public static final int CPU_CORES;
+  public static final long BOOT_TIME;
+
+  public static final ZoneId SYSTEM_ZONEID;
+  public static final ZoneOffset SYSTEM_OFFSET;
+
+  public static final String CONTENT_INFO;
+  public static final String CONTENT_HELP;
+  public static final String CONTENT_COLOR;
+  public static final String DEFAULT_CONFIG;
+
   //= ==================================================================================================================
-  //
-  //  静态信息
-  //
-  //= ==================================================================================================================
-
-  @Comment("换行符") public static final String CRLF = "\r\n";
-  @Comment("换行符") public static final String LINE;
-
-  @Comment("系统核心数量") public static final int CPU_CORES;
-  @Comment("系统启动时间") public static final long BOOT_TIME;
-
-  @Comment("原始系统时区") public static final ZoneId SYSTEM_ZONEID;
-  @Comment("原始系统偏差") public static final ZoneOffset SYSTEM_OFFSET;
-
-  private static final String CONTENT_INFO;
-  private static final String CONTENT_HELP;
-  private static final String CONTENT_COLOR;
-
-  private static final String DEFAULT_CONFIG;
-
-  private static final String CONSOLE_PROMPT;
 
   static {
-
-    //= ================================================================================================================
-    //= 跳过语言设置
-
-    // -D user.country=zh
-    // -D user.language=CN
-    if (System.getenv("FURRYBLACK_LOCALE_SKIP") == null) {
-      System.err.println("Env FURRYBLACK_LOCALE_SKIP not set, Setting JVM local to Locale.SIMPLIFIED_CHINESE");
-      Locale.setDefault(Locale.SIMPLIFIED_CHINESE);
-    }
-
-    //= ================================================================================================================
-    //= 跳过时间设置
-
-    // -D user.timezone=Asia/Shanghai
-    if (System.getenv("FURRYBLACK_TIMEZONE_SKIP") == null) {
-      System.err.println("Env FURRYBLACK_TIMEZONE_SKIP not set, Setting JVM timezone to Asia/Shanghai");
-      TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
-    }
 
     //= ================================================================================================================
     //= 系统信息
@@ -248,6 +232,8 @@ public final class FurryBlack {
     SYSTEM_ZONEID = ZoneId.systemDefault();
     SYSTEM_OFFSET = ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now());
 
+    FORMATTER = TimeEnhance.pattern("yyyy-MM-dd HH-mm-ss");
+
     //= ================================================================================================================
     //= 框架信息
 
@@ -255,7 +241,7 @@ public final class FurryBlack {
 
       // @formatter:off
 
-      YELLOW + "FurryBlackPlus Mirai - ver " + APP_VERSION + RESET + LINE + """
+      YELLOW + "FurryBlack Mirai - ver " + APP_VERSION + RESET + LINE + """
       A Mirai wrapper QQ-Bot framework make with love and \uD83E\uDDE6
       电子白熊会梦到仿生老黑吗
       By - Alceatraz Warprays @ BlackTechStudio
@@ -263,7 +249,7 @@ public final class FurryBlack {
       插件地址 https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
       个人主页 https://www.blacktech.studio"""
 
-     // @formatter:on
+      // @formatter:on
 
     ;
 
@@ -271,8 +257,8 @@ public final class FurryBlack {
 
       // @formatter:off
 
-      YELLOW + "FurryBlackPlus Mirai - ver " + APP_VERSION + RESET + LINE +
-      BRIGHT_CYAN + "# FurryBlackPlus 启动参数 ===========================" + RESET + LINE +
+      YELLOW + "FurryBlack Mirai - ver " + APP_VERSION + RESET + LINE +
+      BRIGHT_CYAN + "# FurryBlack 启动参数 ===========================" + RESET + LINE +
       "--debug       使用DEBUG模式启动" + LINE +
       "--unsafe      允许一些危险的调用" + LINE +
       "--no-login    使用离线模式，仅用于基础调试，功能基本都不可用" + LINE +
@@ -280,10 +266,10 @@ public final class FurryBlack {
       "--no-jline    不使用jline控制台，使用BufferedReader" + LINE +
       "--force-exit  关闭流程执行后，强制结束JVM(halt)" + LINE +
 
-      BRIGHT_CYAN + "# FurryBlackPlus 系统参数 ===========================" + RESET + LINE +
+      BRIGHT_CYAN + "# FurryBlack 系统参数 ===========================" + RESET + LINE +
       "furryblack.logger.level 日志等级" + LINE +
 
-      BRIGHT_CYAN + "# FurryBlackPlus 控制台  ===========================" + RESET + LINE +
+      BRIGHT_CYAN + "# FurryBlack 控制台  ===========================" + RESET + LINE +
       RED + "⚠ 控制台任何操作都属于底层操作可以直接对框架进行不安全和非法的操作" + RESET + LINE +
       "安全：设计如此，不会导致异常或者不可预测的结果" + LINE +
       "风险：功能设计上是安全操作，但是具体被操作对象可能导致错误" + LINE +
@@ -411,7 +397,15 @@ public final class FurryBlack {
 
     ;
 
-    CONSOLE_PROMPT = "[console]$ ";
+  }
+
+  //= ==================================================================================================================
+  //=
+  //= 实例控制
+  //=
+  //= ==================================================================================================================
+
+  private FurryBlack() {
 
   }
 
@@ -421,7 +415,7 @@ public final class FurryBlack {
   //
   //= ==================================================================================================================
 
-  private static final Latch LATCH = new Latch();
+  private static final LockEnhance.Latch LATCH = new LockEnhance.Latch();
 
   //= ==================================================================================================================
   //
@@ -433,16 +427,19 @@ public final class FurryBlack {
 
   private static volatile boolean EVENT_ENABLE;
 
+  private static volatile boolean KERNEL_DEBUG;
   private static volatile boolean SHUTDOWN_HALT;
   private static volatile boolean SHUTDOWN_DROP;
+  private static volatile boolean SHUTDOWN_KILL;
 
   private static volatile LoggerX.Level LEVEL;
 
-  private static FurryBlackKernelConfig kernelConfig;
-  private static FurryBlackSystemConfig systemConfig;
+  private static KernelConfig kernelConfig;
+  private static SystemConfig systemConfig;
 
   private static LoggerX logger;
   private static Terminal terminal;
+  private static Dispatcher dispather;
 
   private static Bot bot;
   private static Schema schema;
@@ -464,7 +461,32 @@ public final class FurryBlack {
   private static ThreadPoolExecutor MONITOR_PROCESS;
   private static ScheduledThreadPoolExecutor SCHEDULE_SERVICE;
 
-  public static void main(String[] args) throws InterruptedException {
+  //= ==================================================================================================================
+  //=
+  //= 启动入口
+  //=
+  //= ==================================================================================================================
+
+  public static void main(String[] args) {
+
+    //= ================================================================================================================
+    //= 跳过语言设置
+
+    // -D user.country=zh
+    // -D user.language=CN
+    if (System.getenv("FURRYBLACK_LOCALE_SKIP") == null) {
+      System.err.println("Env FURRYBLACK_LOCALE_SKIP not set, Setting JVM local to Locale.SIMPLIFIED_CHINESE");
+      Locale.setDefault(Locale.SIMPLIFIED_CHINESE);
+    }
+
+    //= ================================================================================================================
+    //= 跳过时间设置
+
+    // -D user.timezone=Asia/Shanghai
+    if (System.getenv("FURRYBLACK_TIMEZONE_SKIP") == null) {
+      System.err.println("Env FURRYBLACK_TIMEZONE_SKIP not set, Setting JVM timezone to Asia/Shanghai");
+      TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+    }
 
     //= ================================================================================================================
     //=
@@ -499,7 +521,8 @@ public final class FurryBlack {
       dryRun = true;
     }
 
-    if (dryRun) return;
+    if (dryRun)
+      return;
 
     //= ================================================================================================================
     //=
@@ -509,7 +532,7 @@ public final class FurryBlack {
     //=
     //= ================================================================================================================
 
-    System.out.println("[FurryBlack][BOOT]FurryBlackMirai - " + APP_VERSION + " " + TimeTool.datetime(BOOT_TIME));
+    System.out.println("[FurryBlack][BOOT]FurryBlackMirai - " + APP_VERSION + " " + TimeEnhance.datetime(BOOT_TIME));
 
     //= ================================================================================================================
     //=
@@ -517,7 +540,7 @@ public final class FurryBlack {
     //=
     //= ================================================================================================================
 
-    FurryBlackArgument argument = FurryBlackArgument.parse(args);
+    Argument argument = Argument.parse(args);
 
     //= ========================================================================
     //= 命名空间
@@ -533,15 +556,15 @@ public final class FurryBlack {
     //= ========================================================================
     //= 打印参数
 
-    System.out.println("[FurryBlack][ARGS] 选项 -> " + argument.options.size());
+    System.out.println("[FurryBlack][ARGS] 选项 -> " + argument.optionSize());
 
-    for (String it : argument.options) {
+    for (String it : argument.cloneOptions()) {
       System.out.println("[FurryBlack][ARGS]    " + it);
     }
 
-    System.out.println("[FurryBlack][ARGS] 参数 -> " + argument.parameters.size());
+    System.out.println("[FurryBlack][ARGS] 参数 -> " + argument.parameterSize());
 
-    for (Map.Entry<String, String> entry : argument.parameters.entrySet()) {
+    for (Map.Entry<String, String> entry : argument.clonePrameters().entrySet()) {
       String k = entry.getKey();
       String v = entry.getValue();
       System.out.println("[FurryBlack][ARGS]    " + k + "=" + v);
@@ -550,7 +573,7 @@ public final class FurryBlack {
     //= ========================================================================
     //= 内核参数
 
-    kernelConfig = FurryBlackKernelConfig.getInstance(argument);
+    kernelConfig = KernelConfig.getInstance(argument);
 
     if (kernelConfig.debug) {
       System.out.println("[FurryBlack][ARGS]调试开关 - 调试模式");
@@ -659,12 +682,12 @@ public final class FurryBlack {
     //= ================================================================================================================
 
     if (kernelConfig.noConsole) {
-      terminal = new NoConsoleTerminal();
+      terminal = NoConsoleTerminal.getInstance();
     } else {
       if (kernelConfig.noJline) {
-        terminal = new StdinTerminal();
+        terminal = StdinTerminal.getInstance();
       } else {
-        terminal = new JlineTerminal();
+        terminal = JlineTerminal.getInstance();
       }
     }
 
@@ -711,7 +734,7 @@ public final class FurryBlack {
 
     if (LoggerXFactory.needLoggerFile()) {
 
-      String name = TimeTool.format("yyyy-MM-dd HH-mm-ss", BOOT_TIME) + ".txt";
+      String name = FORMATTER.format(Instant.ofEpochMilli(BOOT_TIME)) + ".txt";
       Path loggerFile = FileEnhance.get(FOLDER_LOGGER, name);
       CoreException.check("日志文件初始化失败 -> ", FileEnhance.ensureFileSafe(loggerFile));
 
@@ -724,7 +747,7 @@ public final class FurryBlack {
       FurryBlack.println("[FurryBlack][INIT]日志文件 " + name);
     }
 
-    logger = LoggerXFactory.newLogger(FurryBlack.class);
+    logger = LoggerXFactory.newLogger("System");
 
     FurryBlack.println("[FurryBlack][INIT]日志系统初始化完成");
 
@@ -780,6 +803,10 @@ public final class FurryBlack {
       logger.info("内核配置/关闭策略 - 正常退出");
     }
 
+    //= ========================================================================
+    //= 赋值
+
+    KERNEL_DEBUG = kernelConfig.debug;
     SHUTDOWN_HALT = kernelConfig.forceExit;
 
     //= ================================================================================================================
@@ -829,7 +856,7 @@ public final class FurryBlack {
           logger.warning("丢弃无效配置 " + k + "=" + v);
           continue;
         }
-        argument.properties.put(k, v);
+        argument.append(k, v);
       }
 
     } else {
@@ -843,7 +870,7 @@ public final class FurryBlack {
 
     try {
 
-      systemConfig = FurryBlackSystemConfig.getInstance(argument);
+      systemConfig = SystemConfig.getInstance(argument);
 
     } catch (FirstBootException exception) {
 
@@ -878,18 +905,6 @@ public final class FurryBlack {
       MESSAGE_EULA = FileEnhance.read(FILE_EULA).replace("\\$VERSION", APP_VERSION);
       MESSAGE_INFO = FileEnhance.read(FILE_INFO).replace("\\$VERSION", APP_VERSION);
       MESSAGE_HELP = FileEnhance.read(FILE_HELP).replace("\\$VERSION", APP_VERSION);
-
-      String SHA256_EULA = DigestTool.sha256(MESSAGE_EULA);
-      String SHA256_INFO = DigestTool.sha256(MESSAGE_INFO);
-      String SHA256_HELP = DigestTool.sha256(MESSAGE_INFO);
-
-      logger.info("SHA-256 EULA -> " + SHA256_EULA);
-      logger.info("SHA-256 INFO -> " + SHA256_INFO);
-      logger.info("SHA-256 HELP -> " + SHA256_HELP);
-
-      MESSAGE_EULA = MESSAGE_EULA + "\r\nSHA-256: " + SHA256_EULA;
-      MESSAGE_INFO = MESSAGE_INFO + "\r\nSHA-256: " + SHA256_INFO;
-      MESSAGE_HELP = MESSAGE_HELP + "\r\nSHA-256: " + SHA256_HELP;
 
     }
 
@@ -999,8 +1014,170 @@ public final class FurryBlack {
 
     logger.info("订阅客户端事件");
 
-    Listener<UserMessageEvent> userMessageEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(UserMessageEvent.class, FurryBlack::handleUsersMessage);
-    Listener<GroupMessageEvent> groupMessageEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(GroupMessageEvent.class, FurryBlack::handleGroupMessage);
+    Listener<UserMessageEvent> userMessageEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(UserMessageEvent.class, event -> {
+
+      if (!EVENT_ENABLE) return;
+
+      try {
+
+        for (EventHandlerFilter eventHandlerFilter : schema.getFilterUsersChain()) {
+          if (eventHandlerFilter.handleUsersMessageWrapper(event)) return;
+        }
+
+        MONITOR_PROCESS.submit(() -> {
+          for (EventHandlerMonitor item : schema.getMonitorUsersChain()) {
+            item.handleUsersMessageWrapper(event);
+          }
+        });
+
+        String content = event.getMessage().contentToString();
+
+        if (systemConfig.commandRegex.matcher(content).find()) {
+
+          Command command = new Command(content.substring(1));
+          String commandName = command.getCommandName();
+
+          switch (commandName) {
+
+            case "info" -> FurryBlack.sendMessage(event, MESSAGE_INFO);
+            case "eula" -> FurryBlack.sendMessage(event, MESSAGE_EULA);
+            case "list" -> FurryBlack.sendMessage(event, MESSAGE_LIST_USERS);
+
+            case "help" -> {
+              if (command.hasCommandBody()) {
+                String segment = command.getParameterSegment(0);
+                EventHandlerExecutor executor = schema.getExecutorUsersPool().get(segment);
+                if (executor == null) {
+                  FurryBlack.sendMessage(event, "没有此命令");
+                } else {
+                  FurryBlack.sendMessage(event, executor.getHelp());
+                }
+              } else {
+                FurryBlack.sendMessage(event, MESSAGE_HELP);
+              }
+            }
+
+            default -> {
+              EventHandlerExecutor executor = schema.getExecutorUsersPool().get(commandName);
+              if (executor == null) {
+                FurryBlack.sendMessage(event, "没有此命令");
+                return;
+              }
+              for (EventHandlerChecker checker : schema.getGlobalCheckerUsersPool()) {
+                if (checker.handleUsersMessageWrapper(event, command)) return;
+              }
+              List<EventHandlerChecker> commandCheckerUsersPool = schema.getCommandCheckerUsersPool(commandName);
+              if (commandCheckerUsersPool != null) {
+                for (EventHandlerChecker checker : commandCheckerUsersPool) {
+                  if (checker.handleUsersMessageWrapper(event, command)) return;
+                }
+              }
+              executor.handleUsersMessageWrapper(event, command);
+            }
+          }
+        }
+
+      } catch (Exception exception) {
+        logger.warning("处理私聊消息异常", exception);
+      }
+    });
+
+    Listener<GroupMessageEvent> groupMessageEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(GroupMessageEvent.class, event -> {
+
+      if (!EVENT_ENABLE) return;
+
+      try {
+
+        for (EventHandlerFilter eventHandlerFilter : schema.getFilterGroupChain()) {
+          if (eventHandlerFilter.handleGroupMessageWrapper(event)) return;
+        }
+
+        MONITOR_PROCESS.submit(() -> {
+          for (EventHandlerMonitor item : schema.getMonitorGroupChain()) {
+            item.handleGroupMessageWrapper(event);
+          }
+        });
+
+        String content = event.getMessage().contentToString();
+
+        if (systemConfig.commandRegex.matcher(content).find()) {
+
+          Command command = new Command(content.substring(1));
+          String commandName = command.getCommandName();
+
+          switch (commandName) {
+
+            case "help" -> {
+              if (command.hasCommandBody()) {
+                String segment = command.getParameterSegment(0);
+                EventHandlerExecutor executor = schema.getExecutorGroupPool().get(segment);
+                if (executor == null) {
+                  FurryBlack.sendMessage(event, "没有此命令");
+                } else {
+                  try {
+                    FurryBlack.sendMessage(event, executor.getHelp());
+                  } catch (Exception exception) {
+                    FurryBlack.sendMessage(event, "帮助信息发送至私聊失败 请允许临时会话权限");
+                  }
+                }
+              } else {
+                try {
+                  event.getSender().sendMessage(MESSAGE_HELP);
+                } catch (Exception exception) {
+                  FurryBlack.sendMessage(event, "帮助信息发送至私聊失败 请允许临时会话权限");
+                }
+              }
+            }
+
+            case "list" -> {
+              try {
+                event.getSender().sendMessage(MESSAGE_LIST_GROUP);
+              } catch (Exception exception) {
+                FurryBlack.sendMessage(event, "可用命令发送至私聊失败 请允许临时会话权限");
+              }
+            }
+
+            case "info" -> {
+              try {
+                event.getSender().sendMessage(MESSAGE_INFO);
+              } catch (Exception exception) {
+                FurryBlack.sendMessage(event, "关于发送至私聊失败 请允许临时会话权限");
+              }
+            }
+
+            case "eula" -> {
+              try {
+                event.getSender().sendMessage(MESSAGE_EULA);
+              } catch (Exception exception) {
+                FurryBlack.sendMessage(event, "EULA发送至私聊失败 请允许临时会话权限");
+              }
+            }
+
+            default -> {
+              EventHandlerExecutor executor = schema.getExecutorGroupPool().get(commandName);
+              if (executor == null) {
+                return;
+              }
+              for (EventHandlerChecker checker : schema.getGlobalCheckerGroupPool()) {
+                if (checker.handleGroupMessageWrapper(event, command))
+                  return;
+              }
+              List<EventHandlerChecker> commandCheckerGroupPool = schema.getCommandCheckerGroupPool(commandName);
+              if (commandCheckerGroupPool != null) {
+                for (EventHandlerChecker checker : commandCheckerGroupPool) {
+                  if (checker.handleGroupMessageWrapper(event, command))
+                    return;
+                }
+              }
+              executor.handleGroupMessageWrapper(event, command);
+            }
+          }
+        }
+
+      } catch (Exception exception) {
+        logger.warning("处理群聊消息异常", exception);
+      }
+    });
 
     Listener<NewFriendRequestEvent> newFriendRequestEventListener = GlobalEventChannel.INSTANCE.subscribeAlways(NewFriendRequestEvent.class, event -> {
       logger.hint("BOT被添加好友 " + event.getFromNick() + "(" + event.getFromId() + ")");
@@ -1115,16 +1292,23 @@ public final class FurryBlack {
     Thread currentThread = Thread.currentThread();
 
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+
       LATCH.signal();
+
       try {
         currentThread.join();
       } catch (InterruptedException exception) {
         FurryBlack.println("[FurryBlack][EXIT]FATAL -> Shutdown hook interrupted, Shutdown process not finished.");
         exception.printStackTrace();
       }
-      FurryBlack.println("[FurryBlack][EXIT]FurryBlackPlus normally closed, Bye.");
-      if (isShutdownHalt()) {
-        FurryBlack.println("[FurryBlack][EXIT]FurryBlackPlus normally close with halt, Execute halt now.");
+
+      FurryBlack.println("[FurryBlack][EXIT]FurryBlack normally closed, Bye.");
+
+      if (SHUTDOWN_HALT) {
+        FurryBlack.println("[FurryBlack][EXIT]FurryBlack normally close with halt, Execute halt now.");
+        Runtime.getRuntime().halt(1);
+      } else if (SHUTDOWN_DROP) {
+        FurryBlack.println("[FurryBlack][EXIT]FurryBlack normally close with drop, Execute halt now.");
         Runtime.getRuntime().halt(1);
       }
     }));
@@ -1168,27 +1352,532 @@ public final class FurryBlack {
     //= 启动完成
     //= ================================================================================================================
 
-    logger.hint("系统启动完成 耗时" + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME));
+    logger.hint("系统启动完成 耗时" + TimeEnhance.duration(System.currentTimeMillis() - BOOT_TIME));
 
     //= ========================================================================
     //= 启动完成 修改日志界别到设定值
 
-    if (!isDebug() && LEVEL != null) {
+    if (!kernelConfig.debug && LEVEL != null) {
       LoggerX.setLevel(LEVEL);
     }
 
-    //= ========================================================================
-    //= 启动终端输入功能
+    //= ================================================================================================================
+    //= 控制台子系统
+    //= ================================================================================================================
 
-    Thread consoleThread = new Thread(FurryBlack::console);
+    dispather = new Dispatcher();
+
+    //= ========================================================================
+
+    dispather.registerFunction()
+      .command("info")
+      .function(it -> FurryBlack.println(CONTENT_HELP));
+
+    //= ========================================================================
+
+    dispather.registerFunction()
+      .command("help")
+      .command("?")
+      .function(it -> FurryBlack.println(CONTENT_HELP));
+
+    //= ========================================================================
+
+    dispather.registerFunction()
+      .command("system", "status")
+      .command("system")
+      .command("status")
+      .command("gc")
+      .function(it -> {
+
+        long totalMemory = Runtime.getRuntime().totalMemory();
+        long freeMemory = Runtime.getRuntime().freeMemory();
+        long maxMemory = Runtime.getRuntime().maxMemory();
+        long useMemory = totalMemory - freeMemory;
+
+        String totalMemoryH = toHumanBytes(totalMemory);
+        String freeMemoryH = toHumanBytes(freeMemory);
+        String maxMemoryH = toHumanBytes(maxMemory);
+        String useMemoryH = toHumanBytes(useMemory);
+
+        FurryBlack.println(
+
+          // @formatter:off
+
+          "命名空间: " + NAMESPACE + LINE +
+          "调试开关: " + (kernelConfig.debug ? "调试模式" : "生产模式") + LINE +
+          "安全策略: " + (kernelConfig.unsafe ? "宽松策略" : "标准策略") + LINE +
+          "协议补丁: " + (kernelConfig.upgrade ? "启用升级" : "原生模式") + LINE +
+          "终端模式: " + (kernelConfig.noJline ? "精简终端" : "完整终端") + LINE +
+          "登录模式: " + (kernelConfig.noLogin ? "跳过登录" : "真实登录") + LINE +
+          "关闭策略: " + (SHUTDOWN_HALT ? "强制退出" : "正常退出") + LINE +
+          "消息事件: " + (EVENT_ENABLE ? "正常监听" : "忽略消息") + LINE +
+          "核心数量: " + Runtime.getRuntime().availableProcessors() + LINE +
+          "最大内存: " + maxMemoryH + "/" + maxMemory + LINE +
+          "已用内存: " + useMemoryH + "/" + useMemory + LINE +
+          "空闲内存: " + freeMemoryH + "/" + freeMemory + LINE +
+          "分配内存: " + totalMemoryH + "/" + totalMemory + LINE +
+          "运行时间: " + TimeEnhance.duration(System.currentTimeMillis() - BOOT_TIME)
+
+          // @formatter:on
+
+        );
+      });
+
+    dispather.registerFunction()
+      .command("system", "dump")
+      .command("stack")
+      .command("dump")
+      .function(it -> {
+
+        Map<Thread, StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
+
+        ArrayList<Map.Entry<Thread, StackTraceElement[]>> entries = new ArrayList<>(stackTraces.entrySet());
+
+        entries.sort((o1, o2) -> {
+          if (o1 == o2) return 0;
+          Thread o1Key = o1.getKey();
+          Thread o2Key = o2.getKey();
+          return (int) (o1Key.getId() - o2Key.getId());
+        });
+
+        for (Map.Entry<Thread, StackTraceElement[]> entry : entries) {
+          var k = entry.getKey();
+          var v = entry.getValue();
+          StringBuilder builder = new StringBuilder();
+          if (k.isDaemon()) {
+            builder.append("Daemon-");
+          } else {
+            builder.append("Thread-");
+          }
+          builder.append(k.getId()).append(" ").append(k.getState());
+          builder.append(" (").append(k.getName()).append(") ").append(k.getPriority());
+          builder.append(" [").append(k.getThreadGroup().getName()).append("]").append(LINE);
+          for (StackTraceElement element : v) {
+            builder.append("    ").append(element.getClassName()).append(":").append(element.getMethodName()).append("(").append(element.getLineNumber()).append(")").append(LINE);
+          }
+          FurryBlack.println(builder);
+        }
+      });
+
+    //= ========================================================================
+
+    dispather.registerFunction()
+      .command("system", "power-off")
+      .command("stop")
+      .command("exit")
+      .command("quit")
+      .function(it -> {
+        FurryBlack.println(YELLOW + "CONSOLE invoke -> shutdown" + RESET);
+        Runtime.getRuntime().exit(0);
+      });
+
+    //= ========================================================================
+
+    dispather.registerExclusive()
+      .command("system", "debug")
+      .command("debug")
+      .function(it -> {
+        if (it == null) {
+          FurryBlack.println("DEBUG模式 -> " + (KERNEL_DEBUG ? "已开启" : "已关闭"));
+        } else {
+          switch (it.getOrEmpty(0).toLowerCase()) {
+            case "enable" -> {
+              kernelConfig.debug = true;
+              FurryBlack.println("DEBUG模式: 启动");
+            }
+            case "disable" -> {
+              kernelConfig.debug = false;
+              FurryBlack.println("DEBUG模式: 关闭");
+            }
+            default -> FurryBlack.println("USAGE: system debug enable|disable");
+          }
+        }
+      });
+
+    //= ========================================================================
+
+    dispather.registerFunction()
+      .command("system", "rapid-exit")
+      .command("drop")
+      .function(it -> {
+        SHUTDOWN_DROP = true;
+        FurryBlack.println(RED + "⚠ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ⚠" + RESET);
+        FurryBlack.println(RED + "⚠ WARNING WARNING WARNING WARNING WARNING ⚠" + RESET);
+        FurryBlack.println(RED + "⚠                                         ⚠" + RESET);
+        FurryBlack.println(RED + "⚠   This command will skip all waiting    ⚠" + RESET);
+        FurryBlack.println(RED + "⚠     It is not good for your health      ⚠" + RESET);
+        FurryBlack.println(RED + "⚠       Wish we can see you again         ⚠" + RESET);
+        FurryBlack.println(RED + "⚠                                         ⚠" + RESET);
+        FurryBlack.println(RED + "⚠ WARNING WARNING WARNING WARNING WARNING ⚠" + RESET);
+        FurryBlack.println(RED + "⚠ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ⚠" + RESET);
+        Runtime.getRuntime().exit(0);
+      });
+
+    //= ========================================================================
+
+    dispather.registerFunction()
+      .command("kill", "kill")
+      .function(command -> {
+        FurryBlack.println(RED + "💀 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 💀" + RESET);
+        FurryBlack.println(RED + "💀 FATAL FATAL FATAL FATAL FATAL FATAL 💀" + RESET);
+        FurryBlack.println(RED + "💀                                     💀" + RESET);
+        FurryBlack.println(RED + "💀        Directly halt invoking       💀" + RESET);
+        FurryBlack.println(RED + "💀       There is no turning back      💀" + RESET);
+        FurryBlack.println(RED + "💀      JVM will be termination now    💀" + RESET);
+        FurryBlack.println(RED + "💀                                     💀" + RESET);
+        FurryBlack.println(RED + "💀 FATAL FATAL FATAL FATAL FATAL FATAL 💀" + RESET);
+        FurryBlack.println(RED + "💀 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 💀" + RESET);
+        FurryBlack.println(RED + "[FurryBlack][FATAL] Invoke -> Runtime.getRuntime().halt(1)" + RESET);
+        Runtime.getRuntime().halt(1);
+      });
+
+    //= ========================================================================
+
+    dispather.registerFunction()
+      .command("system", "force-exit")
+      .command("kill")
+      .function(command -> {
+        if (SHUTDOWN_KILL) {
+          FurryBlack.println(RED + "💀 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 💀" + RESET);
+          FurryBlack.println(RED + "💀 FATAL FATAL FATAL FATAL FATAL FATAL 💀" + RESET);
+          FurryBlack.println(RED + "💀                                     💀" + RESET);
+          FurryBlack.println(RED + "💀         Intention confirmed         💀" + RESET);
+          FurryBlack.println(RED + "💀       There is no turning back      💀" + RESET);
+          FurryBlack.println(RED + "💀      JVM will be termination now    💀" + RESET);
+          FurryBlack.println(RED + "💀                                     💀" + RESET);
+          FurryBlack.println(RED + "💀 FATAL FATAL FATAL FATAL FATAL FATAL 💀" + RESET);
+          FurryBlack.println(RED + "💀 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 💀" + RESET);
+          FurryBlack.println(RED + "[FurryBlack][FATAL] Invoke -> Runtime.getRuntime().halt(1)" + RESET);
+          Runtime.getRuntime().halt(1);
+        } else {
+          logger.fatal(RED + "⚠ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ⚠" + RESET);
+          logger.fatal(RED + "⚠ WARNING WARNING WARNING WARNING WARNING ⚠" + RESET);
+          logger.fatal(RED + "⚠                                         ⚠" + RESET);
+          logger.fatal(RED + "⚠   This command will kill JVM directly   ⚠" + RESET);
+          logger.fatal(RED + "⚠   Input it again to confirm intention   ⚠" + RESET);
+          logger.fatal(RED + "⚠                                         ⚠" + RESET);
+          logger.fatal(RED + "⚠ WARNING WARNING WARNING WARNING WARNING ⚠" + RESET);
+          logger.fatal(RED + "⚠ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ⚠" + RESET);
+          SHUTDOWN_KILL = true;
+        }
+      });
+
+    //= ========================================================================
+
+    dispather.registerExclusive()
+      .command("logger", "level")
+      .command("level")
+      .function(it -> {
+        if (it == null) {
+          FurryBlack.println("当前日志级别 -> " + LoggerX.getLevel().getName());
+        } else {
+          if (LoggerX.setLevel(it.getOrEmpty(0))) {
+            FurryBlack.println("日志级别修改为 -> " + LoggerX.getLevel().getName());
+          } else {
+            FurryBlack.println("日志级别不存在 -> " + it.getOrEmpty(0));
+            FurryBlack.println(
+
+              // @formatter:off
+
+              "可用日志级别为: " + LINE +
+              LoggerX.Level.MUTE.getName() + LINE +
+              LoggerX.Level.FATAL.getName() + LINE +
+              LoggerX.Level.ERROR.getName() + LINE +
+              LoggerX.Level.WARN.getName() + LINE +
+              LoggerX.Level.HINT.getName() + LINE +
+              LoggerX.Level.SEEK.getName() + LINE +
+              LoggerX.Level.INFO.getName() + LINE +
+              LoggerX.Level.DEBUG.getName() + LINE +
+              LoggerX.Level.VERBOSE.getName() + LINE +
+              LoggerX.Level.DEVELOP.getName() + LINE +
+              LoggerX.Level.EVERYTHING.getName()
+
+              // @formatter:on
+
+            );
+          }
+        }
+      });
+
+    //= ========================================================================
+
+    dispather.registerFunction()
+      .command("schema")
+      .function(it -> {
+        FurryBlack.println(schema.verboseStatus());
+      });
+
+    //= ========================================================================
+
+    dispather.registerExclusive()
+      .command("schema", "plugin")
+      .function(it -> {
+
+        StringEnhance.LineBuilder builder = new StringEnhance.LineBuilder();
+
+        for (Map.Entry<String, Schema.Plugin> pluginEntry : schema.getAllPlugin()) {
+
+          var pluginName = pluginEntry.getKey();
+          var pluginItem = pluginEntry.getValue();
+
+          builder.append(BRIGHT_CYAN + pluginName + " " + pluginItem.getModules().size() + RESET);
+
+          Map<Runner, Class<? extends EventHandlerRunner>> runnerClassMap = pluginItem.getRunnerClassMap();
+          builder.append(GREEN + ">> 定时器 " + runnerClassMap.size() + RESET);
+          for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> classEntry : runnerClassMap.entrySet()) {
+            var moduleName = classEntry.getKey();
+            var moduleItem = classEntry.getValue();
+            builder.append(moduleName.value() + '[' + moduleName.priority() + "] -> " + moduleItem.getName());
+          }
+
+          Map<Filter, Class<? extends EventHandlerFilter>> filterClassMap = pluginItem.getFilterClassMap();
+          builder.append(GREEN + ">> 过滤器 " + filterClassMap.size() + RESET);
+          for (Map.Entry<Filter, Class<? extends EventHandlerFilter>> classEntry : filterClassMap.entrySet()) {
+            var moduleName = classEntry.getKey();
+            var moduleItem = classEntry.getValue();
+            builder.append(moduleName.value() + '[' + moduleName.priority() + "] -> " + moduleItem.getName());
+          }
+
+          Map<Monitor, Class<? extends EventHandlerMonitor>> monitorClassMap = pluginItem.getMonitorClassMap();
+          builder.append(GREEN + ">> 监听器 " + monitorClassMap.size() + RESET);
+          for (Map.Entry<Monitor, Class<? extends EventHandlerMonitor>> classEntry : monitorClassMap.entrySet()) {
+            var moduleName = classEntry.getKey();
+            var moduleItem = classEntry.getValue();
+            builder.append(moduleName.value() + '[' + moduleName.priority() + "] -> " + moduleItem.getName());
+          }
+
+          Map<Checker, Class<? extends EventHandlerChecker>> checkerClassMap = pluginItem.getCheckerClassMap();
+          builder.append(GREEN + ">> 检查器 " + checkerClassMap.size() + RESET);
+          for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> classEntry : checkerClassMap.entrySet()) {
+            var moduleName = classEntry.getKey();
+            var moduleItem = classEntry.getValue();
+            builder.append(moduleName.value() + '[' + moduleName.priority() + "](" + moduleName.command() + ") -> " + moduleItem.getName());
+          }
+
+          Map<Executor, Class<? extends EventHandlerExecutor>> executorClassMap = pluginItem.getExecutorClassMap();
+          builder.append(GREEN + ">> 执行器 " + executorClassMap.size() + RESET);
+          for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> classEntry : executorClassMap.entrySet()) {
+            var moduleName = classEntry.getKey();
+            var moduleItem = classEntry.getValue();
+            builder.append(moduleName.value() + '(' + moduleName.command() + ") -> " + moduleItem.getName());
+          }
+        }
+
+        FurryBlack.println(builder);
+
+      });
+
+    //= ========================================================================
+
+    dispather.registerExclusive()
+      .command("schema", "module")
+      .function(it -> {
+
+        if (it == null) {
+
+          StringEnhance.LineBuilder builder = new StringEnhance.LineBuilder();
+
+          Map<Runner, Boolean> listRunner = schema.listRunner();
+          builder.append(BRIGHT_CYAN + ">> 定时器 " + listRunner.size() + RESET);
+          for (Map.Entry<Runner, Boolean> entry : listRunner.entrySet()) {
+            builder.append((entry.getValue() ? "开 " : "关 ") + entry.getKey().value());
+          }
+
+          Map<Filter, Boolean> listFilter = schema.listFilter();
+          builder.append(BRIGHT_CYAN + ">> 过滤器 " + listFilter.size() + RESET);
+          for (Map.Entry<Filter, Boolean> entry : listFilter.entrySet()) {
+            builder.append((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
+          }
+
+          Map<Monitor, Boolean> listMonitor = schema.listMonitor();
+          builder.append(BRIGHT_CYAN + ">> 监听器 " + listMonitor.size() + RESET);
+          for (Map.Entry<Monitor, Boolean> entry : listMonitor.entrySet()) {
+            builder.append((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
+          }
+
+          Map<Checker, Boolean> listChecker = schema.listChecker();
+          builder.append(BRIGHT_CYAN + ">> 检查器 " + listChecker.size() + RESET);
+          for (Map.Entry<Checker, Boolean> entry : listChecker.entrySet()) {
+            builder.append((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]" + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
+          }
+
+          Map<Executor, Boolean> listExecutor = schema.listExecutor();
+          builder.append(BRIGHT_CYAN + ">> 执行器 " + listExecutor.size() + RESET);
+          for (Map.Entry<Executor, Boolean> entry : listExecutor.entrySet()) {
+            builder.append((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
+          }
+
+          List<Checker> globalUsersChecker = schema.listGlobalUsersChecker();
+          builder.append(BRIGHT_CYAN + ">> 全局私聊检查器 " + globalUsersChecker.size() + RESET);
+          for (Checker annotation : globalUsersChecker) {
+            builder.append(annotation.value());
+          }
+
+          List<Checker> globalGroupChecker = schema.listGlobalGroupChecker();
+          builder.append(BRIGHT_CYAN + ">> 全局群聊检查器 " + globalGroupChecker.size() + RESET);
+          for (Checker annotation : globalGroupChecker) {
+            builder.append("  " + annotation.value());
+          }
+
+          Map<String, List<Checker>> listCommandUsersChecker = schema.listCommandsUsersChecker();
+          builder.append(BRIGHT_CYAN + ">> 有限私聊检查器 " + listCommandUsersChecker.size() + RESET);
+          for (Map.Entry<String, List<Checker>> entry : listCommandUsersChecker.entrySet()) {
+            builder.append(entry.getKey() + " " + entry.getValue().size());
+            for (Checker item : entry.getValue()) {
+              builder.append("  " + item.value());
+            }
+          }
+
+          Map<String, List<Checker>> listCommandGroupChecker = schema.listCommandsGroupChecker();
+          builder.append(BRIGHT_CYAN + ">> 有限群聊检查器 " + listCommandGroupChecker.size() + RESET);
+          for (Map.Entry<String, List<Checker>> entry : listCommandGroupChecker.entrySet()) {
+            builder.append(entry.getKey() + " " + entry.getValue().size());
+            for (Checker item : entry.getValue()) {
+              builder.append("  " + item.value());
+            }
+          }
+
+          builder.append(BRIGHT_CYAN + ">> 私聊命令列表" + RESET);
+          builder.append(MESSAGE_LIST_USERS);
+          builder.append(BRIGHT_CYAN + ">> 群聊命令列表" + RESET);
+          builder.append(MESSAGE_LIST_GROUP);
+
+          FurryBlack.println(builder);
+
+        } else {
+
+          String type = it.getOrNull(0);
+          String name = it.getOrNull(1);
+
+          if (type == null || name == null) {
+            FurryBlack.println("USAGE: schema module init|boot|shut|reboot|unload <name>");
+            return;
+          }
+
+          switch (type) {
+            case "init" -> schema.initModule(name);
+            case "boot" -> schema.bootModule(name);
+            case "shut" -> schema.shutModule(name);
+            case "reboot" -> schema.rebootModule(name);
+            case "unload" -> schema.unloadModule(name);
+            default -> FurryBlack.println("USAGE: schema module init|boot|shut|reboot|unload <name>");
+          }
+        }
+      });
+
+    //= ========================================================================
+
+    dispather.registerFunction()
+      .command("nickname")
+      .function(it -> {
+        FurryBlack.println("USAGE: nickname list|load|clean|reload|export");
+      });
+
+    //= ========================================================================
+
+    dispather.registerExclusive()
+      .command("nickname", "list")
+      .function(it -> {
+        FurryBlack.println(BRIGHT_CYAN + "全局昵称 " + nickname.getNicknameGlobal().size() + RESET);
+        for (Map.Entry<Long, String> entry : nickname.getNicknameGlobal().entrySet()) {
+          FurryBlack.println(entry.getKey() + ":" + entry.getValue());
+        }
+        FurryBlack.println(BRIGHT_CYAN + "群内昵称 " + nickname.getNicknameGroups().size() + RESET);
+        for (Map.Entry<Long, Map<Long, String>> groupsEntry : nickname.getNicknameGroups().entrySet()) {
+          FurryBlack.println("> " + groupsEntry.getKey());
+          for (Map.Entry<Long, String> nicknameEntry : groupsEntry.getValue().entrySet()) {
+            FurryBlack.println(nicknameEntry.getKey() + ":" + nicknameEntry.getValue());
+          }
+        }
+      });
+
+    //= ========================================================================
+
+    dispather.registerExclusive()
+      .command("nickname", "clean")
+      .function(it -> {
+        nickname.cleanNickname();
+        FurryBlack.println("昵称已清空");
+      });
+    //= ========================================================================
+
+    dispather.registerExclusive()
+      .command("nickname", "append")
+      .function(it -> {
+        nickname.appendNickname();
+        FurryBlack.println("昵称已续加");
+      });
+
+    //= ========================================================================
+
+    dispather.registerExclusive()
+      .command("nickname", "reload")
+      .function(it -> {
+        nickname.cleanNickname();
+        nickname.appendNickname();
+        FurryBlack.println("昵称已重载");
+      });
+
+    //= ========================================================================
+
+    dispather.registerExclusive()
+      .command("nickname", "export")
+      .function(it -> {
+        Path path = FileEnhance.get(FOLDER_CONFIG, "export-" + FORMATTER.format(Instant.now()) + ".txt");
+        StringEnhance.LineBuilder builder = new StringEnhance.LineBuilder();
+        ContactList<Friend> friends = getFriends();
+        builder.append("# 好友 ", friends.size());
+        for (Friend friend : friends) {
+          builder.append("*.", friend.getId(), ":", friend.getNick());
+        }
+        ContactList<Group> groups = getGroups();
+        builder.append("# 群组 ", groups.size());
+        for (Group group : groups) {
+          long groupId = group.getId();
+          builder.append("# ", group.getName(), " ", group.getOwner().getId());
+          for (NormalMember member : group.getMembers()) {
+            String nameCard = member.getNameCard();
+            if (nameCard.isEmpty()) {
+              builder.append(groupId, ".", member.getId(), ":", member.getNick());
+            } else {
+              builder.append(groupId, ".", member.getId(), ":", member.getNick(), "[", nameCard, "]");
+            }
+          }
+        }
+        FileEnhance.write(path, builder.toString());
+        FurryBlack.println("昵称已导出 -> " + path);
+      });
+
+    //= ========================================================================
+
+    Thread consoleThread = new Thread(() -> {
+      while (true) {
+        String readLine = terminal.readLine();
+        if (readLine == null || readLine.isBlank()) {
+          continue;
+        }
+        try {
+          boolean exist = dispather.execute(readLine);
+          if (!exist) {
+            logger.error("命令不存在 -> " + readLine);
+          }
+        } catch (Exception exception) {
+          logger.error("执行命令发生错误 -> " + readLine, exception);
+        }
+      }
+    });
     consoleThread.setName("furryblack-terminal");
     consoleThread.setDaemon(true);
     consoleThread.start();
 
     terminal.updateCompleter();
 
+    //= ================================================================================================================
+    //= 系统启动成功
+    //= ================================================================================================================
+
     //= ========================================================================
-    //= 启动事件响应
+    //= 启动订阅
 
     EVENT_ENABLE = true;
 
@@ -1219,7 +1908,7 @@ public final class FurryBlack {
     //= ========================================================================
     //= 特殊关闭模式
 
-    if (isShutModeDrop()) {
+    if (SHUTDOWN_HALT) {
       System.out.println("[FurryBlack][DROP]Shutdown mode drop, Invoke JVM halt now, Hope nothing broken.");
       Runtime.getRuntime().halt(1);
     }
@@ -1278,7 +1967,8 @@ public final class FurryBlack {
         MONITOR_PROCESS.shutdown();
         try {
           boolean termination = MONITOR_PROCESS.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-          if (!termination) logger.warning("监听任务线程池关闭超时");
+          if (!termination)
+            logger.warning("监听任务线程池关闭超时");
         } catch (InterruptedException exception) {
           logger.error("等待关闭监听任务线程池被中断", exception);
         }
@@ -1295,7 +1985,8 @@ public final class FurryBlack {
         SCHEDULE_SERVICE.shutdown();
         try {
           boolean termination = SCHEDULE_SERVICE.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-          if (!termination) logger.warning("定时任务线程池关闭超时");
+          if (!termination)
+            logger.warning("定时任务线程池关闭超时");
         } catch (InterruptedException exception) {
           logger.error("等待关闭定时任务线程池被中断", exception);
         }
@@ -1305,7 +1996,7 @@ public final class FurryBlack {
 
     try {
       CompletableFuture.allOf(monitorShutdown, scheduleShutdown).get();
-    } catch (ExecutionException exception) {
+    } catch (InterruptedException | ExecutionException exception) {
       logger.error("等待关闭线程池被中断", exception);
     }
 
@@ -1337,193 +2028,2501 @@ public final class FurryBlack {
 
   //= ==================================================================================================================
   //=
-  //=  监听器
+  //= 终端子系统
   //=
   //= ==================================================================================================================
 
+  //= ==================================================================================================================
+  //=  终端系统
+  //= ==================================================================================================================
+
+  private abstract sealed static class Terminal permits NoConsoleTerminal, StdinTerminal, JlineTerminal {
+
+    public static final String CONSOLE_PROMPT = "[console]$ ";
+
+    //= ========================================================================
+    //= 控制台终端
+
+    String readLine() {
+      return readLineImpl();
+    }
+
+    void print(String message) {
+      printImpl(message);
+    }
+
+    void println(String message) {
+      printLineImpl(message);
+    }
+
+    void updateCompleter() {
+      updateCompleterImpl();
+    }
+
+    protected abstract String readLineImpl();
+
+    protected abstract void printImpl(String message);
+
+    protected abstract void printLineImpl(String message);
+
+    protected abstract void updateCompleterImpl();
+
+  }
+
   //= ==========================================================================
-  //= 用户消息
+  //= NoConsoleTerminal
 
-  private static void handleUsersMessage(UserMessageEvent event) {
+  private static final class NoConsoleTerminal extends Terminal {
 
-    if (!EVENT_ENABLE) return;
+    public static NoConsoleTerminal getInstance() {
+      return new NoConsoleTerminal();
+    }
 
-    try {
+    private NoConsoleTerminal() {}
 
-      for (EventHandlerFilter eventHandlerFilter : schema.getFilterUsersChain()) {
-        if (eventHandlerFilter.handleUsersMessageWrapper(event)) return;
+    @Override
+    protected String readLineImpl() {
+      try {
+        Thread.sleep(Long.MAX_VALUE);
+      } catch (InterruptedException exception) {
+        throw new TerminalException(exception);
       }
+      return null;
+    }
 
-      MONITOR_PROCESS.submit(() -> {
-        for (EventHandlerMonitor item : schema.getMonitorUsersChain()) {
-          item.handleUsersMessageWrapper(event);
-        }
-      });
+    @Override
+    protected synchronized void printImpl(String message) {
+      System.out.print(message);
+    }
 
-      String content = event.getMessage().contentToString();
+    @Override
+    protected void printLineImpl(String message) {
+      System.out.println(message + LINE);
+    }
 
-      if (systemConfig.commandRegex.matcher(content).find()) {
+    @Override
+    protected void updateCompleterImpl() {
 
-        Command command = new Command(content.substring(1));
-
-        String commandName = command.getCommandName();
-
-        switch (commandName) {
-
-          case "help" -> {
-            if (command.hasCommandBody()) {
-              String segment = command.getParameterSegment(0);
-              EventHandlerExecutor executor = schema.getExecutorUsersPool().get(segment);
-              if (executor == null) {
-                FurryBlack.sendMessage(event, "没有此命令");
-              } else {
-                FurryBlack.sendMessage(event, executor.getHelp());
-              }
-            } else {
-              FurryBlack.sendMessage(event, MESSAGE_HELP);
-            }
-          }
-
-          case "list" -> FurryBlack.sendMessage(event, MESSAGE_LIST_USERS);
-          case "info" -> FurryBlack.sendMessage(event, MESSAGE_INFO);
-          case "eula" -> FurryBlack.sendMessage(event, MESSAGE_EULA);
-
-          default -> {
-            EventHandlerExecutor executor = schema.getExecutorUsersPool().get(commandName);
-            if (executor == null) {
-              FurryBlack.sendMessage(event, "没有此命令");
-              return;
-            }
-            for (EventHandlerChecker checker : schema.getGlobalCheckerUsersPool()) {
-              if (checker.handleUsersMessageWrapper(event, command)) return;
-            }
-            List<EventHandlerChecker> commandCheckerUsersPool = schema.getCommandCheckerUsersPool(commandName);
-            if (commandCheckerUsersPool != null) {
-              for (EventHandlerChecker checker : commandCheckerUsersPool) {
-                if (checker.handleUsersMessageWrapper(event, command)) return;
-              }
-            }
-            executor.handleUsersMessageWrapper(event, command);
-          }
-        }
-      }
-
-    } catch (Exception exception) {
-      logger.warning("处理私聊消息异常", exception);
     }
   }
 
   //= ==========================================================================
-  //= 群组消息
+  //= StdinTerminal
 
-  public static void handleGroupMessage(GroupMessageEvent event) {
+  private static final class StdinTerminal extends Terminal {
 
-    if (!EVENT_ENABLE) return;
+    public static StdinTerminal getInstance() {
+      return new StdinTerminal();
+    }
 
-    try {
+    private final BufferedReader reader;
+    private final OutputStreamWriter writer;
 
-      for (EventHandlerFilter eventHandlerFilter : schema.getFilterGroupChain()) {
-        if (eventHandlerFilter.handleGroupMessageWrapper(event)) return;
+    private StdinTerminal() {
+      InputStreamReader inputStreamReader = new InputStreamReader(System.in, StandardCharsets.UTF_8);
+      reader = new BufferedReader(inputStreamReader);
+      writer = new OutputStreamWriter(System.out, StandardCharsets.UTF_8);
+    }
+
+    @Override
+    protected String readLineImpl() {
+      printImpl(CONSOLE_PROMPT);
+      try {
+        return reader.readLine();
+      } catch (IOException exception) {
+        throw new TerminalException(exception);
+      }
+    }
+
+    @Override
+    protected synchronized void printImpl(String message) {
+      try {
+        writer.write(message);
+        writer.flush();
+      } catch (IOException exception) {
+        exception.printStackTrace();
+      }
+    }
+
+    @Override
+    protected void printLineImpl(String message) {
+      printImpl(message + LINE);
+    }
+
+    @Override
+    protected void updateCompleterImpl() {
+
+    }
+  }
+
+  //= ==========================================================================
+  //= JlineTerminal
+
+  private static final class JlineTerminal extends Terminal {
+
+    public static JlineTerminal getInstance() {
+      return new JlineTerminal();
+    }
+
+    private final LineReader reader;
+    private final CompleterDelegate completerDelegate;
+
+    private JlineTerminal() {
+      if (kernelConfig.noJline) {
+        completerDelegate = null;
+        reader = null;
+      } else {
+        completerDelegate = new CompleterDelegate();
+        reader = LineReaderBuilder.builder().completer(completerDelegate).build();
+        AutopairWidgets autopairWidgets = new AutopairWidgets(reader);
+        autopairWidgets.enable();
+      }
+    }
+
+    @Override
+    protected String readLineImpl() {
+      return reader.readLine(CONSOLE_PROMPT);
+    }
+
+    @Override
+    protected synchronized void printImpl(String message) {
+      reader.printAbove(message);
+    }
+
+    @Override
+    protected void printLineImpl(String message) {
+      printImpl(message + LINE);
+    }
+
+    @Override
+    protected void updateCompleterImpl() {
+      completerDelegate.update();
+    }
+
+    private static class CompleterDelegate implements Completer {
+
+      private Completer completer;
+
+      private CompleterDelegate() {
+        completer = buildCompleter(null);
       }
 
-      MONITOR_PROCESS.submit(() -> {
-        for (EventHandlerMonitor item : schema.getMonitorGroupChain()) {
-          item.handleGroupMessageWrapper(event);
-        }
-      });
+      @Override
+      public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
+        completer.complete(reader, line, candidates);
+      }
 
-      String content = event.getMessage().contentToString();
-
-      if (systemConfig.commandRegex.matcher(content).find()) {
-
-        Command command = new Command(content.substring(1));
-
-        String commandName = command.getCommandName();
-
-        switch (commandName) {
-
-          case "help" -> {
-            if (command.hasCommandBody()) {
-              String segment = command.getParameterSegment(0);
-              EventHandlerExecutor executor = schema.getExecutorGroupPool().get(segment);
-              if (executor == null) {
-                FurryBlack.sendMessage(event, "没有此命令");
-              } else {
-                try {
-                  FurryBlack.sendMessage(event, executor.getHelp());
-                } catch (Exception exception) {
-                  FurryBlack.sendMessage(event, "帮助信息发送至私聊失败 请允许临时会话权限");
-                }
-              }
-            } else {
-              try {
-                event.getSender().sendMessage(MESSAGE_HELP);
-              } catch (Exception exception) {
-                FurryBlack.sendMessage(event, "帮助信息发送至私聊失败 请允许临时会话权限");
-              }
-            }
-          }
-
-          case "list" -> {
-            try {
-              event.getSender().sendMessage(MESSAGE_LIST_GROUP);
-            } catch (Exception exception) {
-              FurryBlack.sendMessage(event, "可用命令发送至私聊失败 请允许临时会话权限");
-            }
-          }
-
-          case "info" -> {
-            try {
-              event.getSender().sendMessage(MESSAGE_INFO);
-            } catch (Exception exception) {
-              FurryBlack.sendMessage(event, "关于发送至私聊失败 请允许临时会话权限");
-            }
-          }
-
-          case "eula" -> {
-            try {
-              event.getSender().sendMessage(MESSAGE_EULA);
-            } catch (Exception exception) {
-              FurryBlack.sendMessage(event, "EULA发送至私聊失败 请允许临时会话权限");
-            }
-          }
-
-          default -> {
-            EventHandlerExecutor executor = schema.getExecutorGroupPool().get(commandName);
-            if (executor == null) {
-              return;
-            }
-            for (EventHandlerChecker checker : schema.getGlobalCheckerGroupPool()) {
-              if (checker.handleGroupMessageWrapper(event, command)) return;
-            }
-            List<EventHandlerChecker> commandCheckerGroupPool = schema.getCommandCheckerGroupPool(commandName);
-            if (commandCheckerGroupPool != null) {
-              for (EventHandlerChecker checker : commandCheckerGroupPool) {
-                if (checker.handleGroupMessageWrapper(event, command)) return;
-              }
-            }
-            executor.handleGroupMessageWrapper(event, command);
-          }
+      private void update() {
+        if (schema != null) {
+          Set<String> moduleName = schema.listModuleName();
+          TreeCompleter.Node node = node(new StringsCompleter(moduleName));
+          completer = buildCompleter(node);
+        } else {
+          completer = buildCompleter(null);
         }
       }
 
-    } catch (Exception exception) {
-      logger.warning("处理群聊消息异常", exception);
+      private AggregateCompleter buildCompleter(TreeCompleter.Node node) {
+        TreeCompleter.Node temp;
+        if (node == null) {
+          temp = node("init", "boot", "shut", "reboot", "unload");
+        } else {
+          temp = node("init", "boot", "shut", "reboot", "unload", node);
+        }
+        return new AggregateCompleter(
+          new ArgumentCompleter(new StringsCompleter("help", "kill", "drop", "stop", "gc", "stack", "enable", "disable", "schema", "color")),
+          new ArgumentCompleter(new StringsCompleter("list", "send"), new StringsCompleter("users", "group")),
+          new TreeCompleter(node("level", node("MUTE", "FATAL", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "DEVELOP", "EVERYTHING"))),
+          new TreeCompleter(node("nickname", node("list", "clean", "reload", "append", "export"))),
+          new TreeCompleter(node("debug", node("enable", "disable"))),
+          new TreeCompleter(node("plugin")),
+          new TreeCompleter(node("module", temp))
+        );
+      }
+
     }
 
   }
 
   //= ==================================================================================================================
-  //
-  //
-  //  昵称系统
-  //
-  //
+  //=
+  //= 控制台子系统
+  //=
+  //= ==================================================================================================================
+
+  //= ================================================================================================================
+  //= 命令体
+  //= ================================================================================================================
+
+  public static class ConsoleCommand {
+
+    private final String[] args;
+
+    public static ConsoleCommand of(String command) {
+      return new ConsoleCommand(command);
+    }
+
+    private ConsoleCommand(String[] args) {
+      this.args = args;
+    }
+
+    private ConsoleCommand(String command) {
+      this(parseCommand(command));
+    }
+
+    private static String[] parseCommand(String command) {
+      char[] chars = command.toCharArray();
+      boolean filed = false;
+      boolean escape = false;
+      List<String> parts = new LinkedList<>();
+      StringBuilder builder = new StringBuilder();
+      for (char chat : chars) {
+        switch (chat) {
+          case '\\' -> {
+            if (escape) {
+              builder.append("\\");
+            }
+            escape = !escape;
+          }
+          case '\'' -> {
+            if (escape) {
+              builder.append('\'');
+            } else {
+              filed = !filed;
+            }
+            escape = false;
+          }
+          case ' ' -> {
+            if (filed) {
+              builder.append(chat);
+            } else {
+              if (builder.length() == 0) {
+                continue;
+              }
+              parts.add(builder.toString());
+              builder.setLength(0);
+            }
+            escape = false;
+          }
+          default -> {
+            builder.append(chat);
+            escape = false;
+          }
+        }
+      }
+      parts.add(builder.toString());
+      return parts.toArray(new String[0]);
+    }
+
+    public String[] copy() {
+      String[] copy = new String[args.length];
+      System.arraycopy(args, 0, copy, 0, args.length);
+      return copy;
+    }
+
+    public ConsoleSubCommand subCommand(int i) {
+      if (i > args.length) {
+        throw new IllegalArgumentException("Too long");
+      }
+      String[] copy = new String[args.length - i];
+      System.arraycopy(args, i, copy, 0, copy.length);
+      return new ConsoleSubCommand(copy);
+    }
+
+    public int length() {
+      return args.length;
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder builder = new StringBuilder();
+      for (String arg : args) {
+        if (arg.contains(" ")) {
+          builder.append("'").append(arg).append("'");
+        } else {
+          builder.append(arg);
+        }
+        builder.append(" ");
+      }
+      builder.setLength(builder.length() - 1);
+      return builder.toString();
+    }
+  }
+
+  public static class ConsoleSubCommand {
+
+    private final String[] args;
+
+    private ConsoleSubCommand(String[] args) {
+      this.args = args;
+    }
+
+    public int length() {
+      return args.length;
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder builder = new StringBuilder();
+      for (String arg : args) {
+        if (arg.contains(" ")) {
+          builder.append("'").append(arg).append("'");
+        } else {
+          builder.append(arg);
+        }
+        builder.append(" ");
+      }
+      builder.setLength(builder.length() - 1);
+      return builder.toString();
+    }
+
+    public String getOrNull(int i) {
+      return i < args.length ? args[i] : null;
+    }
+
+    public String getOrEmpty(int i) {
+      return i < args.length ? args[i] : "";
+    }
+  }
+
+  //= ================================================================================================================
+  //= 调度器
+  //= ================================================================================================================
+
+  public static class Dispatcher {
+
+    private final Tree tree = new Tree(null, 0);
+
+    public boolean execute(String command) {
+      ConsoleCommand consoleCommand = new ConsoleCommand(command);
+      return tree.execute(consoleCommand);
+    }
+
+    public RegisterFunctionAccessor registerFunction() {
+      return new RegisterFunctionAccessor(this);
+    }
+
+    public RegisterExclusiveAccessor registerExclusive() {
+      return new RegisterExclusiveAccessor(this);
+    }
+
+    public static class RegisterFunctionAccessor {
+
+      private final Dispatcher dispatcher;
+      private final List<String[]> commands = new LinkedList<>();
+
+      private RegisterFunctionAccessor(Dispatcher dispatcher) {
+        this.dispatcher = dispatcher;
+      }
+
+      public RegisterFunctionAccessor command(String... command) {
+        if (dispatcher.tree.isAdopted()) {
+          throw new IllegalArgumentException("Can't register this command -> " + String.join(".", command));
+        }
+        commands.add(command);
+        return this;
+      }
+
+      public void function(Consumer<ConsoleSubCommand> function) {
+        dispatcher.tree.registerFunction(commands, function);
+      }
+    }
+
+    public static class RegisterExclusiveAccessor {
+
+      private final Dispatcher dispatcher;
+      private final List<String[]> comamnds = new LinkedList<>();
+
+      private RegisterExclusiveAccessor(Dispatcher dispatcher) {
+        this.dispatcher = dispatcher;
+      }
+
+      public RegisterExclusiveAccessor command(String... command) {
+        if (dispatcher.tree.isAdopted()) {
+          throw new IllegalArgumentException("Can't register this command -> " + String.join(".", command));
+        }
+        comamnds.add(command);
+        return this;
+      }
+
+      public void function(Consumer<ConsoleSubCommand> function) {
+        dispatcher.tree.registerExclusive(comamnds, function);
+      }
+    }
+  }
+
+  //= ================================================================================================================
+  //= 存储体
+  //= ================================================================================================================
+
+  public static class Tree {
+
+    private final Tree parent;
+    private final int depth;
+    private final Map<String, Tree> tree = new LinkedHashMap<>();
+
+    public String name;
+    public Boolean exclusive = false;
+    public Consumer<ConsoleSubCommand> function;
+
+    public Tree(Tree parent, int depth) {
+      this.parent = parent;
+      this.depth = depth;
+    }
+
+    public boolean isAdopted(String... args) {
+      Tree node = this;
+      for (String arg : args) {
+        Tree next = node.tree.get(arg);
+        if (next == null) return false;
+        node = next;
+      }
+      return node.exclusive;
+    }
+
+    public synchronized void registerFunction(List<String[]> commands, Consumer<ConsoleSubCommand> function) {
+      for (String[] command : commands) {
+        if (isAdopted(command)) {
+          throw new RuntimeException("Command already registered -> " + String.join(" ", command));
+        }
+      }
+      for (String[] command : commands) {
+        Tree node = this;
+        for (String arg : command) {
+          Tree next = node.tree.get(arg);
+          if (next == null) {
+            Tree temp = new Tree(node, node.depth + 1);
+            temp.name = arg;
+            node.tree.put(arg, temp);
+            node = temp;
+          } else {
+            node = next;
+          }
+        }
+        node.function = function;
+        node.exclusive = false;
+      }
+    }
+
+    public synchronized void registerExclusive(List<String[]> commands, Consumer<ConsoleSubCommand> function) {
+      for (String[] command : commands) {
+        if (isAdopted(command)) {
+          throw new RuntimeException("Command already registered -> " + String.join(" ", command));
+        }
+      }
+      for (String[] command : commands) {
+        Tree node = this;
+        for (String arg : command) {
+          Tree next = node.tree.get(arg);
+          if (next == null) {
+            Tree temp = new Tree(node, node.depth + 1);
+            temp.name = arg;
+            node.tree.put(arg, temp);
+            node = temp;
+          } else {
+            node = next;
+          }
+        }
+        node.function = function;
+        node.exclusive = true;
+      }
+    }
+
+    public boolean execute(ConsoleCommand consoleCommand) {
+      Tree node = this;
+      String[] args = consoleCommand.copy();
+      for (String arg : args) {
+        Tree next = node.tree.get(arg);
+        if (next == null) {
+          return false;
+        } else {
+          node = next;
+          if (node.exclusive) {
+            break;
+          }
+        }
+      }
+      if (consoleCommand.length() == node.depth) {
+        node.function.accept(null);
+      } else {
+        ConsoleSubCommand subCommand = consoleCommand.subCommand(node.depth);
+        node.function.accept(subCommand);
+      }
+      return true;
+    }
+
+    @Override
+    public String toString() {
+      if (parent == null) {
+        return "";
+      } else {
+        return parent + "." + name;
+      }
+    }
+
+  }
+
+  //= ==================================================================================================================
+  //=
+  //= 插件子系统
+  //=
+  //= ==================================================================================================================
+
+  //= ==================================================================================================================
+  //= 插件系统
+
+  public static final class Schema {
+
+    private final LoggerX logger = LoggerXFactory.newLogger(Schema.class);
+
+    private final Path folder;
+
+    private final Map<String, Plugin> plugins;
+
+    private final Map<String, Class<? extends AbstractEventHandler>> modules;
+
+    private final Map<Runner, Class<? extends EventHandlerRunner>> COMPONENT_RUNNER_CLAZZ;
+    private final Map<Filter, Class<? extends EventHandlerFilter>> COMPONENT_FILTER_CLAZZ;
+    private final Map<Monitor, Class<? extends EventHandlerMonitor>> COMPONENT_MONITOR_CLAZZ;
+    private final Map<Checker, Class<? extends EventHandlerChecker>> COMPONENT_CHECKER_CLAZZ;
+    private final NavigableMap<Executor, Class<? extends EventHandlerExecutor>> COMPONENT_EXECUTOR_CLAZZ;
+
+    private final List<Runner> SORTED_RUNNER;
+    private final List<Filter> SORTED_FILTER;
+    private final List<Monitor> SORTED_MONITOR;
+    private final List<Checker> SORTED_CHECKER;
+
+    private final Map<Runner, EventHandlerRunner> COMPONENT_RUNNER_INSTANCE;
+    private final Map<Filter, EventHandlerFilter> COMPONENT_FILTER_INSTANCE;
+    private final Map<Monitor, EventHandlerMonitor> COMPONENT_MONITOR_INSTANCE;
+    private final Map<Checker, EventHandlerChecker> COMPONENT_CHECKER_INSTANCE;
+    private final NavigableMap<Executor, EventHandlerExecutor> COMPONENT_EXECUTOR_INSTANCE;
+
+    private final Map<String, Executor> COMMAND_EXECUTOR_RELATION;
+
+    private final Map<String, String> MODULE_PLUGIN_RELATION;
+
+    private final List<EventHandlerFilter> FILTER_USERS_CHAIN;
+    private final List<EventHandlerFilter> FILTER_GROUP_CHAIN;
+
+    private final List<EventHandlerMonitor> MONITOR_USERS_CHAIN;
+    private final List<EventHandlerMonitor> MONITOR_GROUP_CHAIN;
+
+    private final Map<String, EventHandlerExecutor> EXECUTOR_USERS_POOL;
+    private final Map<String, EventHandlerExecutor> EXECUTOR_GROUP_POOL;
+
+    private final List<EventHandlerChecker> GLOBAL_CHECKER_USERS_POOL;
+    private final List<EventHandlerChecker> GLOBAL_CHECKER_GROUP_POOL;
+
+    private final Map<String, List<EventHandlerChecker>> COMMAND_CHECKER_USERS_POOL;
+    private final Map<String, List<EventHandlerChecker>> COMMAND_CHECKER_GROUP_POOL;
+
+    //= ========================================================================
+    //= 构造
+    //= ========================================================================
+
+    public Schema(Path folder) {
+
+      this.folder = folder;
+
+      logger.hint("加载插件模型");
+
+      plugins = new HashMap<>();
+      modules = new HashMap<>();
+
+      COMPONENT_RUNNER_CLAZZ = new HashMap<>();
+      COMPONENT_FILTER_CLAZZ = new HashMap<>();
+      COMPONENT_MONITOR_CLAZZ = new HashMap<>();
+      COMPONENT_CHECKER_CLAZZ = new HashMap<>();
+      COMPONENT_EXECUTOR_CLAZZ = new TreeMap<>(AnnotationEnhance::compare);
+
+      SORTED_RUNNER = new LinkedList<>();
+      SORTED_FILTER = new LinkedList<>();
+      SORTED_MONITOR = new LinkedList<>();
+      SORTED_CHECKER = new LinkedList<>();
+
+      COMPONENT_RUNNER_INSTANCE = new ConcurrentHashMap<>();
+      COMPONENT_FILTER_INSTANCE = new ConcurrentHashMap<>();
+      COMPONENT_MONITOR_INSTANCE = new ConcurrentHashMap<>();
+      COMPONENT_CHECKER_INSTANCE = new ConcurrentHashMap<>();
+      COMPONENT_EXECUTOR_INSTANCE = new ConcurrentSkipListMap<>(AnnotationEnhance::compare);
+
+      COMMAND_EXECUTOR_RELATION = new HashMap<>();
+      MODULE_PLUGIN_RELATION = new HashMap<>();
+
+      FILTER_USERS_CHAIN = new CopyOnWriteArrayList<>();
+      FILTER_GROUP_CHAIN = new CopyOnWriteArrayList<>();
+
+      MONITOR_USERS_CHAIN = new CopyOnWriteArrayList<>();
+      MONITOR_GROUP_CHAIN = new CopyOnWriteArrayList<>();
+
+      EXECUTOR_USERS_POOL = new ConcurrentHashMap<>();
+      EXECUTOR_GROUP_POOL = new ConcurrentHashMap<>();
+
+      GLOBAL_CHECKER_USERS_POOL = new CopyOnWriteArrayList<>();
+      GLOBAL_CHECKER_GROUP_POOL = new CopyOnWriteArrayList<>();
+
+      COMMAND_CHECKER_USERS_POOL = new ConcurrentHashMap<>();
+      COMMAND_CHECKER_GROUP_POOL = new ConcurrentHashMap<>();
+
+    }
+
+    //= ========================================================================
+    //= 核心功能
+    //= ========================================================================
+
+    //= ========================================================================
+    //= 反转控制
+
+    @SuppressWarnings("unchecked")
+    public <T extends EventHandlerRunner> T getRunner(Class<T> clazz) {
+      List<EventHandlerRunner> collect = COMPONENT_RUNNER_INSTANCE.values().stream().filter(clazz::isInstance).toList();
+      if (collect.size() == 1) {
+        return (T) collect.get(0);
+      } else {
+        return null;
+      }
+    }
+
+    //= ========================================================================
+    //= 生成信息
+
+    public String generateUsersExecutorList() {
+      if (EXECUTOR_USERS_POOL.size() == 0) {
+        return "没有任何已装载的命令";
+      }
+      StringBuilder builder = new StringBuilder();
+      for (Executor executor : COMPONENT_EXECUTOR_INSTANCE.keySet()) {
+        if (!EXECUTOR_USERS_POOL.containsKey(executor.command())) {
+          continue;
+        }
+        builder.append(executor.outline());
+        builder.append("[");
+        builder.append(executor.command());
+        builder.append("]");
+        builder.append(executor.description());
+        builder.append("\r\n");
+      }
+      builder.setLength(builder.length() - 2);
+      return builder.toString();
+    }
+
+    public String generateGroupExecutorList() {
+      if (EXECUTOR_GROUP_POOL.size() == 0) {
+        return "没有任何已装载的命令";
+      }
+      StringBuilder builder = new StringBuilder();
+      for (Executor executor : COMPONENT_EXECUTOR_INSTANCE.keySet()) {
+        if (!EXECUTOR_GROUP_POOL.containsKey(executor.command())) {
+          continue;
+        }
+        builder.append(executor.outline());
+        builder.append("[");
+        builder.append(executor.command());
+        builder.append("]");
+        builder.append(executor.description());
+        builder.append("\r\n");
+      }
+      builder.setLength(builder.length() - 2);
+      return builder.toString();
+    }
+
+    //= ========================================================================
+    //= 处理系统
+
+    public List<EventHandlerFilter> getFilterUsersChain() {
+      return FILTER_USERS_CHAIN;
+    }
+
+    public List<EventHandlerFilter> getFilterGroupChain() {
+      return FILTER_GROUP_CHAIN;
+    }
+
+    public List<EventHandlerMonitor> getMonitorUsersChain() {
+      return MONITOR_USERS_CHAIN;
+    }
+
+    public List<EventHandlerMonitor> getMonitorGroupChain() {
+      return MONITOR_GROUP_CHAIN;
+    }
+
+    public Map<String, EventHandlerExecutor> getExecutorUsersPool() {
+      return EXECUTOR_USERS_POOL;
+    }
+
+    public Map<String, EventHandlerExecutor> getExecutorGroupPool() {
+      return EXECUTOR_GROUP_POOL;
+    }
+
+    public List<EventHandlerChecker> getGlobalCheckerUsersPool() {
+      return GLOBAL_CHECKER_USERS_POOL;
+    }
+
+    public List<EventHandlerChecker> getGlobalCheckerGroupPool() {
+      return GLOBAL_CHECKER_GROUP_POOL;
+    }
+
+    public List<EventHandlerChecker> getCommandCheckerUsersPool(String name) {
+      return COMMAND_CHECKER_USERS_POOL.get(name);
+    }
+
+    public List<EventHandlerChecker> getCommandCheckerGroupPool(String name) {
+      return COMMAND_CHECKER_GROUP_POOL.get(name);
+    }
+
+    //= ========================================================================
+    //= 模块承载
+    //= ========================================================================
+
+    //= ========================================================================
+    //=  扫描插件
+
+    public void scanPlugin() {
+
+      logger.hint("扫描插件目录");
+
+      List<Path> listFiles;
+
+      try (Stream<Path> stream = Files.list(folder)) {
+        listFiles = stream.toList();
+      } catch (IOException exception) {
+        throw new SchemaException("扫描插件目录失败", exception);
+      }
+
+      if (listFiles.size() == 0) {
+        logger.warning("插件目录为空");
+        return;
+      }
+
+      logger.seek("发现[" + listFiles.size() + "]个文件");
+
+      for (Path path : listFiles) {
+        logger.info("尝试加载 -> " + path.getFileName());
+        Plugin plugin = Plugin.load(path);
+        String name = plugin.getName();
+        if (plugins.containsKey(name)) {
+          Plugin exist = plugins.get(name);
+          throw new SchemaException("发现插件名称冲突 " + plugin.getPath() + "名称" + name + "已被注册" + exist.getPath());
+        }
+        plugins.put(name, plugin);
+      }
+
+      logger.seek("发现[" + plugins.size() + "]个插件");
+
+      for (Plugin plugin : plugins.values()) {
+        logger.info(plugin.getPath().getFileName() + " -> " + plugin.getName());
+      }
+    }
+
+    //= ========================================================================
+    //=  扫描模块
+
+    public void scanModule() {
+      logger.hint("扫描插件包内容");
+      plugins.values().forEach(Plugin::scan);
+    }
+
+    //= ========================================================================
+    //=  注册模块
+
+    public void loadModule() {
+
+      logger.hint("向插件模型注册模块");
+
+      for (Map.Entry<String, Plugin> pluginEntry : plugins.entrySet()) {
+
+        var pluginName = pluginEntry.getKey();
+        var pluginPackage = pluginEntry.getValue();
+
+        logger.seek("尝试注册插件 -> " + pluginName);
+
+        if (pluginPackage.getModules().isEmpty()) {
+          logger.warning("插件包内不含任何模块 " + pluginName);
+          return;
+        }
+
+        logger.info("模块冲突检查 -> " + pluginName);
+
+        for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> moduleEntry : pluginPackage.getRunnerClassMap().entrySet()) {
+          var k = moduleEntry.getKey();
+          var v = moduleEntry.getValue();
+          if (COMPONENT_RUNNER_CLAZZ.containsKey(k)) {
+            Class<? extends AbstractEventHandler> exist = COMPONENT_RUNNER_CLAZZ.get(k);
+            throw new SchemaException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + COMPONENT_RUNNER_CLAZZ.get(k) + ":" + exist.getName());
+          }
+        }
+
+        for (Map.Entry<Filter, Class<? extends EventHandlerFilter>> moduleEntry : pluginPackage.getFilterClassMap().entrySet()) {
+          var k = moduleEntry.getKey();
+          var v = moduleEntry.getValue();
+          if (COMPONENT_FILTER_CLAZZ.containsKey(k)) {
+            Class<? extends AbstractEventHandler> exist = COMPONENT_FILTER_CLAZZ.get(k);
+            throw new SchemaException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + COMPONENT_FILTER_CLAZZ.get(k) + ":" + exist.getName());
+          }
+        }
+
+        for (Map.Entry<Monitor, Class<? extends EventHandlerMonitor>> moduleEntry : pluginPackage.getMonitorClassMap().entrySet()) {
+          var k = moduleEntry.getKey();
+          var v = moduleEntry.getValue();
+          if (COMPONENT_MONITOR_CLAZZ.containsKey(k)) {
+            Class<? extends AbstractEventHandler> exist = COMPONENT_MONITOR_CLAZZ.get(k);
+            throw new SchemaException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + COMPONENT_MONITOR_CLAZZ.get(k) + ":" + exist.getName());
+          }
+        }
+
+        for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> moduleEntry : pluginPackage.getCheckerClassMap().entrySet()) {
+          var k = moduleEntry.getKey();
+          var v = moduleEntry.getValue();
+          if (COMPONENT_CHECKER_CLAZZ.containsKey(k)) {
+            Class<? extends AbstractEventHandler> exist = COMPONENT_CHECKER_CLAZZ.get(k);
+            throw new SchemaException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + COMPONENT_CHECKER_CLAZZ.get(k) + ":" + exist.getName());
+          }
+        }
+
+        for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> moduleEntry : pluginPackage.getExecutorClassMap().entrySet()) {
+          var k = moduleEntry.getKey();
+          var v = moduleEntry.getValue();
+          if (COMPONENT_EXECUTOR_CLAZZ.containsKey(k)) {
+            Class<? extends AbstractEventHandler> exist = COMPONENT_EXECUTOR_CLAZZ.get(k);
+            throw new SchemaException("发现模块名冲突 " + pluginName + ":" + v.getName() + "与" + COMPONENT_EXECUTOR_CLAZZ.get(k) + ":" + exist.getName());
+          }
+        }
+
+        for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> entry : pluginPackage.getExecutorClassMap().entrySet()) {
+          var k = entry.getKey();
+          var v = entry.getValue();
+          String command = k.command();
+          if (COMMAND_EXECUTOR_RELATION.containsKey(command)) {
+            Executor annotation = COMMAND_EXECUTOR_RELATION.get(command);
+            Class<? extends EventHandlerExecutor> exist = COMPONENT_EXECUTOR_CLAZZ.get(annotation);
+            String existPluginName = MODULE_PLUGIN_RELATION.get(annotation.value());
+            throw new SchemaException("发现命令冲突 " + command + " - " + pluginName + ":" + v.getName() + "已注册为" + existPluginName + ":" + exist.getName());
+          }
+        }
+
+        logger.info("冲突检查通过 -> " + pluginName);
+
+        for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> entry : pluginPackage.getRunnerClassMap().entrySet()) {
+          var k = entry.getKey();
+          var v = entry.getValue();
+          String moduleName = k.value();
+          modules.put(moduleName, v);
+          SORTED_RUNNER.add(k);
+          COMPONENT_RUNNER_CLAZZ.put(k, v);
+          MODULE_PLUGIN_RELATION.put(moduleName, pluginName);
+          logger.info("注册定时器" + pluginName + ":" + moduleName + "[" + k.priority() + "] -> " + v.getName());
+        }
+
+        for (Map.Entry<Filter, Class<? extends EventHandlerFilter>> entry : pluginPackage.getFilterClassMap().entrySet()) {
+          var k = entry.getKey();
+          var v = entry.getValue();
+          String moduleName = k.value();
+          modules.put(moduleName, v);
+          SORTED_FILTER.add(k);
+          COMPONENT_FILTER_CLAZZ.put(k, v);
+          MODULE_PLUGIN_RELATION.put(moduleName, pluginName);
+          logger.info("注册过滤器" + pluginName + ":" + moduleName + "[" + k.priority() + "] -> " + v.getName());
+        }
+
+        for (Map.Entry<Monitor, Class<? extends EventHandlerMonitor>> entry : pluginPackage.getMonitorClassMap().entrySet()) {
+          var k = entry.getKey();
+          var v = entry.getValue();
+          String moduleName = k.value();
+          modules.put(moduleName, v);
+          SORTED_MONITOR.add(k);
+          COMPONENT_MONITOR_CLAZZ.put(k, v);
+          MODULE_PLUGIN_RELATION.put(moduleName, pluginName);
+          logger.info("注册监听器" + pluginName + ":" + moduleName + "[" + k.priority() + "] -> " + v.getName());
+        }
+
+        for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> entry : pluginPackage.getCheckerClassMap().entrySet()) {
+          var k = entry.getKey();
+          var v = entry.getValue();
+          String moduleName = k.value();
+          modules.put(moduleName, v);
+          SORTED_CHECKER.add(k);
+          COMPONENT_CHECKER_CLAZZ.put(k, v);
+          MODULE_PLUGIN_RELATION.put(moduleName, pluginName);
+          logger.info("注册检查器" + pluginName + ":" + moduleName + "[" + k.priority() + "] -> " + v.getName());
+        }
+
+        for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> entry : pluginPackage.getExecutorClassMap().entrySet()) {
+          var k = entry.getKey();
+          var v = entry.getValue();
+          String moduleName = k.value();
+          modules.put(moduleName, v);
+          COMMAND_EXECUTOR_RELATION.put(k.command(), k);
+          COMPONENT_EXECUTOR_CLAZZ.put(k, v);
+          MODULE_PLUGIN_RELATION.put(moduleName, pluginName);
+          logger.info("注册执行器" + pluginName + ":" + moduleName + "[" + k.command() + "] -> " + v.getName());
+        }
+      }
+
+      SORTED_RUNNER.sort(AnnotationEnhance::compare);
+      SORTED_FILTER.sort(AnnotationEnhance::compare);
+      SORTED_MONITOR.sort(AnnotationEnhance::compare);
+      SORTED_CHECKER.sort(AnnotationEnhance::compare);
+
+    }
+
+    //= ========================================================================
+    //=  创建模块
+
+    public void makeModule() {
+
+      logger.hint("加载定时器 " + COMPONENT_RUNNER_CLAZZ.size());
+
+      for (Runner annotation : SORTED_RUNNER) {
+        Class<? extends EventHandlerRunner> clazz = COMPONENT_RUNNER_CLAZZ.get(annotation);
+        String moduleName = annotation.value();
+        String pluginName = MODULE_PLUGIN_RELATION.get(moduleName);
+        Plugin plugin = plugins.get(pluginName);
+        URLClassLoader dependClassLoader = plugin.getDependClassLoader();
+        logger.info("加载定时器" + pluginName + ":" + moduleName + "[" + annotation.priority() + "] -> " + clazz.getName());
+        EventHandlerRunner instance;
+        try {
+          instance = clazz.getConstructor().newInstance();
+          instance.internalInit(pluginName, moduleName, dependClassLoader);
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+          throw new SchemaException("加载定时器失败 " + pluginName + ":" + moduleName + "[" + annotation.priority() + "] -> " + clazz.getName());
+        }
+
+        COMPONENT_RUNNER_INSTANCE.put(annotation, instance);
+      }
+
+      logger.hint("加载过滤器 " + COMPONENT_FILTER_CLAZZ.size());
+
+      for (Filter annotation : SORTED_FILTER) {
+        Class<? extends EventHandlerFilter> clazz = COMPONENT_FILTER_CLAZZ.get(annotation);
+        String moduleName = annotation.value();
+        String pluginName = MODULE_PLUGIN_RELATION.get(moduleName);
+        Plugin plugin = plugins.get(pluginName);
+        URLClassLoader dependClassLoader = plugin.getDependClassLoader();
+        logger.info("加载过滤器" + pluginName + ":" + moduleName + "[" + annotation.priority() + "] -> " + clazz.getName());
+        EventHandlerFilter instance;
+        try {
+          instance = clazz.getConstructor().newInstance();
+          instance.internalInit(pluginName, moduleName, dependClassLoader);
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+          throw new SchemaException("加载过滤器失败 " + MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
+        }
+        COMPONENT_FILTER_INSTANCE.put(annotation, instance);
+        if (annotation.users())
+          FILTER_USERS_CHAIN.add(instance);
+        if (annotation.group())
+          FILTER_GROUP_CHAIN.add(instance);
+      }
+
+      logger.hint("加载监听器 " + COMPONENT_MONITOR_CLAZZ.size());
+
+      for (Monitor annotation : SORTED_MONITOR) {
+        Class<? extends EventHandlerMonitor> clazz = COMPONENT_MONITOR_CLAZZ.get(annotation);
+        String moduleName = annotation.value();
+        String pluginName = MODULE_PLUGIN_RELATION.get(moduleName);
+        Plugin plugin = plugins.get(pluginName);
+        URLClassLoader dependClassLoader = plugin.getDependClassLoader();
+        logger.info("加载监听器" + pluginName + ":" + moduleName + "[" + annotation.priority() + "] -> " + clazz.getName());
+        EventHandlerMonitor instance;
+        try {
+          instance = clazz.getConstructor().newInstance();
+          instance.internalInit(pluginName, moduleName, dependClassLoader);
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+          throw new SchemaException("加载监听器失败 " + MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
+        }
+        COMPONENT_MONITOR_INSTANCE.put(annotation, instance);
+        if (annotation.users())
+          MONITOR_USERS_CHAIN.add(instance);
+        if (annotation.group())
+          MONITOR_GROUP_CHAIN.add(instance);
+      }
+
+      logger.hint("加载检查器 " + COMPONENT_CHECKER_CLAZZ.size());
+
+      for (Checker annotation : SORTED_CHECKER) {
+        Class<? extends EventHandlerChecker> clazz = COMPONENT_CHECKER_CLAZZ.get(annotation);
+        String moduleName = annotation.value();
+        String pluginName = MODULE_PLUGIN_RELATION.get(moduleName);
+        Plugin plugin = plugins.get(pluginName);
+        URLClassLoader dependClassLoader = plugin.getDependClassLoader();
+        logger.info("加载检查器" + pluginName + ":" + moduleName + "[" + annotation.priority() + "] -> " + clazz.getName());
+        EventHandlerChecker instance;
+        try {
+          instance = clazz.getConstructor().newInstance();
+          instance.internalInit(pluginName, moduleName, dependClassLoader);
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+          throw new SchemaException("加载检查器失败 " + MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
+        }
+        COMPONENT_CHECKER_INSTANCE.put(annotation, instance);
+        if (annotation.command().equals("*")) {
+          if (annotation.users())
+            GLOBAL_CHECKER_USERS_POOL.add(instance);
+          if (annotation.group())
+            GLOBAL_CHECKER_GROUP_POOL.add(instance);
+        } else {
+          if (annotation.users()) {
+            List<EventHandlerChecker> checkerList = COMMAND_CHECKER_USERS_POOL.computeIfAbsent(annotation.command(), k1 -> new CopyOnWriteArrayList<>());
+            checkerList.add(instance);
+            checkerList.sort((o1, o2) -> {
+              Checker o1Annotation = o1.getClass().getAnnotation(Checker.class);
+              Checker o2Annotation = o2.getClass().getAnnotation(Checker.class);
+              return o1Annotation.priority() - o2Annotation.priority();
+            });
+          }
+          if (annotation.group()) {
+            List<EventHandlerChecker> checkerList = COMMAND_CHECKER_GROUP_POOL.computeIfAbsent(annotation.command(), k1 -> new CopyOnWriteArrayList<>());
+            checkerList.add(instance);
+            checkerList.sort((o1, o2) -> {
+              Checker o1Annotation = o1.getClass().getAnnotation(Checker.class);
+              Checker o2Annotation = o2.getClass().getAnnotation(Checker.class);
+              return o1Annotation.priority() - o2Annotation.priority();
+            });
+          }
+        }
+      }
+
+      logger.hint("加载执行器 " + COMPONENT_EXECUTOR_CLAZZ.size());
+
+      for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> entry : COMPONENT_EXECUTOR_CLAZZ.entrySet()) {
+        Executor annotation = entry.getKey();
+        Class<? extends EventHandlerExecutor> clazz = entry.getValue();
+        String moduleName = annotation.value();
+        String pluginName = MODULE_PLUGIN_RELATION.get(moduleName);
+        Plugin plugin = plugins.get(pluginName);
+        URLClassLoader dependClassLoader = plugin.getDependClassLoader();
+        logger.info("加载执行器" + pluginName + ":" + moduleName + "[" + annotation.command() + "] -> " + clazz.getName());
+        EventHandlerExecutor instance;
+        try {
+          instance = clazz.getConstructor().newInstance();
+          instance.internalInit(pluginName, moduleName, dependClassLoader);
+          instance.buildHelp(annotation);
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+          throw new SchemaException("加载执行器失败 " + MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
+        }
+        COMPONENT_EXECUTOR_INSTANCE.put(annotation, instance);
+        if (annotation.users())
+          EXECUTOR_USERS_POOL.put(annotation.command(), instance);
+        if (annotation.group())
+          EXECUTOR_GROUP_POOL.put(annotation.command(), instance);
+      }
+
+    }
+
+    //= ========================================================================
+    //=  预载模块
+
+    public void initModule() {
+
+      logger.hint("预载定时器");
+
+      for (Runner annotation : SORTED_RUNNER) {
+        EventHandlerRunner instance = COMPONENT_RUNNER_INSTANCE.get(annotation);
+        logger.info("预载定时器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+        try {
+          instance.initWrapper();
+        } catch (Exception exception) {
+          throw new SchemaException("预载定时器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
+        }
+      }
+
+      logger.hint("预载过滤器");
+
+      for (Filter annotation : SORTED_FILTER) {
+        EventHandlerFilter instance = COMPONENT_FILTER_INSTANCE.get(annotation);
+        logger.info("预载过滤器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+        try {
+          instance.initWrapper();
+        } catch (Exception exception) {
+          throw new SchemaException("预载过滤器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
+        }
+      }
+
+      logger.hint("预载监听器");
+
+      for (Monitor annotation : SORTED_MONITOR) {
+        EventHandlerMonitor instance = COMPONENT_MONITOR_INSTANCE.get(annotation);
+        logger.info("预载监听器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+        try {
+          instance.initWrapper();
+        } catch (Exception exception) {
+          throw new SchemaException("预载监听器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
+        }
+      }
+
+      logger.hint("预载检查器");
+
+      for (Checker annotation : SORTED_CHECKER) {
+        EventHandlerChecker instance = COMPONENT_CHECKER_INSTANCE.get(annotation);
+        logger.info("预载检查器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+        try {
+          instance.initWrapper();
+        } catch (Exception exception) {
+          throw new SchemaException("预载检查器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
+        }
+      }
+
+      logger.hint("预载执行器");
+
+      for (Map.Entry<Executor, EventHandlerExecutor> entry : COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
+        Executor annotation = entry.getKey();
+        EventHandlerExecutor instance = entry.getValue();
+        logger.info("预载执行器" + annotation.value() + "[" + annotation.command() + "] -> " + instance.getClass().getName());
+        try {
+          instance.initWrapper();
+        } catch (Exception exception) {
+          throw new SchemaException("预载执行器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
+        }
+      }
+    }
+
+    //= ========================================================================
+    //=  启动模块
+
+    public void bootModule() {
+
+      logger.hint("启动定时器");
+
+      for (Runner annotation : SORTED_RUNNER) {
+        EventHandlerRunner clazz = COMPONENT_RUNNER_INSTANCE.get(annotation);
+        logger.info("启动定时器" + annotation.value() + "[" + annotation.priority() + "] -> " + clazz.getClass().getName());
+        try {
+          clazz.bootWrapper();
+        } catch (Exception exception) {
+          throw new SchemaException("启动定时器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
+        }
+      }
+
+      logger.hint("启动过滤器");
+
+      for (Filter annotation : SORTED_FILTER) {
+        EventHandlerFilter clazz = COMPONENT_FILTER_INSTANCE.get(annotation);
+        logger.info("启动过滤器" + annotation.value() + "[" + annotation.priority() + "] -> " + clazz.getClass().getName());
+        try {
+          clazz.bootWrapper();
+        } catch (Exception exception) {
+          throw new SchemaException("启动过滤器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
+        }
+      }
+
+      logger.hint("启动监听器");
+
+      for (Monitor annotation : SORTED_MONITOR) {
+        EventHandlerMonitor clazz = COMPONENT_MONITOR_INSTANCE.get(annotation);
+        logger.info("启动监听器" + annotation.value() + "[" + annotation.priority() + "] -> " + clazz.getClass().getName());
+        try {
+          clazz.bootWrapper();
+        } catch (Exception exception) {
+          throw new SchemaException("启动监听器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
+        }
+      }
+
+      logger.hint("启动检查器");
+
+      for (Checker annotation : SORTED_CHECKER) {
+        EventHandlerChecker clazz = COMPONENT_CHECKER_INSTANCE.get(annotation);
+        logger.info("启动检查器" + annotation.value() + "[" + annotation.priority() + "] -> " + clazz.getClass().getName());
+        try {
+          clazz.bootWrapper();
+        } catch (Exception exception) {
+          throw new SchemaException("启动检查器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
+        }
+      }
+
+      logger.hint("启动执行器");
+
+      for (Map.Entry<Executor, EventHandlerExecutor> entry : COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
+        Executor annotation = entry.getKey();
+        EventHandlerExecutor clazz = entry.getValue();
+        logger.info("启动执行器" + annotation.value() + "[" + annotation.command() + "] -> " + clazz.getClass().getName());
+        try {
+          clazz.bootWrapper();
+        } catch (Exception exception) {
+          throw new SchemaException("启动执行器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
+        }
+      }
+    }
+
+    //= ========================================================================
+    //=  关闭模块
+
+    public void shutModule() {
+
+      logger.hint("关闭执行器");
+
+      for (Map.Entry<Executor, EventHandlerExecutor> entry : COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
+        Executor annotation = entry.getKey();
+        EventHandlerExecutor instance = entry.getValue();
+        try {
+          if (FurryBlack.isShutModeDrop()) {
+            logger.info("丢弃执行器" + annotation.value() + "[" + annotation.command() + "] -> " + instance.getClass().getName());
+            Thread thread = new Thread(instance::shutWrapper);
+            thread.setDaemon(true);
+            thread.start();
+          } else {
+            logger.info("关闭执行器" + annotation.value() + "[" + annotation.command() + "] -> " + instance.getClass().getName());
+            instance.shutWrapper();
+          }
+        } catch (Exception exception) {
+          logger.warning("关闭执行器异常" + annotation.value() + "[" + annotation.command() + "] -> " + instance.getClass().getName(), exception);
+        }
+      }
+
+      logger.hint("关闭检查器");
+
+      List<Checker> checkers = new ArrayList<>(SORTED_CHECKER);
+      Collections.reverse(checkers);
+      for (Checker annotation : checkers) {
+        EventHandlerChecker instance = COMPONENT_CHECKER_INSTANCE.get(annotation);
+        try {
+          if (FurryBlack.isShutModeDrop()) {
+            logger.info("丢弃检查器" + annotation.value() + "[" + annotation.command() + "/" + annotation.priority() + "] -> " + instance.getClass().getName());
+            Thread thread = new Thread(instance::shutWrapper);
+            thread.setDaemon(true);
+            thread.start();
+          } else {
+            logger.info("关闭检查器" + annotation.value() + "[" + annotation.command() + "/" + annotation.priority() + "] -> " + instance.getClass().getName());
+            instance.shutWrapper();
+          }
+        } catch (Exception exception) {
+          logger.warning("关闭检查器异常" + annotation.value() + "[" + annotation.command() + "/" + annotation.priority() + "] -> " + instance.getClass().getName(), exception);
+        }
+      }
+
+      logger.hint("关闭监听器");
+
+      List<Monitor> monitors = new ArrayList<>(SORTED_MONITOR);
+      Collections.reverse(monitors);
+      for (Monitor annotation : monitors) {
+        EventHandlerMonitor instance = COMPONENT_MONITOR_INSTANCE.get(annotation);
+        try {
+          if (FurryBlack.isShutModeDrop()) {
+            logger.info("丢弃检查器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+            Thread thread = new Thread(instance::shutWrapper);
+            thread.setDaemon(true);
+            thread.start();
+          } else {
+            logger.info("关闭检查器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+            instance.shutWrapper();
+          }
+        } catch (Exception exception) {
+          logger.warning("关闭检查器异常" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName(), exception);
+        }
+      }
+
+      logger.hint("关闭过滤器");
+
+      List<Filter> filters = new ArrayList<>(SORTED_FILTER);
+      Collections.reverse(filters);
+      for (Filter annotation : filters) {
+        EventHandlerFilter instance = COMPONENT_FILTER_INSTANCE.get(annotation);
+        try {
+          if (FurryBlack.isShutModeDrop()) {
+            logger.info("丢弃过滤器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+            Thread thread = new Thread(instance::shutWrapper);
+            thread.setDaemon(true);
+            thread.start();
+          } else {
+            logger.info("关闭过滤器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+            instance.shutWrapper();
+          }
+        } catch (Exception exception) {
+          logger.warning("关闭过滤器异常" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName(), exception);
+        }
+      }
+
+      logger.hint("关闭定时器");
+
+      List<Runner> runners = new ArrayList<>(SORTED_RUNNER);
+      Collections.reverse(runners);
+      for (Runner annotation : runners) {
+        EventHandlerRunner instance = COMPONENT_RUNNER_INSTANCE.get(annotation);
+        try {
+          if (FurryBlack.isShutModeDrop()) {
+            logger.info("丢弃定时器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+            Thread thread = new Thread(instance::shutWrapper);
+            thread.setDaemon(true);
+            thread.start();
+          } else {
+            logger.info("关闭定时器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+            instance.shutWrapper();
+          }
+        } catch (Exception exception) {
+          logger.warning("关闭定时器异常" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName(), exception);
+        }
+      }
+
+    }
+
+    //= ========================================================================
+    //= 模块管理
+    //= ========================================================================
+
+    //= ========================================================================
+    //=  查询模块
+
+    public Set<Map.Entry<String, Plugin>> getAllPlugin() {
+      return plugins.entrySet();
+    }
+
+    public Set<String> listModuleName() {
+      return modules.keySet();
+    }
+
+    public Map<Runner, Boolean> listRunner() {
+      Map<Runner, Boolean> result = new LinkedHashMap<>();
+      for (Runner annotation : COMPONENT_RUNNER_CLAZZ.keySet()) {
+        result.put(annotation, COMPONENT_RUNNER_INSTANCE.containsKey(annotation));
+      }
+      return result;
+    }
+
+    public Map<Filter, Boolean> listFilter() {
+      Map<Filter, Boolean> result = new LinkedHashMap<>();
+      for (Filter annotation : COMPONENT_FILTER_CLAZZ.keySet()) {
+        result.put(annotation, COMPONENT_FILTER_INSTANCE.containsKey(annotation));
+      }
+      return result;
+    }
+
+    public Map<Monitor, Boolean> listMonitor() {
+      Map<Monitor, Boolean> result = new LinkedHashMap<>();
+      for (Monitor annotation : COMPONENT_MONITOR_CLAZZ.keySet()) {
+        result.put(annotation, COMPONENT_MONITOR_INSTANCE.containsKey(annotation));
+      }
+      return result;
+    }
+
+    public Map<Checker, Boolean> listChecker() {
+      Map<Checker, Boolean> result = new LinkedHashMap<>();
+      for (Checker annotation : COMPONENT_CHECKER_CLAZZ.keySet()) {
+        result.put(annotation, COMPONENT_CHECKER_INSTANCE.containsKey(annotation));
+      }
+      return result;
+    }
+
+    public Map<Executor, Boolean> listExecutor() {
+      Map<Executor, Boolean> result = new LinkedHashMap<>();
+      for (Executor annotation : COMPONENT_EXECUTOR_CLAZZ.keySet()) {
+        result.put(annotation, COMPONENT_EXECUTOR_INSTANCE.containsKey(annotation));
+      }
+      return result;
+    }
+
+    public List<Checker> listGlobalUsersChecker() {
+      return GLOBAL_CHECKER_USERS_POOL.stream().map(item -> item.getClass().getAnnotation(Checker.class)).toList();
+    }
+
+    public List<Checker> listGlobalGroupChecker() {
+      return GLOBAL_CHECKER_GROUP_POOL.stream().map(item -> item.getClass().getAnnotation(Checker.class)).toList();
+    }
+
+    public Map<String, List<Checker>> listCommandsUsersChecker() {
+      Map<String, List<Checker>> result = new LinkedHashMap<>();
+      for (Map.Entry<String, List<EventHandlerChecker>> entry : COMMAND_CHECKER_USERS_POOL.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        List<Checker> collect = v.stream().map(item -> item.getClass().getAnnotation(Checker.class)).toList();
+        result.put(k, collect);
+      }
+      return result;
+    }
+
+    public Map<String, List<Checker>> listCommandsGroupChecker() {
+      Map<String, List<Checker>> result = new LinkedHashMap<>();
+      for (Map.Entry<String, List<EventHandlerChecker>> entry : COMMAND_CHECKER_GROUP_POOL.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        List<Checker> collect = v.stream().map(item -> item.getClass().getAnnotation(Checker.class)).toList();
+        result.put(k, collect);
+      }
+      return result;
+    }
+
+    //= ========================================================================
+    //=  预载模块模板
+
+    private Class<? extends AbstractEventHandler> getModuleClass(String name) {
+
+      if (!modules.containsKey(name)) {
+        return null;
+      }
+
+      for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> entry : COMPONENT_RUNNER_CLAZZ.entrySet()) {
+        if (entry.getKey().value().equals(name)) {
+          return entry.getValue();
+        }
+      }
+
+      for (Map.Entry<Filter, Class<? extends EventHandlerFilter>> entry : COMPONENT_FILTER_CLAZZ.entrySet()) {
+        if (entry.getKey().value().equals(name)) {
+          return entry.getValue();
+        }
+      }
+
+      for (Map.Entry<Monitor, Class<? extends EventHandlerMonitor>> entry : COMPONENT_MONITOR_CLAZZ.entrySet()) {
+        if (entry.getKey().value().equals(name)) {
+          return entry.getValue();
+        }
+      }
+
+      for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> entry : COMPONENT_CHECKER_CLAZZ.entrySet()) {
+        if (entry.getKey().value().equals(name)) {
+          return entry.getValue();
+        }
+      }
+
+      for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> entry : COMPONENT_EXECUTOR_CLAZZ.entrySet()) {
+        if (entry.getKey().value().equals(name)) {
+          return entry.getValue();
+        }
+      }
+
+      return null;
+    }
+
+    //= ========================================================================
+    //=  获取模块实例
+
+    private AbstractEventHandler getModuleInstanceEnsure(String name) {
+      AbstractEventHandler instance = getModuleInstance(name);
+      if (instance == null) {
+        logger.info("没有找到模块实例 -> " + name + " " + (getModuleClass(name) == null ? "不存在" : "未加载"));
+      }
+      return instance;
+    }
+
+    private AbstractEventHandler getModuleInstance(String name) {
+
+      if (!modules.containsKey(name)) {
+        return null;
+      }
+
+      for (Map.Entry<Runner, EventHandlerRunner> entry : COMPONENT_RUNNER_INSTANCE.entrySet()) {
+        if (entry.getKey().value().equals(name)) {
+          return entry.getValue();
+        }
+      }
+
+      for (Map.Entry<Filter, EventHandlerFilter> entry : COMPONENT_FILTER_INSTANCE.entrySet()) {
+        if (entry.getKey().value().equals(name)) {
+          return entry.getValue();
+        }
+      }
+
+      for (Map.Entry<Monitor, EventHandlerMonitor> entry : COMPONENT_MONITOR_INSTANCE.entrySet()) {
+        if (entry.getKey().value().equals(name)) {
+          return entry.getValue();
+        }
+      }
+
+      for (Map.Entry<Checker, EventHandlerChecker> entry : COMPONENT_CHECKER_INSTANCE.entrySet()) {
+        if (entry.getKey().value().equals(name)) {
+          return entry.getValue();
+        }
+      }
+
+      for (Map.Entry<Executor, EventHandlerExecutor> entry : COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
+        if (entry.getKey().value().equals(name)) {
+          return entry.getValue();
+        }
+      }
+
+      return null;
+    }
+
+    //= ========================================================================
+    //=  预载模块
+
+    public void initModule(String name) {
+      AbstractEventHandler moduleInstance = getModuleInstanceEnsure(name);
+      if (moduleInstance == null)
+        return;
+      String instanceName = moduleInstance.getClass().getName();
+      logger.info("预载模块 " + name + " -> " + instanceName);
+      try {
+        moduleInstance.initWrapper();
+      } catch (Exception exception) {
+        logger.warning("预载模块发生错误 " + name + " " + instanceName, exception);
+      }
+    }
+
+    //= ========================================================================
+    //=  启动模块
+
+    public void bootModule(String name) {
+      AbstractEventHandler moduleInstance = getModuleInstanceEnsure(name);
+      if (moduleInstance == null)
+        return;
+      String instanceName = moduleInstance.getClass().getName();
+      logger.info("启动模块 " + name + " -> " + instanceName);
+      try {
+        moduleInstance.bootWrapper();
+      } catch (Exception exception) {
+        logger.warning("启动模块发生错误 " + name + " " + instanceName, exception);
+      }
+    }
+
+    //= ========================================================================
+    //=  关闭模块
+
+    public void shutModule(String name) {
+      AbstractEventHandler moduleInstance = getModuleInstanceEnsure(name);
+      if (moduleInstance == null)
+        return;
+      String instanceName = moduleInstance.getClass().getName();
+      logger.info("关闭模块 " + name + " -> " + instanceName);
+      try {
+        moduleInstance.shutWrapper();
+      } catch (Exception exception) {
+        logger.warning("关闭模块发生错误 " + name + " " + instanceName, exception);
+      }
+    }
+
+    //= ========================================================================
+    //=  重启模块
+
+    public void rebootModule(String name) {
+      AbstractEventHandler moduleInstance = getModuleInstanceEnsure(name);
+      if (moduleInstance == null)
+        return;
+      String instanceName = moduleInstance.getClass().getName();
+      logger.info("重启模块 " + name + " -> " + instanceName);
+      try {
+        moduleInstance.shutWrapper();
+        moduleInstance.initWrapper();
+        moduleInstance.bootWrapper();
+      } catch (Exception exception) {
+        logger.warning("重启模块发生错误 " + name + " " + instanceName, exception);
+      }
+    }
+
+    //= ========================================================================
+    //=  卸载模块
+
+    public void unloadModule(String name) {
+
+      Class<? extends AbstractEventHandler> clazz = modules.get(name);
+
+      if (clazz == null) {
+        logger.warning("不存在此名称的模块 -> " + name);
+        return;
+      }
+
+      for (Map.Entry<Runner, EventHandlerRunner> entry : COMPONENT_RUNNER_INSTANCE.entrySet()) {
+        if (entry.getKey().value().equals(name)) {
+          unloadModule(entry.getKey());
+          return;
+        }
+      }
+
+      for (Map.Entry<Filter, EventHandlerFilter> entry : COMPONENT_FILTER_INSTANCE.entrySet()) {
+        if (entry.getKey().value().equals(name)) {
+          unloadModule(entry.getKey());
+          return;
+        }
+      }
+
+      for (Map.Entry<Monitor, EventHandlerMonitor> entry : COMPONENT_MONITOR_INSTANCE.entrySet()) {
+        if (entry.getKey().value().equals(name)) {
+          unloadModule(entry.getKey());
+          return;
+        }
+      }
+
+      for (Map.Entry<Checker, EventHandlerChecker> entry : COMPONENT_CHECKER_INSTANCE.entrySet()) {
+        if (entry.getKey().value().equals(name)) {
+          unloadModule(entry.getKey());
+          return;
+        }
+      }
+
+      for (Map.Entry<Executor, EventHandlerExecutor> entry : COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
+        if (entry.getKey().value().equals(name)) {
+          unloadModule(entry.getKey());
+          return;
+        }
+      }
+
+      logger.warning("此名称的模块未加载 -> " + name);
+
+    }
+
+    private void unloadModule(Runner annotation) {
+      EventHandlerRunner instance = COMPONENT_RUNNER_INSTANCE.remove(annotation);
+      instance.setEnable(false);
+      instance.shutWrapper();
+      logger.info("定时器已卸载 -> " + printAnnotation(annotation));
+    }
+
+    private void unloadModule(Filter annotation) {
+      EventHandlerFilter instance = COMPONENT_FILTER_INSTANCE.remove(annotation);
+      instance.setEnable(false);
+      if (annotation.users())
+        FILTER_USERS_CHAIN.remove(instance);
+      if (annotation.group())
+        FILTER_GROUP_CHAIN.remove(instance);
+      instance.shutWrapper();
+      logger.info("过滤器已卸载 -> " + printAnnotation(annotation));
+    }
+
+    private void unloadModule(Monitor annotation) {
+      EventHandlerMonitor instance = COMPONENT_MONITOR_INSTANCE.remove(annotation);
+      instance.setEnable(false);
+      if (annotation.users())
+        MONITOR_USERS_CHAIN.remove(instance);
+      if (annotation.group())
+        MONITOR_GROUP_CHAIN.remove(instance);
+      instance.shutWrapper();
+      logger.info("监听器已卸载 -> " + printAnnotation(annotation));
+    }
+
+    private void unloadModule(Checker annotation) {
+      EventHandlerChecker instance = COMPONENT_CHECKER_INSTANCE.remove(annotation);
+      instance.setEnable(false);
+      if (annotation.users()) {
+        if ("*".equals(annotation.command())) {
+          GLOBAL_CHECKER_USERS_POOL.remove(instance);
+        } else {
+          COMMAND_CHECKER_USERS_POOL.get(annotation.command()).remove(instance);
+        }
+      }
+      if (annotation.group()) {
+        if ("*".equals(annotation.command())) {
+          GLOBAL_CHECKER_GROUP_POOL.remove(instance);
+        } else {
+          COMMAND_CHECKER_GROUP_POOL.get(annotation.command()).remove(instance);
+        }
+      }
+      instance.shutWrapper();
+      logger.info("检查器已卸载 -> " + printAnnotation(annotation));
+    }
+
+    private void unloadModule(Executor annotation) {
+      EventHandlerExecutor instance = COMPONENT_EXECUTOR_INSTANCE.remove(annotation);
+      instance.setEnable(false);
+      if (annotation.users())
+        EXECUTOR_USERS_POOL.remove(annotation.command());
+      if (annotation.group())
+        EXECUTOR_GROUP_POOL.remove(annotation.command());
+      COMMAND_EXECUTOR_RELATION.remove(annotation.command());
+      instance.shutWrapper();
+      logger.info("执行器已卸载 -> " + printAnnotation(annotation));
+    }
+
+    //= ========================================================================
+    //= 调试信息
+    //= ========================================================================
+
+    @SuppressWarnings("DuplicatedCode")
+    public String verboseStatus() {
+
+      StringBuilder builder = new StringBuilder();
+
+      builder.append(BRIGHT_MAGENTA).append(">> PLUGINS").append(RESET).append(LINE);
+
+      for (Map.Entry<String, Plugin> entry : plugins.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(BRIGHT_CYAN)
+          .append(k)
+          .append(":")
+          .append(toHumanHashCode(v))
+          .append(" ")
+          .append(v.getPath())
+          .append(RESET)
+          .append(LINE);
+        for (Map.Entry<String, Class<? extends AbstractEventHandler>> classEntry : v.getModules().entrySet()) {
+          var classK = classEntry.getKey();
+          var classV = classEntry.getValue();
+          builder
+            .append(classK)
+            .append(" -> ")
+            .append(classV.getName())
+            .append(":")
+            .append(toHumanHashCode(classV))
+            .append(LINE);
+        }
+      }
+
+      builder.append(BRIGHT_MAGENTA).append(">> MODULES").append(RESET).append(LINE);
+
+      for (Map.Entry<String, Class<? extends AbstractEventHandler>> entry : modules.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(k)
+          .append(" -> ")
+          .append(v.getName())
+          .append(":")
+          .append(toHumanHashCode(v))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_MAGENTA).append(">> MODULE_PLUGIN_RELATION").append(RESET).append(LINE);
+
+      for (Map.Entry<String, String> entry : MODULE_PLUGIN_RELATION.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(k)
+          .append(" -> ")
+          .append(v)
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> COMPONENT_RUNNER_CLAZZ").append(RESET).append(LINE);
+
+      for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> entry : COMPONENT_RUNNER_CLAZZ.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(printAnnotation(k))
+          .append(":")
+          .append(toHumanHashCode(k))
+          .append(" -> ")
+          .append(v.getName())
+          .append(":")
+          .append(toHumanHashCode(v))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> COMPONENT_FILTER_CLAZZ").append(RESET).append(LINE);
+
+      for (Map.Entry<Filter, Class<? extends EventHandlerFilter>> entry : COMPONENT_FILTER_CLAZZ.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(printAnnotation(k))
+          .append(":")
+          .append(toHumanHashCode(k))
+          .append(" -> ")
+          .append(v.getName())
+          .append(":")
+          .append(toHumanHashCode(v))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> COMPONENT_MONITOR_CLAZZ").append(RESET).append(LINE);
+
+      for (Map.Entry<Monitor, Class<? extends EventHandlerMonitor>> entry : COMPONENT_MONITOR_CLAZZ.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(printAnnotation(k))
+          .append(":")
+          .append(toHumanHashCode(k))
+          .append(" -> ")
+          .append(v.getName())
+          .append(":")
+          .append(toHumanHashCode(v))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> COMPONENT_CHECKER_CLAZZ").append(RESET).append(LINE);
+
+      for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> entry : COMPONENT_CHECKER_CLAZZ.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(printAnnotation(k))
+          .append(":")
+          .append(toHumanHashCode(k))
+          .append(" -> ")
+          .append(v.getName())
+          .append(":")
+          .append(toHumanHashCode(v))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> COMPONENT_EXECUTOR_CLAZZ").append(RESET).append(LINE);
+
+      for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> entry : COMPONENT_EXECUTOR_CLAZZ.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(printAnnotation(k))
+          .append(":")
+          .append(toHumanHashCode(k))
+          .append(" -> ")
+          .append(v.getName())
+          .append(":")
+          .append(toHumanHashCode(v))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> SORTED_RUNNER").append(RESET).append(LINE);
+
+      for (Runner entry : SORTED_RUNNER) {
+        builder
+          .append(printAnnotation(entry))
+          .append(":")
+          .append(toHumanHashCode(entry))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> SORTED_FILTER").append(RESET).append(LINE);
+
+      for (Filter entry : SORTED_FILTER) {
+        builder
+          .append(printAnnotation(entry))
+          .append(":")
+          .append(toHumanHashCode(entry))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> SORTED_MONITOR").append(RESET).append(LINE);
+
+      for (Monitor entry : SORTED_MONITOR) {
+        builder
+          .append(printAnnotation(entry))
+          .append(":")
+          .append(toHumanHashCode(entry))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> SORTED_CHECKER").append(RESET).append(LINE);
+
+      for (Checker entry : SORTED_CHECKER) {
+        builder
+          .append(printAnnotation(entry))
+          .append(":")
+          .append(toHumanHashCode(entry))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> COMPONENT_RUNNER_INSTANCE").append(RESET).append(LINE);
+
+      for (Map.Entry<Runner, EventHandlerRunner> entry : COMPONENT_RUNNER_INSTANCE.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(printAnnotation(k))
+          .append(":")
+          .append(toHumanHashCode(k))
+          .append(" -> ")
+          .append(v.getClass().getName())
+          .append(":")
+          .append(toHumanHashCode(v))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> COMPONENT_FILTER_INSTANCE").append(RESET).append(LINE);
+
+      for (Map.Entry<Filter, EventHandlerFilter> entry : COMPONENT_FILTER_INSTANCE.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(printAnnotation(k))
+          .append(":")
+          .append(toHumanHashCode(k))
+          .append(" -> ")
+          .append(v.getClass().getName())
+          .append(":")
+          .append(toHumanHashCode(v))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> COMPONENT_MONITOR_INSTANCE").append(RESET).append(LINE);
+
+      for (Map.Entry<Monitor, EventHandlerMonitor> entry : COMPONENT_MONITOR_INSTANCE.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(printAnnotation(k))
+          .append(":")
+          .append(toHumanHashCode(k))
+          .append(" -> ")
+          .append(v.getClass().getName())
+          .append(":")
+          .append(toHumanHashCode(v))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> COMPONENT_CHECKER_INSTANCE").append(RESET).append(LINE);
+
+      for (Map.Entry<Checker, EventHandlerChecker> entry : COMPONENT_CHECKER_INSTANCE.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(printAnnotation(k))
+          .append(":")
+          .append(toHumanHashCode(k))
+          .append(" -> ")
+          .append(v.getClass().getName())
+          .append(":")
+          .append(toHumanHashCode(v))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> COMPONENT_EXECUTOR_INSTANCE").append(RESET).append(LINE);
+
+      for (Map.Entry<Executor, EventHandlerExecutor> entry : COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(printAnnotation(k))
+          .append(":")
+          .append(toHumanHashCode(k))
+          .append(" -> ")
+          .append(v.getClass().getName())
+          .append(":")
+          .append(toHumanHashCode(v))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> FILTER_USERS_CHAIN").append(RESET).append(LINE);
+
+      for (EventHandlerFilter item : FILTER_USERS_CHAIN) {
+        builder
+          .append(item.getClass().getName())
+          .append(":")
+          .append(toHumanHashCode(item))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> FILTER_GROUP_CHAIN").append(RESET).append(LINE);
+
+      for (EventHandlerFilter item : FILTER_GROUP_CHAIN) {
+        builder
+          .append(item.getClass().getName())
+          .append(":")
+          .append(toHumanHashCode(item))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> MONITOR_USERS_CHAIN").append(RESET).append(LINE);
+
+      for (EventHandlerMonitor item : MONITOR_USERS_CHAIN) {
+        builder
+          .append(item.getClass().getName())
+          .append(":")
+          .append(toHumanHashCode(item))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> MONITOR_GROUP_CHAIN").append(RESET).append(LINE);
+
+      for (EventHandlerMonitor item : MONITOR_GROUP_CHAIN) {
+        builder
+          .append(item.getClass().getName())
+          .append(":")
+          .append(toHumanHashCode(item))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> GLOBAL_CHECKER_USERS_POOL").append(RESET).append(LINE);
+
+      for (EventHandlerChecker item : GLOBAL_CHECKER_USERS_POOL) {
+        builder
+          .append(item.getClass().getName())
+          .append(":")
+          .append(toHumanHashCode(item))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> GLOBAL_CHECKER_GROUP_POOL").append(RESET).append(LINE);
+
+      for (EventHandlerChecker item : GLOBAL_CHECKER_GROUP_POOL) {
+        builder
+          .append(item.getClass().getName())
+          .append(":")
+          .append(toHumanHashCode(item))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> COMMAND_CHECKER_USERS_POOL").append(RESET).append(LINE);
+
+      for (Map.Entry<String, List<EventHandlerChecker>> entry : COMMAND_CHECKER_USERS_POOL.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(CYAN)
+          .append(k)
+          .append(RESET)
+          .append(" ")
+          .append(v.size())
+          .append(LINE);
+        for (EventHandlerChecker checker : v) {
+          builder
+            .append(checker.getClass().getName())
+            .append(":")
+            .append(toHumanHashCode(checker))
+            .append(LINE);
+        }
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> COMMAND_CHECKER_GROUP_POOL").append(RESET).append(LINE);
+
+      for (Map.Entry<String, List<EventHandlerChecker>> entry : COMMAND_CHECKER_GROUP_POOL.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(CYAN)
+          .append(k)
+          .append(RESET)
+          .append(" ")
+          .append(v.size())
+          .append(LINE);
+        for (EventHandlerChecker checker : v) {
+          builder
+            .append(checker.getClass().getName())
+            .append(":")
+            .append(toHumanHashCode(checker))
+            .append(LINE);
+        }
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> EXECUTOR_USERS_POOL").append(RESET).append(LINE);
+
+      for (Map.Entry<String, EventHandlerExecutor> entry : EXECUTOR_USERS_POOL.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(k)
+          .append(" -> ")
+          .append(v.getClass().getName())
+          .append(":")
+          .append(toHumanHashCode(v))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> EXECUTOR_GROUP_POOL").append(RESET).append(LINE);
+
+      for (Map.Entry<String, EventHandlerExecutor> entry : EXECUTOR_GROUP_POOL.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(k)
+          .append(" -> ")
+          .append(v.getClass().getName())
+          .append(":")
+          .append(toHumanHashCode(v))
+          .append(LINE);
+      }
+
+      builder.append(BRIGHT_CYAN).append(">> COMMAND_EXECUTOR_RELATION").append(RESET).append(LINE);
+
+      for (Map.Entry<String, Executor> entry : COMMAND_EXECUTOR_RELATION.entrySet()) {
+        var k = entry.getKey();
+        var v = entry.getValue();
+        builder
+          .append(CYAN)
+          .append(k)
+          .append(RESET)
+          .append(" -> ")
+          .append(v.value())
+          .append(":")
+          .append(toHumanHashCode(v))
+          .append(" {")
+          .append(v.users() ? "U" : "")
+          .append(v.group() ? "G" : "")
+          .append("} ")
+          .append(v.outline())
+          .append(":")
+          .append(v.description())
+          .append(LINE);
+        for (String temp : v.usage()) {
+          builder
+            .append(temp)
+            .append(LINE);
+        }
+        for (String temp : v.privacy()) {
+          builder
+            .append(temp)
+            .append(LINE);
+        }
+      }
+
+      return builder.toString();
+
+    }
+
+    private static final class Plugin {
+
+      private static final Pattern PATTERN = Pattern.compile("^[\\da-z_-]{8,64}$");
+
+      private final LoggerX logger;
+
+      private final Path path;
+      private final String name;
+
+      private URLClassLoader dependClassLoader;
+      private URLClassLoader pluginClassLoader;
+
+      private Map<String, Class<? extends AbstractEventHandler>> modules;
+      private Map<Runner, Class<? extends EventHandlerRunner>> runnerClassMap;
+      private Map<Filter, Class<? extends EventHandlerFilter>> filterClassMap;
+      private Map<Monitor, Class<? extends EventHandlerMonitor>> monitorClassMap;
+      private Map<Checker, Class<? extends EventHandlerChecker>> checkerClassMap;
+      private Map<Executor, Class<? extends EventHandlerExecutor>> executorClassMap;
+
+      public static Plugin load(Path path) {
+
+        String name;
+
+        try (JarFile jarFile = new JarFile(path.toFile())) {
+
+          Manifest manifest;
+          try {
+            manifest = jarFile.getManifest();
+          } catch (IOException exception) {
+            throw new SchemaException("加载MANIFEST失败 -> " + path, exception);
+          }
+
+          Attributes attributes = manifest.getAttributes("FurryBlack-Extension");
+          if (attributes == null || attributes.isEmpty()) {
+            throw new SchemaException("加载插件失败: MANIFEST不包含FurryBlack-Extension标签组");
+          }
+
+          String loaderVersion = attributes.getValue("Loader-Version");
+
+          if (loaderVersion == null) {
+            throw new SchemaException("加载插件失败: MANIFEST中FurryBlack-Extension标签组不含Loader-Version");
+          }
+
+          if (!"1".equals(loaderVersion)) {
+            throw new SchemaException("加载插件失败: 加载器版本不符，此插件声明其版本为 " + loaderVersion);
+          }
+
+          name = attributes.getValue("Extension-Name");
+
+          if (name == null) {
+            throw new SchemaException("加载插件失败: MANIFEST中FurryBlack-Extension标签组不含Extension-Name");
+          }
+
+          if (!PATTERN.matcher(name).find()) {
+            throw new SchemaException("加载插件失败: 插件包名非法，此插件声明其名称为 " + name);
+          }
+
+        } catch (IOException | SchemaException exception) {
+          throw new SchemaException(exception);
+        }
+
+        Plugin plugin;
+        try {
+          plugin = new Plugin(path, name);
+        } catch (Exception exception) {
+          throw new SchemaException(exception);
+        }
+        return plugin;
+      }
+
+      //= ==================================================================================================================
+
+      private Plugin(Path path, String name) {
+
+        this.path = path;
+        this.name = name;
+
+        logger = LoggerXFactory.newLogger(name);
+
+      }
+
+      @SuppressWarnings("unchecked")
+      public void scan() {
+
+        //= ==================================================================================================================
+
+        Path depend = FileEnhance.get(FOLDER_DEPEND, name);
+
+        //= ==================================================================================================================
+
+        List<URL> tempURL = new LinkedList<>();
+
+        try (JarFile jarFile = new JarFile(path.toFile())) {
+
+          if (Files.exists(depend)) {
+
+            if (!Files.isDirectory(depend)) {
+              throw new SchemaException("依赖文件不是目录 -> " + depend);
+            }
+
+            List<Path> dependFiles;
+
+            try (Stream<Path> stream = Files.list(depend)) {
+              dependFiles = stream.toList();
+            } catch (IOException exception) {
+              throw new SchemaException("列出依赖文件失败 -> " + depend);
+            }
+
+            for (Path dependFile : dependFiles) {
+              if (Files.isRegularFile(dependFile)) {
+                URL url = dependFile.toUri().toURL();
+                tempURL.add(url);
+              }
+            }
+          }
+
+          URL[] urls = tempURL.toArray(new URL[0]);
+
+          logger.seek("加载依赖 -> " + depend + "[" + urls.length + "]");
+
+          dependClassLoader = new URLClassLoader(urls); // Inject with systemClassLoader in default
+
+          URL pluginURL = path.toUri().toURL();
+
+          pluginClassLoader = new URLClassLoader(new URL[]{pluginURL}, dependClassLoader);
+
+          Map<String, Class<? extends EventHandlerExecutor>> commands = new HashMap<>();
+
+          Enumeration<JarEntry> entries = jarFile.entries();
+
+          //= ==================================================================================================================
+
+          modules = new LinkedHashMap<>();
+          runnerClassMap = new LinkedHashMap<>();
+          filterClassMap = new LinkedHashMap<>();
+          monitorClassMap = new LinkedHashMap<>();
+          checkerClassMap = new LinkedHashMap<>();
+          executorClassMap = new LinkedHashMap<>();
+
+          //= ==================================================================================================================
+
+          while (entries.hasMoreElements()) {
+
+            JarEntry jarEntry = entries.nextElement();
+
+            if (jarEntry.isDirectory()) {
+              continue;
+            }
+
+            String jarEntryName = jarEntry.getName();
+
+            if (!jarEntryName.endsWith(".class")) {
+              continue;
+            }
+
+            String className = jarEntryName.substring(0, jarEntryName.length() - 6).replace("/", ".");
+
+            //= ==================================================================================================================
+
+            Class<?> clazz;
+
+            try {
+              clazz = Class.forName(className, false, pluginClassLoader);
+            } catch (ClassNotFoundException exception) {
+              logger.warning("加载类失败 " + name + ":" + className, exception);
+              continue;
+            }
+
+            if (!AbstractEventHandler.class.isAssignableFrom(clazz)) {
+              continue;
+            }
+
+            String clazzName = clazz.getName();
+
+            //= ==================================================================================================================
+
+            if (EventHandlerRunner.class.isAssignableFrom(clazz)) {
+
+              if (!clazz.isAnnotationPresent(Runner.class)) {
+                logger.warning("发现无注解模块 不予注册 " + name);
+                continue;
+              }
+
+              Runner annotation = clazz.getAnnotation(Runner.class);
+
+              String moduleName = annotation.value();
+
+              if (modules.containsKey(moduleName)) {
+                Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
+                logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
+                logger.warning("不予注册插件 " + name);
+                throw new SchemaException("发现垃圾插件 包含自冲突");
+              }
+
+              modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
+              runnerClassMap.put(annotation, (Class<? extends EventHandlerRunner>) clazz);
+              logger.info("定时器 -> " + clazzName);
+
+              continue;
+
+            } else if (EventHandlerFilter.class.isAssignableFrom(clazz)) {
+
+              if (!clazz.isAnnotationPresent(Filter.class)) {
+                logger.warning("发现无注解模块 不予注册 " + name);
+                continue;
+              }
+
+              Filter annotation = clazz.getAnnotation(Filter.class);
+
+              String moduleName = annotation.value();
+
+              if (modules.containsKey(moduleName)) {
+                Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
+                logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
+                logger.warning("不予注册插件 " + name);
+                throw new SchemaException("发现垃圾插件 包含自冲突");
+              }
+
+              if (annotation.users() || annotation.group()) {
+                modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
+                filterClassMap.put(annotation, (Class<? extends EventHandlerFilter>) clazz);
+                logger.info("过滤器 -> " + clazzName);
+              } else {
+                logger.warning("发现未启用过滤器 " + clazzName);
+              }
+
+              continue;
+
+            } else if (EventHandlerMonitor.class.isAssignableFrom(clazz)) {
+
+              if (!clazz.isAnnotationPresent(Monitor.class)) {
+                logger.warning("发现无注解模块 不予注册 " + name);
+                continue;
+              }
+
+              Monitor annotation = clazz.getAnnotation(Monitor.class);
+
+              String moduleName = annotation.value();
+
+              if (modules.containsKey(moduleName)) {
+                Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
+                logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
+                logger.warning("不予注册插件 " + name);
+                throw new SchemaException("发现垃圾插件 包含自冲突");
+              }
+
+              if (annotation.users() || annotation.group()) {
+                modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
+                monitorClassMap.put(annotation, (Class<? extends EventHandlerMonitor>) clazz);
+                logger.info("监视器 -> " + clazzName);
+              } else {
+                logger.warning("发现未启用监听器 " + clazz.getName());
+              }
+
+              continue;
+
+            } else if (EventHandlerChecker.class.isAssignableFrom(clazz)) {
+
+              if (!clazz.isAnnotationPresent(Checker.class)) {
+                logger.warning("发现无注解模块 不予注册 " + name);
+                continue;
+              }
+
+              Checker annotation = clazz.getAnnotation(Checker.class);
+
+              String moduleName = annotation.value();
+
+              if (modules.containsKey(moduleName)) {
+                Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
+                logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
+                logger.warning("不予注册插件 " + name);
+                throw new SchemaException("发现垃圾插件 包含自冲突");
+              }
+
+              if (annotation.users() || annotation.group()) {
+                modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
+                checkerClassMap.put(annotation, (Class<? extends EventHandlerChecker>) clazz);
+                logger.info("检查器 -> " + clazzName);
+              } else {
+                logger.warning("发现未启用检查器 " + clazz.getName());
+              }
+
+              continue;
+
+            } else if (EventHandlerExecutor.class.isAssignableFrom(clazz)) {
+
+              if (!clazz.isAnnotationPresent(Executor.class)) {
+                logger.warning("发现无注解模块 不予注册 " + name);
+                continue;
+              }
+
+              Executor annotation = clazz.getAnnotation(Executor.class);
+
+              String moduleName = annotation.value();
+
+              if (modules.containsKey(moduleName)) {
+                Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
+                logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
+                logger.warning("不予注册插件 " + name);
+                throw new SchemaException("发现垃圾插件 包含自冲突");
+              }
+
+              String command = annotation.command();
+
+              if (commands.containsKey(command)) {
+                Class<? extends EventHandlerExecutor> exist = commands.get(command);
+                logger.warning("发现自冲突命令 " + command + " " + clazz.getName() + " " + moduleName + " " + exist.getName());
+                logger.warning("不予注册插件 " + name);
+                throw new SchemaException("发现垃圾插件 包含自冲突");
+              }
+
+              if (annotation.users() || annotation.group()) {
+                commands.put(command, (Class<? extends EventHandlerExecutor>) clazz);
+                modules.put(moduleName, (Class<? extends AbstractEventHandler>) clazz);
+                executorClassMap.put(annotation, (Class<? extends EventHandlerExecutor>) clazz);
+                logger.info("执行器 -> " + clazzName);
+              } else {
+                logger.warning("发现未启用执行器 " + clazzName);
+              }
+
+              continue;
+
+            }
+
+            logger.warning("不支持自行创建的分支模块 不予注册 " + name + ":" + className);
+
+          }
+
+        } catch (IOException exception) {
+          throw new SchemaException(exception);
+        }
+      }
+
+      public String getName() {
+        return name;
+      }
+
+      public Path getPath() {
+        return path;
+      }
+
+      public Map<String, Class<? extends AbstractEventHandler>> getModules() {
+        return modules;
+      }
+
+      public Map<Runner, Class<? extends EventHandlerRunner>> getRunnerClassMap() {
+        return runnerClassMap;
+      }
+
+      public Map<Filter, Class<? extends EventHandlerFilter>> getFilterClassMap() {
+        return filterClassMap;
+      }
+
+      public Map<Monitor, Class<? extends EventHandlerMonitor>> getMonitorClassMap() {
+        return monitorClassMap;
+      }
+
+      public Map<Checker, Class<? extends EventHandlerChecker>> getCheckerClassMap() {
+        return checkerClassMap;
+      }
+
+      public Map<Executor, Class<? extends EventHandlerExecutor>> getExecutorClassMap() {
+        return executorClassMap;
+      }
+
+      public URLClassLoader getDependClassLoader() {
+        return dependClassLoader;
+      }
+
+      @SuppressWarnings("unused")
+      public URLClassLoader getPluginClassLoader() {
+        return pluginClassLoader;
+      }
+    }
+
+  }
+
+  //= ==================================================================================================================
+  //=
+  //= 昵称子系统
+  //=
   //= ==================================================================================================================
 
   private static class Nickname {
 
-    private static final LoggerX logger = LoggerXFactory.newLogger(Nickname.class);
+    private static final LoggerX logger = LoggerXFactory.newLogger("Nickname");
 
     private final Map<Long, String> global;
     private final Map<Long, Map<Long, String>> groups;
@@ -1557,7 +4556,8 @@ public final class FurryBlack {
         if (indexOfDot < 0) {
           logger.warning("配置无效 " + line);
           continue;
-        } if (indexOfColon < 0) {
+        }
+        if (indexOfColon < 0) {
           logger.warning("配置无效 " + line);
           continue;
         }
@@ -1597,10 +4597,12 @@ public final class FurryBlack {
       Map<Long, String> groupMap = groups.get(member.getGroup().getId());
       if (groupMap != null) {
         String nickName = groupMap.get(member.getId());
-        if (nickName != null) return nickName;
+        if (nickName != null)
+          return nickName;
       }
       String nickName = global.get(member.getId());
-      if (nickName != null) return nickName;
+      if (nickName != null)
+        return nickName;
       String nameCard = member.getNameCard();
       if (nameCard.isBlank()) {
         return member.getNick();
@@ -1613,10 +4615,12 @@ public final class FurryBlack {
       Map<Long, String> groupMap = groups.get(groupId);
       if (groupMap != null) {
         String nickName = groupMap.get(userId);
-        if (nickName != null) return nickName;
+        if (nickName != null)
+          return nickName;
       }
       String nickName = global.get(userId);
-      if (nickName != null) return nickName;
+      if (nickName != null)
+        return nickName;
       Member member = bot.getGroupOrFail(groupId).getOrFail(userId);
       String nameCard = member.getNameCard();
       if (nameCard.isBlank()) {
@@ -1629,760 +4633,463 @@ public final class FurryBlack {
   }
 
   //= ==================================================================================================================
-  //
-  //
-  //  终端系统
-  //
-  //
+  //=
+  //= 配置子系统
+  //=
   //= ==================================================================================================================
 
-  //= ==========================================================================
-  //= 控制台终端
+  //= ==================================================================================================================
+  //= 参数模块
+  //= ==================================================================================================================
 
-  private abstract static sealed class Terminal permits JlineTerminal, NoConsoleTerminal, StdinTerminal {
+  private static class Argument {
 
-    String readLine() {
-      return readLineImpl();
+    private final Properties properties;
+    private final LinkedList<String> options;
+    private final LinkedHashMap<String, String> parameters;
+
+    //= ========================================================================
+    //= 名称转换
+
+    /**
+     * a,b,c -> a-b-c for args --a-b-c xxx
+     */
+    public static String toArgumentName(String... name) {
+      String join = String.join("-", name);
+      if (NAMESPACE == null)
+        return join;
+      return NAMESPACE + "-" + join;
     }
 
-    void print(String message) {
-      printImpl(message);
+    /**
+     * a,b,c -> a.b.c for system property -Da.b.c=xxx
+     */
+    public static String toPropertyName(String... name) {
+      String join = String.join(".", name);
+      if (NAMESPACE == null)
+        return join;
+      return NAMESPACE + "." + join;
     }
 
-    void println(String message) {
-      printLineImpl(message);
+    /**
+     * a,b,c -> A_B_C for envs export A_B_C=xxx
+     */
+    public static String toEnvironmentName(String... name) {
+      String join = String.join("_", name);
+      if (NAMESPACE == null)
+        return join;
+      return (NAMESPACE + "_" + join).toUpperCase();
     }
 
-    void updateCompleter() {
-      updateCompleterImpl();
+    /**
+     * a,b,c -> a.b.c for property a.b.c=xxx no namespace
+     */
+    public static String toConfigName(String... name) {
+      return String.join(".", name);
     }
 
-    protected abstract String readLineImpl();
+    //= ========================================================================
 
-    protected abstract void printImpl(String message);
+    public static Argument parse(String[] arguments) {
 
-    protected abstract void printLineImpl(String message);
-
-    protected abstract void updateCompleterImpl();
-
-  }
-
-  //= ==========================================================================
-  //= NoConsoleTerminal
-
-  private static final class NoConsoleTerminal extends FurryBlack.Terminal {
-
-    private final OutputStreamWriter writer;
-
-    public NoConsoleTerminal() {
-      writer = new OutputStreamWriter(System.out, StandardCharsets.UTF_8);
-    }
-
-    @Override
-    protected String readLineImpl() {
-      try {
-        Thread.sleep(Long.MAX_VALUE);
-      } catch (InterruptedException exception) {
-        throw new TerminalException(exception);
+      Argument instance = new Argument();
+      int length = arguments.length;
+      for (int i = 0; i < length; i++) {
+        String argument = arguments[i].trim();
+        if (argument.startsWith("--")) {
+          if (i + 1 == length) {
+            instance.options.add(argument.substring(2));
+          } else {
+            String next = arguments[i + 1];
+            if (next.startsWith("--")) {
+              instance.options.add(argument.substring(2));
+            } else {
+              instance.parameters.put(argument.substring(2), next);
+              i++;
+            }
+          }
+        } else {
+          instance.options.add(argument);
+        }
       }
+      return instance;
+    }
+
+    //= ========================================================================
+
+    private Argument() {
+      options = new LinkedList<>();
+      parameters = new LinkedHashMap<>();
+      properties = new Properties();
+    }
+
+    //= ========================================================================
+
+    public int optionSize() {
+      return options.size();
+    }
+
+    public int parameterSize() {
+      return parameters.size();
+    }
+
+    public LinkedList<String> cloneOptions() {
+      return new LinkedList<>(options);
+    }
+
+    public LinkedHashMap<String, String> clonePrameters() {
+      return new LinkedHashMap<>(parameters);
+    }
+
+    public void append(Object key, Object value) {
+      properties.put(key.toString(), String.valueOf(value));
+    }
+
+    //= ========================================================================
+
+    @Comment(value = "查询内核选项", attention = {
+      "环境变量 > 系统属性 > 程序参数",
+    })
+    public boolean checkKernelOption(String... name) {
+      if (java.lang.System.getenv(toEnvironmentName(name)) != null)
+        return true;
+      if (java.lang.System.getProperty(toPropertyName(name)) != null)
+        return true;
+      return options.contains(toArgumentName(name));
+    }
+
+    @Comment(value = "查询内核参数", attention = {
+      "环境变量 > 系统属性 > 程序参数",
+    })
+    public String getKernelParameter(String... name) {
+      String value = java.lang.System.getenv(toEnvironmentName(name));
+      if (value != null)
+        return value;
+      value = java.lang.System.getProperty(toPropertyName(name));
+      if (value != null)
+        return value;
+      value = parameters.get(toArgumentName(name));
+      if (value != null)
+        return value;
       return null;
     }
 
-    @Override
-    protected synchronized void printImpl(String message) {
-      try {
-        writer.write(message);
-        writer.flush();
-      } catch (IOException exception) {
-        exception.printStackTrace();
-      }
+    //= ========================================================================
+
+    @Comment(value = "查询框架选项", attention = {
+      "环境变量 > 系统属性 > 程序参数 > 配置文件",
+    })
+    public boolean checkSystemOption(String... name) {
+      if (java.lang.System.getenv(toEnvironmentName(name)) != null)
+        return true;
+      if (java.lang.System.getProperty(toPropertyName(name)) != null)
+        return true;
+      if (options.contains(toArgumentName(name)))
+        return true;
+      return properties.getProperty(toConfigName(name)) != null;
     }
 
-    @Override
-    protected void printLineImpl(String message) {
-      printImpl(message + LINE);
+    @Comment(value = "查询框架参数", attention = {
+      "环境变量 > 系统属性 > 程序参数 > 配置文件",
+    })
+    public String getSystemParameter(String... name) {
+      String value = java.lang.System.getenv(toEnvironmentName(name));
+      if (value != null)
+        return value;
+      value = java.lang.System.getProperty(toPropertyName(name));
+      if (value != null)
+        return value;
+      value = parameters.get(toArgumentName(name));
+      if (value != null)
+        return value;
+      value = properties.getProperty(toConfigName(name));
+      if (value != null)
+        return value;
+      return null;
     }
 
-    @Override
-    protected void updateCompleterImpl() {
-
+    @Comment(value = "查询框架选项", attention = {
+      "环境变量 > 程序参数 > 配置文件",
+      "不读取系统配置,避免有人把密码写在命令行,导致谁都能看",
+    })
+    public boolean checkSystemOptionSafe(String... name) {
+      if (java.lang.System.getenv(toEnvironmentName(name)) != null)
+        return true;
+      if (options.contains(toArgumentName(name)))
+        return true;
+      return properties.getProperty(toConfigName(name)) != null;
     }
+
+    @Comment(value = "查询框架参数", attention = {
+      "环境变量 > 程序参数 > 配置文件",
+      "不读取系统配置,避免有人把密码写在命令行,导致谁都能看",
+    })
+    public String getSystemParameterSafe(String... name) {
+      String value = java.lang.System.getenv(toEnvironmentName(name));
+      if (value != null)
+        return value;
+      value = parameters.get(toArgumentName(name));
+      if (value != null)
+        return value;
+      value = properties.getProperty(toConfigName(name));
+      if (value != null)
+        return value;
+      return null;
+    }
+
   }
 
-  //= ==========================================================================
-  //= StdinTerminal
+  //= ==================================================================================================================
+  //= 内核参数
+  //= ==================================================================================================================
 
-  private static final class StdinTerminal extends FurryBlack.Terminal {
+  private static class KernelConfig {
 
-    private final BufferedReader reader;
-    private final OutputStreamWriter writer;
+    private volatile boolean debug;
+    private volatile boolean unsafe;
+    private boolean upgrade;
+    private boolean noLogin;
+    private boolean noJline;
+    private boolean noConsole;
+    private boolean forceExit;
 
-    public StdinTerminal() {
-      InputStreamReader inputStreamReader = new InputStreamReader(System.in, StandardCharsets.UTF_8);
-      reader = new BufferedReader(inputStreamReader);
-      writer = new OutputStreamWriter(System.out, StandardCharsets.UTF_8);
+    private String level;
+    private String provider;
+
+    public static KernelConfig getInstance(Argument argument) {
+
+      KernelConfig config = new KernelConfig();
+
+      config.debug = argument.checkKernelOption(ARGS_DEBUG);
+      config.unsafe = argument.checkKernelOption(ARGS_UNSAFE);
+      config.upgrade = argument.checkKernelOption(ARGS_UPGRADE);
+      config.noLogin = argument.checkKernelOption(ARGS_NO_LOGIN);
+      config.noJline = argument.checkKernelOption(ARGS_NO_JLINE);
+      config.noConsole = argument.checkKernelOption(ARGS_NO_CONSOLE);
+      config.forceExit = argument.checkKernelOption(ARGS_FORCE_EXIT);
+
+      config.level = argument.getKernelParameter(ARGS_LOGGER_LEVEL);
+      config.provider = argument.getKernelParameter(ARGS_LOGGER_PROVIDER);
+
+      return config;
     }
 
-    @Override
-    protected String readLineImpl() {
-      printImpl(FurryBlack.CONSOLE_PROMPT);
-      try {
-        return reader.readLine();
-      } catch (IOException exception) {
-        throw new TerminalException(exception);
-      }
-    }
-
-    @Override
-    protected synchronized void printImpl(String message) {
-      try {
-        writer.write(message);
-        writer.flush();
-      } catch (IOException exception) {
-        exception.printStackTrace();
-      }
-    }
-
-    @Override
-    protected void printLineImpl(String message) {
-      printImpl(message + LINE);
-    }
-
-    @Override
-    protected void updateCompleterImpl() {
-
-    }
+    private KernelConfig() {}
   }
 
-  //= ==========================================================================
-  //= JlineTerminal
+  //= ==================================================================================================================
+  //= 系统参数
+  //= ==================================================================================================================
 
-  private static final class JlineTerminal extends FurryBlack.Terminal {
+  private static class SystemConfig {
 
-    private final LineReader reader;
-    private final CompleterDelegate completerDelegate;
+    private static final LoggerX logger = LoggerXFactory.newLogger("Config");
 
-    public JlineTerminal() {
-      if (kernelConfig.noJline) {
-        completerDelegate = null;
-        reader = null;
+    AuthMode authMod;
+    long username;
+    String password;
+    DeviceType deviceType;
+    String deviceInfo;
+    Pattern commandRegex;
+    Integer monitorThreads;
+    Integer scheduleThreads;
+
+    static SystemConfig getInstance(Argument argument) {
+
+      SystemConfig config = new SystemConfig();
+
+      //= ======================================================================
+
+      String authMod = argument.getSystemParameter(CONF_ACCOUNT_AUTH);
+      if (authMod == null) {
+        logger.info("认证模式 -> 使用默认值");
       } else {
-        completerDelegate = new CompleterDelegate();
-        reader = LineReaderBuilder.builder().completer(completerDelegate).build();
-        AutopairWidgets autopairWidgets = new AutopairWidgets(reader);
-        autopairWidgets.enable();
-      }
-    }
-
-    @Override
-    protected String readLineImpl() {
-      return reader.readLine(FurryBlack.CONSOLE_PROMPT);
-    }
-
-    @Override
-    protected synchronized void printImpl(String message) {
-      reader.printAbove(message);
-    }
-
-    @Override
-    protected void printLineImpl(String message) {
-      printImpl(message + LINE);
-    }
-
-    @Override
-    protected void updateCompleterImpl() {
-      completerDelegate.update();
-    }
-
-    public static class CompleterDelegate implements Completer {
-
-      private Completer completer;
-
-      public CompleterDelegate() {
-        completer = buildCompleter();
+        config.authMod = AuthMode.of(authMod);
+        logger.seek("认证模式 -> " + config.authMod);
       }
 
-      @Override
-      public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
-        completer.complete(reader, line, candidates);
+      //= ======================================================================
+
+      String username = argument.getSystemParameter(CONF_ACCOUNT_USERNAME);
+      FirstBootException.require(username, CONF_ACCOUNT_USERNAME);
+      logger.seek("登录账号 -> " + username);
+      config.username = parseLong(username, () -> new InvalidConfigException("账号配置有误 -> " + username));
+
+      //= ======================================================================
+
+      if (config.authMod == AuthMode.PASSWD) {
+        String password = argument.getSystemParameterSafe(CONF_ACCOUNT_PASSWORD);
+        FirstBootException.require(password, CONF_ACCOUNT_PASSWORD);
+        config.password = password;
+        if (kernelConfig.debug) {
+          logger.warning("！！！！！！！！！！！！！！！！");
+          logger.warning("调试模式开启时会在日志中记录密码");
+          logger.warning("！！！！！！！！！！！！！！！！");
+          logger.seek("登录密码 -> " + password);
+          logger.warning("！！！！！！！！！！！！！！！！");
+          logger.warning("调试模式开启时会在日志中记录密码");
+          logger.warning("！！！！！！！！！！！！！！！！");
+        } else {
+          logger.seek("登录密码 -> " + "*".repeat(username.length()));
+        }
       }
 
-      public void update() {
-        completer = buildCompleter("", "");
+      //= ======================================================================
+
+      String deviceType = argument.getSystemParameter(CONF_DEVICE_TYPE);
+      if (deviceType == null) {
+        if (config.authMod == AuthMode.QRCODE) {
+          config.deviceType = DeviceType.WATCH;
+          logger.info("设备类型 -> 使用默认值 WATCH");
+        } else {
+          config.deviceType = DeviceType.PHONE;
+          logger.info("设备类型 -> 使用默认值 PHONE");
+        }
+      } else {
+        config.deviceType = DeviceType.of(deviceType);
+        if (config.authMod == AuthMode.QRCODE && config.deviceType != DeviceType.WATCH && config.deviceType != DeviceType.MACOS) {
+          throw new InvalidConfigException("配置无效 - 扫码认证必须使用 WATCH/MACOS 协议");
+        }
+        logger.seek("设备类型 -> " + config.deviceType);
       }
 
-      private AggregateCompleter buildCompleter(String... modules) {
-        return new AggregateCompleter(
-          new ArgumentCompleter(new StringsCompleter("help", "kill", "drop", "stop", "gc", "stack", "enable", "disable", "schema", "color")),
-          new ArgumentCompleter(new StringsCompleter("list", "send"), new StringsCompleter("users", "group")),
-          new TreeCompleter(node("level", node("MUTE", "FATAL", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "DEVELOP", "EVERYTHING"))),
-          new TreeCompleter(node("nickname", node("list", "clean", "reload", "append", "export"))),
-          new TreeCompleter(node("debug", node("enable", "disable"))),
-          new TreeCompleter(node("plugin")),
-          new TreeCompleter(node("module", node("initModule", "bootModule", "shut", "reboot", "unload", node(new StringsCompleter(modules)))))
-        );
+      //= ======================================================================
+
+      String deviceInfo = argument.getSystemParameter(CONF_DEVICE_INFO);
+      if (deviceInfo == null) {
+        logger.info("设备信息 -> 使用默认值 device.json");
+      } else {
+        if (!deviceInfo.matches("^[a-zA-Z0-9.]*$")) {
+          throw new InvalidConfigException("配置无效 - 设备信息文件名不合法 必须满足 ^[a-zA-Z0-9.]*$");
+        }
+        logger.seek("设备信息 -> " + deviceInfo);
+      }
+      Path deviceInfoPath = FileEnhance.get(FOLDER_CONFIG, deviceInfo == null ? "device.json" : deviceInfo);
+
+      if (Files.notExists(deviceInfoPath)) {
+        throw new FirstBootException("配置无效 - 设备信息文件不存在 -> " + deviceInfoPath);
       }
 
-    }
-
-  }
-
-  //= ==================================================================================================================
-  //
-  //
-  //  控制台系统
-  //
-  //
-  //= ==================================================================================================================
-
-  private static void console() {
-
-    console:
-    while (true) {
+      if (!Files.isRegularFile(deviceInfoPath)) {
+        throw new FirstBootException("配置无效 - 设备信息不是平文件 -> " + deviceInfoPath);
+      }
 
       try {
-
-        String temp = terminal.readLine();
-        if (temp == null || temp.isBlank()) continue;
-
-        Command command = new Command(temp.trim());
-
-        switch (command.getCommandName()) {
-
-          //= ==========================================================================================================
-
-          case "?":
-          case "help":
-            FurryBlack.println(CONTENT_HELP);
-            break;
-
-          //= ==========================================================================================================
-
-          case "info":
-            FurryBlack.println(CONTENT_INFO);
-            break;
-
-          //= ==========================================================================================================
-
-          case "halt":
-            if (command.getParameterLength() == 1) {
-              SHUTDOWN_HALT = Boolean.parseBoolean(command.getParameterSegment(0));
-              if (SHUTDOWN_HALT) {
-                FurryBlack.println("启动强制退出");
-              } else {
-                FurryBlack.println("关闭强制退出");
-              }
-            } else {
-              FurryBlack.println("Usage: halt enable/disable");
-            }
-            break;
-
-          //= ==========================================================================================================
-
-          case "drop":
-            SHUTDOWN_DROP = true;
-
-          case "stop":
-          case "quit":
-          case "exit":
-            Runtime.getRuntime().exit(0);
-            break console;
-
-          //= ==========================================================================================================
-
-          case "kill":
-            System.out.println("[FurryBlack][KILL]Invoke JVM halt now, Good luck.");
-            Runtime.getRuntime().halt(1);
-            break console;
-
-          //= ==========================================================================================================
-
-          case "enable":
-            EVENT_ENABLE = true;
-            FurryBlack.println("启动事件响应");
-            break;
-
-          //= ==========================================================================================================
-
-          case "disable":
-            EVENT_ENABLE = false;
-            FurryBlack.println("关闭事件响应");
-            break;
-
-          //= ==========================================================================================================
-
-          case "gc":
-          case "stat":
-          case "stats":
-          case "status":
-            long totalMemory = Runtime.getRuntime().totalMemory();
-            long freeMemory = Runtime.getRuntime().freeMemory();
-            long maxMemory = Runtime.getRuntime().maxMemory();
-            long useMemory = totalMemory - freeMemory;
-
-            String totalMemoryH = toHumanBytes(totalMemory);
-            String freeMemoryH = toHumanBytes(freeMemory);
-            String maxMemoryH = toHumanBytes(maxMemory);
-            String useMemoryH = toHumanBytes(useMemory);
-
-            // @formatter:off
-
-            FurryBlack.println(
-
-              "命名空间: " + NAMESPACE + LINE +
-              "调试开关: " + (kernelConfig.debug ? "调试模式" : "生产模式") + LINE +
-              "安全策略: " + (kernelConfig.unsafe ? "宽松策略" : "标准策略") + LINE +
-              "协议补丁: " + (kernelConfig.upgrade ? "启用升级" : "原生模式") + LINE +
-              "终端模式: " + (kernelConfig.noJline ? "精简终端" : "完整终端") + LINE +
-              "登录模式: " + (kernelConfig.noLogin ? "跳过登录" : "真实登录") + LINE +
-              "关闭策略: " + (SHUTDOWN_HALT ? "强制退出" : "正常退出") + LINE +
-              "消息事件: " + (EVENT_ENABLE ? "正常监听" : "忽略消息") + LINE +
-              "核心数量: " + Runtime.getRuntime().availableProcessors() + LINE +
-              "最大内存: " + maxMemoryH + "/" + maxMemory + LINE +
-              "已用内存: " + useMemoryH + "/" + useMemory + LINE +
-              "空闲内存: " + freeMemoryH + "/" + freeMemory + LINE +
-              "分配内存: " + totalMemoryH + "/" + totalMemory + LINE +
-              "运行时间: " + TimeTool.duration(System.currentTimeMillis() - BOOT_TIME)
-
-            );
-
-            // @formatter:on
-
-            break;
-
-          //= ==========================================================================================================
-
-          case "stack":
-
-            Map<Thread, StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
-
-            ArrayList<Map.Entry<Thread, StackTraceElement[]>> entries = new ArrayList<>(stackTraces.entrySet());
-
-            entries.sort((o1, o2) -> {
-              if (o1 == o2) return 0;
-              Thread o1Key = o1.getKey();
-              Thread o2Key = o2.getKey();
-              return (int) (o1Key.getId() - o2Key.getId());
-            });
-
-            for (Map.Entry<Thread, StackTraceElement[]> entry : entries) {
-              var k = entry.getKey();
-              var v = entry.getValue();
-              StringBuilder builder = new StringBuilder();
-              if (k.isDaemon()) {
-                builder.append("Daemon-");
-              } else {
-                builder.append("Thread-");
-              }
-              builder.append(k.getId()).append(" ").append(k.getState());
-              builder.append(" (").append(k.getName());
-              builder.append(") ").append(k.getPriority());
-              builder.append(" [").append(k.getThreadGroup().getName());
-              builder.append("]");
-              builder.append(LINE);
-              for (StackTraceElement element : v) {
-                String format = String.format("    %s:%s(%s)", element.getClassName(), element.getMethodName(), element.getLineNumber());
-                builder.append(format).append(LINE);
-              }
-              FurryBlack.println(builder);
-
-            }
-            break;
-
-          //= ==========================================================================================================
-
-          case "debug":
-            if (command.getParameterLength() == 1) {
-              switch (command.getParameterSegment(0)) {
-                case "enable" -> {
-                  kernelConfig.debug = true;
-                  FurryBlack.println("DEBUG模式启动");
-                }
-                case "disable" -> {
-                  kernelConfig.debug = false;
-                  FurryBlack.println("DEBUG模式关闭");
-                }
-              }
-            } else {
-              FurryBlack.println(kernelConfig.debug ? "DEBUG已开启" : "DEBUG已关闭");
-            }
-            break;
-
-          //= ==========================================================================================================
-
-          case "color":
-            FurryBlack.println(CONTENT_COLOR);
-            break;
-
-          //= ==========================================================================================================
-
-          case "level":
-            if (command.hasCommandBody()) {
-              String level = command.getParameterSegment(0);
-              if (LoggerX.setLevel(level)) {
-                logger.bypass("日志级别调整为 " + level);
-              } else {
-                logger.bypass("修改日志级别失败：不存在此级别，可用值为 MUTE FATAL ERROR WARN HINT SEEK INFO DEBUG VERBOSE DEVELOP EVERYTHING");
-              }
-            } else {
-              logger.bypass("可用值为 MUTE ERROR WARN HINT SEEK INFO DEBUG VERBOSE EVERYTHING");
-              logger.fatal("The quick brown fox jump over a lazy dog");
-              logger.error("The quick brown fox jump over a lazy dog");
-              logger.warning("The quick brown fox jump over a lazy dog");
-              logger.hint("The quick brown fox jump over a lazy dog");
-              logger.seek("The quick brown fox jump over a lazy dog");
-              logger.info("The quick brown fox jump over a lazy dog");
-              logger.debug("The quick brown fox jump over a lazy dog");
-              logger.verbose("The quick brown fox jump over a lazy dog");
-              logger.develop("The quick brown fox jump over a lazy dog");
-            }
-            break;
-
-          //= ==========================================================================================================
-
-          case "schema":
-            FurryBlack.println(schema.verboseStatus());
-            break;
-
-          //= ==========================================================================================================
-
-          case "plugin":
-
-            for (Map.Entry<String, Plugin> pluginEntry : schema.getAllPlugin()) {
-
-              var pluginName = pluginEntry.getKey();
-              var pluginItem = pluginEntry.getValue();
-
-              FurryBlack.println(BRIGHT_CYAN + pluginName + " " + pluginItem.getModules().size() + RESET);
-
-              Map<Runner, Class<? extends EventHandlerRunner>> runnerClassMap = pluginItem.getRunnerClassMap();
-              FurryBlack.println(GREEN + ">> 定时器 " + runnerClassMap.size() + RESET);
-              for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> classEntry : runnerClassMap.entrySet()) {
-                var moduleName = classEntry.getKey();
-                var moduleItem = classEntry.getValue();
-                FurryBlack.println(moduleName.value() + '[' + moduleName.priority() + "] -> " + moduleItem.getName());
-              }
-
-              Map<Filter, Class<? extends EventHandlerFilter>> filterClassMap = pluginItem.getFilterClassMap();
-              FurryBlack.println(GREEN + ">> 过滤器 " + filterClassMap.size() + RESET);
-              for (Map.Entry<Filter, Class<? extends EventHandlerFilter>> classEntry : filterClassMap.entrySet()) {
-                var moduleName = classEntry.getKey();
-                var moduleItem = classEntry.getValue();
-                FurryBlack.println(moduleName.value() + '[' + moduleName.priority() + "] -> " + moduleItem.getName());
-              }
-
-              Map<Monitor, Class<? extends EventHandlerMonitor>> monitorClassMap = pluginItem.getMonitorClassMap();
-              FurryBlack.println(GREEN + ">> 监听器 " + monitorClassMap.size() + RESET);
-              for (Map.Entry<Monitor, Class<? extends EventHandlerMonitor>> classEntry : monitorClassMap.entrySet()) {
-                var moduleName = classEntry.getKey();
-                var moduleItem = classEntry.getValue();
-                FurryBlack.println(moduleName.value() + '[' + moduleName.priority() + "] -> " + moduleItem.getName());
-              }
-
-              Map<Checker, Class<? extends EventHandlerChecker>> checkerClassMap = pluginItem.getCheckerClassMap();
-              FurryBlack.println(GREEN + ">> 检查器 " + checkerClassMap.size() + RESET);
-              for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> classEntry : checkerClassMap.entrySet()) {
-                var moduleName = classEntry.getKey();
-                var moduleItem = classEntry.getValue();
-                FurryBlack.println(moduleName.value() + '[' + moduleName.priority() + "](" + moduleName.command() + ") -> " + moduleItem.getName());
-              }
-
-              Map<Executor, Class<? extends EventHandlerExecutor>> executorClassMap = pluginItem.getExecutorClassMap();
-              FurryBlack.println(GREEN + ">> 执行器 " + executorClassMap.size() + RESET);
-              for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> classEntry : executorClassMap.entrySet()) {
-                var moduleName = classEntry.getKey();
-                var moduleItem = classEntry.getValue();
-                FurryBlack.println(moduleName.value() + '(' + moduleName.command() + ") -> " + moduleItem.getName());
-              }
-            }
-
-            MESSAGE_LIST_USERS = schema.generateUsersExecutorList();
-            MESSAGE_LIST_GROUP = schema.generateGroupExecutorList();
-
-            break;
-
-          //= ==================================================================================================================
-
-          case "module":
-
-            switch (command.getParameterLength()) {
-
-              case 2 -> {
-
-                switch (command.getParameterSegment(0)) {
-                  // module shut <plugin>
-                  case "shut" -> schema.shutModule(command.getParameterSegment(1));
-
-                  // module initModule <plugin>
-                  case "initModule" -> schema.initModule(command.getParameterSegment(1));
-
-                  // module bootModule <plugin>
-                  case "bootModule" -> schema.bootModule(command.getParameterSegment(1));
-
-                  // module reboot <plugin>
-                  case "reboot" -> schema.rebootModule(command.getParameterSegment(1));
-
-                  // module unload <plugin>
-                  case "unload" -> {
-                    schema.unloadModule(command.getParameterSegment(1));
-                    terminal.updateCompleter();
-                  }
-
-                }
-              }
-
-              case 0 -> {
-
-                LineBuilder builder = new LineBuilder();
-
-                Map<Runner, Boolean> listRunner = schema.listRunner();
-                builder.append(BRIGHT_CYAN + ">> 定时器 " + listRunner.size() + RESET);
-                for (Map.Entry<Runner, Boolean> entry : listRunner.entrySet()) {
-                  builder.append((entry.getValue() ? "开 " : "关 ") + entry.getKey().value());
-                }
-
-                Map<Filter, Boolean> listFilter = schema.listFilter();
-                builder.append(BRIGHT_CYAN + ">> 过滤器 " + listFilter.size() + RESET);
-                for (Map.Entry<Filter, Boolean> entry : listFilter.entrySet()) {
-                  builder.append((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
-                }
-
-                Map<Monitor, Boolean> listMonitor = schema.listMonitor();
-                builder.append(BRIGHT_CYAN + ">> 监听器 " + listMonitor.size() + RESET);
-                for (Map.Entry<Monitor, Boolean> entry : listMonitor.entrySet()) {
-                  builder.append((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
-                }
-
-                Map<Checker, Boolean> listChecker = schema.listChecker();
-                builder.append(BRIGHT_CYAN + ">> 检查器 " + listChecker.size() + RESET);
-                for (Map.Entry<Checker, Boolean> entry : listChecker.entrySet()) {
-                  builder.append((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]" + "{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
-                }
-
-                Map<Executor, Boolean> listExecutor = schema.listExecutor();
-                builder.append(BRIGHT_CYAN + ">> 执行器 " + listExecutor.size() + RESET);
-                for (Map.Entry<Executor, Boolean> entry : listExecutor.entrySet()) {
-                  builder.append((entry.getValue() ? "开 " : "关 ") + entry.getKey().value() + "[" + entry.getKey().command() + "]{" + (entry.getKey().users() ? "U" : "") + (entry.getKey().group() ? "G" : "") + "}");
-                }
-
-                List<Checker> globalUsersChecker = schema.listGlobalUsersChecker();
-                builder.append(BRIGHT_CYAN + ">> 全局私聊检查器 " + globalUsersChecker.size() + RESET);
-                for (Checker annotation : globalUsersChecker) {
-                  builder.append(annotation.value());
-                }
-
-                List<Checker> globalGroupChecker = schema.listGlobalGroupChecker();
-                builder.append(BRIGHT_CYAN + ">> 全局群聊检查器 " + globalGroupChecker.size() + RESET);
-                for (Checker annotation : globalGroupChecker) {
-                  builder.append("  " + annotation.value());
-                }
-
-                Map<String, List<Checker>> listCommandUsersChecker = schema.listCommandsUsersChecker();
-                builder.append(BRIGHT_CYAN + ">> 有限私聊检查器 " + listCommandUsersChecker.size() + RESET);
-                for (Map.Entry<String, List<Checker>> entry : listCommandUsersChecker.entrySet()) {
-                  builder.append(entry.getKey() + " " + entry.getValue().size());
-                  for (Checker item : entry.getValue()) {
-                    builder.append("  " + item.value());
-                  }
-                }
-
-                Map<String, List<Checker>> listCommandGroupChecker = schema.listCommandsGroupChecker();
-                builder.append(BRIGHT_CYAN + ">> 有限群聊检查器 " + listCommandGroupChecker.size() + RESET);
-                for (Map.Entry<String, List<Checker>> entry : listCommandGroupChecker.entrySet()) {
-                  builder.append(entry.getKey() + " " + entry.getValue().size());
-                  for (Checker item : entry.getValue()) {
-                    builder.append("  " + item.value());
-                  }
-                }
-
-                builder.append(BRIGHT_CYAN + ">> 私聊命令列表" + RESET);
-                builder.append(MESSAGE_LIST_USERS);
-                builder.append(BRIGHT_CYAN + ">> 群聊命令列表" + RESET);
-                builder.append(MESSAGE_LIST_GROUP);
-
-                FurryBlack.println(builder);
-
-              }
-            }
-
-            MESSAGE_LIST_USERS = schema.generateUsersExecutorList();
-            MESSAGE_LIST_GROUP = schema.generateGroupExecutorList();
-
-            break;
-
-          //= ==================================================================================================================
-
-          case "nickname":
-
-            if (!command.hasCommandBody()) break;
-
-            switch (command.getParameterSegment(0)) {
-
-              case "list" -> {
-                FurryBlack.println(BRIGHT_CYAN + "全局昵称" + RESET);
-                for (Map.Entry<Long, String> entry : nickname.getNicknameGlobal().entrySet()) {
-                  FurryBlack.println(entry.getKey() + ":" + entry.getValue());
-                }
-                FurryBlack.println(BRIGHT_CYAN + "群内昵称" + RESET);
-                for (Map.Entry<Long, Map<Long, String>> groupsEntry : nickname.getNicknameGroups().entrySet()) {
-                  FurryBlack.println("> " + groupsEntry.getKey());
-                  for (Map.Entry<Long, String> nicknameEntry : groupsEntry.getValue().entrySet()) {
-                    FurryBlack.println(nicknameEntry.getKey() + ":" + nicknameEntry.getValue());
-                  }
-                }
-              }
-
-              case "clean" -> {
-                nickname.cleanNickname();
-                FurryBlack.println("昵称已清空");
-              }
-
-              case "append" -> {
-                nickname.appendNickname();
-                FurryBlack.println("昵称已续加");
-              }
-
-              case "reload" -> {
-                nickname.cleanNickname();
-                nickname.appendNickname();
-                FurryBlack.println("昵称已重载");
-              }
-
-              case "export" -> {
-                Path path = FileEnhance.get(FOLDER_CONFIG, "export-" + TimeTool.format("yyyy-MM-dd HH-mm-ss") + ".txt");
-                LineBuilder builder = new LineBuilder();
-                ContactList<Friend> friends = getFriends();
-                builder.append("# 好友 ", friends.size());
-                for (Friend friend : friends) {
-                  builder.append("*.", friend.getId(), ":", friend.getNick());
-                }
-                ContactList<Group> groups = getGroups();
-                builder.append("# 群组 ", groups.size());
-                for (Group group : groups) {
-                  long groupId = group.getId();
-                  builder.append("# ", group.getName(), " ", group.getOwner().getId());
-                  for (NormalMember member : group.getMembers()) {
-                    String nameCard = member.getNameCard();
-                    if (nameCard.isEmpty()) {
-                      builder.append(groupId, ".", member.getId(), ":", member.getNick());
-                    } else {
-                      builder.append(groupId, ".", member.getId(), ":", member.getNick(), "[", nameCard, "]");
-                    }
-                  }
-                }
-                Files.writeString(path, builder.toString());
-                FurryBlack.println("昵称已导出 -> " + path);
-              }
-            }
-            break;
-
-          //= ==================================================================================================================
-
-          case "list":
-
-            if (!command.hasCommandBody()) break;
-
-            switch (command.getParameterSegment(0)) {
-
-              case "u", "usr", "user", "users", "f", "fri", "friend", "friends" -> {
-                List<Friend> friends = FurryBlack.getFriends().stream().filter(item -> item.getId() != getBotID()).toList();
-                if (friends.size() == 0) {
-                  FurryBlack.println("你没有朋友");
-                  break;
-                }
-                friends.stream()
-                  .map(FurryBlack::getFormattedNickName)
-                  .forEach(FurryBlack::println);
-              }
-
-              case "g", "grp", "group", "groups" -> {
-                ContactList<Group> groups = FurryBlack.getGroups();
-                if (groups.size() == 0) {
-                  FurryBlack.println("你没有群组");
-                  break;
-                }
-                groups.stream()
-                  .map(item -> item.getName() + "(" + item.getId() + ") " + item.getMembers().size() + "人")
-                  .forEach(FurryBlack::println);
-              }
-
-              default -> {
-                long group;
-                try {
-                  group = Long.parseLong(command.getParameterSegment(0));
-                } catch (Exception exception) {
-                  FurryBlack.println("命令发生异常 省略group需要指定群号");
-                  break;
-                }
-                FurryBlack.getGroup(group).getMembers().stream()
-                  .sorted((_$1, _$2) -> _$2.getPermission().getLevel() - _$1.getPermission().getLevel())
-                  .forEach(item -> {
-                    StringBuilder builder = new StringBuilder();
-                    builder.append(item.getNameCard());
-                    builder.append(" - ");
-                    builder.append(FurryBlack.getFormattedNickName(item));
-                    switch (item.getPermission().getLevel()) {
-                      case 2 -> builder.append(" 群主");
-                      case 1 -> builder.append(" 管理");
-                    }
-                    FurryBlack.println(builder);
-                  });
-              }
-            }
-            break;
-
-          //= ==================================================================================================================
-
-          case "send":
-
-            if (!command.hasCommandBody()) break;
-
-            switch (command.getParameterSegment(0)) {
-
-              case "u":
-              case "usr":
-              case "user":
-              case "users":
-              case "f":
-              case "fri":
-              case "friend":
-              case "friends":
-                long user = Long.parseLong(command.getParameterSegment(1));
-                FurryBlack.sendUserMessage(user, command.join(2));
-                break;
-
-              case "g":
-              case "grp":
-              case "group":
-              case "groups":
-                long group = Long.parseLong(command.getParameterSegment(1));
-                FurryBlack.sendGroupMessage(group, command.join(2));
-                break;
-
-              default:
-                group = Long.parseLong(command.getParameterSegment(0));
-                user = Long.parseLong(command.getParameterSegment(1));
-                FurryBlack.sendAtMessage(group, user, command.join(2));
-            }
-            break;
-
-        }
-
-      } catch (UserInterruptException exception) {
-        return;
-      } catch (Exception exception) {
-        logger.error("命令导致了异常", exception);
+        config.deviceInfo = Files.readString(deviceInfoPath);
+      } catch (IOException exception) {
+        throw new CoreException("配置无效 - 设备信息文件无法读取 -> " + deviceInfoPath, exception);
       }
+
+      //= ======================================================================
+
+      String commandRegex = argument.getSystemParameter(CONF_COMMAND_REGEX);
+      if (commandRegex == null) {
+        config.commandRegex = Pattern.compile("^/[a-zA-Z0-9]{2,16}");
+        logger.info("命令正则 -> 使用默认值 ^/[a-zA-Z0-9]{2,16}");
+      } else {
+        config.commandRegex = Pattern.compile(commandRegex);
+        logger.seek("命令正则 -> " + commandRegex);
+      }
+
+      //= ======================================================================
+
+      String monitorThreads = argument.getSystemParameter(CONF_THREADS_MONITOR);
+      if (monitorThreads == null) {
+        config.monitorThreads = CPU_CORES;
+        logger.info("监听器池 -> 使用系统值 " + CPU_CORES);
+      } else {
+        config.monitorThreads = parseInt(monitorThreads, () -> new InvalidConfigException("监听器池配置有误 -> " + monitorThreads));
+        if (config.monitorThreads <= 0) {
+          config.monitorThreads = CPU_CORES;
+          logger.seek("监听器池 -> 使用自动值 " + config.monitorThreads);
+        } else {
+          logger.seek("监听器池 -> " + config.monitorThreads);
+        }
+      }
+
+      //= ======================================================================
+
+      String scheduleThreads = argument.getSystemParameter(CONF_THREADS_SCHEDULE);
+      if (scheduleThreads == null) {
+        config.scheduleThreads = CPU_CORES;
+        logger.info("定时器池 -> 使用系统值 " + CPU_CORES);
+      } else {
+        config.scheduleThreads = parseInt(scheduleThreads, () -> new InvalidConfigException("定时器池配置有误 -> " + scheduleThreads));
+        if (config.scheduleThreads <= 0) {
+          config.scheduleThreads = CPU_CORES;
+          logger.seek("定时器池 -> 使用自动值 " + config.monitorThreads);
+        } else {
+          logger.seek("定时器池 -> " + config.scheduleThreads);
+        }
+      }
+
+      //= ======================================================================
+
+      return config;
     }
+
+    private SystemConfig() {}
 
   }
 
   //= ==================================================================================================================
-  //
-  //
-  //  公共API
-  //
-  //
+  //= 认证模式
+  //= ==================================================================================================================
+
+  private enum AuthMode {
+
+    PASSWD,
+    QRCODE,
+    ;
+
+    public static AuthMode of(String value) {
+      return switch (value.toLowerCase()) {
+        case "code", "qrcode", "scancode" -> QRCODE;
+        case "pass", "passwd", "password" -> PASSWD;
+        default -> throw new InvalidConfigException("ERROR: No such AuthMode -> " + value);
+      };
+    }
+  }
+
+  //= ==================================================================================================================
+  //= 设备类型
+  //= ==================================================================================================================
+
+  private enum DeviceType {
+
+    PAD,
+    PHONE,
+    WATCH,
+    IPAD,
+    MACOS,
+    ;
+
+    public static DeviceType of(String value) {
+      return switch (value.toLowerCase()) {
+        case "pad", "android_pad" -> PAD;
+        case "phone", "android_phone" -> PHONE;
+        case "watch", "android_watch" -> WATCH;
+        case "ipad" -> IPAD;
+        case "macos" -> MACOS;
+        default -> throw new InvalidConfigException("ERROR: No such DeviceType -> " + value);
+      };
+    }
+
+    public BotConfiguration.MiraiProtocol toMiraiProtocol() {
+      return switch (this) {
+        case PAD -> BotConfiguration.MiraiProtocol.ANDROID_PAD;
+        case PHONE -> BotConfiguration.MiraiProtocol.ANDROID_PHONE;
+        case WATCH -> BotConfiguration.MiraiProtocol.ANDROID_WATCH;
+        case IPAD -> BotConfiguration.MiraiProtocol.IPAD;
+        case MACOS -> BotConfiguration.MiraiProtocol.MACOS;
+      };
+    }
+  }
+
+  //= ==================================================================================================================
+  //=
+  //= 公共API
+  //=
   //= ==================================================================================================================
 
   //= ==========================================================================
@@ -2390,13 +5097,15 @@ public final class FurryBlack {
 
   @Comment("在终端打印消息")
   public static void terminalPrint(Object message) {
-    if (message == null) return;
+    if (message == null)
+      return;
     terminal.print(message.toString());
   }
 
   @Comment("在终端打印消息")
   public static void println(Object message) {
-    if (message == null) return;
+    if (message == null)
+      return;
     terminal.println(message.toString());
   }
 
@@ -2406,6 +5115,11 @@ public final class FurryBlack {
   @Comment("框架运行状态")
   public static boolean isDebug() {
     return kernelConfig.debug;
+  }
+
+  @Comment("框架运行状态")
+  public static boolean isNoJline() {
+    return kernelConfig.noJline;
   }
 
   @Comment("框架运行状态")
@@ -2507,16 +5221,6 @@ public final class FurryBlack {
     return SCHEDULE_SERVICE.scheduleWithFixedDelay(runnable, initialDelay, delay, unit);
   }
 
-  @Comment("提交明天开始的等间隔定时任务")
-  public static ScheduledFuture<?> scheduleAtNextDayFixedRate(Runnable runnable, long period, TimeUnit unit) {
-    return SCHEDULE_SERVICE.scheduleAtFixedRate(runnable, TimeTool.timeToTomorrow(), period, unit);
-  }
-
-  @Comment("提交明天开始的等延迟定时任务")
-  public static ScheduledFuture<?> scheduleWithNextDayFixedDelay(Runnable runnable, long delay, TimeUnit unit) {
-    return SCHEDULE_SERVICE.scheduleWithFixedDelay(runnable, TimeTool.timeToTomorrow(), delay, unit);
-  }
-
   //= ==========================================================================
   //= 昵称子系统
 
@@ -2585,7 +5289,8 @@ public final class FurryBlack {
   @Comment("发送私聊消息")
   public static void sendUserMessage(long id, Message message) {
     User user = getFriend(id);
-    if (user == null) user = getStrangerOrFail(id);
+    if (user == null)
+      user = getStrangerOrFail(id);
     sendMessage(user, message);
   }
 
@@ -2853,424 +5558,5 @@ public final class FurryBlack {
   public static void solveNewFriendRequestEvent(long eventId, long fromId, String fromNick, boolean accept, boolean blackList) {
     Mirai.getInstance().solveNewFriendRequestEvent(bot, eventId, fromId, fromNick, accept, blackList);
   }
-
-  //= ==================================================================================================================
-  //=
-  //=
-  //= 配置管理
-  //=
-  //=
-  //= ==================================================================================================================
-
-  //= ==================================================================================================================
-  //= 名称转换
-
-  /**
-   * a,b,c -> a-b-c for args --a-b-c xxx
-   */
-  public static String toArgumentName(String... name) {
-    String join = String.join("-", name);
-    if (NAMESPACE == null) return join;
-    return NAMESPACE + "-" + join;
-  }
-
-  /**
-   * a,b,c -> a.b.c for system property -Da.b.c=xxx
-   */
-  public static String toPropertyName(String... name) {
-    String join = String.join(".", name);
-    if (NAMESPACE == null) return join;
-    return NAMESPACE + "." + join;
-  }
-
-  /**
-   * a,b,c -> A_B_C for envs export A_B_C=xxx
-   */
-  public static String toEnvironmentName(String... name) {
-    String join = String.join("_", name);
-    if (NAMESPACE == null) return join;
-    return (NAMESPACE + "_" + join).toUpperCase();
-  }
-
-  /**
-   * a,b,c -> a.b.c for property a.b.c=xxx no namespace
-   */
-  public static String toConfigName(String... name) {
-    return String.join(".", name);
-  }
-
-  //= ==================================================================================================================
-  //= 配置存储
-
-  private static class FurryBlackArgument {
-
-    private final Properties properties;
-    private final LinkedList<String> options;
-    private final LinkedHashMap<String, String> parameters;
-
-    //= ========================================================================
-
-    private static FurryBlackArgument parse(String[] arguments) {
-
-      FurryBlackArgument instance = new FurryBlackArgument();
-      int length = arguments.length;
-      for (int i = 0; i < length; i++) {
-        String argument = arguments[i].trim();
-        if (argument.startsWith("--")) {
-          if (i + 1 == length) {
-            instance.options.add(argument.substring(2));
-          } else {
-            String next = arguments[i + 1];
-            if (next.startsWith("--")) {
-              instance.options.add(argument.substring(2));
-            } else {
-              instance.parameters.put(argument.substring(2), next);
-              i++;
-            }
-          }
-        } else {
-          instance.options.add(argument);
-        }
-      }
-      return instance;
-    }
-
-    //= ========================================================================
-
-    private FurryBlackArgument() {
-      options = new LinkedList<>();
-      parameters = new LinkedHashMap<>();
-      properties = new Properties();
-    }
-
-    //= ========================================================================
-
-    @Comment(value = "查询内核选项", attention = {
-      "环境变量 > 系统属性 > 程序参数",
-    })
-    private boolean checkKernelOption(String... name) {
-      if (System.getenv(toEnvironmentName(name)) != null) return true;
-      if (System.getProperty(toPropertyName(name)) != null) return true;
-      return options.contains(toArgumentName(name));
-    }
-
-    @Comment(value = "查询内核参数", attention = {
-      "环境变量 > 系统属性 > 程序参数",
-    })
-    private String getKernelParameter(String... name) {
-      String value = System.getenv(toEnvironmentName(name));
-      if (value != null) return value;
-      value = System.getProperty(toPropertyName(name));
-      if (value != null) return value;
-      value = parameters.get(toArgumentName(name));
-      if (value != null) return value;
-      return null;
-    }
-
-    //= ========================================================================
-
-    @Comment(value = "查询框架选项", attention = {
-      "环境变量 > 系统属性 > 程序参数 > 配置文件",
-    })
-    private boolean checkSystemOption(String... name) {
-      if (System.getenv(toEnvironmentName(name)) != null) return true;
-      if (System.getProperty(toPropertyName(name)) != null) return true;
-      if (options.contains(toArgumentName(name))) return true;
-      return properties.getProperty(toConfigName(name)) != null;
-    }
-
-    @Comment(value = "查询框架参数", attention = {
-      "环境变量 > 系统属性 > 程序参数 > 配置文件",
-    })
-    private String getSystemParameter(String... name) {
-      String value = System.getenv(toEnvironmentName(name));
-      if (value != null) return value;
-      value = System.getProperty(toPropertyName(name));
-      if (value != null) return value;
-      value = parameters.get(toArgumentName(name));
-      if (value != null) return value;
-      value = properties.getProperty(toConfigName(name));
-      if (value != null) return value;
-      return null;
-    }
-
-    @Comment(value = "查询框架选项", attention = {
-      "环境变量 > 程序参数 > 配置文件",
-      "不读取系统配置,避免有人把密码写在命令行,导致谁都能看",
-    })
-    private boolean checkSystemOptionSafe(String... name) {
-      if (System.getenv(toEnvironmentName(name)) != null) return true;
-      if (options.contains(toArgumentName(name))) return true;
-      return properties.getProperty(toConfigName(name)) != null;
-    }
-
-    @Comment(value = "查询框架参数", attention = {
-      "环境变量 > 程序参数 > 配置文件",
-      "不读取系统配置,避免有人把密码写在命令行,导致谁都能看",
-    })
-    private String getSystemParameterSafe(String... name) {
-      String value = System.getenv(toEnvironmentName(name));
-      if (value != null) return value;
-      value = parameters.get(toArgumentName(name));
-      if (value != null) return value;
-      value = properties.getProperty(toConfigName(name));
-      if (value != null) return value;
-      return null;
-    }
-
-  }
-
-  //= ==================================================================================================================
-  //= 内核配置
-
-  private static class FurryBlackKernelConfig {
-
-    volatile boolean debug;
-    volatile boolean unsafe;
-    boolean upgrade;
-    boolean noLogin;
-    boolean noJline;
-    boolean noConsole;
-    boolean forceExit;
-
-    String level;
-    private String provider;
-
-    private static FurryBlackKernelConfig getInstance(FurryBlackArgument argument) {
-
-      FurryBlackKernelConfig config = new FurryBlackKernelConfig();
-
-      config.debug = argument.checkKernelOption(ARGS_DEBUG);
-      config.unsafe = argument.checkKernelOption(ARGS_UNSAFE);
-      config.upgrade = argument.checkKernelOption(ARGS_UPGRADE);
-      config.noLogin = argument.checkKernelOption(ARGS_NO_LOGIN);
-      config.noJline = argument.checkKernelOption(ARGS_NO_JLINE);
-      config.noConsole = argument.checkKernelOption(ARGS_NO_CONSOLE);
-      config.forceExit = argument.checkKernelOption(ARGS_FORCE_EXIT);
-
-      config.level = argument.getKernelParameter(ARGS_LOGGER_LEVEL);
-      config.provider = argument.getKernelParameter(ARGS_LOGGER_PROVIDER);
-
-      return config;
-    }
-
-    private FurryBlackKernelConfig() {
-
-    }
-  }
-
-  //= ==================================================================================================================
-  //= 框架配置
-
-  private static class FurryBlackSystemConfig {
-
-    private static final LoggerX logger = LoggerXFactory.newLogger(FurryBlackSystemConfig.class);
-
-    private AuthMode authMod;
-    private long username;
-    private String password;
-    private DeviceType deviceType;
-    private String deviceInfo;
-    private Pattern commandRegex;
-    private Integer monitorThreads;
-    private Integer scheduleThreads;
-
-    public static FurryBlackSystemConfig getInstance(FurryBlackArgument argument) {
-
-      FurryBlackSystemConfig config = new FurryBlackSystemConfig();
-
-      //= ======================================================================
-
-      String authMod = argument.getSystemParameter(CONF_ACCOUNT_AUTH);
-      if (authMod == null) {
-        logger.info("认证模式 -> 使用默认值");
-      } else {
-        config.authMod = AuthMode.of(authMod);
-        logger.seek("认证模式 -> " + config.authMod);
-      }
-
-      //= ======================================================================
-
-      String username = argument.getSystemParameter(CONF_ACCOUNT_USERNAME);
-      FirstBootException.require(username, CONF_ACCOUNT_USERNAME);
-      logger.seek("登录账号 -> " + username);
-      config.username = parseLong(username, () -> new InvalidConfigException("账号配置有误 -> " + username));
-
-      //= ======================================================================
-
-      if (config.authMod == AuthMode.PASSWD) {
-        String password = argument.getSystemParameterSafe(CONF_ACCOUNT_PASSWORD);
-        FirstBootException.require(password, CONF_ACCOUNT_PASSWORD);
-        config.password = password;
-        if (kernelConfig.debug) {
-          logger.warning("！！！！！！！！！！！！！！！！");
-          logger.warning("调试模式开启时会在日志中记录密码");
-          logger.warning("！！！！！！！！！！！！！！！！");
-          logger.seek("登录密码 -> " + password);
-          logger.warning("！！！！！！！！！！！！！！！！");
-          logger.warning("调试模式开启时会在日志中记录密码");
-          logger.warning("！！！！！！！！！！！！！！！！");
-        } else {
-          logger.seek("登录密码 -> " + "*".repeat(username.length()));
-        }
-      }
-
-      //= ======================================================================
-
-      String deviceType = argument.getSystemParameter(CONF_DEVICE_TYPE);
-      if (deviceType == null) {
-        if (config.authMod == AuthMode.QRCODE) {
-          config.deviceType = DeviceType.WATCH;
-          logger.info("设备类型 -> 使用默认值 WATCH");
-        } else {
-          config.deviceType = DeviceType.PHONE;
-          logger.info("设备类型 -> 使用默认值 PHONE");
-        }
-      } else {
-        config.deviceType = DeviceType.of(deviceType);
-        if (config.authMod == AuthMode.QRCODE && config.deviceType != DeviceType.WATCH && config.deviceType != DeviceType.MACOS) {
-          throw new InvalidConfigException("配置无效 - 扫码认证必须使用 WATCH/MACOS 协议");
-        }
-        logger.seek("设备类型 -> " + config.deviceType);
-      }
-
-      //= ======================================================================
-
-      String deviceInfo = argument.getSystemParameter(CONF_DEVICE_INFO);
-      if (deviceInfo == null) {
-        logger.info("设备信息 -> 使用默认值 device.json");
-      } else {
-        if (!deviceInfo.matches("^[a-zA-Z0-9.]*$")) {
-          throw new InvalidConfigException("配置无效 - 设备信息文件名不合法 必须满足 ^[a-zA-Z0-9.]*$");
-        }
-        logger.seek("设备信息 -> " + deviceInfo);
-      }
-      Path deviceInfoPath = FileEnhance.get(FOLDER_CONFIG, deviceInfo == null ? "device.json" : deviceInfo);
-
-      if (Files.notExists(deviceInfoPath)) {
-        throw new FirstBootException("配置无效 - 设备信息文件不存在 -> " + deviceInfoPath);
-      }
-
-      if (!Files.isRegularFile(deviceInfoPath)) {
-        throw new FirstBootException("配置无效 - 设备信息不是平文件 -> " + deviceInfoPath);
-      }
-
-      try {
-        config.deviceInfo = Files.readString(deviceInfoPath);
-      } catch (IOException exception) {
-        throw new CoreException("配置无效 - 设备信息文件无法读取 -> " + deviceInfoPath, exception);
-      }
-
-      //= ======================================================================
-
-      String commandRegex = argument.getSystemParameter(CONF_COMMAND_REGEX);
-      if (commandRegex == null) {
-        config.commandRegex = Pattern.compile("^/[a-zA-Z0-9]{2,16}");
-        logger.info("命令正则 -> 使用默认值 ^/[a-zA-Z0-9]{2,16}");
-      } else {
-        config.commandRegex = Pattern.compile(commandRegex);
-        logger.seek("命令正则 -> " + commandRegex);
-      }
-
-      //= ======================================================================
-
-      String monitorThreads = argument.getSystemParameter(CONF_THREADS_MONITOR);
-      if (monitorThreads == null) {
-        config.monitorThreads = CPU_CORES;
-        logger.info("监听器池 -> 使用系统值 " + CPU_CORES);
-      } else {
-        config.monitorThreads = parseInt(monitorThreads, () -> new InvalidConfigException("监听器池配置有误 -> " + monitorThreads));
-        if (config.monitorThreads <= 0) {
-          config.monitorThreads = CPU_CORES;
-          logger.seek("监听器池 -> 使用自动值 " + config.monitorThreads);
-        } else {
-          logger.seek("监听器池 -> " + config.monitorThreads);
-        }
-      }
-
-      //= ======================================================================
-
-      String scheduleThreads = argument.getSystemParameter(CONF_THREADS_SCHEDULE);
-      if (scheduleThreads == null) {
-        config.scheduleThreads = CPU_CORES;
-        logger.info("定时器池 -> 使用系统值 " + CPU_CORES);
-      } else {
-        config.scheduleThreads = parseInt(scheduleThreads, () -> new InvalidConfigException("定时器池配置有误 -> " + scheduleThreads));
-        if (config.scheduleThreads <= 0) {
-          config.scheduleThreads = CPU_CORES;
-          logger.seek("定时器池 -> 使用自动值 " + config.monitorThreads);
-        } else {
-          logger.seek("定时器池 -> " + config.scheduleThreads);
-        }
-      }
-
-      //= ======================================================================
-
-      return config;
-    }
-
-    private FurryBlackSystemConfig() {
-
-    }
-
-    //= ========================================================================
-
-    private enum AuthMode {
-
-      PASSWD,
-      QRCODE,
-      ;
-
-      private static AuthMode of(String value) {
-        return switch (value.toLowerCase()) {
-          case "code", "qrcode", "scancode" -> QRCODE;
-          case "pass", "passwd", "password" -> PASSWD;
-          default -> throw new InvalidConfigException("ERROR: No such AuthMode -> " + value);
-        };
-      }
-    }
-
-    //= ========================================================================
-
-    private enum DeviceType {
-
-      PAD,
-      PHONE,
-      WATCH,
-      IPAD,
-      MACOS,
-      ;
-
-      private static DeviceType of(String value) {
-        return switch (value.toLowerCase()) {
-          case "pad", "android_pad" -> PAD;
-          case "phone", "android_phone" -> PHONE;
-          case "watch", "android_watch" -> WATCH;
-          case "ipad" -> IPAD;
-          case "macos" -> MACOS;
-          default -> throw new InvalidConfigException("ERROR: No such DeviceType -> " + value);
-        };
-      }
-
-      private BotConfiguration.MiraiProtocol toMiraiProtocol() {
-        return switch (this) {
-          case PAD -> BotConfiguration.MiraiProtocol.ANDROID_PAD;
-          case PHONE -> BotConfiguration.MiraiProtocol.ANDROID_PHONE;
-          case WATCH -> BotConfiguration.MiraiProtocol.ANDROID_WATCH;
-          case IPAD -> BotConfiguration.MiraiProtocol.IPAD;
-          case MACOS -> BotConfiguration.MiraiProtocol.MACOS;
-        };
-      }
-    }
-
-  }
-
-  //= ==================================================================================================================
-  //=
-  //=
-  //= 辅助功能
-  //=
-  //=
-  //= ==================================================================================================================
 
 }

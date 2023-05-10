@@ -1,6 +1,6 @@
 package studio.blacktech.furryblackplus.core.common.enhance;
 
-import studio.blacktech.furryblackplus.common.Comment;
+import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 
 import java.io.File;
 import java.io.IOException;

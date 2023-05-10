@@ -15,7 +15,7 @@
 
 package studio.blacktech.furryblackplus.core.exception;
 
-import studio.blacktech.furryblackplus.common.Comment;
+import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 
 @Comment(value = "基础异常", attention = "RuntimeException")
 public class CoreException extends RuntimeException {

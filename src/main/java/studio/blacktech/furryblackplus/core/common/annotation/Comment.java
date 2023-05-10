@@ -13,7 +13,7 @@
  * General Public License along with this program in README or LICENSE.
  */
 
-package studio.blacktech.furryblackplus.common;
+package studio.blacktech.furryblackplus.core.common.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

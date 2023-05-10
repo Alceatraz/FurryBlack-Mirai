@@ -15,7 +15,7 @@
 
 package studio.blacktech.furryblackplus.core.exception.system;
 
-import studio.blacktech.furryblackplus.common.Comment;
+import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 import studio.blacktech.furryblackplus.core.exception.schema.SchemaException;
 
 @Comment("初次启动,缺少必要的配置项目")
