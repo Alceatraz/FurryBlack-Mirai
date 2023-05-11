@@ -156,6 +156,7 @@ import static studio.blacktech.furryblackplus.core.handler.annotation.Annotation
 @Comment(
   value = "FurryBlack - Mirai",
   usage = {
+    "A Mirai wrapper QQ-Bot framework make with love and 🧦",
     "电子白熊会梦到仿生老黑吗",
     "Alceatraz Warprays @ BlackTechStudio",
     "个人主页 https://www.blacktech.studio",
@@ -163,7 +164,7 @@ import static studio.blacktech.furryblackplus.core.handler.annotation.Annotation
     "插件地址 https://github.com/Alceatraz/FurryBlack-Mirai-Extensions",
   },
   attention = {
-    "!!!本项目并非使用纯AGPLv3协议，请认真阅读LICENSE!!!"
+    "!!!本项目并非使用纯AGPLv3协议, 请认真阅读LICENSE!!!"
   }
 )
 public class FurryBlack {
@@ -193,7 +194,7 @@ public class FurryBlack {
   private static final String[] CONF_ACCOUNT_AUTH = {"account", "auth"};
   private static final String[] CONF_ACCOUNT_USERNAME = {"account", "username"};
   private static final String[] CONF_ACCOUNT_PASSWORD = {"account", "password"};
-  private static final String[] CONF_COMMAND_REGEX = {"command", "prefix"};
+  private static final String[] CONF_COMMAND_REGEX = {"command", "regex"};
   private static final String[] CONF_THREADS_MONITOR = {"threads", "monitor"};
   private static final String[] CONF_THREADS_SCHEDULE = {"threads", "schedule"};
 
@@ -257,72 +258,112 @@ public class FurryBlack {
 
       // @formatter:off
 
-      YELLOW + "FurryBlack Mirai - ver " + APP_VERSION + RESET + LINE +
-      BRIGHT_CYAN + "# FurryBlack 启动参数 ===========================" + RESET + LINE +
-      "--debug       使用DEBUG模式启动" + LINE +
-      "--unsafe      允许一些危险的调用" + LINE +
-      "--no-login    使用离线模式，仅用于基础调试，功能基本都不可用" + LINE +
-      "--no-console  不使用控制台，唯一正常关闭方式是使用进程信号" + LINE +
-      "--no-jline    不使用jline控制台，使用BufferedReader" + LINE +
-      "--force-exit  关闭流程执行后，强制结束JVM(halt)" + LINE +
+"# ==============================================================================" + RESET + LINE +
 
-      BRIGHT_CYAN + "# FurryBlack 系统参数 ===========================" + RESET + LINE +
-      "furryblack.logger.level 日志等级" + LINE +
+"FurryBlack Mirai - ver " + APP_VERSION + RESET + LINE +
 
-      BRIGHT_CYAN + "# FurryBlack 控制台  ===========================" + RESET + LINE +
-      RED + "⚠ 控制台任何操作都属于底层操作可以直接对框架进行不安全和非法的操作" + RESET + LINE +
-      "安全：设计如此，不会导致异常或者不可预测的结果" + LINE +
-      "风险：功能设计上是安全操作，但是具体被操作对象可能导致错误" + LINE +
-      "危险：没有安全性检查的操作，可能会让功能严重异常导致被迫重启或损坏模块的数据存档" + LINE +
-      "高危：后果完全未知的危险操作，或者正常流程中不应该如此操作但是控制台仍然可以强制执行" + LINE +
+BRIGHT_CYAN +
 
-      GREEN + "# 系统管理 ==========================================" + RESET + LINE +
-      "level (安全) 修改控制台日志打印等级，日志不受影响(可能导致漏掉ERR/WARN信息)" + LINE +
-      "stat  (安全) 查看性能状态" + LINE +
-      "stop  (安全) 正常退出，完整执行关闭流程，等待模块结束，等待线程池结束，等待所有线程" + LINE +
-      "drop  (高危) 强制退出，不等待插件关闭完成，不等待线程池结束，且最终强制结束JVM(halt)" + LINE +
-      "kill  (高危) 命令执行后直接强制结束JVM(halt)，不会进行任何关闭操作" + LINE +
+"# FurryBlack 交互模式* ==========================================================" + RESET + LINE +
+"--help ------------------------------ 显示帮助" + LINE +
+"--info ------------------------------ 显示版本" + LINE +
+"--color ----------------------------- 显示颜色" + LINE +
+"*: 交互模式是模仿unix软件的信息显示功能, 执行后退出" + LINE +
 
-      GREEN + "# 功能管理 ==========================================" + RESET + LINE +
-      "enable  (安全) 启用消息事件处理 正常响应消息" + LINE +
-      "disable (安全) 停用消息事件处理 无视任何消息" + LINE +
+BRIGHT_CYAN +
+"# FurryBlack 启动参数 ===========================================================" + RESET + LINE +
+"--debug ----------------------------- 选项 启动DEBUG模式*" + LINE +
+"--unsafe ---------------------------- 选项 允许一些正常模式下禁止的调用" + LINE +
+"--no-login -------------------------- 选项 跳过客户端登录,大部分功能不可用" + LINE +
+"--no-jline -------------------------- 选项 不使用jline终端" + LINE +
+"--no-console ------------------------ 选项 不使用终端" + LINE +
+"--force-exit ------------------------ 选项 关闭后将强退JVM*" + LINE +
+"--logger-level ---------------------- 参数 设置启动后的日志级别*" + LINE +
+"--logger-provider ------------------- 参数 使用指定的日志后端" + LINE +
+YELLOW +
+"*: 可在启动后通过终端修改,参数的目的是启动初始化阶段即应用" + LINE +
+"**: 选项: 键存在即可, 参数: 必须是键值对 例如 --logger-level MUTE" + RESET + LINE +
 
-      GREEN + "# 好友相关 ==========================================" + RESET + LINE +
-      "list users   (安全) 列出好友" + LINE +
-      "list group   (安全) 列出群组" + LINE +
-      "list <group> (安全) 列出成员" + LINE +
+BRIGHT_CYAN +
+"# FurryBlack 参数传递 ===========================================================" + RESET + LINE +
+"例如 foo bar 参数 可由三种方式传递" + LINE +
+"环境变量 export FOO_BAR -------------- 转换为大写 下划线拼接" + LINE +
+"系统配置 -Dfoo.bar ------------------- 转换为小写 中横线拼接" + LINE +
+"程序参数 --foo-bar ------------------- 转换为小写 英句号拼接" + LINE +
+"配置文件 foo.bar --------------------- 转换为小写 英句号拼接" + LINE +
 
-      GREEN + "# 昵称相关 ==========================================" + RESET + LINE +
-      "nickname list (安全) 列出昵称" + LINE +
-      "nickname clean (安全) 清空昵称" + LINE +
-      "nickname append (安全) 加载且合并昵称" + LINE +
-      "nickname reload (安全) 清空且加载昵称" + LINE +
+BRIGHT_CYAN +
+"# FurryBlack 命名空间 ===========================================================" + RESET + LINE +
+"程序参数 --namespace xxx 可将参数传递时的所有键添加前缀, 例如:" + LINE +
+"环境变量 export XXX_FOO_BAR ---------- 转换为大写 下划线拼接" + LINE +
+"系统配置 -Dxxx.foo.bar --------------- 转换为小写 中横线拼接" + LINE +
+"程序参数 --xxx-foo-bar --------------- 转换为小写 英句号拼接" + LINE +
+"配置文件 foo.bar --------------------- 转换为小写 英句号拼接" + LINE +
+YELLOW +
+"*: 配置文件内名称不受命名空间影响" + RESET + LINE +
 
-      GREEN + "# 发送消息 ==========================================" + RESET + LINE +
-      "send users <users> <消息>  (安全) 向好友发送消息" + LINE +
-      "send group <group> <消息>  (安全) 向群聊发送消息" + LINE +
-      "send <group> <user> <消息> (安全) 向群聊发送AT消息" + LINE +
+BRIGHT_CYAN +
+"# FurryBlack 覆盖参数 ===========================================================" + RESET + LINE +
+"参数优先级 环境变量 > 系统配置 > 程序参数 > 配置文件 " + LINE +
+"account.auth ----------------------- 认证模式 PASSWD/QRCODE" + LINE +
+"account.username ------------------- 账号, 必填" + LINE +
+"account.password* ------------------ 密码, QRCODE模式不填" + LINE +
+"device.type ------------------------ 设备类型, IPAD/MACOS/PAD/PHONE/WATCH" + LINE +
+"device.info ------------------------ 设备信息, 使用Aoki生成" + LINE +
+"command.prefix --------------------- 命令识别正则" + LINE +
+"threads.monitor -------------------- 监听器线程池" + LINE +
+"threads.schedule ------------------- 定时器线程池" + LINE +
+YELLOW +
+"*: 为了避免有人把密码写在命令行导致所有人都能在task里看见, 密码不从系统配置或程序参数读取" + LINE +
+"*: 如若执意要如此使用, 需要使用unsafe配置项, 解锁安全限制后使用, 强烈反对使用因其极度危险" + RESET + LINE +
 
-      GREEN + "# 模型管理 ==========================================" + RESET + LINE +
-      "schema (安全) 详细显示插件和模块" + LINE +
+BRIGHT_CYAN +
+"# FurryBlack 控制台  ============================================================" + RESET + LINE +
+RED +
+"⚠ 控制台任何操作都属于底层操作可以直接对框架进行不安全和非法的操作" + RESET + LINE +
+"安全: 设计如此, 不会导致异常或者不可预测的结果" + LINE +
+"风险: 功能设计上是安全操作, 但是具体被操作对象可能导致错误" + LINE +
+"危险: 没有安全性检查的操作, 可能会让功能严重异常导致被迫重启或损坏模块的数据存档" + LINE +
+"高危: 后果完全未知的危险操作, 或者正常流程中不应该如此操作但是控制台仍然可以强制执行" + LINE +
 
-      GREEN + "# 插件管理 ==========================================" + RESET + LINE +
-      "plugin (安全) 列出插件" + LINE +
+BRIGHT_CYAN +
+"# 框架内核 ======================================================================" + RESET + LINE +
+"? ----------------------------------- (安全) 显示本帮助信息" + LINE +
+"help -------------------------------- (安全) 显示本帮助信息" + LINE +
+"gc ---------------------------------- (安全) 显示系统运行状态" + LINE +
+"status ------------------------------ (安全) 显示系统运行状态" + LINE +
+"system status ----------------------- (安全) 显示系统运行状态" + LINE +
+"system stacks ----------------------- (安全) 打印所有运行中的线程" + LINE +
+"system debug [enable|disable] ------- (安全) 切换DEBUG开关状态" + LINE +
+"system power-off -------------------- (安全) 正常关闭系统 直接执行" + LINE +
+"system rapid-stop ------------------- (危险) 快速关闭系统 直接执行" + LINE +
+"system force-exit ------------------- (高危) 直接杀死系统 二次确认" + LINE +
 
-      GREEN + "# 模块管理 ==========================================" + RESET + LINE +
-      "module (安全) 列出模块" + LINE +
+BRIGHT_CYAN +
+"# 插件系统 ======================================================================" + RESET + LINE +
+YELLOW +
+"※ Runner可能会被依赖, 底层操作框架不检查依赖, 有可能导致关联模块崩溃" + RESET + LINE +
+"schema event [enable|disable] ------- (安全) 启用消息事件处理 正常响应消息" + LINE +
+"schema ------------------------------ (安全) 显示插件机制注册状态" + LINE +
+"schema plugin ----------------------- (安全) 列出所有插件" + LINE +
+"schema module ----------------------- (安全) 列出所有模块" + LINE +
+"schema module init ------------------ (风险) 执行模块预载流程 无视状态直接执行" + LINE +
+"schema module boot ------------------ (风险) 执行模块启动流程 无视状态直接执行" + LINE +
+"schema module shut ------------------ (风险) 执行模块关闭流程 无视状态直接执行" + LINE +
+"schema module reboot ---------------- (风险) 执行模块重启流程 无视状态直接执行" + LINE +
+"schema module unload ---------------- (风险) 彻底卸载模块实例 无视状态直接执行" + LINE +
 
-      GREEN + "※ Runner可能会被依赖，底层操作框架不检查依赖，有可能导致关联模块崩溃" + RESET + LINE +
-      "module unload <名称> (风险) 卸载指定模块(执行 shut + 从处理链中移除)" + LINE +
-      "module reboot <名称> (风险) 重启指定模块(执行 shut + init + boot)" + LINE +
-      "module shut   <名称> (风险) 关闭指定模块(执行 shut)" + LINE +
-      "module init   <名称> (风险) 预载指定模块(执行 init)" + LINE +
-      "module boot   <名称> (风险) 启动指定模块(执行 boot)" + LINE +
+BRIGHT_CYAN +
+"# 昵称系统 ======================================================================" + RESET + LINE +
+"nickname list ----------------------- (安全) 列出昵称" + LINE +
+"nickname clean ---------------------- (安全) 清空昵称" + LINE +
+"nickname append --------------------- (安全) 加载且合并昵称" + LINE +
+"nickname reload --------------------- (安全) 清空且加载昵称" + LINE +
 
-      GREEN + "# 调试功能 ==========================================" + RESET + LINE +
-      "debug [enable|disable] (风险) DEBUG开关，打印DEBUG输出和控制某些功能，插件如果不遵守标准开发可能会导致崩溃"
+BRIGHT_CYAN +
+"# ==============================================================================" + RESET
 
-      // @formatter:on
+    // @formatter:on
 
     ;
 
@@ -439,7 +480,7 @@ public class FurryBlack {
 
   private static LoggerX logger;
   private static Terminal terminal;
-  private static Dispatcher dispather;
+  private static Dispatcher dispatcher;
 
   private static Bot bot;
   private static Schema schema;
@@ -564,7 +605,7 @@ public class FurryBlack {
 
     System.out.println("[FurryBlack][ARGS] 参数 -> " + argument.parameterSize());
 
-    for (Map.Entry<String, String> entry : argument.clonePrameters().entrySet()) {
+    for (Map.Entry<String, String> entry : argument.cloneParameters().entrySet()) {
       String k = entry.getKey();
       String v = entry.getValue();
       System.out.println("[FurryBlack][ARGS]    " + k + "=" + v);
@@ -1365,24 +1406,18 @@ public class FurryBlack {
     //= 控制台子系统
     //= ================================================================================================================
 
-    dispather = new Dispatcher();
+    dispatcher = new Dispatcher();
 
     //= ========================================================================
 
-    dispather.registerFunction()
-      .command("info")
-      .function(it -> FurryBlack.println(CONTENT_HELP));
-
-    //= ========================================================================
-
-    dispather.registerFunction()
+    dispatcher.registerFunction()
       .command("help")
       .command("?")
       .function(it -> FurryBlack.println(CONTENT_HELP));
 
     //= ========================================================================
 
-    dispather.registerFunction()
+    dispatcher.registerFunction()
       .command("system", "status")
       .command("status")
       .command("gc")
@@ -1422,8 +1457,8 @@ public class FurryBlack {
         );
       });
 
-    dispather.registerFunction()
-      .command("system", "dump")
+    dispatcher.registerFunction()
+      .command("system", "stacks")
       .function(it -> {
 
         Map<Thread, StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
@@ -1458,17 +1493,7 @@ public class FurryBlack {
 
     //= ========================================================================
 
-    dispather.registerFunction()
-      .command("system", "power-off")
-      .command("stop")
-      .function(it -> {
-        FurryBlack.println(YELLOW + "CONSOLE invoke -> shutdown" + RESET);
-        Runtime.getRuntime().exit(0);
-      });
-
-    //= ========================================================================
-
-    dispather.registerExclusive()
+    dispatcher.registerExclusive()
       .command("system", "debug")
       .function(it -> {
         if (it == null) {
@@ -1490,7 +1515,17 @@ public class FurryBlack {
 
     //= ========================================================================
 
-    dispather.registerFunction()
+    dispatcher.registerFunction()
+      .command("system", "power-off")
+      .command("stop")
+      .function(it -> {
+        FurryBlack.println(YELLOW + "CONSOLE invoke -> shutdown" + RESET);
+        Runtime.getRuntime().exit(0);
+      });
+
+    //= ========================================================================
+
+    dispatcher.registerFunction()
       .command("system", "rapid-stop")
       .function(it -> {
         SHUTDOWN_DROP = true;
@@ -1508,7 +1543,7 @@ public class FurryBlack {
 
     //= ========================================================================
 
-    dispather.registerFunction()
+    dispatcher.registerFunction()
       .command("kill")
       .function(command -> {
         FurryBlack.println(RED + "💀 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 💀" + RESET);
@@ -1526,7 +1561,7 @@ public class FurryBlack {
 
     //= ========================================================================
 
-    dispather.registerFunction()
+    dispatcher.registerFunction()
       .command("system", "force-exit")
       .function(command -> {
         if (SHUTDOWN_KILL) {
@@ -1556,7 +1591,7 @@ public class FurryBlack {
 
     //= ========================================================================
 
-    dispather.registerExclusive()
+    dispatcher.registerExclusive()
       .command("logger", "level")
       .function(it -> {
         if (it == null) {
@@ -1592,13 +1627,35 @@ public class FurryBlack {
 
     //= ========================================================================
 
-    dispather.registerFunction()
+    dispatcher.registerFunction()
       .command("schema")
       .function(it -> FurryBlack.println(schema.verboseStatus()));
 
     //= ========================================================================
 
-    dispather.registerExclusive()
+    dispatcher.registerExclusive()
+      .command("schema", "event")
+      .function(it -> {
+        if (it == null) {
+          FurryBlack.println("SCHEMA模式, 是否响应消息事件 -> " + (KERNEL_DEBUG ? "已开启" : "已关闭"));
+        } else {
+          switch (it.getOrEmpty(0).toLowerCase()) {
+            case "enable" -> {
+              kernelConfig.debug = true;
+              FurryBlack.println("SCHEMA模式: 启动");
+            }
+            case "disable" -> {
+              kernelConfig.debug = false;
+              FurryBlack.println("SCHEMA模式: 关闭");
+            }
+            default -> FurryBlack.println("USAGE: system debug enable|disable");
+          }
+        }
+      });
+
+    //= ========================================================================
+
+    dispatcher.registerExclusive()
       .command("schema", "plugin")
       .function(it -> {
 
@@ -1658,7 +1715,7 @@ public class FurryBlack {
 
     //= ========================================================================
 
-    dispather.registerExclusive()
+    dispatcher.registerExclusive()
       .command("schema", "module")
       .function(it -> {
 
@@ -1756,15 +1813,13 @@ public class FurryBlack {
 
     //= ========================================================================
 
-    dispather.registerFunction()
+    dispatcher.registerFunction()
       .command("nickname")
-      .function(it -> {
-        FurryBlack.println("USAGE: nickname list|load|clean|reload|export");
-      });
+      .function(it -> FurryBlack.println("USAGE: nickname list|load|clean|reload|export"));
 
     //= ========================================================================
 
-    dispather.registerExclusive()
+    dispatcher.registerExclusive()
       .command("nickname", "list")
       .function(it -> {
         FurryBlack.println(BRIGHT_CYAN + "全局昵称 " + nickname.getNicknameGlobal().size() + RESET);
@@ -1782,15 +1837,16 @@ public class FurryBlack {
 
     //= ========================================================================
 
-    dispather.registerExclusive()
+    dispatcher.registerExclusive()
       .command("nickname", "clean")
       .function(it -> {
         nickname.cleanNickname();
         FurryBlack.println("昵称已清空");
       });
+
     //= ========================================================================
 
-    dispather.registerExclusive()
+    dispatcher.registerExclusive()
       .command("nickname", "append")
       .function(it -> {
         nickname.appendNickname();
@@ -1799,7 +1855,7 @@ public class FurryBlack {
 
     //= ========================================================================
 
-    dispather.registerExclusive()
+    dispatcher.registerExclusive()
       .command("nickname", "reload")
       .function(it -> {
         nickname.cleanNickname();
@@ -1809,7 +1865,7 @@ public class FurryBlack {
 
     //= ========================================================================
 
-    dispather.registerExclusive()
+    dispatcher.registerExclusive()
       .command("nickname", "export")
       .function(it -> {
         Path path = FileEnhance.get(FOLDER_CONFIG, "export-" + FORMATTER.format(Instant.now()) + ".txt");
@@ -1849,8 +1905,9 @@ public class FurryBlack {
         if (readLine == null || readLine.isBlank()) {
           continue;
         }
+        readLine = readLine.trim();
         try {
-          boolean exist = dispather.execute(readLine);
+          boolean exist = dispatcher.execute(readLine);
           if (!exist) {
             logger.error("命令不存在 -> " + readLine);
           }
@@ -3006,10 +3063,8 @@ public class FurryBlack {
           throw new SchemaException("加载过滤器失败 " + MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
         }
         COMPONENT_FILTER_INSTANCE.put(annotation, instance);
-        if (annotation.users())
-          FILTER_USERS_CHAIN.add(instance);
-        if (annotation.group())
-          FILTER_GROUP_CHAIN.add(instance);
+        if (annotation.users()) FILTER_USERS_CHAIN.add(instance);
+        if (annotation.group()) FILTER_GROUP_CHAIN.add(instance);
       }
 
       logger.hint("加载监听器 " + COMPONENT_MONITOR_CLAZZ.size());
@@ -3029,10 +3084,8 @@ public class FurryBlack {
           throw new SchemaException("加载监听器失败 " + MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
         }
         COMPONENT_MONITOR_INSTANCE.put(annotation, instance);
-        if (annotation.users())
-          MONITOR_USERS_CHAIN.add(instance);
-        if (annotation.group())
-          MONITOR_GROUP_CHAIN.add(instance);
+        if (annotation.users()) MONITOR_USERS_CHAIN.add(instance);
+        if (annotation.group()) MONITOR_GROUP_CHAIN.add(instance);
       }
 
       logger.hint("加载检查器 " + COMPONENT_CHECKER_CLAZZ.size());
@@ -3053,10 +3106,8 @@ public class FurryBlack {
         }
         COMPONENT_CHECKER_INSTANCE.put(annotation, instance);
         if (annotation.command().equals("*")) {
-          if (annotation.users())
-            GLOBAL_CHECKER_USERS_POOL.add(instance);
-          if (annotation.group())
-            GLOBAL_CHECKER_GROUP_POOL.add(instance);
+          if (annotation.users()) GLOBAL_CHECKER_USERS_POOL.add(instance);
+          if (annotation.group()) GLOBAL_CHECKER_GROUP_POOL.add(instance);
         } else {
           if (annotation.users()) {
             List<EventHandlerChecker> checkerList = COMMAND_CHECKER_USERS_POOL.computeIfAbsent(annotation.command(), k1 -> new CopyOnWriteArrayList<>());
@@ -3098,10 +3149,8 @@ public class FurryBlack {
           throw new SchemaException("加载执行器失败 " + MODULE_PLUGIN_RELATION.get(moduleName) + ":" + moduleName + " " + clazz.getName());
         }
         COMPONENT_EXECUTOR_INSTANCE.put(annotation, instance);
-        if (annotation.users())
-          EXECUTOR_USERS_POOL.put(annotation.command(), instance);
-        if (annotation.group())
-          EXECUTOR_GROUP_POOL.put(annotation.command(), instance);
+        if (annotation.users()) EXECUTOR_USERS_POOL.put(annotation.command(), instance);
+        if (annotation.group()) EXECUTOR_GROUP_POOL.put(annotation.command(), instance);
       }
 
     }
@@ -3441,38 +3490,27 @@ public class FurryBlack {
 
     private Class<? extends AbstractEventHandler> getModuleClass(String name) {
 
-      if (!modules.containsKey(name)) {
-        return null;
-      }
+      if (!modules.containsKey(name)) return null;
 
       for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> entry : COMPONENT_RUNNER_CLAZZ.entrySet()) {
-        if (entry.getKey().value().equals(name)) {
-          return entry.getValue();
-        }
+        if (entry.getKey().value().equals(name)) return entry.getValue();
       }
 
       for (Map.Entry<Filter, Class<? extends EventHandlerFilter>> entry : COMPONENT_FILTER_CLAZZ.entrySet()) {
-        if (entry.getKey().value().equals(name)) {
-          return entry.getValue();
-        }
+        if (entry.getKey().value().equals(name)) return entry.getValue();
       }
 
       for (Map.Entry<Monitor, Class<? extends EventHandlerMonitor>> entry : COMPONENT_MONITOR_CLAZZ.entrySet()) {
-        if (entry.getKey().value().equals(name)) {
-          return entry.getValue();
-        }
+        if (entry.getKey().value().equals(name)) return entry.getValue();
+
       }
 
       for (Map.Entry<Checker, Class<? extends EventHandlerChecker>> entry : COMPONENT_CHECKER_CLAZZ.entrySet()) {
-        if (entry.getKey().value().equals(name)) {
-          return entry.getValue();
-        }
+        if (entry.getKey().value().equals(name)) return entry.getValue();
       }
 
       for (Map.Entry<Executor, Class<? extends EventHandlerExecutor>> entry : COMPONENT_EXECUTOR_CLAZZ.entrySet()) {
-        if (entry.getKey().value().equals(name)) {
-          return entry.getValue();
-        }
+        if (entry.getKey().value().equals(name)) return entry.getValue();
       }
 
       return null;
@@ -4180,7 +4218,7 @@ public class FurryBlack {
           }
 
           if (!"1".equals(loaderVersion)) {
-            throw new SchemaException("加载插件失败: 加载器版本不符，此插件声明其版本为 " + loaderVersion);
+            throw new SchemaException("加载插件失败: 加载器版本不符, 此插件声明其版本为 " + loaderVersion);
           }
 
           name = attributes.getValue("Extension-Name");
@@ -4190,7 +4228,7 @@ public class FurryBlack {
           }
 
           if (!PATTERN.matcher(name).find()) {
-            throw new SchemaException("加载插件失败: 插件包名非法，此插件声明其名称为 " + name);
+            throw new SchemaException("加载插件失败: 插件包名非法, 此插件声明其名称为 " + name);
           }
 
         } catch (IOException | SchemaException exception) {
@@ -4736,7 +4774,7 @@ public class FurryBlack {
       return new LinkedList<>(options);
     }
 
-    public LinkedHashMap<String, String> clonePrameters() {
+    public LinkedHashMap<String, String> cloneParameters() {
       return new LinkedHashMap<>(parameters);
     }
 
@@ -4746,93 +4784,88 @@ public class FurryBlack {
 
     //= ========================================================================
 
-    @Comment(value = "查询内核选项", attention = {
-      "环境变量 > 系统属性 > 程序参数",
-    })
+    @Comment("环境变量 > 系统配置 > 程序参数 > 配置文件")
     public boolean checkKernelOption(String... name) {
-      if (java.lang.System.getenv(toEnvironmentName(name)) != null)
-        return true;
-      if (java.lang.System.getProperty(toPropertyName(name)) != null)
-        return true;
+      if (System.getenv(toEnvironmentName(name)) != null) return true;
+      if (System.getProperty(toPropertyName(name)) != null) return true;
       return options.contains(toArgumentName(name));
     }
 
-    @Comment(value = "查询内核参数", attention = {
-      "环境变量 > 系统属性 > 程序参数",
-    })
+    @Comment("环境变量 > 系统配置 > 程序参数 > 配置文件")
     public String getKernelParameter(String... name) {
-      String value = java.lang.System.getenv(toEnvironmentName(name));
-      if (value != null)
-        return value;
-      value = java.lang.System.getProperty(toPropertyName(name));
-      if (value != null)
-        return value;
+      String value = System.getenv(toEnvironmentName(name));
+      if (value != null) return value;
+      value = System.getProperty(toPropertyName(name));
+      if (value != null) return value;
       value = parameters.get(toArgumentName(name));
-      if (value != null)
-        return value;
+      if (value != null) return value;
       return null;
     }
 
     //= ========================================================================
 
-    @Comment(value = "查询框架选项", attention = {
-      "环境变量 > 系统属性 > 程序参数 > 配置文件",
-    })
+    @Comment("环境变量 > 系统配置 > 程序参数 > 配置文件")
     public boolean checkSystemOption(String... name) {
-      if (java.lang.System.getenv(toEnvironmentName(name)) != null)
-        return true;
-      if (java.lang.System.getProperty(toPropertyName(name)) != null)
-        return true;
-      if (options.contains(toArgumentName(name)))
-        return true;
+      if (System.getenv(toEnvironmentName(name)) != null) return true;
+      if (System.getProperty(toPropertyName(name)) != null) return true;
+      if (options.contains(toArgumentName(name))) return true;
       return properties.getProperty(toConfigName(name)) != null;
     }
 
-    @Comment(value = "查询框架参数", attention = {
-      "环境变量 > 系统属性 > 程序参数 > 配置文件",
-    })
+    @Comment("环境变量 > 系统配置 > 程序参数 > 配置文件")
     public String getSystemParameter(String... name) {
-      String value = java.lang.System.getenv(toEnvironmentName(name));
-      if (value != null)
-        return value;
-      value = java.lang.System.getProperty(toPropertyName(name));
-      if (value != null)
-        return value;
-      value = parameters.get(toArgumentName(name));
-      if (value != null)
-        return value;
+      String value = System.getenv(toEnvironmentName(name));
+      if (value != null) return value;
+      value = System.getProperty(toPropertyName(name));
+      if (value != null) return value;
+      value = parameters.get(toArgumentName(name)); if (value != null) return value;
       value = properties.getProperty(toConfigName(name));
-      if (value != null)
-        return value;
+      if (value != null) return value;
       return null;
     }
 
-    @Comment(value = "查询框架选项", attention = {
-      "环境变量 > 程序参数 > 配置文件",
-      "不读取系统配置,避免有人把密码写在命令行,导致谁都能看",
-    })
+    @Comment("环境变量 > unsafe(系统配置) > unsafe(程序参数) > 配置文件")
     public boolean checkSystemOptionSafe(String... name) {
-      if (java.lang.System.getenv(toEnvironmentName(name)) != null)
-        return true;
-      if (options.contains(toArgumentName(name)))
-        return true;
+      if (System.getenv(toEnvironmentName(name)) != null) return true;
+      if (kernelConfig.unsafe) {
+        if (System.getProperty(toPropertyName(name)) != null) {
+          logger.warning("WARNING WARNING WARNING WARNING WARNING WARNING");
+          logger.warning("从系统属性加载私密配置非常危险, 强烈建议不要使用此配置方式");
+          logger.warning("WARNING WARNING WARNING WARNING WARNING WARNING");
+          return true;
+        }
+        if (options.contains(toArgumentName(name))) {
+          logger.warning("WARNING WARNING WARNING WARNING WARNING WARNING");
+          logger.warning("从程序参数加载私密配置非常危险, 强烈建议不要使用此配置方式");
+          logger.warning("WARNING WARNING WARNING WARNING WARNING WARNING");
+          return true;
+        }
+      }
       return properties.getProperty(toConfigName(name)) != null;
     }
 
-    @Comment(value = "查询框架参数", attention = {
-      "环境变量 > 程序参数 > 配置文件",
-      "不读取系统配置,避免有人把密码写在命令行,导致谁都能看",
-    })
+    @Comment("环境变量 > unsafe(系统配置) > unsafe(程序参数) > 配置文件")
     public String getSystemParameterSafe(String... name) {
-      String value = java.lang.System.getenv(toEnvironmentName(name));
-      if (value != null)
-        return value;
-      value = parameters.get(toArgumentName(name));
-      if (value != null)
-        return value;
+      String value = System.getenv(toEnvironmentName(name));
+      if (value != null) return value;
+      if (kernelConfig.unsafe) {
+        value = System.getProperty(toPropertyName(name));
+        if (value != null) {
+          logger.warning("WARNING WARNING WARNING WARNING WARNING WARNING");
+          logger.warning("从系统属性加载私密配置非常危险, 强烈建议不要使用此配置方式");
+          logger.warning("WARNING WARNING WARNING WARNING WARNING WARNING");
+          return value;
+        }
+        value = parameters.get(toArgumentName(name));
+        if (value != null) {
+          logger.warning("WARNING WARNING WARNING WARNING WARNING WARNING");
+          logger.warning("从程序参数加载私密配置非常危险, 强烈建议不要使用此配置方式");
+          logger.warning("WARNING WARNING WARNING WARNING WARNING WARNING");
+          return value;
+        }
+      }
       value = properties.getProperty(toConfigName(name));
-      if (value != null)
-        return value;
+      if (value != null) return value;
       return null;
     }
 
@@ -5096,15 +5129,13 @@ public class FurryBlack {
 
   @Comment("在终端打印消息")
   public static void terminalPrint(Object message) {
-    if (message == null)
-      return;
+    if (message == null) return;
     terminal.print(message.toString());
   }
 
   @Comment("在终端打印消息")
   public static void println(Object message) {
-    if (message == null)
-      return;
+    if (message == null) return;
     terminal.println(message.toString());
   }
 
@@ -5201,8 +5232,28 @@ public class FurryBlack {
   }
 
   @Comment("提交定时任务")
-  public static ScheduledFuture<?> schedule(Runnable runnable, long time, TimeUnit timeUnit) {
-    return SCHEDULE_SERVICE.schedule(runnable, time, timeUnit);
+  public static ScheduledFuture<?> schedule(Runnable runnable, long time) {
+    return SCHEDULE_SERVICE.schedule(runnable, time, TimeUnit.MILLISECONDS);
+  }
+
+  @Comment("提交定时任务")
+  public static ScheduledFuture<?> schedule(Callable<?> callable, long delay) {
+    return SCHEDULE_SERVICE.schedule(callable, delay, TimeUnit.MILLISECONDS);
+  }
+
+  @Comment("提交等间隔定时任务")
+  public static ScheduledFuture<?> scheduleAtFixedRate(Runnable runnable, long initialDelay, long period) {
+    return SCHEDULE_SERVICE.scheduleAtFixedRate(runnable, initialDelay, period, TimeUnit.MILLISECONDS);
+  }
+
+  @Comment("提交等延迟定时任务")
+  public static ScheduledFuture<?> scheduleWithFixedDelay(Runnable runnable, long initialDelay, long delay) {
+    return SCHEDULE_SERVICE.scheduleWithFixedDelay(runnable, initialDelay, delay, TimeUnit.MILLISECONDS);
+  }
+
+  @Comment("提交定时任务")
+  public static ScheduledFuture<?> schedule(Runnable runnable, long time, TimeUnit unit) {
+    return SCHEDULE_SERVICE.schedule(runnable, time, unit);
   }
 
   @Comment("提交定时任务")
@@ -5288,8 +5339,7 @@ public class FurryBlack {
   @Comment("发送私聊消息")
   public static void sendUserMessage(long id, Message message) {
     User user = getFriend(id);
-    if (user == null)
-      user = getStrangerOrFail(id);
+    if (user == null) user = getStrangerOrFail(id);
     sendMessage(user, message);
   }
 

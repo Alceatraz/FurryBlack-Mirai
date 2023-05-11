@@ -8,8 +8,14 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+@SuppressWarnings("unused")
+
 @Comment("时间工具")
 public class TimeEnhance {
+
+  public static final long DURATION_HOUR = 1000 * 3600;
+  public static final long DURATION_DAY = 1000 * 3600 * 24;
+  public static final long DURATION_WEEK = 1000 * 3600 * 24 * 7;
 
   //= ==========================================================================
 
