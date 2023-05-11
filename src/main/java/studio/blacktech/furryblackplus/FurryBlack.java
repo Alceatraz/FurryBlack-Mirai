@@ -1512,6 +1512,8 @@ BLUE +
 
     dispatcher.registerFunction()
       .command("system", "power-off")
+      .command("exit")
+      .command("quit")
       .command("stop")
       .function(it -> {
         FurryBlack.println(YELLOW + "CONSOLE invoke -> shutdown" + RESET);
