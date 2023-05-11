@@ -1,11 +1,11 @@
 package studio.blacktech.furryblackplus.core.common.enhance;
 
-import studio.blacktech.furryblackplus.FurryBlack;
 import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 @SuppressWarnings("unused")
@@ -13,15 +13,30 @@ import java.time.format.DateTimeFormatter;
 @Comment("时间工具")
 public class TimeEnhance {
 
-  public static final long DURATION_HOUR = 1000 * 3600;
-  public static final long DURATION_DAY = 1000 * 3600 * 24;
-  public static final long DURATION_WEEK = 1000 * 3600 * 24 * 7;
+  public static final ZoneId SYSTEM_ZONEID;
+  public static final ZoneOffset SYSTEM_OFFSET;
 
-  //= ==========================================================================
+  public static final long DURATION_HOUR;
+  public static final long DURATION_DAY;
+  public static final long DURATION_WEEK;
 
-  private static final DateTimeFormatter DATETIME = pattern("yyyy-MM-dd HH:mm:ss");
-  private static final DateTimeFormatter DATE = pattern("yyyy-MM-dd");
-  private static final DateTimeFormatter TIME = pattern("HH:mm:ss");
+  private static final DateTimeFormatter DATETIME;
+  private static final DateTimeFormatter DATE;
+  private static final DateTimeFormatter TIME;
+
+  static {
+
+    DURATION_HOUR = 1000 * 3600;
+    DURATION_DAY = 1000 * 3600 * 24;
+    DURATION_WEEK = 1000 * 3600 * 24 * 7;
+
+    DATETIME = pattern("yyyy-MM-dd HH:mm:ss");
+    TIME = pattern("HH:mm:ss");
+    DATE = pattern("yyyy-MM-dd");
+
+    SYSTEM_ZONEID = ZoneId.systemDefault();
+    SYSTEM_OFFSET = ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now());
+  }
 
   //= ==========================================================================
 
@@ -101,7 +116,7 @@ public class TimeEnhance {
       second == null ? now.getSecond() : second == 0 ? 0 : now.getSecond() + second,
       nano == null ? now.getNano() : nano == 0 ? 0 : now.getNano() + nano
     );
-    return next.toEpochSecond(FurryBlack.SYSTEM_OFFSET) * 1000;
+    return next.toEpochSecond(SYSTEM_OFFSET) * 1000;
   }
 
   //= ==========================================================================

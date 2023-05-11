@@ -36,6 +36,7 @@ import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageSource;
 import net.mamoe.mirai.message.data.PlainText;
 import net.mamoe.mirai.utils.BotConfiguration;
+import org.jetbrains.annotations.Nullable;
 import org.jline.builtins.Completers.TreeCompleter;
 import org.jline.reader.Candidate;
 import org.jline.reader.Completer;
@@ -210,9 +211,6 @@ public class FurryBlack {
   public static final int CPU_CORES;
   public static final long BOOT_TIME;
 
-  public static final ZoneId SYSTEM_ZONEID;
-  public static final ZoneOffset SYSTEM_OFFSET;
-
   public static final String CONTENT_INFO;
   public static final String CONTENT_HELP;
   public static final String CONTENT_COLOR;
@@ -229,9 +227,6 @@ public class FurryBlack {
 
     BOOT_TIME = ManagementFactory.getRuntimeMXBean().getStartTime();
     CPU_CORES = Runtime.getRuntime().availableProcessors();
-
-    SYSTEM_ZONEID = ZoneId.systemDefault();
-    SYSTEM_OFFSET = ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now());
 
     FORMATTER = TimeEnhance.pattern("yyyy-MM-dd HH-mm-ss");
 
@@ -258,19 +253,22 @@ public class FurryBlack {
 
       // @formatter:off
 
+BLUE +
 "# ==============================================================================" + RESET + LINE +
 
-"FurryBlack Mirai - ver " + APP_VERSION + RESET + LINE +
+" FurryBlack Mirai - ver " + APP_VERSION + RESET + LINE +
 
-BRIGHT_CYAN +
+BLUE +
+"# ==============================================================================" + RESET + LINE + LINE +
 
+BLUE +
 "# FurryBlack 交互模式* ==========================================================" + RESET + LINE +
 "--help ------------------------------ 显示帮助" + LINE +
 "--info ------------------------------ 显示版本" + LINE +
 "--color ----------------------------- 显示颜色" + LINE +
-"*: 交互模式是模仿unix软件的信息显示功能, 执行后退出" + LINE +
+"※ 交互模式是模仿unix软件的信息显示功能, 执行后退出" + LINE +
 
-BRIGHT_CYAN +
+BLUE +
 "# FurryBlack 启动参数 ===========================================================" + RESET + LINE +
 "--debug ----------------------------- 选项 启动DEBUG模式*" + LINE +
 "--unsafe ---------------------------- 选项 允许一些正常模式下禁止的调用" + LINE +
@@ -281,10 +279,10 @@ BRIGHT_CYAN +
 "--logger-level ---------------------- 参数 设置启动后的日志级别*" + LINE +
 "--logger-provider ------------------- 参数 使用指定的日志后端" + LINE +
 YELLOW +
-"*: 可在启动后通过终端修改,参数的目的是启动初始化阶段即应用" + LINE +
-"**: 选项: 键存在即可, 参数: 必须是键值对 例如 --logger-level MUTE" + RESET + LINE +
+"※ 可在启动后通过终端修改,参数的目的是启动初始化阶段即应用" + LINE +
+"※ 选项: 键存在即可, 参数: 必须是键值对 例如 --logger-level MUTE" + RESET + LINE +
 
-BRIGHT_CYAN +
+BLUE +
 "# FurryBlack 参数传递 ===========================================================" + RESET + LINE +
 "例如 foo bar 参数 可由三种方式传递" + LINE +
 "环境变量 export FOO_BAR -------------- 转换为大写 下划线拼接" + LINE +
@@ -292,7 +290,7 @@ BRIGHT_CYAN +
 "程序参数 --foo-bar ------------------- 转换为小写 英句号拼接" + LINE +
 "配置文件 foo.bar --------------------- 转换为小写 英句号拼接" + LINE +
 
-BRIGHT_CYAN +
+BLUE +
 "# FurryBlack 命名空间 ===========================================================" + RESET + LINE +
 "程序参数 --namespace xxx 可将参数传递时的所有键添加前缀, 例如:" + LINE +
 "环境变量 export XXX_FOO_BAR ---------- 转换为大写 下划线拼接" + LINE +
@@ -300,9 +298,9 @@ BRIGHT_CYAN +
 "程序参数 --xxx-foo-bar --------------- 转换为小写 英句号拼接" + LINE +
 "配置文件 foo.bar --------------------- 转换为小写 英句号拼接" + LINE +
 YELLOW +
-"*: 配置文件内名称不受命名空间影响" + RESET + LINE +
+"※ 配置文件内名称不受命名空间影响" + RESET + LINE +
 
-BRIGHT_CYAN +
+BLUE +
 "# FurryBlack 覆盖参数 ===========================================================" + RESET + LINE +
 "参数优先级 环境变量 > 系统配置 > 程序参数 > 配置文件 " + LINE +
 "account.auth ----------------------- 认证模式 PASSWD/QRCODE" + LINE +
@@ -314,10 +312,10 @@ BRIGHT_CYAN +
 "threads.monitor -------------------- 监听器线程池" + LINE +
 "threads.schedule ------------------- 定时器线程池" + LINE +
 YELLOW +
-"*: 为了避免有人把密码写在命令行导致所有人都能在task里看见, 密码不从系统配置或程序参数读取" + LINE +
-"*: 如若执意要如此使用, 需要使用unsafe配置项, 解锁安全限制后使用, 强烈反对使用因其极度危险" + RESET + LINE +
+"※ 为了避免有人把密码写在命令行导致所有人都能在task里看见, 密码不从系统配置或程序参数读取" + LINE +
+"※ 如若执意要如此使用, 需要使用unsafe配置项, 解锁安全限制后使用, 强烈反对使用因其极度危险" + RESET + LINE +
 
-BRIGHT_CYAN +
+BLUE +
 "# FurryBlack 控制台  ============================================================" + RESET + LINE +
 RED +
 "⚠ 控制台任何操作都属于底层操作可以直接对框架进行不安全和非法的操作" + RESET + LINE +
@@ -326,7 +324,7 @@ RED +
 "危险: 没有安全性检查的操作, 可能会让功能严重异常导致被迫重启或损坏模块的数据存档" + LINE +
 "高危: 后果完全未知的危险操作, 或者正常流程中不应该如此操作但是控制台仍然可以强制执行" + LINE +
 
-BRIGHT_CYAN +
+BLUE +
 "# 框架内核 ======================================================================" + RESET + LINE +
 "? ----------------------------------- (安全) 显示本帮助信息" + LINE +
 "help -------------------------------- (安全) 显示本帮助信息" + LINE +
@@ -339,10 +337,8 @@ BRIGHT_CYAN +
 "system rapid-stop ------------------- (危险) 快速关闭系统 直接执行" + LINE +
 "system force-exit ------------------- (高危) 直接杀死系统 二次确认" + LINE +
 
-BRIGHT_CYAN +
+BLUE +
 "# 插件系统 ======================================================================" + RESET + LINE +
-YELLOW +
-"※ Runner可能会被依赖, 底层操作框架不检查依赖, 有可能导致关联模块崩溃" + RESET + LINE +
 "schema event [enable|disable] ------- (安全) 启用消息事件处理 正常响应消息" + LINE +
 "schema ------------------------------ (安全) 显示插件机制注册状态" + LINE +
 "schema plugin ----------------------- (安全) 列出所有插件" + LINE +
@@ -352,15 +348,17 @@ YELLOW +
 "schema module shut ------------------ (风险) 执行模块关闭流程 无视状态直接执行" + LINE +
 "schema module reboot ---------------- (风险) 执行模块重启流程 无视状态直接执行" + LINE +
 "schema module unload ---------------- (风险) 彻底卸载模块实例 无视状态直接执行" + LINE +
+YELLOW +
+"※ Runner可能会被依赖, 底层操作框架不检查依赖, 有可能导致关联模块崩溃" + RESET + LINE +
 
-BRIGHT_CYAN +
+BLUE +
 "# 昵称系统 ======================================================================" + RESET + LINE +
 "nickname list ----------------------- (安全) 列出昵称" + LINE +
 "nickname clean ---------------------- (安全) 清空昵称" + LINE +
 "nickname append --------------------- (安全) 加载且合并昵称" + LINE +
 "nickname reload --------------------- (安全) 清空且加载昵称" + LINE +
 
-BRIGHT_CYAN +
+BLUE +
 "# ==============================================================================" + RESET
 
     // @formatter:on
@@ -511,25 +509,6 @@ BRIGHT_CYAN +
   public static void main(String[] args) {
 
     //= ================================================================================================================
-    //= 跳过语言设置
-
-    // -D user.country=zh
-    // -D user.language=CN
-    if (System.getenv("FURRYBLACK_LOCALE_SKIP") == null) {
-      System.err.println("Env FURRYBLACK_LOCALE_SKIP not set, Setting JVM local to Locale.SIMPLIFIED_CHINESE");
-      Locale.setDefault(Locale.SIMPLIFIED_CHINESE);
-    }
-
-    //= ================================================================================================================
-    //= 跳过时间设置
-
-    // -D user.timezone=Asia/Shanghai
-    if (System.getenv("FURRYBLACK_TIMEZONE_SKIP") == null) {
-      System.err.println("Env FURRYBLACK_TIMEZONE_SKIP not set, Setting JVM timezone to Asia/Shanghai");
-      TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
-    }
-
-    //= ================================================================================================================
     //=
     //=
     //= 交互模式
@@ -562,8 +541,7 @@ BRIGHT_CYAN +
       dryRun = true;
     }
 
-    if (dryRun)
-      return;
+    if (dryRun) return;
 
     //= ================================================================================================================
     //=
@@ -574,6 +552,27 @@ BRIGHT_CYAN +
     //= ================================================================================================================
 
     System.out.println("[FurryBlack][BOOT]FurryBlackMirai - " + APP_VERSION + " " + TimeEnhance.datetime(BOOT_TIME));
+
+    //= ================================================================================================================
+    //= 跳过语言设置
+
+    // -D user.country=zh
+    // -D user.language=CN
+    if (System.getenv("FURRYBLACK_LOCALE_SKIP") == null) {
+      System.err.println("Env FURRYBLACK_LOCALE_SKIP not set, Setting JVM local to Locale.SIMPLIFIED_CHINESE");
+      Locale.setDefault(Locale.SIMPLIFIED_CHINESE);
+    }
+
+    //= ================================================================================================================
+    //= 跳过时间设置
+
+    // -D user.timezone=Asia/Shanghai
+    if (System.getenv("FURRYBLACK_TIMEZONE_SKIP") == null) {
+      System.err.println("Env FURRYBLACK_TIMEZONE_SKIP not set, Setting JVM timezone to Asia/Shanghai");
+      TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+    }
+
+
 
     //= ================================================================================================================
     //=
@@ -1437,7 +1436,7 @@ BRIGHT_CYAN +
 
           // @formatter:off
 
-          "命名空间: " + NAMESPACE + LINE +
+          "命名空间: " + (NAMESPACE == null || NAMESPACE.isBlank() ? "无" : NAMESPACE ) + LINE +
           "调试开关: " + (kernelConfig.debug ? "调试模式" : "生产模式") + LINE +
           "安全策略: " + (kernelConfig.unsafe ? "宽松策略" : "标准策略") + LINE +
           "协议补丁: " + (kernelConfig.upgrade ? "启用升级" : "原生模式") + LINE +
@@ -1455,6 +1454,7 @@ BRIGHT_CYAN +
           // @formatter:on
 
         );
+
       });
 
     dispatcher.registerFunction()
@@ -4791,6 +4791,7 @@ BRIGHT_CYAN +
       return options.contains(toArgumentName(name));
     }
 
+    @Nullable
     @Comment("环境变量 > 系统配置 > 程序参数 > 配置文件")
     public String getKernelParameter(String... name) {
       String value = System.getenv(toEnvironmentName(name));
@@ -4812,6 +4813,7 @@ BRIGHT_CYAN +
       return properties.getProperty(toConfigName(name)) != null;
     }
 
+    @Nullable
     @Comment("环境变量 > 系统配置 > 程序参数 > 配置文件")
     public String getSystemParameter(String... name) {
       String value = System.getenv(toEnvironmentName(name));
@@ -4844,6 +4846,7 @@ BRIGHT_CYAN +
       return properties.getProperty(toConfigName(name)) != null;
     }
 
+    @Nullable
     @Comment("环境变量 > unsafe(系统配置) > unsafe(程序参数) > 配置文件")
     public String getSystemParameterSafe(String... name) {
       String value = System.getenv(toEnvironmentName(name));
