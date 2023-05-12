@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static studio.blacktech.furryblackplus.core.common.enhance.StringEnhance.extractStackTrace;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.RESET;
 
 @SuppressWarnings("unused")
 
@@ -64,7 +65,7 @@ public final class WriteLogger extends LoggerX {
     if (color == null) {
       FurryBlack.println(message);
     } else {
-      FurryBlack.println(color + message + Color.RESET);
+      FurryBlack.println(color + message + RESET);
     }
     try (FileWriter writer = new FileWriter(logger, StandardCharsets.UTF_8, true)) {
       writer.append(message);
@@ -81,20 +82,20 @@ public final class WriteLogger extends LoggerX {
   public void fatalImpl(String message) {
     if (message == null) return;
     String result = "[" + TimeEnhance.datetime() + "][FATAL][" + name + "]" + message;
-    WriteLogger.handle(Color.BOLD_BRIGHT_RED, result);
+    WriteLogger.handle(FATAL, result);
   }
 
   @Override
   public void fatalImpl(Throwable throwable) {
     if (throwable == null) return;
     String result = "[" + TimeEnhance.datetime() + "][FATAL][" + name + "]" + extractStackTrace(throwable);
-    WriteLogger.handle(Color.BOLD_BRIGHT_RED, result);
+    WriteLogger.handle(FATAL, result);
   }
 
   @Override
   public void fatalImpl(String message, Throwable throwable) {
     String result = "[" + TimeEnhance.datetime() + "][FATAL][" + name + "]" + message + "\n" + extractStackTrace(throwable);
-    WriteLogger.handle(Color.BOLD_BRIGHT_RED, result);
+    WriteLogger.handle(FATAL, result);
   }
 
   //= ==================================================================================================================
@@ -103,20 +104,20 @@ public final class WriteLogger extends LoggerX {
   public void errorImpl(String message) {
     if (message == null) return;
     String result = "[" + TimeEnhance.datetime() + "][ERROR][" + name + "]" + message;
-    WriteLogger.handle(Color.BOLD_RED, result);
+    WriteLogger.handle(ERROR, result);
   }
 
   @Override
   public void errorImpl(Throwable throwable) {
     if (throwable == null) return;
     String result = "[" + TimeEnhance.datetime() + "][ERROR][" + name + "]" + extractStackTrace(throwable);
-    WriteLogger.handle(Color.BOLD_RED, result);
+    WriteLogger.handle(ERROR, result);
   }
 
   @Override
   public void errorImpl(String message, Throwable throwable) {
     String result = "[" + TimeEnhance.datetime() + "][ERROR][" + name + "]" + message + "\n" + extractStackTrace(throwable);
-    WriteLogger.handle(Color.BOLD_RED, result);
+    WriteLogger.handle(ERROR, result);
   }
 
   //= ==================================================================================================================
@@ -125,20 +126,20 @@ public final class WriteLogger extends LoggerX {
   public void warnImpl(String message) {
     if (message == null) return;
     String result = "[" + TimeEnhance.datetime() + "][WARN][" + name + "]" + message;
-    WriteLogger.handle(Color.BOLD_BRIGHT_YELLOW, result);
+    WriteLogger.handle(WARN, result);
   }
 
   @Override
   public void warnImpl(Throwable throwable) {
     if (throwable == null) return;
     String result = "[" + TimeEnhance.datetime() + "][WARN][" + name + "]" + extractStackTrace(throwable);
-    WriteLogger.handle(Color.BOLD_BRIGHT_YELLOW, result);
+    WriteLogger.handle(WARN, result);
   }
 
   @Override
   public void warnImpl(String message, Throwable throwable) {
     String result = "[" + TimeEnhance.datetime() + "][WARN][" + name + "]" + message + "\n" + extractStackTrace(throwable);
-    WriteLogger.handle(Color.BOLD_BRIGHT_YELLOW, result);
+    WriteLogger.handle(WARN, result);
   }
 
   //= ==================================================================================================================
@@ -147,20 +148,20 @@ public final class WriteLogger extends LoggerX {
   public void hintImpl(String message) {
     if (message == null) return;
     String result = "[" + TimeEnhance.datetime() + "][HINT][" + name + "]" + message;
-    WriteLogger.handle(Color.CYAN, result);
+    WriteLogger.handle(HINT, result);
   }
 
   @Override
   public void hintImpl(Throwable throwable) {
     if (throwable == null) return;
     String result = "[" + TimeEnhance.datetime() + "][HINT][" + name + "]" + extractStackTrace(throwable);
-    WriteLogger.handle(Color.CYAN, result);
+    WriteLogger.handle(HINT, result);
   }
 
   @Override
   public void hintImpl(String message, Throwable throwable) {
     String result = "[" + TimeEnhance.datetime() + "][HINT][" + name + "]" + message + "\n" + extractStackTrace(throwable);
-    WriteLogger.handle(Color.CYAN, result);
+    WriteLogger.handle(HINT, result);
   }
 
   //= ==================================================================================================================
@@ -169,20 +170,20 @@ public final class WriteLogger extends LoggerX {
   public void seekImpl(String message) {
     if (message == null) return;
     String result = "[" + TimeEnhance.datetime() + "][SEEK][" + name + "]" + message;
-    WriteLogger.handle(Color.BRIGHT_GREEN, result);
+    WriteLogger.handle(SEEK, result);
   }
 
   @Override
   public void seekImpl(Throwable throwable) {
     if (throwable == null) return;
     String result = "[" + TimeEnhance.datetime() + "][SEEK][" + name + "]" + extractStackTrace(throwable);
-    WriteLogger.handle(Color.BRIGHT_GREEN, result);
+    WriteLogger.handle(SEEK, result);
   }
 
   @Override
   public void seekImpl(String message, Throwable throwable) {
     String result = "[" + TimeEnhance.datetime() + "][SEEK][" + name + "]" + message + "\n" + extractStackTrace(throwable);
-    WriteLogger.handle(Color.BRIGHT_GREEN, result);
+    WriteLogger.handle(SEEK, result);
   }
 
   //= ==================================================================================================================
@@ -198,13 +199,13 @@ public final class WriteLogger extends LoggerX {
   public void infoImpl(Throwable throwable) {
     if (throwable == null) return;
     String result = "[" + TimeEnhance.datetime() + "][INFO][" + name + "]" + extractStackTrace(throwable);
-    WriteLogger.handle(null, result);
+    WriteLogger.handle(INFO, result);
   }
 
   @Override
   public void infoImpl(String message, Throwable throwable) {
     String result = "[" + TimeEnhance.datetime() + "][INFO][" + name + "]" + message + "\n" + extractStackTrace(throwable);
-    WriteLogger.handle(null, result);
+    WriteLogger.handle(INFO, result);
   }
 
   //= ==================================================================================================================
@@ -213,20 +214,20 @@ public final class WriteLogger extends LoggerX {
   public void debugImpl(String message) {
     if (message == null) return;
     String result = "[" + TimeEnhance.datetime() + "][DEBUG][" + name + "]" + message;
-    WriteLogger.handle(Color.BRIGHT_BLACK, result);
+    WriteLogger.handle(DEBUG, result);
   }
 
   @Override
   public void debugImpl(Throwable throwable) {
     if (throwable == null) return;
     String result = "[" + TimeEnhance.datetime() + "][DEBUG][" + name + "]" + extractStackTrace(throwable);
-    WriteLogger.handle(Color.BRIGHT_BLACK, result);
+    WriteLogger.handle(DEBUG, result);
   }
 
   @Override
   public void debugImpl(String message, Throwable throwable) {
     String result = "[" + TimeEnhance.datetime() + "][DEBUG][" + name + "]" + message + "\n" + extractStackTrace(throwable);
-    WriteLogger.handle(Color.BRIGHT_BLACK, result);
+    WriteLogger.handle(DEBUG, result);
   }
 
   //= ==================================================================================================================
@@ -235,20 +236,20 @@ public final class WriteLogger extends LoggerX {
   public void traceImpl(String message) {
     if (message == null) return;
     String result = "[" + TimeEnhance.datetime() + "][TRACE][" + name + "]" + message;
-    WriteLogger.handle(Color.BLACK, result);
+    WriteLogger.handle(TRACE, result);
   }
 
   @Override
   public void traceImpl(Throwable throwable) {
     if (throwable == null) return;
     String result = "[" + TimeEnhance.datetime() + "][TRACE][" + name + "]" + extractStackTrace(throwable);
-    WriteLogger.handle(Color.BLACK, result);
+    WriteLogger.handle(TRACE, result);
   }
 
   @Override
   public void traceImpl(String message, Throwable throwable) {
     String result = "[" + TimeEnhance.datetime() + "][TRACE][" + name + "]" + message + "\n" + extractStackTrace(throwable);
-    WriteLogger.handle(Color.BLACK, result);
+    WriteLogger.handle(TRACE, result);
   }
 
 }

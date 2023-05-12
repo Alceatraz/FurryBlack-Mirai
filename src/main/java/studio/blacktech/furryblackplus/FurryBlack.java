@@ -432,7 +432,7 @@ BOLD_BRIGHT_CYAN +
       BOLD_BRIGHT_RED           + "FATAL / BOLD_BRIGHT_RED --------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
       BOLD_RED                  + "ERROR / BOLD_RED ---------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
       BOLD_BRIGHT_YELLOW        + "WARN  / BOLD_BRIGHT_YELLOW ------ [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
-      CYAN                      + "HINT  / BRIGHT_CYAN ------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
+      BRIGHT_CYAN               + "HINT  / BRIGHT_CYAN ------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
       BRIGHT_GREEN              + "SEEK  / BRIGHT_GREEN ------------ [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
                                   "INFO  / BRIGHT_RED -------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + LINE +
       BRIGHT_BLACK              + "DEBUG / BRIGHT_BLACK ------------ [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
