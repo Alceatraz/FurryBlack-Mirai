@@ -444,4 +444,61 @@ public abstract class AbstractEventHandler {
 
   //= ==========================================================================
 
+  @Comment("从配置加载")
+  protected final byte get(String name, byte defaultValue) {
+    String value = CONFIG.getProperty(name);
+    if (value == null) return defaultValue;
+    try {
+      return Byte.parseByte(value);
+    } catch (Exception exception) {
+      return defaultValue;
+    }
+  }
+
+  @Comment("从配置加载")
+  protected final short get(String name, short defaultValue) {
+    String value = CONFIG.getProperty(name);
+    if (value == null) return defaultValue;
+    try {
+      return Short.parseShort(value);
+    } catch (Exception exception) {
+      return defaultValue;
+    }
+  }
+
+  @Comment("从配置加载")
+  protected final int get(String name, int defaultValue) {
+    String value = CONFIG.getProperty(name);
+    if (value == null) return defaultValue;
+    try {
+      return Integer.parseInt(value);
+    } catch (Exception exception) {
+      return defaultValue;
+    }
+  }
+
+  @Comment("从配置加载")
+  protected final long get(String name, long defaultValue) {
+    String value = CONFIG.getProperty(name);
+    if (value == null) return defaultValue;
+    try {
+      return Long.parseLong(value);
+    } catch (Exception exception) {
+      return defaultValue;
+    }
+  }
+
+  @Comment("从配置加载")
+  protected final boolean get(String name, boolean defaultValue) {
+    String value = CONFIG.getProperty(name);
+    if (value == null) return defaultValue;
+    try {
+      return Boolean.parseBoolean(value);
+    } catch (Exception exception) {
+      return defaultValue;
+    }
+  }
+
+  //= ==========================================================================
+
 }
