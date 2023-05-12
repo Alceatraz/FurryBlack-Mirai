@@ -41,44 +41,22 @@ public final class PrintLogger extends LoggerX {
   //= ==================================================================================================================
 
   @Override
-  public void bypassImpl(String message) {
-    if (message == null) return;
-    String result = "[" + TimeEnhance.datetime() + "][BYPASS][" + name + "]" + message;
-    FurryBlack.println(result);
-  }
-
-  @Override
-  public void bypassImpl(Throwable throwable) {
-    if (throwable == null) return;
-    String result = "[" + TimeEnhance.datetime() + "][BYPASS][" + name + "]" + extractStackTrace(throwable);
-    FurryBlack.println(result);
-  }
-
-  @Override
-  public void bypassImpl(String message, Throwable throwable) {
-    String result = "[" + TimeEnhance.datetime() + "][BYPASS][" + name + "]" + message + "\n" + extractStackTrace(throwable);
-    FurryBlack.println(result);
-  }
-
-  //= ==================================================================================================================
-
-  @Override
   public void fatalImpl(String message) {
     if (message == null) return;
-    String result = Color.BRIGHT_MAGENTA + "[" + TimeEnhance.datetime() + "][FATAL][" + name + "]" + message + Color.RESET;
+    String result = Color.BOLD_BRIGHT_RED + "[" + TimeEnhance.datetime() + "][FATAL][" + name + "]" + message + Color.RESET;
     FurryBlack.println(result);
   }
 
   @Override
   public void fatalImpl(Throwable throwable) {
     if (throwable == null) return;
-    String result = Color.BRIGHT_MAGENTA + "[" + TimeEnhance.datetime() + "][FATAL][" + name + "]" + extractStackTrace(throwable) + Color.RESET;
+    String result = Color.BOLD_BRIGHT_RED + "[" + TimeEnhance.datetime() + "][FATAL][" + name + "]" + extractStackTrace(throwable) + Color.RESET;
     FurryBlack.println(result);
   }
 
   @Override
   public void fatalImpl(String message, Throwable throwable) {
-    String result = Color.BRIGHT_MAGENTA + "[" + TimeEnhance.datetime() + "][FATAL][" + name + "]" + message + "\n" + extractStackTrace(throwable) + Color.RESET;
+    String result = Color.BOLD_BRIGHT_RED + "[" + TimeEnhance.datetime() + "][FATAL][" + name + "]" + message + "\n" + extractStackTrace(throwable) + Color.RESET;
     FurryBlack.println(result);
   }
 
@@ -87,20 +65,20 @@ public final class PrintLogger extends LoggerX {
   @Override
   public void errorImpl(String message) {
     if (message == null) return;
-    String result = Color.BRIGHT_RED + "[" + TimeEnhance.datetime() + "][ERROR][" + name + "]" + message + Color.RESET;
+    String result = Color.BOLD_RED + "[" + TimeEnhance.datetime() + "][ERROR][" + name + "]" + message + Color.RESET;
     FurryBlack.println(result);
   }
 
   @Override
   public void errorImpl(Throwable throwable) {
     if (throwable == null) return;
-    String result = Color.BRIGHT_RED + "[" + TimeEnhance.datetime() + "][ERROR][" + name + "]" + extractStackTrace(throwable) + Color.RESET;
+    String result = Color.BOLD_RED + "[" + TimeEnhance.datetime() + "][ERROR][" + name + "]" + extractStackTrace(throwable) + Color.RESET;
     FurryBlack.println(result);
   }
 
   @Override
   public void errorImpl(String message, Throwable throwable) {
-    String result = Color.BRIGHT_RED + "[" + TimeEnhance.datetime() + "][ERROR][" + name + "]" + message + "\n" + extractStackTrace(throwable) + Color.RESET;
+    String result = Color.BOLD_RED + "[" + TimeEnhance.datetime() + "][ERROR][" + name + "]" + message + "\n" + extractStackTrace(throwable) + Color.RESET;
     FurryBlack.println(result);
   }
 
@@ -109,20 +87,20 @@ public final class PrintLogger extends LoggerX {
   @Override
   public void warnImpl(String message) {
     if (message == null) return;
-    String result = Color.BRIGHT_YELLOW + "[" + TimeEnhance.datetime() + "][WARN][" + name + "]" + message + Color.RESET;
+    String result = Color.BOLD_BRIGHT_YELLOW + "[" + TimeEnhance.datetime() + "][WARN][" + name + "]" + message + Color.RESET;
     FurryBlack.println(result);
   }
 
   @Override
   public void warnImpl(Throwable throwable) {
     if (throwable == null) return;
-    String result = Color.BRIGHT_YELLOW + "[" + TimeEnhance.datetime() + "][WARN][" + name + "]" + extractStackTrace(throwable) + Color.RESET;
+    String result = Color.BOLD_BRIGHT_YELLOW + "[" + TimeEnhance.datetime() + "][WARN][" + name + "]" + extractStackTrace(throwable) + Color.RESET;
     FurryBlack.println(result);
   }
 
   @Override
   public void warnImpl(String message, Throwable throwable) {
-    String result = Color.BRIGHT_YELLOW + "[" + TimeEnhance.datetime() + "][WARN][" + name + "]" + message + "\n" + extractStackTrace(throwable) + Color.RESET;
+    String result = Color.BOLD_BRIGHT_YELLOW + "[" + TimeEnhance.datetime() + "][WARN][" + name + "]" + message + "\n" + extractStackTrace(throwable) + Color.RESET;
     FurryBlack.println(result);
   }
 
@@ -131,20 +109,20 @@ public final class PrintLogger extends LoggerX {
   @Override
   public void hintImpl(String message) {
     if (message == null) return;
-    String result = Color.BRIGHT_CYAN + "[" + TimeEnhance.datetime() + "][HINT][" + name + "]" + message + Color.RESET;
+    String result = Color.CYAN + "[" + TimeEnhance.datetime() + "][HINT][" + name + "]" + message + Color.RESET;
     FurryBlack.println(result);
   }
 
   @Override
   public void hintImpl(Throwable throwable) {
     if (throwable == null) return;
-    String result = Color.BRIGHT_CYAN + "[" + TimeEnhance.datetime() + "][HINT][" + name + "]" + extractStackTrace(throwable) + Color.RESET;
+    String result = Color.CYAN + "[" + TimeEnhance.datetime() + "][HINT][" + name + "]" + extractStackTrace(throwable) + Color.RESET;
     FurryBlack.println(result);
   }
 
   @Override
   public void hintImpl(String message, Throwable throwable) {
-    String result = Color.BRIGHT_CYAN + "[" + TimeEnhance.datetime() + "][HINT][" + name + "]" + message + "\n" + extractStackTrace(throwable) + Color.RESET;
+    String result = Color.CYAN + "[" + TimeEnhance.datetime() + "][HINT][" + name + "]" + message + "\n" + extractStackTrace(throwable) + Color.RESET;
     FurryBlack.println(result);
   }
 
@@ -217,44 +195,22 @@ public final class PrintLogger extends LoggerX {
   //= ==================================================================================================================
 
   @Override
-  public void developImpl(String message) {
+  public void traceImpl(String message) {
     if (message == null) return;
-    String result = Color.GRAY + "[" + TimeEnhance.datetime() + "][DEVEL][" + name + "]" + message + Color.RESET;
+    String result = Color.BLACK + "[" + TimeEnhance.datetime() + "][TRACE][" + name + "]" + message + Color.RESET;
     FurryBlack.println(result);
   }
 
   @Override
-  public void developImpl(Throwable throwable) {
+  public void traceImpl(Throwable throwable) {
     if (throwable == null) return;
-    String result = Color.GRAY + "[" + TimeEnhance.datetime() + "][DEVEL][" + name + "]" + extractStackTrace(throwable) + Color.RESET;
+    String result = Color.BLACK + "[" + TimeEnhance.datetime() + "][TRACE][" + name + "]" + extractStackTrace(throwable) + Color.RESET;
     FurryBlack.println(result);
   }
 
   @Override
-  public void developImpl(String message, Throwable throwable) {
-    String result = Color.GRAY + "[" + TimeEnhance.datetime() + "][DEVEL][" + name + "]" + message + "\n" + extractStackTrace(throwable) + Color.RESET;
-    FurryBlack.println(result);
-  }
-
-  //= ==================================================================================================================
-
-  @Override
-  public void verboseImpl(String message) {
-    if (message == null) return;
-    String result = Color.GRAY + "[" + TimeEnhance.datetime() + "][VERBOSE][" + name + "]" + message + Color.RESET;
-    FurryBlack.println(result);
-  }
-
-  @Override
-  public void verboseImpl(Throwable throwable) {
-    if (throwable == null) return;
-    String result = Color.GRAY + "[" + TimeEnhance.datetime() + "][VERBOSE][" + name + "]" + extractStackTrace(throwable) + Color.RESET;
-    FurryBlack.println(result);
-  }
-
-  @Override
-  public void verboseImpl(String message, Throwable throwable) {
-    String result = Color.GRAY + "[" + TimeEnhance.datetime() + "][VERBOSE][" + name + "]" + message + "\n" + extractStackTrace(throwable) + Color.RESET;
+  public void traceImpl(String message, Throwable throwable) {
+    String result = Color.BLACK + "[" + TimeEnhance.datetime() + "][TRACE][" + name + "]" + message + "\n" + extractStackTrace(throwable) + Color.RESET;
     FurryBlack.println(result);
   }
 

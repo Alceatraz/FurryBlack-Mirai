@@ -132,7 +132,24 @@ import static studio.blacktech.furryblackplus.core.common.enhance.DataEnhance.pa
 import static studio.blacktech.furryblackplus.core.common.enhance.DataEnhance.parseLong;
 import static studio.blacktech.furryblackplus.core.common.enhance.StringEnhance.toHumanBytes;
 import static studio.blacktech.furryblackplus.core.common.enhance.StringEnhance.toHumanHashCode;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BLACK;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BLUE;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BLACK;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BLUE;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BRIGHT_BLACK;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BRIGHT_BLUE;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BRIGHT_CYAN;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BRIGHT_GREEN;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BRIGHT_MAGENTA;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BRIGHT_RED;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BRIGHT_WHITE;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BRIGHT_YELLOW;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_CYAN;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_GREEN;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_MAGENTA;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_RED;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_WHITE;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_YELLOW;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_BLACK;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_BLUE;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_CYAN;
@@ -142,7 +159,6 @@ import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Co
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_WHITE;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_YELLOW;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.CYAN;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.GRAY;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.GREEN;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.MAGENTA;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.RED;
@@ -174,6 +190,7 @@ public class FurryBlack {
   //= ==================================================================================================================
 
   public static final String APP_VERSION = "3.0.0";
+  public static final String MIRAI_VERSION = "2.15.0";
 
   //= ==========================================================================
 
@@ -234,13 +251,20 @@ public class FurryBlack {
 
       // @formatter:off
 
-      YELLOW + "FurryBlack Mirai - ver " + APP_VERSION + RESET + LINE + """
-      A Mirai wrapper QQ-Bot framework make with love and \uD83E\uDDE6
-      电子白熊会梦到仿生老黑吗
-      By - Alceatraz Warprays @ BlackTechStudio
-      项目地址 https://github.com/Alceatraz/FurryBlack-Mirai
-      插件地址 https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
-      个人主页 https://www.blacktech.studio"""
+BOLD_BRIGHT_CYAN +
+"※ FurryBlack 版本信息 ===========================================================" + RESET + LINE + LINE +
+
+"A Mirai wrapper framework make with love and 🧦" + LINE +
+"Create by: Alceatraz Warprays @ BlackTechStudio" + LINE + LINE +
+
+"框架版本 " + APP_VERSION + LINE +
+"内核版本 " + MIRAI_VERSION + LINE + LINE +
+"内核源码 https://github.com/mamoe/mirai" + LINE +
+"框架源码 https://github.com/Alceatraz/FurryBlack-Mirai" + LINE +
+"示例插件 https://github.com/Alceatraz/FurryBlack-Mirai-Extensions" + LINE + LINE +
+
+BOLD_BRIGHT_CYAN +
+"# ==============================================================================" + RESET
 
       // @formatter:on
 
@@ -250,23 +274,25 @@ public class FurryBlack {
 
       // @formatter:off
 
-BLUE +
-"# ==============================================================================" + RESET + LINE +
+BOLD_BRIGHT_CYAN +
+"※ FurryBlack 版本信息 ===========================================================" + RESET + LINE +
+"A Mirai wrapper framework make with love and 🧦" + LINE +
+"Create by: Alceatraz Warprays @ BlackTechStudio" + LINE +
+"框架版本 " + APP_VERSION + LINE +
+"内核版本 " + MIRAI_VERSION + LINE +
+"内核源码 https://github.com/mamoe/mirai" + LINE +
+"框架源码 https://github.com/Alceatraz/FurryBlack-Mirai" + LINE +
+"示例插件 https://github.com/Alceatraz/FurryBlack-Mirai-Extensions" + LINE +
 
-" FurryBlack Mirai - ver " + APP_VERSION + RESET + LINE +
-
-BLUE +
-"# ==============================================================================" + RESET + LINE + LINE +
-
-BLUE +
-"# FurryBlack 交互模式* ==========================================================" + RESET + LINE +
+BOLD_BRIGHT_CYAN +
+"※ FurryBlack 交互模式 ===========================================================" + RESET + LINE +
 "--help ------------------------------ 显示帮助" + LINE +
 "--info ------------------------------ 显示版本" + LINE +
 "--color ----------------------------- 显示颜色" + LINE +
-"※ 交互模式是模仿unix软件的信息显示功能, 执行后退出" + LINE +
+"* 交互模式是模仿unix软件的信息显示功能, 执行后退出" + LINE +
 
-BLUE +
-"# FurryBlack 启动参数 ===========================================================" + RESET + LINE +
+BOLD_BRIGHT_CYAN +
+"※ FurryBlack 启动参数 ===========================================================" + RESET + LINE +
 "--debug ----------------------------- 选项 启动DEBUG模式*" + LINE +
 "--unsafe ---------------------------- 选项 允许一些正常模式下禁止的调用" + LINE +
 "--no-login -------------------------- 选项 跳过客户端登录,大部分功能不可用" + LINE +
@@ -276,29 +302,29 @@ BLUE +
 "--logger-level ---------------------- 参数 设置启动后的日志级别*" + LINE +
 "--logger-provider ------------------- 参数 使用指定的日志后端" + LINE +
 YELLOW +
-"※ 可在启动后通过终端修改,参数的目的是启动初始化阶段即应用" + LINE +
-"※ 选项: 键存在即可, 参数: 必须是键值对 例如 --logger-level MUTE" + RESET + LINE +
+"* 可在启动后通过终端修改,参数的目的是启动初始化阶段即应用" + LINE +
+"* 选项: 键存在即可, 参数: 必须是键值对 例如 --logger-level MUTE" + RESET + LINE +
 
-BLUE +
-"# FurryBlack 参数传递 ===========================================================" + RESET + LINE +
+BOLD_BRIGHT_CYAN +
+"※ FurryBlack 参数传递 ===========================================================" + RESET + LINE +
 "例如 foo bar 参数 可由三种方式传递" + LINE +
 "环境变量 export FOO_BAR -------------- 转换为大写 下划线拼接" + LINE +
 "系统配置 -Dfoo.bar ------------------- 转换为小写 中横线拼接" + LINE +
 "程序参数 --foo-bar ------------------- 转换为小写 英句号拼接" + LINE +
 "配置文件 foo.bar --------------------- 转换为小写 英句号拼接" + LINE +
 
-BLUE +
-"# FurryBlack 命名空间 ===========================================================" + RESET + LINE +
+BOLD_BRIGHT_CYAN +
+"※ FurryBlack 命名空间 ===========================================================" + RESET + LINE +
 "程序参数 --namespace xxx 可将参数传递时的所有键添加前缀, 例如:" + LINE +
 "环境变量 export XXX_FOO_BAR ---------- 转换为大写 下划线拼接" + LINE +
 "系统配置 -Dxxx.foo.bar --------------- 转换为小写 中横线拼接" + LINE +
 "程序参数 --xxx-foo-bar --------------- 转换为小写 英句号拼接" + LINE +
 "配置文件 foo.bar --------------------- 转换为小写 英句号拼接" + LINE +
 YELLOW +
-"※ 配置文件内名称不受命名空间影响" + RESET + LINE +
+"* 配置文件内名称不受命名空间影响" + RESET + LINE +
 
-BLUE +
-"# FurryBlack 覆盖参数 ===========================================================" + RESET + LINE +
+BOLD_BRIGHT_CYAN +
+"※ FurryBlack 覆盖参数 ===========================================================" + RESET + LINE +
 "参数优先级 环境变量 > 系统配置 > 程序参数 > 配置文件 " + LINE +
 "account.auth ----------------------- 认证模式 PASSWD/QRCODE" + LINE +
 "account.username ------------------- 账号, 必填" + LINE +
@@ -309,11 +335,11 @@ BLUE +
 "threads.monitor -------------------- 监听器线程池" + LINE +
 "threads.schedule ------------------- 定时器线程池" + LINE +
 YELLOW +
-"※ 为了避免有人把密码写在命令行导致所有人都能在task里看见, 密码不从系统配置或程序参数读取" + LINE +
-"※ 如若执意要如此使用, 需要使用unsafe配置项, 解锁安全限制后使用, 强烈反对使用因其极度危险" + RESET + LINE +
+"* 为了避免有人把密码写在命令行导致所有人都能在task里看见, 密码不从系统配置或程序参数读取" + LINE +
+"* 如若执意要如此使用, 需要使用unsafe配置项, 解锁安全限制后使用, 强烈反对使用因其极度危险" + RESET + LINE +
 
-BLUE +
-"# FurryBlack 控制台  ============================================================" + RESET + LINE +
+BOLD_BRIGHT_CYAN +
+"※ FurryBlack 控制台  ============================================================" + RESET + LINE +
 RED +
 "⚠ 控制台任何操作都属于底层操作可以直接对框架进行不安全和非法的操作" + RESET + LINE +
 "安全: 设计如此, 不会导致异常或者不可预测的结果" + LINE +
@@ -321,8 +347,8 @@ RED +
 "危险: 没有安全性检查的操作, 可能会让功能严重异常导致被迫重启或损坏模块的数据存档" + LINE +
 "高危: 后果完全未知的危险操作, 或者正常流程中不应该如此操作但是控制台仍然可以强制执行" + LINE +
 
-BLUE +
-"# 框架内核 ======================================================================" + RESET + LINE +
+BOLD_BRIGHT_CYAN +
+"※ 框架内核 ======================================================================" + RESET + LINE +
 "? ----------------------------------- (安全) 显示本帮助信息" + LINE +
 "help -------------------------------- (安全) 显示本帮助信息" + LINE +
 "gc ---------------------------------- (安全) 显示系统运行状态" + LINE +
@@ -334,8 +360,8 @@ BLUE +
 "system rapid-stop ------------------- (危险) 快速关闭系统 直接执行" + LINE +
 "system force-exit ------------------- (高危) 直接杀死系统 二次确认" + LINE +
 
-BLUE +
-"# 插件系统 ======================================================================" + RESET + LINE +
+BOLD_BRIGHT_CYAN +
+"※ 插件系统 ======================================================================" + RESET + LINE +
 "schema event [enable|disable] ------- (安全) 启用消息事件处理 正常响应消息" + LINE +
 "schema ------------------------------ (安全) 显示插件机制注册状态" + LINE +
 "schema plugin ----------------------- (安全) 列出所有插件" + LINE +
@@ -346,19 +372,19 @@ BLUE +
 "schema module reboot ---------------- (风险) 执行模块重启流程 无视状态直接执行" + LINE +
 "schema module unload ---------------- (风险) 彻底卸载模块实例 无视状态直接执行" + LINE +
 YELLOW +
-"※ Runner可能会被依赖, 底层操作框架不检查依赖, 有可能导致关联模块崩溃" + RESET + LINE +
+"* Runner可能会被依赖, 底层操作框架不检查依赖, 有可能导致关联模块崩溃" + RESET + LINE +
 
-BLUE +
-"# 昵称系统 ======================================================================" + RESET + LINE +
+BOLD_BRIGHT_CYAN +
+"※ 昵称系统 ======================================================================" + RESET + LINE +
 "nickname list ----------------------- (安全) 列出昵称" + LINE +
 "nickname clean ---------------------- (安全) 清空昵称" + LINE +
 "nickname append --------------------- (安全) 加载且合并昵称" + LINE +
 "nickname reload --------------------- (安全) 清空且加载昵称" + LINE +
 
-BLUE +
+BOLD_BRIGHT_CYAN +
 "# ==============================================================================" + RESET
 
-    // @formatter:on
+      // @formatter:on
 
     ;
 
@@ -366,22 +392,52 @@ BLUE +
 
       // @formatter:off
 
-      RED            + "RED -------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      GREEN          + "GREEN ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      YELLOW         + "YELLOW ----------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BLUE           + "BLUE ------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      MAGENTA        + "MAGENTA ---------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      CYAN           + "CYAN ------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BRIGHT_RED     + "BRIGHT_RED ------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BRIGHT_GREEN   + "BRIGHT_GREEN ----- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BRIGHT_YELLOW  + "BRIGHT_YELLOW ---- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BRIGHT_BLUE    + "BRIGHT_BLUE ------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BRIGHT_MAGENTA + "BRIGHT_MAGENTA --- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BRIGHT_CYAN    + "BRIGHT_CYAN ------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      WHITE          + "WHITE ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      GRAY           + "GRAY ------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BRIGHT_BLACK   + "BRIGHT_BLACK ----- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BRIGHT_WHITE   + "BRIGHT_WHITE ----- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET
+                                  "# ===========================================================================================================" + LINE +
+                                  "NO COLOR ---------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + LINE +
+                                  "# ===========================================================================================================" + LINE +
+      BLACK                     + "BLACK ------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      RED                       + "RED --------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      GREEN                     + "GREEN ------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      YELLOW                    + "YELLOW ------------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BLUE                      + "BLUE -------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      MAGENTA                   + "MAGENTA ----------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      CYAN                      + "CYAN -------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      WHITE                     + "WHITE ------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BRIGHT_BLACK              + "BRIGHT_BLACK ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BRIGHT_RED                + "BRIGHT_RED -------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BRIGHT_GREEN              + "BRIGHT_GREEN ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BRIGHT_YELLOW             + "BRIGHT_YELLOW ----------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BRIGHT_BLUE               + "BRIGHT_BLUE ------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BRIGHT_MAGENTA            + "BRIGHT_MAGENTA ---------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BRIGHT_CYAN               + "BRIGHT_CYAN ------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BRIGHT_WHITE              + "BRIGHT_WHITE ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+                                  "# ===========================================================================================================" + LINE +
+      BOLD_BLACK                + "BOLD_BLACK -------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BOLD_RED                  + "BOLD_RED ---------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BOLD_GREEN                + "BOLD_GREEN -------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BOLD_YELLOW               + "BOLD_YELLOW ------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BOLD_BLUE                 + "BOLD_BLUE --------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BOLD_MAGENTA              + "BOLD_MAGENTA ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BOLD_CYAN                 + "BOLD_CYAN --------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BOLD_WHITE                + "BOLD_WHITE -------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BOLD_BRIGHT_BLACK         + "BOLD_BRIGHT_BLACK ------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BOLD_BRIGHT_RED           + "BOLD_BRIGHT_RED --------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BOLD_BRIGHT_GREEN         + "BOLD_BRIGHT_GREEN ------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BOLD_BRIGHT_YELLOW        + "BOLD_BRIGHT_YELLOW ------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BOLD_BRIGHT_BLUE          + "BOLD_BRIGHT_BLUE -------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BOLD_BRIGHT_MAGENTA       + "BOLD_BRIGHT_MAGENTA ----- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BOLD_BRIGHT_CYAN          + "BOLD_BRIGHT_CYAN -------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+      BOLD_BRIGHT_WHITE         + "BOLD_BRIGHT_WHITE ------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+                                  "# ===========================================================================================================" + LINE +
+      BOLD_BRIGHT_RED           + "FATAL / BOLD_BRIGHT_RED --------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
+      BOLD_RED                  + "ERROR / BOLD_RED ---------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
+      BOLD_BRIGHT_YELLOW        + "WARN  / BOLD_BRIGHT_YELLOW ------ [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
+      CYAN                      + "HINT  / BRIGHT_CYAN ------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
+      BRIGHT_GREEN              + "SEEK  / BRIGHT_GREEN ------------ [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
+                                  "INFO  / BRIGHT_RED -------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + LINE +
+      BRIGHT_BLACK              + "DEBUG / BRIGHT_BLACK ------------ [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
+      BLACK                     + "TRACE / BLACK ------------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
+                                  "# ==========================================================================================================="
 
       // @formatter:on
 
@@ -657,17 +713,12 @@ BLUE +
 
       if (LEVEL == null) {
         System.out.println("[FurryBlack][ARGS]日志级别 - 输入值无效 -> " + kernelConfig.level + ", 可用日志级别为:");
-        System.out.println("[FurryBlack][ARGS] - MUTE");
-        System.out.println("[FurryBlack][ARGS] - FATAL");
+        System.out.println("[FurryBlack][ARGS] - CLOSE");
         System.out.println("[FurryBlack][ARGS] - ERROR");
         System.out.println("[FurryBlack][ARGS] - WARN");
-        System.out.println("[FurryBlack][ARGS] - HINT");
-        System.out.println("[FurryBlack][ARGS] - SEEK");
         System.out.println("[FurryBlack][ARGS] - INFO");
         System.out.println("[FurryBlack][ARGS] - DEBUG");
-        System.out.println("[FurryBlack][ARGS] - VERBOSE");
-        System.out.println("[FurryBlack][ARGS] - DEVELOP");
-        System.out.println("[FurryBlack][ARGS] - EVERYTHING");
+        System.out.println("[FurryBlack][ARGS] - TRACE");
         throw new CoreException("[FurryBlack][FATAL] Logger level invalid -> " + kernelConfig.level);
       } else {
         System.out.println("[FurryBlack][ARGS]日志级别 - " + LEVEL.name());
@@ -1592,10 +1643,10 @@ BLUE +
       .command("logger", "level")
       .function(it -> {
         if (it == null) {
-          FurryBlack.println("当前日志级别 -> " + LoggerX.getLevel().getName());
+          FurryBlack.println("当前日志级别 -> " + LoggerX.getLevel());
         } else {
           if (LoggerX.setLevel(it.getOrEmpty(0))) {
-            FurryBlack.println("日志级别修改为 -> " + LoggerX.getLevel().getName());
+            FurryBlack.println("日志级别修改为 -> " + LoggerX.getLevel());
           } else {
             FurryBlack.println("日志级别不存在 -> " + it.getOrEmpty(0));
             FurryBlack.println(
@@ -1603,17 +1654,12 @@ BLUE +
               // @formatter:off
 
               "可用日志级别为: " + LINE +
-              LoggerX.Level.MUTE.getName() + LINE +
-              LoggerX.Level.FATAL.getName() + LINE +
-              LoggerX.Level.ERROR.getName() + LINE +
-              LoggerX.Level.WARN.getName() + LINE +
-              LoggerX.Level.HINT.getName() + LINE +
-              LoggerX.Level.SEEK.getName() + LINE +
-              LoggerX.Level.INFO.getName() + LINE +
-              LoggerX.Level.DEBUG.getName() + LINE +
-              LoggerX.Level.VERBOSE.getName() + LINE +
-              LoggerX.Level.DEVELOP.getName() + LINE +
-              LoggerX.Level.EVERYTHING.getName()
+              "TRACE = TRACE "  + LINE +
+              "DEBUG = DEBUG "  + LINE +
+              "INFO  = HINT + SEEK + INFO"  + LINE +
+              "WARN  = WARN"   + LINE +
+              "ERROR = ERROR + FATAL"  + LINE +
+              "CLOSE = N/A"
 
               // @formatter:on
 
@@ -1948,7 +1994,7 @@ BLUE +
     //= ========================================================================
     //= 开始关闭 修改日志界别到设定值
 
-    LoggerX.setLevel(LoggerX.Level.VERBOSE);
+    LoggerX.setLevel(LoggerX.Level.TRACE);
 
     //= ========================================================================
     //= 特殊关闭模式

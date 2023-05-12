@@ -32,153 +32,52 @@ public final class NullLogger extends LoggerX {
     super(clazz);
   }
 
-  @Override
-  protected void bypassImpl(String message) {
+  @Override protected void fatalImpl(String message) {}
 
-  }
+  @Override protected void fatalImpl(Throwable throwable) {}
 
-  @Override
-  protected void bypassImpl(Throwable throwable) {
+  @Override protected void fatalImpl(String message, Throwable throwable) {}
 
-  }
+  @Override protected void errorImpl(String message) {}
 
-  @Override
-  protected void bypassImpl(String message, Throwable throwable) {
+  @Override protected void errorImpl(Throwable throwable) {}
 
-  }
+  @Override protected void errorImpl(String message, Throwable throwable) {}
 
-  @Override
-  protected void fatalImpl(String message) {
+  @Override protected void warnImpl(String message) {}
 
-  }
+  @Override protected void warnImpl(Throwable throwable) {}
 
-  @Override
-  protected void fatalImpl(Throwable throwable) {
+  @Override protected void warnImpl(String message, Throwable throwable) {}
 
-  }
+  @Override protected void hintImpl(String message) {}
 
-  @Override
-  protected void fatalImpl(String message, Throwable throwable) {
+  @Override protected void hintImpl(Throwable throwable) {}
 
-  }
+  @Override protected void hintImpl(String message, Throwable throwable) {}
 
-  @Override
-  protected void errorImpl(String message) {
+  @Override protected void seekImpl(String message) {}
 
-  }
+  @Override protected void seekImpl(Throwable throwable) {}
 
-  @Override
-  protected void errorImpl(Throwable throwable) {
+  @Override protected void seekImpl(String message, Throwable throwable) {}
 
-  }
+  @Override protected void infoImpl(String message) {}
 
-  @Override
-  protected void errorImpl(String message, Throwable throwable) {
+  @Override protected void infoImpl(Throwable throwable) {}
 
-  }
+  @Override protected void infoImpl(String message, Throwable throwable) {}
 
-  @Override
-  protected void warnImpl(String message) {
+  @Override protected void debugImpl(String message) {}
 
-  }
+  @Override protected void debugImpl(Throwable throwable) {}
 
-  @Override
-  protected void warnImpl(Throwable throwable) {
+  @Override protected void debugImpl(String message, Throwable throwable) {}
 
-  }
+  @Override protected void traceImpl(String message) {}
 
-  @Override
-  protected void warnImpl(String message, Throwable throwable) {
+  @Override protected void traceImpl(Throwable throwable) {}
 
-  }
+  @Override protected void traceImpl(String message, Throwable throwable) {}
 
-  @Override
-  protected void hintImpl(String message) {
-
-  }
-
-  @Override
-  protected void hintImpl(Throwable throwable) {
-
-  }
-
-  @Override
-  protected void hintImpl(String message, Throwable throwable) {
-
-  }
-
-  @Override
-  protected void seekImpl(String message) {
-
-  }
-
-  @Override
-  protected void seekImpl(Throwable throwable) {
-
-  }
-
-  @Override
-  protected void seekImpl(String message, Throwable throwable) {
-
-  }
-
-  @Override
-  protected void infoImpl(String message) {
-
-  }
-
-  @Override
-  protected void infoImpl(Throwable throwable) {
-
-  }
-
-  @Override
-  protected void infoImpl(String message, Throwable throwable) {
-
-  }
-
-  @Override
-  protected void debugImpl(String message) {
-
-  }
-
-  @Override
-  protected void debugImpl(Throwable throwable) {
-
-  }
-
-  @Override
-  protected void debugImpl(String message, Throwable throwable) {
-
-  }
-
-  @Override
-  protected void developImpl(String message) {
-
-  }
-
-  @Override
-  protected void developImpl(Throwable throwable) {
-
-  }
-
-  @Override
-  protected void developImpl(String message, Throwable throwable) {
-
-  }
-
-  @Override
-  protected void verboseImpl(String message) {
-
-  }
-
-  @Override
-  protected void verboseImpl(Throwable throwable) {
-
-  }
-
-  @Override
-  protected void verboseImpl(String message, Throwable throwable) {
-
-  }
 }

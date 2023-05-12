@@ -19,6 +19,7 @@
 package studio.blacktech.furryblackplus.core.common.logger.base;
 
 import net.mamoe.mirai.utils.MiraiLogger;
+import org.jetbrains.annotations.Nullable;
 import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 import studio.blacktech.furryblackplus.core.common.logger.LoggerXFactory;
 import studio.blacktech.furryblackplus.core.common.logger.support.NullLogger;
@@ -27,11 +28,20 @@ import studio.blacktech.furryblackplus.core.common.logger.support.WriteLogger;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Objects;
 
 @SuppressWarnings("unused")
 
 @Comment(
   value = "基础日志工具类 请使用工厂方法创建实例",
+  attention = {
+    "TRACE = TRACE + VERBOSE(Mirai)",
+    "DEBUG = DEBUG",
+    "INFO  = HINT + SEEK + INFO",
+    "WARN  = WARN",
+    "ERROR = ERROR + FATAL",
+    "CLOSE = N/A",
+  },
   relativeClass = {
     LoggerXFactory.class,
     NullLogger.class,
@@ -41,7 +51,7 @@ import java.util.HashMap;
 )
 public abstract class LoggerX implements MiraiLogger {
 
-  private static Level level = Level.EVERYTHING;
+  private static Level level = Level.TRACE;
 
   public static void initLoggerFile(File file) {
     throw new UnsupportedOperationException("LoggerX后端必须重写此方法");
@@ -60,35 +70,43 @@ public abstract class LoggerX implements MiraiLogger {
     this(clazz.getSimpleName());
   }
 
+  //= ==========================================================================
+
+  public boolean isTraceEnabled() {
+    return Level.TRACE.shouldPrint(level);
+  }
+
+  public boolean isDebugEnabled() {
+    return Level.DEBUG.shouldPrint(level);
+  }
+
+  public boolean isInfoEnabled() {
+    return Level.INFO.shouldPrint(level);
+  }
+
+  public boolean isWarnEnabled() {
+    return Level.WARN.shouldPrint(level);
+  }
+
+  public boolean isErrorEnabled() {
+    return Level.ERROR.shouldPrint(level);
+  }
+
   //= ==================================================================================================================
   //= 提供包装
 
   //= ==========================================================================
 
-  public final void bypass(String message) {
-    bypassImpl(message);
-  }
-
-  public final void bypass(Throwable throwable) {
-    bypassImpl(throwable);
-  }
-
-  public final void bypass(String message, Throwable throwable) {
-    bypassImpl(message, throwable);
-  }
-
-  //= ==========================================================================
-
   public final void fatal(String message) {
-    if (Level.FATAL.shouldPrint(level)) fatalImpl(message);
+    if (Level.ERROR.shouldPrint(level)) fatalImpl(message);
   }
 
   public final void fatal(Throwable throwable) {
-    if (Level.FATAL.shouldPrint(level)) fatalImpl(throwable);
+    if (Level.ERROR.shouldPrint(level)) fatalImpl(throwable);
   }
 
   public final void fatal(String message, Throwable throwable) {
-    if (Level.FATAL.shouldPrint(level)) fatalImpl(message, throwable);
+    if (Level.ERROR.shouldPrint(level)) fatalImpl(message, throwable);
   }
 
   //= ==========================================================================
@@ -125,43 +143,43 @@ public abstract class LoggerX implements MiraiLogger {
   //= ==========================================================================
 
   public final void hint(String message) {
-    if (Level.HINT.shouldPrint(level)) hintImpl(message);
+    if (Level.INFO.shouldPrint(level)) hintImpl(message);
   }
 
   public final void hint(Throwable throwable) {
-    if (Level.ERROR.shouldPrint(level)) hintImpl(throwable);
+    if (Level.INFO.shouldPrint(level)) hintImpl(throwable);
   }
 
   public final void hint(String message, Throwable throwable) {
-    if (Level.ERROR.shouldPrint(level)) hintImpl(message, throwable);
+    if (Level.INFO.shouldPrint(level)) hintImpl(message, throwable);
   }
 
   //= ==========================================================================
 
   public final void seek(String message) {
-    if (Level.ERROR.shouldPrint(level)) seekImpl(message);
+    if (Level.INFO.shouldPrint(level)) seekImpl(message);
   }
 
   public final void seek(Throwable throwable) {
-    if (Level.ERROR.shouldPrint(level)) seekImpl(throwable);
+    if (Level.INFO.shouldPrint(level)) seekImpl(throwable);
   }
 
   public final void seek(String message, Throwable throwable) {
-    if (Level.ERROR.shouldPrint(level)) seekImpl(message, throwable);
+    if (Level.INFO.shouldPrint(level)) seekImpl(message, throwable);
   }
 
   //= ==========================================================================
 
   public final void info(String message) {
-    if (Level.ERROR.shouldPrint(level)) infoImpl(message);
+    if (Level.INFO.shouldPrint(level)) infoImpl(message);
   }
 
   public final void info(Throwable throwable) {
-    if (Level.ERROR.shouldPrint(level)) infoImpl(throwable);
+    if (Level.INFO.shouldPrint(level)) infoImpl(throwable);
   }
 
   public final void info(String message, Throwable throwable) {
-    if (Level.ERROR.shouldPrint(level)) infoImpl(message, throwable);
+    if (Level.INFO.shouldPrint(level)) infoImpl(message, throwable);
   }
 
   //= ==========================================================================
@@ -180,40 +198,32 @@ public abstract class LoggerX implements MiraiLogger {
 
   //= ==========================================================================
 
-  public final void develop(String message) {
-    if (Level.DEVELOP.shouldPrint(level)) developImpl(message);
+  public final void trace(String message) {
+    if (Level.TRACE.shouldPrint(level)) traceImpl(message);
   }
 
-  public final void develop(Throwable throwable) {
-    if (Level.DEVELOP.shouldPrint(level)) developImpl(throwable);
+  public final void trace(Throwable throwable) {
+    if (Level.TRACE.shouldPrint(level)) traceImpl(throwable);
   }
 
-  public final void develop(String message, Throwable throwable) {
-    if (Level.DEVELOP.shouldPrint(level)) developImpl(message, throwable);
+  public final void trace(String message, Throwable throwable) {
+    if (Level.TRACE.shouldPrint(level)) traceImpl(message, throwable);
   }
 
   //= ==========================================================================
 
-  public final void verbose(String message) {
-    if (Level.VERBOSE.shouldPrint(level)) verboseImpl(message);
+  @Override
+  public final void verbose(@Nullable String message) {
+    if (Level.TRACE.shouldPrint(level)) debugImpl(message);
   }
 
-  public final void verbose(Throwable throwable) {
-    if (Level.VERBOSE.shouldPrint(level)) verboseImpl(throwable);
-  }
-
-  public final void verbose(String message, Throwable throwable) {
-    if (Level.VERBOSE.shouldPrint(level)) verboseImpl(message, throwable);
+  @Override
+  public final void verbose(@Nullable String message, @Nullable Throwable throwable) {
+    if (Level.TRACE.shouldPrint(level)) debugImpl(message, throwable);
   }
 
   //= ==================================================================================================================
   // 提供接口
-
-  protected abstract void bypassImpl(String message);
-
-  protected abstract void bypassImpl(Throwable throwable);
-
-  protected abstract void bypassImpl(String message, Throwable throwable);
 
   protected abstract void fatalImpl(String message);
 
@@ -257,17 +267,11 @@ public abstract class LoggerX implements MiraiLogger {
 
   protected abstract void debugImpl(String message, Throwable throwable);
 
-  protected abstract void developImpl(String message);
+  protected abstract void traceImpl(String message);
 
-  protected abstract void developImpl(Throwable throwable);
+  protected abstract void traceImpl(Throwable throwable);
 
-  protected abstract void developImpl(String message, Throwable throwable);
-
-  protected abstract void verboseImpl(String message);
-
-  protected abstract void verboseImpl(Throwable throwable);
-
-  protected abstract void verboseImpl(String message, Throwable throwable);
+  protected abstract void traceImpl(String message, Throwable throwable);
 
   //= ==================================================================================================================
 
@@ -293,19 +297,24 @@ public abstract class LoggerX implements MiraiLogger {
 
   //= ==================================================================================================================
 
+  public static String process(String pattern, Object... objects) {
+    for (Object object : objects) {
+      String value = Objects.toString(object);
+      pattern = pattern.replace("{}", value);
+    }
+    return pattern;
+  }
+
+  //= ==================================================================================================================
+
   public enum Level {
 
-    MUTE(0, "MUTE"),
-    FATAL(1, "FATAL"),
-    ERROR(2, "ERROR"),
-    WARN(3, "WARN"),
-    HINT(4, "HINT"),
-    SEEK(5, "SEEK"),
-    INFO(6, "INFO"),
-    DEBUG(7, "DEBUG"),
-    VERBOSE(8, "VERBOSE"),
-    DEVELOP(9, "DEVELOP"),
-    EVERYTHING(Integer.MAX_VALUE, "ALL"),
+    CLOSE(0),
+    ERROR(1),
+    WARN(2),
+    INFO(3),
+    DEBUG(4),
+    TRACE(5),
 
     ;
 
@@ -313,17 +322,12 @@ public abstract class LoggerX implements MiraiLogger {
 
     static {
       LOOKUP = new HashMap<>();
-      LOOKUP.put("mute", Level.MUTE);
-      LOOKUP.put("fatal", Level.FATAL);
+      LOOKUP.put("close", Level.CLOSE);
       LOOKUP.put("error", Level.ERROR);
       LOOKUP.put("warn", Level.WARN);
-      LOOKUP.put("hint", Level.HINT);
-      LOOKUP.put("seek", Level.SEEK);
       LOOKUP.put("info", Level.INFO);
       LOOKUP.put("debug", Level.DEBUG);
-      LOOKUP.put("verbose", Level.VERBOSE);
-      LOOKUP.put("develop", Level.DEVELOP);
-      LOOKUP.put("everything", Level.EVERYTHING);
+      LOOKUP.put("trace", Level.TRACE);
     }
 
     public static Level getByName(String name) {
@@ -331,23 +335,17 @@ public abstract class LoggerX implements MiraiLogger {
     }
 
     private final int level;
-    private final String name;
 
-    Level(int level, String name) {
+    Level(int level) {
       this.level = level;
-      this.name = name;
     }
 
     public int getLevel() {
       return level;
     }
 
-    public String getName() {
-      return name;
-    }
-
-    public boolean shouldPrint(Level target) {
-      return level <= target.level;
+    public boolean shouldPrint(Level level) {
+      return this.level <= level.level;
     }
 
   }
@@ -356,14 +354,15 @@ public abstract class LoggerX implements MiraiLogger {
 
     RESET("\u001b[0m"),
 
-    WHITE("\u001b[30m"),
+    BLACK("\u001b[30m"),
     RED("\u001b[31m"),
     GREEN("\u001b[32m"),
     YELLOW("\u001b[33m"),
     BLUE("\u001b[34m"),
     MAGENTA("\u001b[35m"),
     CYAN("\u001b[36m"),
-    GRAY("\u001b[90m"),
+    WHITE("\u001b[37m"),
+
     BRIGHT_BLACK("\u001b[90m"),
     BRIGHT_RED("\u001b[91m"),
     BRIGHT_GREEN("\u001b[92m"),
@@ -373,17 +372,53 @@ public abstract class LoggerX implements MiraiLogger {
     BRIGHT_CYAN("\u001b[96m"),
     BRIGHT_WHITE("\u001b[97m"),
 
+    BOLD_BLACK("\u001b[1;30m"),
+    BOLD_RED("\u001b[1;31m"),
+    BOLD_GREEN("\u001b[1;32m"),
+    BOLD_YELLOW("\u001b[1;33m"),
+    BOLD_BLUE("\u001b[1;34m"),
+    BOLD_MAGENTA("\u001b[1;35m"),
+    BOLD_CYAN("\u001b[1;36m"),
+    BOLD_WHITE("\u001b[1;37m"),
+
+    BOLD_BRIGHT_BLACK("\u001b[1;90m"),
+    BOLD_BRIGHT_RED("\u001b[1;91m"),
+    BOLD_BRIGHT_GREEN("\u001b[1;92m"),
+    BOLD_BRIGHT_YELLOW("\u001b[1;93m"),
+    BOLD_BRIGHT_BLUE("\u001b[1;94m"),
+    BOLD_BRIGHT_MAGENTA("\u001b[1;95m"),
+    BOLD_BRIGHT_CYAN("\u001b[1;96m"),
+    BOLD_BRIGHT_WHITE("\u001b[1;97m"),
+
+    BACKGROUND_BLACK("\u001b[40m"),
+    BACKGROUND_RED("\u001b[41m"),
+    BACKGROUND_GREEN("\u001b[42m"),
+    BACKGROUND_YELLOW("\u001b[43m"),
+    BACKGROUND_BLUE("\u001b[44m"),
+    BACKGROUND_MAGENTA("\u001b[45m"),
+    BACKGROUND_CYAN("\u001b[46m"),
+    BACKGROUND_WHITE("\u001b[47m"),
+
+    BACKGROUND_BRIGHT_BLACK("\u001b[100m"),
+    BACKGROUND_BRIGHT_RED("\u001b[101m"),
+    BACKGROUND_BRIGHT_GREEN("\u001b[102m"),
+    BACKGROUND_BRIGHT_YELLOW("\u001b[103m"),
+    BACKGROUND_BRIGHT_BLUE("\u001b[104m"),
+    BACKGROUND_BRIGHT_MAGENTA("\u001b[105m"),
+    BACKGROUND_BRIGHT_CYAN("\u001b[106m"),
+    BACKGROUND_BRIGHT_WHITE("\u001b[107m"),
+
     ;
 
-    private final String value;
+    public final String code;
 
-    Color(String value) {
-      this.value = value;
+    Color(String code) {
+      this.code = code;
     }
 
     @Override
     public String toString() {
-      return value;
+      return code;
     }
   }
 
