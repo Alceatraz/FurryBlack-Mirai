@@ -2351,7 +2351,7 @@ BOLD_BRIGHT_CYAN +
           new TreeCompleter(node("nickname", node("list", "clean", "append", "reload", "export"))),
 
           // logger level xxx
-          new TreeCompleter(node("logger", node("level", node("MUTE", "FATAL", "ERROR", "WARN", "HINT", "SEEK", "INFO", "DEBUG", "VERBOSE", "DEVELOP", "EVERYTHING")))),
+          new TreeCompleter(node("logger", node("level", node("TRACE", "DEBUG", "INFO", "SEEK", "HINT", "WARN", "ERROR", "FATAL", "CLOSE")))),
 
           // ?
           // help
