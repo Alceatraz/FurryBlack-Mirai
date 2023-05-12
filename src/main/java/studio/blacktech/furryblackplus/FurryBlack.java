@@ -165,6 +165,7 @@ import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Co
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.RESET;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.WHITE;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.YELLOW;
+import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Level.INFO;
 import static studio.blacktech.furryblackplus.core.handler.annotation.AnnotationEnhance.printAnnotation;
 
 @Comment(
@@ -1435,19 +1436,6 @@ BOLD_BRIGHT_CYAN +
     MESSAGE_LIST_GROUP = schema.generateGroupExecutorList();
 
     //= ================================================================================================================
-    //= 启动完成
-    //= ================================================================================================================
-
-    logger.hint("系统启动完成 耗时" + TimeEnhance.duration(System.currentTimeMillis() - BOOT_TIME));
-
-    //= ========================================================================
-    //= 启动完成 修改日志界别到设定值
-
-    if (!kernelConfig.debug && LEVEL != null) {
-      LoggerX.setLevel(LEVEL);
-    }
-
-    //= ================================================================================================================
     //= 控制台子系统
     //= ================================================================================================================
 
@@ -1977,13 +1965,24 @@ BOLD_BRIGHT_CYAN +
     consoleThread.start();
 
     //= ================================================================================================================
-    //= 系统启动成功
+    //= 启动完成
     //= ================================================================================================================
 
     //= ========================================================================
     //= 启动订阅
 
     EVENT_ENABLE = true;
+
+    //= ========================================================================
+    //= 启动完成 修改日志界别到设定值
+
+    if (!KERNEL_DEBUG && LEVEL == null) {
+      LoggerX.setLevel(INFO);
+    } else {
+      LoggerX.setLevel(LEVEL);
+    }
+
+    logger.hint("系统启动完成 耗时" + TimeEnhance.duration(System.currentTimeMillis() - BOOT_TIME));
 
     //= ========================================================================
     //= 正常工作
@@ -2653,6 +2652,9 @@ BOLD_BRIGHT_CYAN +
             break;
           }
         }
+      }
+      if (node.function == null) {
+        return false;
       }
       if (consoleCommand.length() == node.depth) {
         node.function.accept(null);
