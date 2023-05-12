@@ -169,7 +169,9 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryB
 - 重写内核
 - 重写参数系统
 - 重写配置系统
-- 移动主类
+- 添加 slf4j
+- 调整LoggerX日志颜色
+- 调整LoggerX日志级别
 
 ### 2.2.0
 
