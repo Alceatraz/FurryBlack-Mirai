@@ -308,7 +308,12 @@ public abstract class LoggerX implements MiraiLogger {
 
   public static String process(String pattern, Object... objects) {
     for (Object object : objects) {
-      String value = Objects.toString(object);
+      String value;
+      try {
+        value = Objects.toString(object);
+      } catch (Exception exception) {
+        value = exception.getMessage();
+      }
       pattern = pattern.replace("{}", value);
     }
     return pattern;
