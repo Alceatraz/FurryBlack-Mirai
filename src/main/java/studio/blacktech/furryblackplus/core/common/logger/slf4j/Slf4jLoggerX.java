@@ -5,8 +5,6 @@ import org.slf4j.Marker;
 import studio.blacktech.furryblackplus.core.common.logger.LoggerXFactory;
 import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
 
-import java.util.Objects;
-
 public class Slf4jLoggerX implements Logger {
 
   private final LoggerX logger;
@@ -32,11 +30,11 @@ public class Slf4jLoggerX implements Logger {
   }
 
   @Override public void trace(String message, Object object) {
-    logger.trace(message.replace("{}", Objects.toString(object)));
+    logger.trace(LoggerX.process(message, object));
   }
 
   @Override public void trace(String message, Object object, Object object1) {
-    logger.trace(message.replace("{}", Objects.toString(object)).replace("{}", Objects.toString(object1)));
+    logger.trace(LoggerX.process(message, object, object1));
   }
 
   @Override public void trace(String message, Object... objects) {
@@ -56,11 +54,11 @@ public class Slf4jLoggerX implements Logger {
   }
 
   @Override public void trace(Marker marker, String message, Object object) {
-    logger.trace(message.replace("{}", Objects.toString(object)));
+    logger.trace(LoggerX.process(message, object));
   }
 
   @Override public void trace(Marker marker, String message, Object object, Object object1) {
-    logger.trace(message.replace("{}", Objects.toString(object)).replace("{}", Objects.toString(object1)));
+    logger.trace(LoggerX.process(message, object, object1));
   }
 
   @Override public void trace(Marker marker, String message, Object... objects) {
@@ -80,11 +78,11 @@ public class Slf4jLoggerX implements Logger {
   }
 
   @Override public void debug(String message, Object object) {
-    logger.debug(message.replace("{}", Objects.toString(object)));
+    logger.debug(LoggerX.process(message, object));
   }
 
   @Override public void debug(String message, Object object, Object object1) {
-    logger.debug(message.replace("{}", Objects.toString(object)).replace("{}", Objects.toString(object1)));
+    logger.debug(LoggerX.process(message, object, object1));
   }
 
   @Override public void debug(String message, Object... objects) {
@@ -104,11 +102,11 @@ public class Slf4jLoggerX implements Logger {
   }
 
   @Override public void debug(Marker marker, String message, Object object) {
-    logger.debug(message.replace("{}", Objects.toString(object)));
+    logger.debug(LoggerX.process(message, object));
   }
 
   @Override public void debug(Marker marker, String message, Object object, Object object1) {
-    logger.debug(message.replace("{}", Objects.toString(object)).replace("{}", Objects.toString(object1)));
+    logger.debug(LoggerX.process(message, object, object1));
   }
 
   @Override public void debug(Marker marker, String message, Object... objects) {
@@ -128,11 +126,11 @@ public class Slf4jLoggerX implements Logger {
   }
 
   @Override public void info(String message, Object object) {
-    logger.info(message.replace("{}", Objects.toString(object)));
+    logger.info(LoggerX.process(message, object));
   }
 
   @Override public void info(String message, Object object, Object object1) {
-    logger.info(message.replace("{}", Objects.toString(object)).replace("{}", Objects.toString(object1)));
+    logger.info(LoggerX.process(message, object, object1));
   }
 
   @Override public void info(String message, Object... objects) {
@@ -152,11 +150,11 @@ public class Slf4jLoggerX implements Logger {
   }
 
   @Override public void info(Marker marker, String message, Object object) {
-    logger.info(message.replace("{}", Objects.toString(object)));
+    logger.info(LoggerX.process(message, object));
   }
 
   @Override public void info(Marker marker, String message, Object object, Object object1) {
-    logger.info(message.replace("{}", Objects.toString(object)).replace("{}", Objects.toString(object1)));
+    logger.info(LoggerX.process(message, object, object1));
   }
 
   @Override public void info(Marker marker, String message, Object... objects) {
@@ -176,7 +174,7 @@ public class Slf4jLoggerX implements Logger {
   }
 
   @Override public void warn(String message, Object object) {
-    logger.warning(message.replace("{}", Objects.toString(object)));
+    logger.warning(LoggerX.process(message, object));
   }
 
   @Override public void warn(String message, Object... objects) {
@@ -184,7 +182,7 @@ public class Slf4jLoggerX implements Logger {
   }
 
   @Override public void warn(String message, Object object, Object object1) {
-    logger.warning(message.replace("{}", Objects.toString(object)).replace("{}", Objects.toString(object1)));
+    logger.warning(LoggerX.process(message, object, object1));
   }
 
   @Override public void warn(String message, Throwable throwable) {
@@ -200,11 +198,11 @@ public class Slf4jLoggerX implements Logger {
   }
 
   @Override public void warn(Marker marker, String message, Object object) {
-    logger.warning(message.replace("{}", Objects.toString(object)));
+    logger.warning(LoggerX.process(message, object));
   }
 
   @Override public void warn(Marker marker, String message, Object object, Object object1) {
-    logger.warning(message.replace("{}", Objects.toString(object)).replace("{}", Objects.toString(object1)));
+    logger.warning(LoggerX.process(message, object, object1));
   }
 
   @Override public void warn(Marker marker, String message, Object... objects) {
@@ -224,11 +222,11 @@ public class Slf4jLoggerX implements Logger {
   }
 
   @Override public void error(String message, Object object) {
-    logger.error(message.replace("{}", Objects.toString(object)));
+    logger.error(LoggerX.process(message, object));
   }
 
   @Override public void error(String message, Object object, Object object1) {
-    logger.error(message.replace("{}", Objects.toString(object)).replace("{}", Objects.toString(object)));
+    logger.error(LoggerX.process(message, object, object1));
   }
 
   @Override public void error(String message, Object... objects) {
@@ -248,11 +246,11 @@ public class Slf4jLoggerX implements Logger {
   }
 
   @Override public void error(Marker marker, String message, Object object) {
-    logger.error(message.replace("{}", Objects.toString(object)));
+    logger.error(LoggerX.process(message, object));
   }
 
   @Override public void error(Marker marker, String message, Object object, Object object1) {
-    logger.error(message.replace("{}", Objects.toString(object)).replace("{}", Objects.toString(object)));
+    logger.error(LoggerX.process(message, object, object1));
   }
 
   @Override public void error(Marker marker, String message, Object... objects) {
