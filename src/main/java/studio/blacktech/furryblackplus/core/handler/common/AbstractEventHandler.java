@@ -499,6 +499,11 @@ public abstract class AbstractEventHandler {
     }
   }
 
+  @Comment("从配置加载")
+  protected final String get(String name, String defaultValue) {
+    return CONFIG.getProperty(name, defaultValue);
+  }
+
   //= ==========================================================================
 
 }
