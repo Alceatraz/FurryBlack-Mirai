@@ -58,9 +58,9 @@ public abstract class LoggerX implements MiraiLogger {
   public static final Color WARN = Color.BOLD_BRIGHT_YELLOW;
   public static final Color HINT = Color.BRIGHT_CYAN;
   public static final Color SEEK = Color.BRIGHT_GREEN;
-  public static final Color INFO = Color.WHITE;
-  public static final Color DEBUG = Color.BRIGHT_BLACK;
-  public static final Color TRACE = Color.BLACK;
+  public static final Color INFO = Color.BRIGHT_WHITE;
+  public static final Color DEBUG = Color.WHITE;
+  public static final Color TRACE = Color.BRIGHT_BLACK;
 
   public static void initLoggerFile(File file) {
     throw new UnsupportedOperationException("LoggerX后端必须重写此方法");

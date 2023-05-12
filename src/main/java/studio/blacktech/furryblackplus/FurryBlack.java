@@ -1456,6 +1456,12 @@ BOLD_BRIGHT_CYAN +
     //= ========================================================================
 
     dispatcher.registerFunction()
+      .command("info")
+      .function(it -> FurryBlack.println(CONTENT_INFO));
+
+    //= ========================================================================
+
+    dispatcher.registerFunction()
       .command("help")
       .command("?")
       .function(it -> FurryBlack.println(CONTENT_HELP));
@@ -1636,6 +1642,13 @@ BOLD_BRIGHT_CYAN +
           SHUTDOWN_KILL = true;
         }
       });
+
+    //= ========================================================================
+
+    dispatcher.registerFunction()
+      .command("logger", "color")
+      .command("color")
+      .function(it -> FurryBlack.println(CONTENT_COLOR));
 
     //= ========================================================================
 
