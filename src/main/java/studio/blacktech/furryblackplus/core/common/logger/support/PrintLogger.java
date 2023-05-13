@@ -31,8 +31,8 @@ import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Co
 @LoggerXConfig
 public final class PrintLogger extends LoggerX {
 
-  public PrintLogger(String name) {
-    super(name);
+  public PrintLogger(String simple) {
+    super(simple);
   }
 
   public PrintLogger(Class<?> clazz) {

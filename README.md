@@ -172,6 +172,7 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryB
 - 添加 slf4j
 - 调整LoggerX日志颜色
 - 调整LoggerX日志级别
+- 添加LoggerX-slf4j
 
 ### 2.2.0
 

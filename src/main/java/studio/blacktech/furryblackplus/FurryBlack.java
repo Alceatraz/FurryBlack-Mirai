@@ -165,7 +165,6 @@ import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Co
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.RESET;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.WHITE;
 import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.YELLOW;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Level.INFO;
 import static studio.blacktech.furryblackplus.core.handler.annotation.AnnotationEnhance.printAnnotation;
 
 @Comment(
@@ -525,8 +524,6 @@ BOLD_BRIGHT_CYAN +
   private static volatile boolean SHUTDOWN_DROP;
   private static volatile boolean SHUTDOWN_KILL;
 
-  private static volatile LoggerX.Level LEVEL;
-
   private static KernelConfig kernelConfig;
   private static SystemConfig systemConfig;
 
@@ -710,9 +707,9 @@ BOLD_BRIGHT_CYAN +
 
     if (kernelConfig.level != null) {
 
-      LEVEL = LoggerX.Level.getByName(kernelConfig.level);
-
-      if (LEVEL == null) {
+      if (LoggerX.setLevel(kernelConfig.level)) {
+        System.out.println("[FurryBlack][ARGS]日志级别 - " + kernelConfig.level);
+      } else {
         System.out.println("[FurryBlack][ARGS]日志级别 - 输入值无效 -> " + kernelConfig.level + ", 可用日志级别为:");
         System.out.println("[FurryBlack][ARGS] - CLOSE");
         System.out.println("[FurryBlack][ARGS] - ERROR");
@@ -721,8 +718,6 @@ BOLD_BRIGHT_CYAN +
         System.out.println("[FurryBlack][ARGS] - DEBUG");
         System.out.println("[FurryBlack][ARGS] - TRACE");
         throw new CoreException("[FurryBlack][FATAL] Logger level invalid -> " + kernelConfig.level);
-      } else {
-        System.out.println("[FurryBlack][ARGS]日志级别 - " + LEVEL.name());
       }
 
     }
@@ -1974,13 +1969,7 @@ BOLD_BRIGHT_CYAN +
     EVENT_ENABLE = true;
 
     //= ========================================================================
-    //= 启动完成 修改日志界别到设定值
-
-    if (!KERNEL_DEBUG && LEVEL == null) {
-      LoggerX.setLevel(INFO);
-    } else {
-      LoggerX.setLevel(LEVEL);
-    }
+    //= 启动完成
 
     logger.hint("系统启动完成 耗时" + TimeEnhance.duration(System.currentTimeMillis() - BOOT_TIME));
 
@@ -2002,19 +1991,6 @@ BOLD_BRIGHT_CYAN +
     //= 关闭事件响应
 
     EVENT_ENABLE = false;
-
-    //= ========================================================================
-    //= 开始关闭 修改日志界别到设定值
-
-    LoggerX.setLevel(LoggerX.Level.TRACE);
-
-    //= ========================================================================
-    //= 特殊关闭模式
-
-    if (SHUTDOWN_HALT) {
-      System.out.println("[FurryBlack][DROP]Shutdown mode drop, Invoke JVM halt now, Hope nothing broken.");
-      Runtime.getRuntime().halt(1);
-    }
 
     //= ================================================================================================================
     //= 机器人子系统
@@ -2062,7 +2038,7 @@ BOLD_BRIGHT_CYAN +
     logger.hint("关闭线程池");
 
     CompletableFuture<Void> monitorShutdown = CompletableFuture.runAsync(() -> {
-      if (FurryBlack.isShutModeDrop()) {
+      if (SHUTDOWN_DROP) {
         logger.warning("丢弃监听任务线程池");
         MONITOR_PROCESS.shutdownNow();
       } else {
@@ -2080,7 +2056,7 @@ BOLD_BRIGHT_CYAN +
     });
 
     CompletableFuture<Void> scheduleShutdown = CompletableFuture.runAsync(() -> {
-      if (FurryBlack.isShutModeDrop()) {
+      if (SHUTDOWN_DROP) {
         logger.warning("丢弃定时任务线程池");
         SCHEDULE_SERVICE.shutdownNow();
       } else {
@@ -2117,7 +2093,7 @@ BOLD_BRIGHT_CYAN +
     if (kernelConfig.noLogin) {
       logger.warning("调试模式 不需要关闭机器人");
     } else {
-      if (FurryBlack.isShutModeDrop()) {
+      if (SHUTDOWN_DROP) {
         bot.close(null);
       } else {
         logger.info("机器人关闭中");
@@ -3358,7 +3334,7 @@ BOLD_BRIGHT_CYAN +
         Executor annotation = entry.getKey();
         EventHandlerExecutor instance = entry.getValue();
         try {
-          if (FurryBlack.isShutModeDrop()) {
+          if (SHUTDOWN_DROP) {
             logger.info("丢弃执行器" + annotation.value() + "[" + annotation.command() + "] -> " + instance.getClass().getName());
             Thread thread = new Thread(instance::shutWrapper);
             thread.setDaemon(true);
@@ -3379,7 +3355,7 @@ BOLD_BRIGHT_CYAN +
       for (Checker annotation : checkers) {
         EventHandlerChecker instance = COMPONENT_CHECKER_INSTANCE.get(annotation);
         try {
-          if (FurryBlack.isShutModeDrop()) {
+          if (SHUTDOWN_DROP) {
             logger.info("丢弃检查器" + annotation.value() + "[" + annotation.command() + "/" + annotation.priority() + "] -> " + instance.getClass().getName());
             Thread thread = new Thread(instance::shutWrapper);
             thread.setDaemon(true);
@@ -3400,7 +3376,7 @@ BOLD_BRIGHT_CYAN +
       for (Monitor annotation : monitors) {
         EventHandlerMonitor instance = COMPONENT_MONITOR_INSTANCE.get(annotation);
         try {
-          if (FurryBlack.isShutModeDrop()) {
+          if (SHUTDOWN_DROP) {
             logger.info("丢弃检查器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
             Thread thread = new Thread(instance::shutWrapper);
             thread.setDaemon(true);
@@ -3421,7 +3397,7 @@ BOLD_BRIGHT_CYAN +
       for (Filter annotation : filters) {
         EventHandlerFilter instance = COMPONENT_FILTER_INSTANCE.get(annotation);
         try {
-          if (FurryBlack.isShutModeDrop()) {
+          if (SHUTDOWN_DROP) {
             logger.info("丢弃过滤器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
             Thread thread = new Thread(instance::shutWrapper);
             thread.setDaemon(true);
@@ -3442,7 +3418,7 @@ BOLD_BRIGHT_CYAN +
       for (Runner annotation : runners) {
         EventHandlerRunner instance = COMPONENT_RUNNER_INSTANCE.get(annotation);
         try {
-          if (FurryBlack.isShutModeDrop()) {
+          if (SHUTDOWN_DROP) {
             logger.info("丢弃定时器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
             Thread thread = new Thread(instance::shutWrapper);
             thread.setDaemon(true);

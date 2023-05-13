@@ -43,8 +43,8 @@ public final class WriteLogger extends LoggerX {
 
   //= ==================================================================================================================
 
-  public WriteLogger(String name) {
-    super(name);
+  public WriteLogger(String simple) {
+    super(simple);
   }
 
   public WriteLogger(Class<?> clazz) {

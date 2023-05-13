@@ -51,8 +51,6 @@ import java.util.Objects;
 )
 public abstract class LoggerX implements MiraiLogger {
 
-  private static Level level = Level.TRACE;
-
   public static final Color FATAL = Color.BOLD_BRIGHT_RED;
   public static final Color ERROR = Color.BOLD_RED;
   public static final Color WARN = Color.BOLD_BRIGHT_YELLOW;
@@ -62,9 +60,7 @@ public abstract class LoggerX implements MiraiLogger {
   public static final Color DEBUG = Color.BRIGHT_BLACK;
   public static final Color TRACE = Color.BRIGHT_BLACK;
 
-  public static void initLoggerFile(File file) {
-    throw new UnsupportedOperationException("LoggerX后端必须重写此方法");
-  }
+  private static Level level = Level.INFO;
 
   //= ==================================================================================================================
   //= 内部实现
@@ -76,10 +72,11 @@ public abstract class LoggerX implements MiraiLogger {
   }
 
   public LoggerX(Class<?> clazz) {
-    this(clazz.getSimpleName());
+    this.name = clazz.getSimpleName();
   }
 
   //= ==========================================================================
+  //= SLF4j 兼容层
 
   public boolean isTraceEnabled() {
     return Level.TRACE.shouldPrint(level);
@@ -234,6 +231,10 @@ public abstract class LoggerX implements MiraiLogger {
   //= ==================================================================================================================
   // 提供接口
 
+  public static void initLoggerFile(File file) {
+    throw new UnsupportedOperationException("LoggerX后端必须重写此方法");
+  }
+
   protected abstract void fatalImpl(String message);
 
   protected abstract void fatalImpl(Throwable throwable);
@@ -312,7 +313,7 @@ public abstract class LoggerX implements MiraiLogger {
       try {
         value = Objects.toString(object);
       } catch (Exception exception) {
-        value = exception.getMessage();
+        value = "[" + exception.getMessage() + "]";
       }
       pattern = pattern.replace("{}", value);
     }
