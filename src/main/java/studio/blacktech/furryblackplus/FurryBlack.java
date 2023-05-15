@@ -1071,8 +1071,6 @@ BOLD_BRIGHT_CYAN +
     botConfiguration.setCacheDir(FileEnhance.get(FOLDER_CONFIG, "cache").toFile());
     botConfiguration.setProtocol(systemConfig.deviceType.toMiraiProtocol());
     botConfiguration.loadDeviceInfoJson(systemConfig.deviceInfo);
-    botConfiguration.setBotLoggerSupplier(i -> LoggerXFactory.newLogger("MiraiBot"));
-    botConfiguration.setNetworkLoggerSupplier(i -> LoggerXFactory.newLogger("MiraiNet"));
 
     //= ========================================================================
     //= 加载客户端认证
