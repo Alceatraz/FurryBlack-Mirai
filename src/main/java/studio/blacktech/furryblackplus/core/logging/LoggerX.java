@@ -168,10 +168,10 @@ public abstract class LoggerX {
     simpleName = clazz.getSimpleName();
   }
 
-  protected LoggerX(String simpleName) {
+  protected LoggerX(String name) {
     clazz = null;
-    fullName = null;
-    this.simpleName = simpleName;
+    fullName = name;
+    simpleName = name;
   }
 
   public Class<?> getClazz() {
@@ -193,64 +193,64 @@ public abstract class LoggerX {
   //= ==========================================================================
   //= 内置级别
 
-  protected final boolean isError() {
+  public final boolean isErrorEnabled() {
     return ERROR.isEnable(DEFAULT_LEVEL);
   }
 
-  protected final boolean isWarn() {
+  public final boolean isWarnEnabled() {
     return WARN.isEnable(DEFAULT_LEVEL);
   }
 
-  protected final boolean isInfo() {
+  public final boolean isInfoEnabled() {
     return INFO.isEnable(DEFAULT_LEVEL);
   }
 
-  protected final boolean isDebug() {
+  public final boolean isDebugEnabled() {
     return DEBUG.isEnable(DEFAULT_LEVEL);
   }
 
-  protected final boolean isTrace() {
+  public final boolean isTraceEnabled() {
     return TRACE.isEnable(DEFAULT_LEVEL);
   }
 
   //= ==========================================================================
   //= Slf4j级别
 
-  public final boolean isErrorEnabled() {
+  public final boolean isErrorEnabled(String name) {
     if (enablePrefix) {
-      return PREFIX.getLevel(fullName).isEnable(DEFAULT_LEVEL);
+      return PREFIX.getLevel(name).isEnable(DEFAULT_LEVEL);
     } else {
       return ERROR.isEnable(DEFAULT_LEVEL);
     }
   }
 
-  public final boolean isWarnEnabled() {
+  public final boolean isWarnEnabled(String name) {
     if (enablePrefix) {
-      return PREFIX.getLevel(fullName).isEnable(DEFAULT_LEVEL);
+      return PREFIX.getLevel(name).isEnable(DEFAULT_LEVEL);
     } else {
       return WARN.isEnable(DEFAULT_LEVEL);
     }
   }
 
-  public final boolean isInfoEnabled() {
+  public final boolean isInfoEnabled(String name) {
     if (enablePrefix) {
-      return PREFIX.getLevel(fullName).isEnable(DEFAULT_LEVEL);
+      return PREFIX.getLevel(name).isEnable(DEFAULT_LEVEL);
     } else {
       return INFO.isEnable(DEFAULT_LEVEL);
     }
   }
 
-  public final boolean isDebugEnabled() {
+  public final boolean isDebugEnabled(String name) {
     if (enablePrefix) {
-      return PREFIX.getLevel(fullName).isEnable(DEFAULT_LEVEL);
+      return PREFIX.getLevel(name).isEnable(DEFAULT_LEVEL);
     } else {
       return DEBUG.isEnable(DEFAULT_LEVEL);
     }
   }
 
-  public final boolean isTraceEnabled() {
+  public final boolean isTraceEnabled(String name) {
     if (enablePrefix) {
-      return PREFIX.getLevel(fullName).isEnable(DEFAULT_LEVEL);
+      return PREFIX.getLevel(name).isEnable(DEFAULT_LEVEL);
     } else {
       return TRACE.isEnable(DEFAULT_LEVEL);
     }

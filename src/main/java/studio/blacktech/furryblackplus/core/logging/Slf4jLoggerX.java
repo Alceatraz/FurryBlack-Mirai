@@ -25,52 +25,52 @@ public class Slf4jLoggerX implements Logger {
 
   @Override
   public boolean isErrorEnabled() {
-    return logger.isErrorEnabled();
+    return logger.isErrorEnabled(logger.fullName);
   }
 
   @Override
   public boolean isWarnEnabled() {
-    return logger.isWarnEnabled();
+    return logger.isWarnEnabled(logger.fullName);
   }
 
   @Override
   public boolean isInfoEnabled() {
-    return logger.isInfoEnabled();
+    return logger.isInfoEnabled(logger.fullName);
   }
 
   @Override
   public boolean isDebugEnabled() {
-    return logger.isDebugEnabled();
+    return logger.isDebugEnabled(logger.fullName);
   }
 
   @Override
   public boolean isTraceEnabled() {
-    return logger.isTraceEnabled();
+    return logger.isTraceEnabled(logger.fullName);
   }
 
   @Override
   public boolean isErrorEnabled(Marker marker) {
-    return logger.isErrorEnabled();
+    return logger.isErrorEnabled(logger.fullName);
   }
 
   @Override
   public boolean isWarnEnabled(Marker marker) {
-    return logger.isWarnEnabled();
+    return logger.isWarnEnabled(logger.fullName);
   }
 
   @Override
   public boolean isInfoEnabled(Marker marker) {
-    return logger.isInfoEnabled();
+    return logger.isInfoEnabled(logger.fullName);
   }
 
   @Override
   public boolean isDebugEnabled(Marker marker) {
-    return logger.isDebugEnabled();
+    return logger.isDebugEnabled(logger.fullName);
   }
 
   @Override
   public boolean isTraceEnabled(Marker marker) {
-    return logger.isTraceEnabled();
+    return logger.isTraceEnabled(logger.fullName);
   }
 
   //= ==========================================================================
