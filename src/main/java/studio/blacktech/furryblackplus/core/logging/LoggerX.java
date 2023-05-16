@@ -7,6 +7,7 @@ import studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static studio.blacktech.furryblackplus.FurryBlack.LINE;
 import static studio.blacktech.furryblackplus.core.common.enhance.StringEnhance.extractStackTrace;
@@ -71,6 +72,7 @@ public abstract class LoggerX {
   //= 分组等级
 
   private static final Node PREFIX = Node.root();
+  private static final Map<String, LoggerXLevel> CACHE = new ConcurrentHashMap<>();
 
   private static boolean enablePrefix = false;
 
@@ -123,9 +125,95 @@ public abstract class LoggerX {
     }
 
     public LoggerXLevel getLevel(String path) {
-      return get(path.split("\\."));
+      return CACHE.computeIfAbsent(path, i -> get(i.split("\\.")));
     }
 
+  }
+
+  //= ==========================================================================
+  //= 内置级别
+
+  public final boolean isErrorEnabled() {
+    if (enablePrefix) {
+      return ERROR.isEnable(PREFIX.getLevel(fullName));
+    } else {
+      return ERROR.isEnable(DEFAULT_LEVEL);
+    }
+  }
+
+  public final boolean isWarnEnabled() {
+    if (enablePrefix) {
+      return WARN.isEnable(PREFIX.getLevel(fullName));
+    } else {
+      return WARN.isEnable(DEFAULT_LEVEL);
+    }
+  }
+
+  public final boolean isInfoEnabled() {
+    if (enablePrefix) {
+      return INFO.isEnable(PREFIX.getLevel(fullName));
+    } else {
+      return INFO.isEnable(DEFAULT_LEVEL);
+    }
+  }
+
+  public final boolean isDebugEnabled() {
+    if (enablePrefix) {
+      return DEBUG.isEnable(PREFIX.getLevel(fullName));
+    } else {
+      return DEBUG.isEnable(DEFAULT_LEVEL);
+    }
+  }
+
+  public final boolean isTraceEnabled() {
+    if (enablePrefix) {
+      return TRACE.isEnable(PREFIX.getLevel(fullName));
+    } else {
+      return TRACE.isEnable(DEFAULT_LEVEL);
+    }
+  }
+
+  //= ==========================================================================
+  //= 外部级别
+
+  public final boolean isErrorEnabled(String name) {
+    if (enablePrefix) {
+      return ERROR.isEnable(PREFIX.getLevel(name));
+    } else {
+      return ERROR.isEnable(DEFAULT_LEVEL);
+    }
+  }
+
+  public final boolean isWarnEnabled(String name) {
+    if (enablePrefix) {
+      return WARN.isEnable(PREFIX.getLevel(name));
+    } else {
+      return WARN.isEnable(DEFAULT_LEVEL);
+    }
+  }
+
+  public final boolean isInfoEnabled(String name) {
+    if (enablePrefix) {
+      return INFO.isEnable(PREFIX.getLevel(name));
+    } else {
+      return INFO.isEnable(DEFAULT_LEVEL);
+    }
+  }
+
+  public final boolean isDebugEnabled(String name) {
+    if (enablePrefix) {
+      return DEBUG.isEnable(PREFIX.getLevel(name));
+    } else {
+      return DEBUG.isEnable(DEFAULT_LEVEL);
+    }
+  }
+
+  public final boolean isTraceEnabled(String name) {
+    if (enablePrefix) {
+      return TRACE.isEnable(PREFIX.getLevel(name));
+    } else {
+      return TRACE.isEnable(DEFAULT_LEVEL);
+    }
   }
 
   //= ==================================================================================================================
@@ -188,72 +276,6 @@ public abstract class LoggerX {
 
   public String getSafeName() {
     return clazz == null ? simpleName : fullName;
-  }
-
-  //= ==========================================================================
-  //= 内置级别
-
-  public final boolean isErrorEnabled() {
-    return ERROR.isEnable(DEFAULT_LEVEL);
-  }
-
-  public final boolean isWarnEnabled() {
-    return WARN.isEnable(DEFAULT_LEVEL);
-  }
-
-  public final boolean isInfoEnabled() {
-    return INFO.isEnable(DEFAULT_LEVEL);
-  }
-
-  public final boolean isDebugEnabled() {
-    return DEBUG.isEnable(DEFAULT_LEVEL);
-  }
-
-  public final boolean isTraceEnabled() {
-    return TRACE.isEnable(DEFAULT_LEVEL);
-  }
-
-  //= ==========================================================================
-  //= Slf4j级别
-
-  public final boolean isErrorEnabled(String name) {
-    if (enablePrefix) {
-      return ERROR.isEnable(PREFIX.getLevel(name));
-    } else {
-      return ERROR.isEnable(DEFAULT_LEVEL);
-    }
-  }
-
-  public final boolean isWarnEnabled(String name) {
-    if (enablePrefix) {
-      return WARN.isEnable(PREFIX.getLevel(name));
-    } else {
-      return WARN.isEnable(DEFAULT_LEVEL);
-    }
-  }
-
-  public final boolean isInfoEnabled(String name) {
-    if (enablePrefix) {
-      return INFO.isEnable(PREFIX.getLevel(name));
-    } else {
-      return INFO.isEnable(DEFAULT_LEVEL);
-    }
-  }
-
-  public final boolean isDebugEnabled(String name) {
-    if (enablePrefix) {
-      return DEBUG.isEnable(PREFIX.getLevel(name));
-    } else {
-      return DEBUG.isEnable(DEFAULT_LEVEL);
-    }
-  }
-
-  public final boolean isTraceEnabled(String name) {
-    if (enablePrefix) {
-      return TRACE.isEnable(PREFIX.getLevel(name));
-    } else {
-      return TRACE.isEnable(DEFAULT_LEVEL);
-    }
   }
 
   //= ==========================================================================

@@ -176,7 +176,7 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryB
 - 添加MiraiLoggerX接入Mirai的BOT和NET日志(私有)
 - 重新设计LoggerX机制,使其实现Slf4j
 - 日志级别由后端处理,以实现文件/终端不同级别
-- 默认实现提供了按类路径设定级别功能(仅对Slf4jLoggerX启用)
+- 默认实现提供了按类路径设定级别功能
 
 ### 2.2.0
 
