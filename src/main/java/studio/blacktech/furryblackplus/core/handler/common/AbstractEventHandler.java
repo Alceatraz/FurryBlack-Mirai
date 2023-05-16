@@ -22,13 +22,13 @@ import studio.blacktech.furryblackplus.FurryBlack;
 import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 import studio.blacktech.furryblackplus.core.common.enhance.FileEnhance;
 import studio.blacktech.furryblackplus.core.common.enhance.TimeEnhance;
-import studio.blacktech.furryblackplus.core.common.logger.LoggerXFactory;
-import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
 import studio.blacktech.furryblackplus.core.exception.CoreException;
 import studio.blacktech.furryblackplus.core.exception.moduels.BootException;
 import studio.blacktech.furryblackplus.core.exception.moduels.InitException;
 import studio.blacktech.furryblackplus.core.exception.moduels.ModuleException;
 import studio.blacktech.furryblackplus.core.exception.moduels.ShutException;
+import studio.blacktech.furryblackplus.core.logging.LoggerX;
+import studio.blacktech.furryblackplus.core.logging.LoggerXFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +47,7 @@ import java.util.Properties;
 @Comment("基础模块类")
 public abstract class AbstractEventHandler {
 
-  protected final LoggerX logger = LoggerXFactory.newLogger(getClass());
+  protected final LoggerX logger = LoggerXFactory.getLogger(getClass());
 
   private volatile boolean internalInitLock;
 
@@ -340,6 +340,16 @@ public abstract class AbstractEventHandler {
     return keepComment ? strings : removeComment(strings);
   }
 
+  private List<String> removeComment(List<String> lines) {
+    return lines.stream()
+      .filter(it -> !it.isBlank())
+      .filter(it -> !it.startsWith("#"))
+      .map(it -> {
+        int index = it.indexOf("#");
+        return index > 0 ? it.substring(0, index).trim() : it;
+      }).toList();
+  }
+
   //= ==========================================================================
 
   @Comment("写入根目录下的文件")
@@ -392,14 +402,56 @@ public abstract class AbstractEventHandler {
     FileEnhance.write(FOLDER_LOGS, name, content);
   }
 
-  private List<String> removeComment(List<String> lines) {
-    return lines.stream()
-      .filter(it -> !it.isBlank())
-      .filter(it -> !it.startsWith("#"))
-      .map(it -> {
-        int index = it.indexOf("#");
-        return index > 0 ? it.substring(0, index).trim() : it;
-      }).toList();
+  @Comment("续写根目录下的文件")
+  protected final void append(Path path, String content) {
+    FileEnhance.append(path, content);
+  }
+
+  //= ==========================================================================
+
+  @Comment("续写根目录下的文件")
+  protected final void append(Path path, List<String> content) {
+    FileEnhance.append(path, content);
+  }
+
+  @Comment("续写根目录下的文件")
+  protected final void append(String name, String content) {
+    FileEnhance.append(FOLDER_ROOT, name, content);
+  }
+
+  @Comment("续写日志目录下的文件")
+  protected final void appendConf(String name, String content) {
+    FileEnhance.append(FOLDER_CONF, name, content);
+  }
+
+  @Comment("续写日志目录下的文件")
+  protected final void appendData(String name, String content) {
+    FileEnhance.append(FOLDER_DATA, name, content);
+  }
+
+  @Comment("续写日志目录下的文件")
+  protected final void appendLogs(String name, String content) {
+    FileEnhance.append(FOLDER_LOGS, name, content);
+  }
+
+  @Comment("续写根目录下的文件")
+  protected final void append(String name, List<String> content) {
+    FileEnhance.append(FOLDER_ROOT, name, content);
+  }
+
+  @Comment("续写日志目录下的文件")
+  protected final void appendConf(String name, List<String> content) {
+    FileEnhance.append(FOLDER_CONF, name, content);
+  }
+
+  @Comment("续写日志目录下的文件")
+  protected final void appendData(String name, List<String> content) {
+    FileEnhance.append(FOLDER_DATA, name, content);
+  }
+
+  @Comment("续写日志目录下的文件")
+  protected final void appendLogs(String name, List<String> content) {
+    FileEnhance.append(FOLDER_LOGS, name, content);
   }
 
   //= ==========================================================================

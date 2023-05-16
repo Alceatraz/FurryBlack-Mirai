@@ -169,10 +169,14 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryB
 - 重写内核
 - 重写参数系统
 - 重写配置系统
-- 添加 slf4j
 - 调整LoggerX日志颜色
 - 调整LoggerX日志级别
-- 添加LoggerX-slf4j
+- 添加slf4j
+- 添加Slf4jLoggerX接入slf4j日志
+- 添加MiraiLoggerX接入Mirai的BOT和NET日志(私有)
+- 重新设计LoggerX机制,使其实现Slf4j
+- 日志级别由后端处理,以实现文件/终端不同级别
+- 默认实现提供了按类路径设定级别功能(仅对Slf4jLoggerX启用)
 
 ### 2.2.0
 

@@ -1,1 +1,1 @@
-studio.blacktech.furryblackplus.core.common.logger.slf4j.Slf4jLoggerXServiceProvider
+studio.blacktech.furryblackplus.core.logging.Slf4jLoggerXServiceProvider

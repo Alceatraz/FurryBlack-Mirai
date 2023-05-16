@@ -36,6 +36,7 @@ import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageSource;
 import net.mamoe.mirai.message.data.PlainText;
 import net.mamoe.mirai.utils.BotConfiguration;
+import net.mamoe.mirai.utils.MiraiLogger;
 import org.jetbrains.annotations.Nullable;
 import org.jline.builtins.Completers.TreeCompleter;
 import org.jline.reader.Candidate;
@@ -52,9 +53,6 @@ import studio.blacktech.furryblackplus.core.common.enhance.FileEnhance;
 import studio.blacktech.furryblackplus.core.common.enhance.LockEnhance;
 import studio.blacktech.furryblackplus.core.common.enhance.StringEnhance;
 import studio.blacktech.furryblackplus.core.common.enhance.TimeEnhance;
-import studio.blacktech.furryblackplus.core.common.logger.LoggerXConfig;
-import studio.blacktech.furryblackplus.core.common.logger.LoggerXFactory;
-import studio.blacktech.furryblackplus.core.common.logger.base.LoggerX;
 import studio.blacktech.furryblackplus.core.exception.CoreException;
 import studio.blacktech.furryblackplus.core.exception.schema.SchemaException;
 import studio.blacktech.furryblackplus.core.exception.system.FirstBootException;
@@ -73,6 +71,10 @@ import studio.blacktech.furryblackplus.core.handler.annotation.Monitor;
 import studio.blacktech.furryblackplus.core.handler.annotation.Runner;
 import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 import studio.blacktech.furryblackplus.core.handler.common.Command;
+import studio.blacktech.furryblackplus.core.logging.LoggerX;
+import studio.blacktech.furryblackplus.core.logging.LoggerXFactory;
+import studio.blacktech.furryblackplus.core.logging.annotation.LoggerXConfig;
+import studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -132,40 +134,40 @@ import static studio.blacktech.furryblackplus.core.common.enhance.DataEnhance.pa
 import static studio.blacktech.furryblackplus.core.common.enhance.DataEnhance.parseLong;
 import static studio.blacktech.furryblackplus.core.common.enhance.StringEnhance.toHumanBytes;
 import static studio.blacktech.furryblackplus.core.common.enhance.StringEnhance.toHumanHashCode;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BLACK;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BLUE;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BLACK;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BLUE;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BRIGHT_BLACK;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BRIGHT_BLUE;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BRIGHT_CYAN;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BRIGHT_GREEN;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BRIGHT_MAGENTA;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BRIGHT_RED;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BRIGHT_WHITE;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_BRIGHT_YELLOW;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_CYAN;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_GREEN;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_MAGENTA;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_RED;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_WHITE;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BOLD_YELLOW;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_BLACK;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_BLUE;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_CYAN;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_GREEN;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_MAGENTA;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_RED;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_WHITE;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.BRIGHT_YELLOW;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.CYAN;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.GREEN;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.MAGENTA;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.RED;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.RESET;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.WHITE;
-import static studio.blacktech.furryblackplus.core.common.logger.base.LoggerX.Color.YELLOW;
 import static studio.blacktech.furryblackplus.core.handler.annotation.AnnotationEnhance.printAnnotation;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BLACK;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BLUE;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BOLD_BLACK;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BOLD_BLUE;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BOLD_BRIGHT_BLACK;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BOLD_BRIGHT_BLUE;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BOLD_BRIGHT_CYAN;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BOLD_BRIGHT_GREEN;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BOLD_BRIGHT_MAGENTA;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BOLD_BRIGHT_RED;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BOLD_BRIGHT_WHITE;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BOLD_BRIGHT_YELLOW;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BOLD_CYAN;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BOLD_GREEN;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BOLD_MAGENTA;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BOLD_RED;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BOLD_WHITE;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BOLD_YELLOW;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BRIGHT_BLACK;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BRIGHT_BLUE;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BRIGHT_CYAN;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BRIGHT_GREEN;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BRIGHT_MAGENTA;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BRIGHT_RED;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BRIGHT_WHITE;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.BRIGHT_YELLOW;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.CYAN;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.GREEN;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.MAGENTA;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.RED;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.RESET;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.WHITE;
+import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.YELLOW;
 
 @Comment(
   value = "FurryBlack - Mirai",
@@ -202,6 +204,7 @@ public class FurryBlack {
   private static final String[] ARGS_NO_CONSOLE = {"no", "console"};
   private static final String[] ARGS_FORCE_EXIT = {"force", "exit"};
   private static final String[] ARGS_LOGGER_LEVEL = {"logger", "level"};
+  private static final String[] ARGS_LOGGER_PREFIX = {"logger", "prefix"};
   private static final String[] ARGS_LOGGER_PROVIDER = {"logger", "provider"};
 
   private static final String[] CONF_DEVICE_TYPE = {"device", "type"};
@@ -298,9 +301,10 @@ BOLD_BRIGHT_CYAN +
 "--no-login -------------------------- 选项 跳过客户端登录,大部分功能不可用" + LINE +
 "--no-jline -------------------------- 选项 不使用jline终端" + LINE +
 "--no-console ------------------------ 选项 不使用终端" + LINE +
-"--force-exit ------------------------ 选项 关闭后将强退JVM*" + LINE +
-"--logger-level ---------------------- 参数 设置启动后的日志级别*" + LINE +
-"--logger-provider ------------------- 参数 使用指定的日志后端" + LINE +
+"--force-exit ------------------------ 选项 关闭后将强退JVM" + LINE +
+"--logger-level ---------------------- 参数 设置默认日志级别*" + LINE +
+"--logger-prefix --------------------- 参数 使用指定的日志级别配置*" + LINE +
+"--logger-provider ------------------- 参数 使用指定类名的日志实现后端*" + LINE +
 YELLOW +
 "* 可在启动后通过终端修改,参数的目的是启动初始化阶段即应用" + LINE +
 "* 选项: 键存在即可, 参数: 必须是键值对 例如 --logger-level MUTE" + RESET + LINE +
@@ -707,9 +711,9 @@ BOLD_BRIGHT_CYAN +
 
     if (kernelConfig.level != null) {
 
-      if (LoggerX.setLevel(kernelConfig.level)) {
-        System.out.println("[FurryBlack][ARGS]日志级别 - " + kernelConfig.level);
-      } else {
+      LoggerXLevel level = LoggerXLevel.of(kernelConfig.level);
+
+      if (level == null) {
         System.out.println("[FurryBlack][ARGS]日志级别 - 输入值无效 -> " + kernelConfig.level + ", 可用日志级别为:");
         System.out.println("[FurryBlack][ARGS] - CLOSE");
         System.out.println("[FurryBlack][ARGS] - ERROR");
@@ -718,43 +722,58 @@ BOLD_BRIGHT_CYAN +
         System.out.println("[FurryBlack][ARGS] - DEBUG");
         System.out.println("[FurryBlack][ARGS] - TRACE");
         throw new CoreException("[FurryBlack][FATAL] Logger level invalid -> " + kernelConfig.level);
+      } else {
+        System.out.println("[FurryBlack][ARGS]日志级别 - " + kernelConfig.level);
       }
+
+      LoggerXFactory.setLevel(level);
+
+    }
+
+    //= ========================================================================
+    //= 日志前缀
+
+    if (kernelConfig.prefix == null) {
+      System.out.println("[FurryBlack][ARGS]日志前缀 - 使用统一日志级别");
+    } else {
+      System.out.println("[FurryBlack][ARGS]日志前缀 - " + LoggerXFactory.getDefault());
+
+      LoggerXFactory.enablePrefix();
+
+      System.out.println("[FurryBlack][ARGS]日志前缀 - 尝试加载前缀配置 -> " + kernelConfig.prefix);
+
+      Path path = Paths.get(kernelConfig.prefix);
+      List<String> lines = FileEnhance.readLine(path);
+      LoggerXFactory.injectPrefix(lines);
 
     }
 
     //= ========================================================================
     //= 日志后端
 
-    if (kernelConfig.provider != null) {
-      boolean result = LoggerXFactory.setDefault(kernelConfig.provider);
-      if (result) {
-        System.out.println("[FurryBlack][ARGS]日志后端 - " + LoggerXFactory.getDefault());
-      } else {
-        System.out.println("[FurryBlack][ARGS]日志后端 - 指定后端尚未注册 -> " + kernelConfig.provider + ", 已注册日志后端为:");
-        LoggerXFactory.getProviders().forEach((k, v) -> System.out.println("[FurryBlack][ARGS] - " + k + "/" + v));
-        System.out.println("[FurryBlack][ARGS]日志后端 - 尝试加载日志后端 -> " + kernelConfig.provider);
-        Class<?> clazz;
-        Class<? extends LoggerX> loggerClazz;
-        try {
-          clazz = Class.forName(kernelConfig.provider);
-        } catch (Exception exception) {
-          throw new CoreException("[FurryBlack][ARGS]日志后端 - 尝试加载日志后端失败, 加载类失败 -> " + kernelConfig.provider, exception);
-        }
-        if (LoggerX.class.isAssignableFrom(clazz)) {
-          @SuppressWarnings("unchecked")
-          Class<? extends LoggerX> tempForSuppress = (Class<? extends LoggerX>) clazz;
-          loggerClazz = tempForSuppress;
-        } else {
-          throw new CoreException("[FurryBlack][ARGS]日志后端 - 尝试加载日志后端失败, 指定的类未继承 LoggerX -> " + kernelConfig.provider);
-        }
-        if (!loggerClazz.isAnnotationPresent(LoggerXConfig.class)) {
-          throw new CoreException("[FurryBlack][ARGS]日志后端 - 尝试加载日志后端失败, 指定的类未添加 LoggerXConfig 注解 -> " + kernelConfig.provider);
-        }
-        String registerProvider = LoggerXFactory.registerProvider(loggerClazz);
-        CoreException.check("尝试加载日志后端失败, 注册日志后端失败 -> ", registerProvider);
-        LoggerXFactory.setDefault(loggerClazz);
-        System.out.println("[FurryBlack][ARGS]日志后端 - 加载日志后端成功 -> " + LoggerXFactory.getDefault());
+    if (kernelConfig.provider == null) {
+      System.out.println("[FurryBlack][ARGS]日志后端 - " + LoggerXFactory.getDefault());
+    } else {
+      System.out.println("[FurryBlack][ARGS]日志后端 - 尝试加载日志后端 -> " + kernelConfig.provider);
+      Class<?> clazz;
+      try {
+        clazz = Class.forName(kernelConfig.provider);
+      } catch (Exception exception) {
+        throw new CoreException("[FurryBlack][ARGS]日志后端 - 尝试加载日志后端失败, 加载类失败 -> " + kernelConfig.provider, exception);
       }
+      Class<? extends LoggerX> loggerClazz;
+      if (LoggerX.class.isAssignableFrom(clazz)) {
+        @SuppressWarnings("unchecked")
+        Class<? extends LoggerX> tempForSuppress = (Class<? extends LoggerX>) clazz;
+        loggerClazz = tempForSuppress;
+      } else {
+        throw new CoreException("[FurryBlack][ARGS]日志后端 - 尝试加载日志后端失败, 指定的类未继承 LoggerX -> " + kernelConfig.provider);
+      }
+      if (!loggerClazz.isAnnotationPresent(LoggerXConfig.class)) {
+        throw new CoreException("[FurryBlack][ARGS]日志后端 - 尝试加载日志后端失败, 指定的类未添加 LoggerXConfig 注解 -> " + kernelConfig.provider);
+      }
+      LoggerXFactory.setDefault(loggerClazz);
+      System.out.println("[FurryBlack][ARGS]日志后端 - 加载日志后端成功 -> " + LoggerXFactory.getDefault());
     }
 
     System.out.println("[FurryBlack][INIT]内核配置初始化完成");
@@ -809,7 +828,7 @@ BOLD_BRIGHT_CYAN +
     FurryBlack.println("[FurryBlack][INIT]核心日志目录 " + FOLDER_LOGGER);
 
     FurryBlack.println("[FurryBlack][INIT]日志后端 " + LoggerXFactory.getDefault());
-    FurryBlack.println("[FurryBlack][INIT]日志级别 " + LoggerX.getLevel().name());
+    FurryBlack.println("[FurryBlack][INIT]日志级别 " + LoggerXFactory.getLevel().name());
 
     //= ========================================================================
     //= 初始化日志
@@ -829,7 +848,7 @@ BOLD_BRIGHT_CYAN +
       FurryBlack.println("[FurryBlack][INIT]日志文件 " + name);
     }
 
-    logger = LoggerXFactory.newLogger("System");
+    logger = LoggerXFactory.getLogger("System");
 
     FurryBlack.println("[FurryBlack][INIT]日志系统初始化完成");
 
@@ -845,7 +864,7 @@ BOLD_BRIGHT_CYAN +
     logger.info("系统状态/核心日志目录 " + FOLDER_LOGGER);
 
     logger.info("内核配置/日志后端 " + LoggerXFactory.getDefault());
-    logger.info("内核配置/日志级别 " + LoggerX.getLevel().name());
+    logger.info("内核配置/日志级别 " + LoggerXFactory.getLevel().name());
 
     if (kernelConfig.debug) {
       logger.info("内核配置/调试开关 - 调试模式");
@@ -931,11 +950,11 @@ BOLD_BRIGHT_CYAN +
         var k = entry.getKey();
         var v = entry.getValue();
         if (k == null || k.toString().isBlank()) {
-          logger.warning("丢弃无效配置 " + k + "=" + v);
+          logger.warn("丢弃无效配置 " + k + "=" + v);
           continue;
         }
         if (v == null || k.toString().isBlank()) {
-          logger.warning("丢弃无效配置 " + k + "=" + v);
+          logger.warn("丢弃无效配置 " + k + "=" + v);
           continue;
         }
         argument.append(k, v);
@@ -1071,6 +1090,8 @@ BOLD_BRIGHT_CYAN +
     botConfiguration.setCacheDir(FileEnhance.get(FOLDER_CONFIG, "cache").toFile());
     botConfiguration.setProtocol(systemConfig.deviceType.toMiraiProtocol());
     botConfiguration.loadDeviceInfoJson(systemConfig.deviceInfo);
+    botConfiguration.setBotLoggerSupplier(i -> new MiraiLoggerX("MiraiBot"));
+    botConfiguration.setNetworkLoggerSupplier(i -> new MiraiLoggerX("MiraiNet"));
 
     //= ========================================================================
     //= 加载客户端认证
@@ -1158,7 +1179,7 @@ BOLD_BRIGHT_CYAN +
         }
 
       } catch (Exception exception) {
-        logger.warning("处理私聊消息异常", exception);
+        logger.warn("处理私聊消息异常", exception);
       }
     });
 
@@ -1255,7 +1276,7 @@ BOLD_BRIGHT_CYAN +
         }
 
       } catch (Exception exception) {
-        logger.warning("处理群聊消息异常", exception);
+        logger.warn("处理群聊消息异常", exception);
       }
     });
 
@@ -1326,7 +1347,7 @@ BOLD_BRIGHT_CYAN +
     //= 登录机器人
 
     if (kernelConfig.noLogin) {
-      logger.warning("指定了--no-login参数 跳过登录");
+      logger.warn("指定了--no-login参数 跳过登录");
     } else {
       logger.hint("登录机器人");
       bot.login();
@@ -1637,11 +1658,12 @@ BOLD_BRIGHT_CYAN +
       .command("logger", "level")
       .function(it -> {
         if (it == null) {
-          FurryBlack.println("当前日志级别 -> " + LoggerX.getLevel());
+          FurryBlack.println("当前日志级别 -> " + LoggerXFactory.getLevel());
         } else {
-          if (LoggerX.setLevel(it.getOrEmpty(0))) {
-            FurryBlack.println("日志级别修改为 -> " + LoggerX.getLevel());
-          } else {
+
+          LoggerXLevel of = LoggerXLevel.of(it.getOrEmpty(0));
+
+          if (of == null) {
             FurryBlack.println("日志级别不存在 -> " + it.getOrEmpty(0));
             FurryBlack.println(
 
@@ -1658,6 +1680,8 @@ BOLD_BRIGHT_CYAN +
               // @formatter:on
 
             );
+          } else {
+            FurryBlack.println("日志级别修改为 -> " + LoggerXFactory.getLevel());
           }
         }
       });
@@ -2037,7 +2061,7 @@ BOLD_BRIGHT_CYAN +
 
     CompletableFuture<Void> monitorShutdown = CompletableFuture.runAsync(() -> {
       if (SHUTDOWN_DROP) {
-        logger.warning("丢弃监听任务线程池");
+        logger.warn("丢弃监听任务线程池");
         MONITOR_PROCESS.shutdownNow();
       } else {
         logger.info("关闭监听任务线程池");
@@ -2045,7 +2069,7 @@ BOLD_BRIGHT_CYAN +
         try {
           boolean termination = MONITOR_PROCESS.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
           if (!termination)
-            logger.warning("监听任务线程池关闭超时");
+            logger.warn("监听任务线程池关闭超时");
         } catch (InterruptedException exception) {
           logger.error("等待关闭监听任务线程池被中断", exception);
         }
@@ -2055,7 +2079,7 @@ BOLD_BRIGHT_CYAN +
 
     CompletableFuture<Void> scheduleShutdown = CompletableFuture.runAsync(() -> {
       if (SHUTDOWN_DROP) {
-        logger.warning("丢弃定时任务线程池");
+        logger.warn("丢弃定时任务线程池");
         SCHEDULE_SERVICE.shutdownNow();
       } else {
         logger.info("关闭定时任务线程池");
@@ -2063,7 +2087,7 @@ BOLD_BRIGHT_CYAN +
         try {
           boolean termination = SCHEDULE_SERVICE.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
           if (!termination)
-            logger.warning("定时任务线程池关闭超时");
+            logger.warn("定时任务线程池关闭超时");
         } catch (InterruptedException exception) {
           logger.error("等待关闭定时任务线程池被中断", exception);
         }
@@ -2089,7 +2113,7 @@ BOLD_BRIGHT_CYAN +
     logger.info("通知机器人关闭");
 
     if (kernelConfig.noLogin) {
-      logger.warning("调试模式 不需要关闭机器人");
+      logger.warn("调试模式 不需要关闭机器人");
     } else {
       if (SHUTDOWN_DROP) {
         bot.close(null);
@@ -2100,6 +2124,131 @@ BOLD_BRIGHT_CYAN +
     }
 
     logger.info("机器人已关闭");
+
+  }
+
+  //= ==================================================================================================================
+  //=
+  //= MiraiLogger
+  //=
+  //= ==================================================================================================================
+
+  private static class MiraiLoggerX implements MiraiLogger {
+
+    private final LoggerX logger;
+
+    protected MiraiLoggerX(String name) {
+      this.logger = LoggerXFactory.getLogger(name);
+    }
+
+    @Override public String getIdentity() {
+      return logger.getSimpleName();
+    }
+
+    @Override public boolean isEnabled() {
+      return true;
+    }
+
+    @Override public boolean isErrorEnabled() {
+      return logger.isErrorEnabled();
+    }
+
+    @Override public boolean isWarningEnabled() {
+      return logger.isWarnEnabled();
+    }
+
+    @Override public boolean isInfoEnabled() {
+      return logger.isInfoEnabled();
+    }
+
+    @Override public boolean isDebugEnabled() {
+      return logger.isDebugEnabled();
+    }
+
+    @Override public boolean isVerboseEnabled() {
+      return logger.isTraceEnabled();
+    }
+
+    @Override public void error(String message) {
+      if (message == null) return;
+      logger.error(message);
+    }
+
+    @Override public void error(Throwable throwable) {
+      if (throwable == null) return;
+      logger.error(StringEnhance.extractStackTrace(throwable));
+    }
+
+    @Override public void error(String message, Throwable throwable) {
+      if (throwable == null) error(message);
+      if (message == null) error(throwable);
+      logger.error(message, throwable);
+    }
+
+    @Override public void warning(String message) {
+      if (message == null) return;
+      logger.warn(message);
+    }
+
+    @Override public void warning(Throwable throwable) {
+      if (throwable == null) return;
+      logger.warn(StringEnhance.extractStackTrace(throwable));
+    }
+
+    @Override public void warning(String message, Throwable throwable) {
+      if (throwable == null) warning(message);
+      if (message == null) warning(throwable);
+      logger.warn(message, throwable);
+    }
+
+    @Override public void info(String message) {
+      if (message == null) return;
+      logger.info(message);
+    }
+
+    @Override public void info(Throwable throwable) {
+      if (throwable == null) return;
+      logger.info(StringEnhance.extractStackTrace(throwable));
+    }
+
+    @Override public void info(String message, Throwable throwable) {
+      if (throwable == null) info(message);
+      if (message == null) info(throwable);
+      logger.info(message, throwable);
+    }
+
+    @Override public void debug(String message) {
+      if (message == null) return;
+      logger.error(message);
+
+    }
+
+    @Override public void debug(Throwable throwable) {
+      if (throwable == null) return;
+      logger.debug(StringEnhance.extractStackTrace(throwable));
+    }
+
+    @Override public void debug(String message, Throwable throwable) {
+      if (throwable == null) debug(message);
+      if (message == null) debug(throwable);
+      logger.debug(message, throwable);
+    }
+
+    @Override public void verbose(String message) {
+      if (message == null) return;
+      logger.trace(message);
+    }
+
+    @Override public void verbose(Throwable throwable) {
+      if (throwable == null) return;
+      logger.trace(StringEnhance.extractStackTrace(throwable));
+    }
+
+    @Override public void verbose(String message, Throwable throwable) {
+      if (throwable == null) verbose(message);
+      if (message == null) verbose(throwable);
+      logger.trace(message, throwable);
+    }
 
   }
 
@@ -2661,7 +2810,7 @@ BOLD_BRIGHT_CYAN +
 
   private static final class Schema {
 
-    private final LoggerX logger = LoggerXFactory.newLogger(Schema.class);
+    private final LoggerX logger = LoggerXFactory.getLogger(Schema.class);
 
     private final Path folder;
 
@@ -2878,7 +3027,7 @@ BOLD_BRIGHT_CYAN +
       }
 
       if (listFiles.size() == 0) {
-        logger.warning("插件目录为空");
+        logger.warn("插件目录为空");
         return;
       }
 
@@ -2925,7 +3074,7 @@ BOLD_BRIGHT_CYAN +
         logger.seek("尝试注册插件 -> " + pluginName);
 
         if (pluginPackage.getModules().isEmpty()) {
-          logger.warning("插件包内不含任何模块 " + pluginName);
+          logger.warn("插件包内不含任何模块 " + pluginName);
           return;
         }
 
@@ -3342,7 +3491,7 @@ BOLD_BRIGHT_CYAN +
             instance.shutWrapper();
           }
         } catch (Exception exception) {
-          logger.warning("关闭执行器异常" + annotation.value() + "[" + annotation.command() + "] -> " + instance.getClass().getName(), exception);
+          logger.warn("关闭执行器异常" + annotation.value() + "[" + annotation.command() + "] -> " + instance.getClass().getName(), exception);
         }
       }
 
@@ -3363,7 +3512,7 @@ BOLD_BRIGHT_CYAN +
             instance.shutWrapper();
           }
         } catch (Exception exception) {
-          logger.warning("关闭检查器异常" + annotation.value() + "[" + annotation.command() + "/" + annotation.priority() + "] -> " + instance.getClass().getName(), exception);
+          logger.warn("关闭检查器异常" + annotation.value() + "[" + annotation.command() + "/" + annotation.priority() + "] -> " + instance.getClass().getName(), exception);
         }
       }
 
@@ -3384,7 +3533,7 @@ BOLD_BRIGHT_CYAN +
             instance.shutWrapper();
           }
         } catch (Exception exception) {
-          logger.warning("关闭检查器异常" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName(), exception);
+          logger.warn("关闭检查器异常" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName(), exception);
         }
       }
 
@@ -3405,7 +3554,7 @@ BOLD_BRIGHT_CYAN +
             instance.shutWrapper();
           }
         } catch (Exception exception) {
-          logger.warning("关闭过滤器异常" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName(), exception);
+          logger.warn("关闭过滤器异常" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName(), exception);
         }
       }
 
@@ -3426,7 +3575,7 @@ BOLD_BRIGHT_CYAN +
             instance.shutWrapper();
           }
         } catch (Exception exception) {
-          logger.warning("关闭定时器异常" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName(), exception);
+          logger.warn("关闭定时器异常" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName(), exception);
         }
       }
 
@@ -3610,7 +3759,7 @@ BOLD_BRIGHT_CYAN +
       try {
         moduleInstance.initWrapper();
       } catch (Exception exception) {
-        logger.warning("预载模块发生错误 " + name + " " + instanceName, exception);
+        logger.warn("预载模块发生错误 " + name + " " + instanceName, exception);
       }
     }
 
@@ -3626,7 +3775,7 @@ BOLD_BRIGHT_CYAN +
       try {
         moduleInstance.bootWrapper();
       } catch (Exception exception) {
-        logger.warning("启动模块发生错误 " + name + " " + instanceName, exception);
+        logger.warn("启动模块发生错误 " + name + " " + instanceName, exception);
       }
     }
 
@@ -3642,7 +3791,7 @@ BOLD_BRIGHT_CYAN +
       try {
         moduleInstance.shutWrapper();
       } catch (Exception exception) {
-        logger.warning("关闭模块发生错误 " + name + " " + instanceName, exception);
+        logger.warn("关闭模块发生错误 " + name + " " + instanceName, exception);
       }
     }
 
@@ -3660,7 +3809,7 @@ BOLD_BRIGHT_CYAN +
         moduleInstance.initWrapper();
         moduleInstance.bootWrapper();
       } catch (Exception exception) {
-        logger.warning("重启模块发生错误 " + name + " " + instanceName, exception);
+        logger.warn("重启模块发生错误 " + name + " " + instanceName, exception);
       }
     }
 
@@ -3672,7 +3821,7 @@ BOLD_BRIGHT_CYAN +
       Class<? extends AbstractEventHandler> clazz = modules.get(name);
 
       if (clazz == null) {
-        logger.warning("不存在此名称的模块 -> " + name);
+        logger.warn("不存在此名称的模块 -> " + name);
         return;
       }
 
@@ -3711,7 +3860,7 @@ BOLD_BRIGHT_CYAN +
         }
       }
 
-      logger.warning("此名称的模块未加载 -> " + name);
+      logger.warn("此名称的模块未加载 -> " + name);
 
     }
 
@@ -4283,7 +4432,7 @@ BOLD_BRIGHT_CYAN +
         this.path = path;
         this.name = name;
 
-        logger = LoggerXFactory.newLogger(name);
+        logger = LoggerXFactory.getLogger(name);
 
       }
 
@@ -4370,7 +4519,7 @@ BOLD_BRIGHT_CYAN +
             try {
               clazz = Class.forName(className, false, pluginClassLoader);
             } catch (ClassNotFoundException exception) {
-              logger.warning("加载类失败 " + name + ":" + className, exception);
+              logger.warn("加载类失败 " + name + ":" + className, exception);
               continue;
             }
 
@@ -4385,7 +4534,7 @@ BOLD_BRIGHT_CYAN +
             if (EventHandlerRunner.class.isAssignableFrom(clazz)) {
 
               if (!clazz.isAnnotationPresent(Runner.class)) {
-                logger.warning("发现无注解模块 不予注册 " + name);
+                logger.warn("发现无注解模块 不予注册 " + name);
                 continue;
               }
 
@@ -4395,8 +4544,8 @@ BOLD_BRIGHT_CYAN +
 
               if (modules.containsKey(moduleName)) {
                 Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
-                logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
-                logger.warning("不予注册插件 " + name);
+                logger.warn("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
+                logger.warn("不予注册插件 " + name);
                 throw new SchemaException("发现垃圾插件 包含自冲突");
               }
 
@@ -4409,7 +4558,7 @@ BOLD_BRIGHT_CYAN +
             } else if (EventHandlerFilter.class.isAssignableFrom(clazz)) {
 
               if (!clazz.isAnnotationPresent(Filter.class)) {
-                logger.warning("发现无注解模块 不予注册 " + name);
+                logger.warn("发现无注解模块 不予注册 " + name);
                 continue;
               }
 
@@ -4419,8 +4568,8 @@ BOLD_BRIGHT_CYAN +
 
               if (modules.containsKey(moduleName)) {
                 Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
-                logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
-                logger.warning("不予注册插件 " + name);
+                logger.warn("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
+                logger.warn("不予注册插件 " + name);
                 throw new SchemaException("发现垃圾插件 包含自冲突");
               }
 
@@ -4429,7 +4578,7 @@ BOLD_BRIGHT_CYAN +
                 filterClassMap.put(annotation, (Class<? extends EventHandlerFilter>) clazz);
                 logger.info("过滤器 -> " + clazzName);
               } else {
-                logger.warning("发现未启用过滤器 " + clazzName);
+                logger.warn("发现未启用过滤器 " + clazzName);
               }
 
               continue;
@@ -4437,7 +4586,7 @@ BOLD_BRIGHT_CYAN +
             } else if (EventHandlerMonitor.class.isAssignableFrom(clazz)) {
 
               if (!clazz.isAnnotationPresent(Monitor.class)) {
-                logger.warning("发现无注解模块 不予注册 " + name);
+                logger.warn("发现无注解模块 不予注册 " + name);
                 continue;
               }
 
@@ -4447,8 +4596,8 @@ BOLD_BRIGHT_CYAN +
 
               if (modules.containsKey(moduleName)) {
                 Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
-                logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
-                logger.warning("不予注册插件 " + name);
+                logger.warn("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
+                logger.warn("不予注册插件 " + name);
                 throw new SchemaException("发现垃圾插件 包含自冲突");
               }
 
@@ -4457,7 +4606,7 @@ BOLD_BRIGHT_CYAN +
                 monitorClassMap.put(annotation, (Class<? extends EventHandlerMonitor>) clazz);
                 logger.info("监视器 -> " + clazzName);
               } else {
-                logger.warning("发现未启用监听器 " + clazz.getName());
+                logger.warn("发现未启用监听器 " + clazz.getName());
               }
 
               continue;
@@ -4465,7 +4614,7 @@ BOLD_BRIGHT_CYAN +
             } else if (EventHandlerChecker.class.isAssignableFrom(clazz)) {
 
               if (!clazz.isAnnotationPresent(Checker.class)) {
-                logger.warning("发现无注解模块 不予注册 " + name);
+                logger.warn("发现无注解模块 不予注册 " + name);
                 continue;
               }
 
@@ -4475,8 +4624,8 @@ BOLD_BRIGHT_CYAN +
 
               if (modules.containsKey(moduleName)) {
                 Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
-                logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
-                logger.warning("不予注册插件 " + name);
+                logger.warn("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
+                logger.warn("不予注册插件 " + name);
                 throw new SchemaException("发现垃圾插件 包含自冲突");
               }
 
@@ -4485,7 +4634,7 @@ BOLD_BRIGHT_CYAN +
                 checkerClassMap.put(annotation, (Class<? extends EventHandlerChecker>) clazz);
                 logger.info("检查器 -> " + clazzName);
               } else {
-                logger.warning("发现未启用检查器 " + clazz.getName());
+                logger.warn("发现未启用检查器 " + clazz.getName());
               }
 
               continue;
@@ -4493,7 +4642,7 @@ BOLD_BRIGHT_CYAN +
             } else if (EventHandlerExecutor.class.isAssignableFrom(clazz)) {
 
               if (!clazz.isAnnotationPresent(Executor.class)) {
-                logger.warning("发现无注解模块 不予注册 " + name);
+                logger.warn("发现无注解模块 不予注册 " + name);
                 continue;
               }
 
@@ -4503,8 +4652,8 @@ BOLD_BRIGHT_CYAN +
 
               if (modules.containsKey(moduleName)) {
                 Class<? extends AbstractEventHandler> exist = modules.get(moduleName);
-                logger.warning("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
-                logger.warning("不予注册插件 " + name);
+                logger.warn("发现自冲突 " + clazz.getName() + " " + moduleName + " " + exist.getName());
+                logger.warn("不予注册插件 " + name);
                 throw new SchemaException("发现垃圾插件 包含自冲突");
               }
 
@@ -4512,8 +4661,8 @@ BOLD_BRIGHT_CYAN +
 
               if (commands.containsKey(command)) {
                 Class<? extends EventHandlerExecutor> exist = commands.get(command);
-                logger.warning("发现自冲突命令 " + command + " " + clazz.getName() + " " + moduleName + " " + exist.getName());
-                logger.warning("不予注册插件 " + name);
+                logger.warn("发现自冲突命令 " + command + " " + clazz.getName() + " " + moduleName + " " + exist.getName());
+                logger.warn("不予注册插件 " + name);
                 throw new SchemaException("发现垃圾插件 包含自冲突");
               }
 
@@ -4523,14 +4672,14 @@ BOLD_BRIGHT_CYAN +
                 executorClassMap.put(annotation, (Class<? extends EventHandlerExecutor>) clazz);
                 logger.info("执行器 -> " + clazzName);
               } else {
-                logger.warning("发现未启用执行器 " + clazzName);
+                logger.warn("发现未启用执行器 " + clazzName);
               }
 
               continue;
 
             }
 
-            logger.warning("不支持自行创建的分支模块 不予注册 " + name + ":" + className);
+            logger.warn("不支持自行创建的分支模块 不予注册 " + name + ":" + className);
 
           }
 
@@ -4591,7 +4740,7 @@ BOLD_BRIGHT_CYAN +
 
   private static class Nickname {
 
-    private static final LoggerX logger = LoggerXFactory.newLogger("Nickname");
+    private static final LoggerX logger = LoggerXFactory.getLogger("Nickname");
 
     private final Map<Long, String> global;
     private final Map<Long, Map<Long, String>> groups;
@@ -4623,11 +4772,11 @@ BOLD_BRIGHT_CYAN +
         int indexOfDot = temp.indexOf(".");
         int indexOfColon = temp.indexOf(":");
         if (indexOfDot < 0) {
-          logger.warning("配置无效 " + line);
+          logger.warn("配置无效 " + line);
           continue;
         }
         if (indexOfColon < 0) {
-          logger.warning("配置无效 " + line);
+          logger.warn("配置无效 " + line);
           continue;
         }
         String group = line.substring(0, indexOfDot);
@@ -4863,15 +5012,15 @@ BOLD_BRIGHT_CYAN +
       if (System.getenv(toEnvironmentName(name)) != null) return true;
       if (kernelConfig.unsafe) {
         if (System.getProperty(toPropertyName(name)) != null) {
-          logger.warning("WARNING WARNING WARNING WARNING WARNING WARNING");
-          logger.warning("从系统属性加载私密配置非常危险, 强烈建议不要使用此配置方式");
-          logger.warning("WARNING WARNING WARNING WARNING WARNING WARNING");
+          logger.warn("WARNING WARNING WARNING WARNING WARNING WARNING");
+          logger.warn("从系统属性加载私密配置非常危险, 强烈建议不要使用此配置方式");
+          logger.warn("WARNING WARNING WARNING WARNING WARNING WARNING");
           return true;
         }
         if (options.contains(toArgumentName(name))) {
-          logger.warning("WARNING WARNING WARNING WARNING WARNING WARNING");
-          logger.warning("从程序参数加载私密配置非常危险, 强烈建议不要使用此配置方式");
-          logger.warning("WARNING WARNING WARNING WARNING WARNING WARNING");
+          logger.warn("WARNING WARNING WARNING WARNING WARNING WARNING");
+          logger.warn("从程序参数加载私密配置非常危险, 强烈建议不要使用此配置方式");
+          logger.warn("WARNING WARNING WARNING WARNING WARNING WARNING");
           return true;
         }
       }
@@ -4886,16 +5035,16 @@ BOLD_BRIGHT_CYAN +
       if (kernelConfig.unsafe) {
         value = System.getProperty(toPropertyName(name));
         if (value != null) {
-          logger.warning("WARNING WARNING WARNING WARNING WARNING WARNING");
-          logger.warning("从系统属性加载私密配置非常危险, 强烈建议不要使用此配置方式");
-          logger.warning("WARNING WARNING WARNING WARNING WARNING WARNING");
+          logger.warn("WARNING WARNING WARNING WARNING WARNING WARNING");
+          logger.warn("从系统属性加载私密配置非常危险, 强烈建议不要使用此配置方式");
+          logger.warn("WARNING WARNING WARNING WARNING WARNING WARNING");
           return value;
         }
         value = parameters.get(toArgumentName(name));
         if (value != null) {
-          logger.warning("WARNING WARNING WARNING WARNING WARNING WARNING");
-          logger.warning("从程序参数加载私密配置非常危险, 强烈建议不要使用此配置方式");
-          logger.warning("WARNING WARNING WARNING WARNING WARNING WARNING");
+          logger.warn("WARNING WARNING WARNING WARNING WARNING WARNING");
+          logger.warn("从程序参数加载私密配置非常危险, 强烈建议不要使用此配置方式");
+          logger.warn("WARNING WARNING WARNING WARNING WARNING WARNING");
           return value;
         }
       }
@@ -4921,6 +5070,7 @@ BOLD_BRIGHT_CYAN +
     private boolean forceExit;
 
     private String level;
+    private String prefix;
     private String provider;
 
     public static KernelConfig getInstance(Argument argument) {
@@ -4936,6 +5086,7 @@ BOLD_BRIGHT_CYAN +
       config.forceExit = argument.checkKernelOption(ARGS_FORCE_EXIT);
 
       config.level = argument.getKernelParameter(ARGS_LOGGER_LEVEL);
+      config.prefix = argument.getKernelParameter(ARGS_LOGGER_PREFIX);
       config.provider = argument.getKernelParameter(ARGS_LOGGER_PROVIDER);
 
       return config;
@@ -4950,7 +5101,7 @@ BOLD_BRIGHT_CYAN +
 
   private static class SystemConfig {
 
-    private static final LoggerX logger = LoggerXFactory.newLogger("Config");
+    private static final LoggerX logger = LoggerXFactory.getLogger("Config");
 
     AuthMode authMod;
     long username;
@@ -4989,13 +5140,13 @@ BOLD_BRIGHT_CYAN +
         FirstBootException.require(password, CONF_ACCOUNT_PASSWORD);
         config.password = password;
         if (kernelConfig.debug) {
-          logger.warning("！！！！！！！！！！！！！！！！");
-          logger.warning("调试模式开启时会在日志中记录密码");
-          logger.warning("！！！！！！！！！！！！！！！！");
+          logger.warn("！！！！！！！！！！！！！！！！");
+          logger.warn("调试模式开启时会在日志中记录密码");
+          logger.warn("！！！！！！！！！！！！！！！！");
           logger.seek("登录密码 -> " + password);
-          logger.warning("！！！！！！！！！！！！！！！！");
-          logger.warning("调试模式开启时会在日志中记录密码");
-          logger.warning("！！！！！！！！！！！！！！！！");
+          logger.warn("！！！！！！！！！！！！！！！！");
+          logger.warn("调试模式开启时会在日志中记录密码");
+          logger.warn("！！！！！！！！！！！！！！！！");
         } else {
           logger.seek("登录密码 -> " + "*".repeat(username.length()));
         }
@@ -5459,7 +5610,7 @@ BOLD_BRIGHT_CYAN +
     if (kernelConfig.unsafe) {
       return bot;
     } else {
-      logger.warning("获取机器人实例禁止 只有在unsafe模式下可用");
+      logger.warn("获取机器人实例禁止 只有在unsafe模式下可用");
       for (StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
         System.out.println(stackTraceElement);
       }

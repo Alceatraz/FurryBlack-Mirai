@@ -1,4 +1,4 @@
-package studio.blacktech.furryblackplus.core.common.logger.slf4j;
+package studio.blacktech.furryblackplus.core.logging;
 
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;

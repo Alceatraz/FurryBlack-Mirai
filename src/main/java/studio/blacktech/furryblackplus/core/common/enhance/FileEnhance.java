@@ -10,6 +10,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.WRITE;
+
 @Comment("文件工具")
 public class FileEnhance {
 
@@ -191,7 +194,7 @@ public class FileEnhance {
   public static void write(Path path, String content) {
     ensureFile(path);
     try {
-      Files.writeString(path, content, StandardCharsets.UTF_8);
+      Files.writeString(path, content, StandardCharsets.UTF_8, WRITE);
     } catch (IOException exception) {
       throw new RuntimeException("写入失败 -> ", exception);
     }
@@ -201,7 +204,27 @@ public class FileEnhance {
   public static void write(Path path, List<String> content) {
     ensureFile(path);
     try {
-      Files.write(path, content, StandardCharsets.UTF_8);
+      Files.write(path, content, StandardCharsets.UTF_8, WRITE);
+    } catch (IOException exception) {
+      throw new RuntimeException("写入失败 -> ", exception);
+    }
+  }
+
+  @Comment("确保并写入文件")
+  public static void append(Path path, String content) {
+    ensureFile(path);
+    try {
+      Files.writeString(path, content, StandardCharsets.UTF_8, APPEND);
+    } catch (IOException exception) {
+      throw new RuntimeException("写入失败 -> ", exception);
+    }
+  }
+
+  @Comment("确保并写入文件")
+  public static void append(Path path, List<String> content) {
+    ensureFile(path);
+    try {
+      Files.write(path, content, StandardCharsets.UTF_8, APPEND);
     } catch (IOException exception) {
       throw new RuntimeException("写入失败 -> ", exception);
     }
@@ -243,5 +266,13 @@ public class FileEnhance {
 
   public static void write(Path path, String name, List<String> content) {
     write(get(path, name), content);
+  }
+
+  public static void append(Path path, String name, String content) {
+    append(get(path, name), content);
+  }
+
+  public static void append(Path path, String name, List<String> content) {
+    append(get(path, name), content);
   }
 }

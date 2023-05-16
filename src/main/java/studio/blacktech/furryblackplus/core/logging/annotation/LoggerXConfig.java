@@ -1,4 +1,4 @@
-package studio.blacktech.furryblackplus.core.common.logger;
+package studio.blacktech.furryblackplus.core.logging.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
