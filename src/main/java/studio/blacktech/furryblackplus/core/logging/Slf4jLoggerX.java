@@ -82,11 +82,6 @@ public class Slf4jLoggerX implements Logger {
   }
 
   @Override
-  public LoggingEventBuilder makeLoggingEventBuilder(Level level) {
-    return Logger.super.makeLoggingEventBuilder(level);
-  }
-
-  @Override
   public LoggingEventBuilder atLevel(Level level) {
     return Logger.super.atLevel(level);
   }
@@ -114,6 +109,11 @@ public class Slf4jLoggerX implements Logger {
   @Override
   public LoggingEventBuilder atTrace() {
     return Logger.super.atTrace();
+  }
+
+  @Override
+  public LoggingEventBuilder makeLoggingEventBuilder(Level level) {
+    return Logger.super.makeLoggingEventBuilder(level);
   }
 
   //= ==========================================================================
@@ -261,31 +261,37 @@ public class Slf4jLoggerX implements Logger {
 
   @Override
   public void info(String message) {
+    if (!isInfoEnabled()) return;
     logger.infoImpl(message);
   }
 
   @Override
   public void info(String message, Throwable throwable) {
+    if (!isInfoEnabled()) return;
     logger.infoImpl(message, throwable);
   }
 
   @Override
   public void info(String messagePattern, Object... objects) {
+    if (!isInfoEnabled()) return;
     logger.infoImpl(messagePattern, objects);
   }
 
   @Override
   public void info(String messagePattern, Object object1) {
+    if (!isInfoEnabled()) return;
     logger.infoImpl(messagePattern, object1);
   }
 
   @Override
   public void info(String messagePattern, Object object1, Object object2) {
+    if (!isInfoEnabled()) return;
     logger.infoImpl(messagePattern, object1, object2);
   }
 
   @Override
   public void info(Marker marker, String message) {
+    if (!isInfoEnabled(marker)) return;
     if (marker == null) {
       logger.infoImpl(message);
     } else {
@@ -295,6 +301,7 @@ public class Slf4jLoggerX implements Logger {
 
   @Override
   public void info(Marker marker, String message, Throwable throwable) {
+    if (!isInfoEnabled(marker)) return;
     if (marker == null) {
       logger.infoImpl(message, throwable);
     } else {
@@ -304,6 +311,7 @@ public class Slf4jLoggerX implements Logger {
 
   @Override
   public void info(Marker marker, String messagePattern, Object... objects) {
+    if (!isInfoEnabled(marker)) return;
     if (marker == null) {
       logger.infoImpl(messagePattern, objects);
     } else {
@@ -313,6 +321,7 @@ public class Slf4jLoggerX implements Logger {
 
   @Override
   public void info(Marker marker, String messagePattern, Object object1) {
+    if (!isInfoEnabled(marker)) return;
     if (marker == null) {
       logger.infoImpl(messagePattern, object1);
     } else {
@@ -322,6 +331,7 @@ public class Slf4jLoggerX implements Logger {
 
   @Override
   public void info(Marker marker, String messagePattern, Object object1, Object object2) {
+    if (!isInfoEnabled(marker)) return;
     if (marker == null) {
       logger.infoImpl(messagePattern, object1, object2);
     } else {

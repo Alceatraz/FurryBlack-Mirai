@@ -5,7 +5,6 @@ import studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel;
 
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
-import java.util.List;
 
 public class LoggerXFactory {
 
@@ -33,8 +32,16 @@ public class LoggerXFactory {
   //= ==================================================================================================================
   //= 前缀系统
 
-  public static void injectPrefix(String prefix,LoggerXLevel level) {
-    LoggerX.injectPrefix(prefix,level);
+  public static void enablePrefix() {
+    LoggerX.enablePrefix();
+  }
+
+  public static void disablePrefix() {
+    LoggerX.disablePrefix();
+  }
+
+  public static void injectPrefix(String prefix, LoggerXLevel level) {
+    LoggerX.injectPrefix(prefix, level);
   }
 
   //= ==================================================================================================================

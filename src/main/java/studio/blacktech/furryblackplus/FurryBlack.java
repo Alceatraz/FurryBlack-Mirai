@@ -736,32 +736,22 @@ CONF_THREADS_SCHEDULE=0
       System.out.println("[FurryBlack][ARGS]日志前缀 - 尝试加载前缀配置 -> " + kernelConfig.prefix);
 
       Path path = Paths.get(kernelConfig.prefix);
-
       List<String> lines = FileEnhance.readLine(path);
 
       if (lines.isEmpty()) {
-
         System.out.println("[FurryBlack][ARGS]日志前缀 - 前缀配置为空 切换至默认模式");
-
       } else {
-
         for (String line : lines) {
           String[] split = line.split("=");
           var k = split[0];
           var v = split[1];
-
           LoggerXLevel of = LoggerXLevel.of(v);
-
-          System.out.println("[FurryBlack][ARGS]日志前缀 - " + v + " " + k);
-
           LoggerXFactory.injectPrefix(k, of);
+          System.out.println("[FurryBlack][ARGS]日志前缀 - 加载 " + v + " " + k);
         }
-
+        LoggerXFactory.enablePrefix();
       }
-
     }
-
-    System.out.println("[FurryBlack][ARGS]日志前缀 - " + kernelConfig.prefix);
 
     //= ========================================================================
     //= 日志后端

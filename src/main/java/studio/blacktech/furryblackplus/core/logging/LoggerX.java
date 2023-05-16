@@ -218,7 +218,7 @@ public abstract class LoggerX {
 
   public final boolean isErrorEnabled(String name) {
     if (enablePrefix) {
-      return PREFIX.getLevel(name).isEnable(DEFAULT_LEVEL);
+      return ERROR.isEnable(PREFIX.getLevel(name));
     } else {
       return ERROR.isEnable(DEFAULT_LEVEL);
     }
@@ -226,7 +226,7 @@ public abstract class LoggerX {
 
   public final boolean isWarnEnabled(String name) {
     if (enablePrefix) {
-      return PREFIX.getLevel(name).isEnable(DEFAULT_LEVEL);
+      return WARN.isEnable(PREFIX.getLevel(name));
     } else {
       return WARN.isEnable(DEFAULT_LEVEL);
     }
@@ -234,7 +234,7 @@ public abstract class LoggerX {
 
   public final boolean isInfoEnabled(String name) {
     if (enablePrefix) {
-      return PREFIX.getLevel(name).isEnable(DEFAULT_LEVEL);
+      return INFO.isEnable(PREFIX.getLevel(name));
     } else {
       return INFO.isEnable(DEFAULT_LEVEL);
     }
@@ -242,7 +242,7 @@ public abstract class LoggerX {
 
   public final boolean isDebugEnabled(String name) {
     if (enablePrefix) {
-      return PREFIX.getLevel(name).isEnable(DEFAULT_LEVEL);
+      return DEBUG.isEnable(PREFIX.getLevel(name));
     } else {
       return DEBUG.isEnable(DEFAULT_LEVEL);
     }
@@ -250,7 +250,7 @@ public abstract class LoggerX {
 
   public final boolean isTraceEnabled(String name) {
     if (enablePrefix) {
-      return PREFIX.getLevel(name).isEnable(DEFAULT_LEVEL);
+      return TRACE.isEnable(PREFIX.getLevel(name));
     } else {
       return TRACE.isEnable(DEFAULT_LEVEL);
     }
