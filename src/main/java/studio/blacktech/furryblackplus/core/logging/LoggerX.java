@@ -259,7 +259,8 @@ public abstract class LoggerX {
   protected LoggerX(String name) {
     clazz = null;
     fullName = name;
-    simpleName = name;
+    String[] split = name.split("\\.");
+    simpleName = split[split.length - 1];
   }
 
   public Class<?> getClazz() {
