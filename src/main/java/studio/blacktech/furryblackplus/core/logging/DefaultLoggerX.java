@@ -23,7 +23,6 @@ import studio.blacktech.furryblackplus.core.common.enhance.FileEnhance;
 import studio.blacktech.furryblackplus.core.common.enhance.TimeEnhance;
 import studio.blacktech.furryblackplus.core.logging.annotation.LoggerXConfig;
 
-import java.io.File;
 import java.nio.file.Path;
 
 import static studio.blacktech.furryblackplus.FurryBlack.LINE;
@@ -35,6 +34,7 @@ import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.RE
 public final class DefaultLoggerX extends WrappedLoggerX {
 
   private static Path path;
+  private static volatile boolean lock = false;
 
   public DefaultLoggerX(String simple) {
     super(simple);
@@ -46,9 +46,10 @@ public final class DefaultLoggerX extends WrappedLoggerX {
 
   //= ==================================================================================================================
 
-  @Override
-  public void initLoggerFile(File file) {
-    path = file.toPath();
+  public static void init(Path path) {
+    if (lock) return;
+    lock = true;
+    DefaultLoggerX.path = path;
   }
 
   //= ==================================================================================================================

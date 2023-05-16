@@ -4,7 +4,6 @@ import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 import studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor;
 import studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel;
 
-import java.io.File;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -185,10 +184,6 @@ public abstract class LoggerX {
 
   public String getSafeName() {
     return clazz == null ? simpleName : fullName;
-  }
-
-  public void initLoggerFile(File file) {
-    throw new UnsupportedOperationException("在LoggerXConfig标记为needLoggerFile=true的后端必须实现此方法以初始化日志文件");
   }
 
   public final boolean isErrorEnabled() {

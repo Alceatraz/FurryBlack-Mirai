@@ -3,9 +3,8 @@ package studio.blacktech.furryblackplus.core.logging;
 import studio.blacktech.furryblackplus.core.logging.annotation.LoggerXConfig;
 import studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -58,9 +57,10 @@ public class LoggerXFactory {
     return DEFAULT_LOGGER.getAnnotation(LoggerXConfig.class).needLoggerFile();
   }
 
-  public static void initLoggerFile(File file) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    Method initLoggerFile = DEFAULT_LOGGER.getDeclaredMethod("initLoggerFile", File.class);
-    initLoggerFile.invoke(null, file);
+  public static void initLoggerFile(Path path) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    DEFAULT_LOGGER
+      .getDeclaredMethod("init", Path.class)
+      .invoke(null, path);
   }
 
   //= ==================================================================================================================

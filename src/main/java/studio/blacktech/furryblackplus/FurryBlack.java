@@ -840,9 +840,11 @@ BOLD_BRIGHT_CYAN +
       CoreException.check("日志文件初始化失败 -> ", FileEnhance.ensureFileSafe(loggerFile));
 
       try {
-        LoggerXFactory.initLoggerFile(loggerFile.toFile());
-      } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException exception) {
-        throw new CoreException("日志后端初始化失败 -> " + loggerFile, exception);
+        LoggerXFactory.initLoggerFile(loggerFile);
+      } catch (NoSuchMethodException | IllegalAccessException exception) {
+        throw new CoreException("日志后端初始化失败 标记为需要日志文件的后端必须实现public void init(Path)方法 -> " + loggerFile, exception);
+      } catch (InvocationTargetException exception) {
+        throw new CoreException("日志后端初始化失败 后端执行public void init(Path)方法时发生异常 -> " + loggerFile, exception);
       }
 
       FurryBlack.println("[FurryBlack][INIT]日志文件 " + name);
