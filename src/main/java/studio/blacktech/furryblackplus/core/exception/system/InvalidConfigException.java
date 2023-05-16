@@ -37,7 +37,7 @@ public class InvalidConfigException extends SchemaException {
 
   public static String require(String value, String... name) {
     if (value != null) return value;
-    throw new InvalidConfigException("Required field " + String.join(".", name) + " not setLevel");
+    throw new InvalidConfigException("Required field " + String.join(".", name) + " not set");
   }
 
 }
