@@ -78,8 +78,12 @@ public abstract class LoggerX {
     enablePrefix = true;
   }
 
+  protected static void disablePrefix() {
+    enablePrefix = false;
+  }
+
   protected static void loadPrefix(Map<String, LoggerXLevel> prefixes) {
-    enablePrefix = true;
+    prefixes.forEach(PREFIX::set);
   }
 
   private static class Node {

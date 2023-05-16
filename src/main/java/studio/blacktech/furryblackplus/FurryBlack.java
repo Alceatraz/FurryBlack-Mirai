@@ -734,11 +734,10 @@ BOLD_BRIGHT_CYAN +
     //= 日志前缀
 
     if (kernelConfig.prefix == null) {
-      System.out.println("[FurryBlack][ARGS]日志前缀 - 使用统一日志级别");
-    } else {
-      System.out.println("[FurryBlack][ARGS]日志前缀 - " + LoggerXFactory.getDefault());
 
-      LoggerXFactory.enablePrefix();
+      System.out.println("[FurryBlack][ARGS]日志前缀 - 使用统一日志级别");
+
+    } else {
 
       System.out.println("[FurryBlack][ARGS]日志前缀 - 尝试加载前缀配置 -> " + kernelConfig.prefix);
 

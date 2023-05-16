@@ -35,10 +35,6 @@ public class LoggerXFactory {
   //= ==================================================================================================================
   //= 前缀系统
 
-  public static void enablePrefix() {
-    LoggerX.enablePrefix();
-  }
-
   public static void injectPrefix(List<String> lines) {
     Map<String, LoggerXLevel> temp = new TreeMap<>();
     for (String line : lines) {
@@ -47,7 +43,12 @@ public class LoggerXFactory {
       var v = split[1];
       temp.put(k, LoggerXLevel.of(v));
     }
-    LoggerX.loadPrefix(temp);
+    if (temp.isEmpty()) {
+      LoggerX.disablePrefix();
+    } else {
+      LoggerX.enablePrefix();
+      LoggerX.loadPrefix(temp);
+    }
   }
 
   //= ==================================================================================================================
