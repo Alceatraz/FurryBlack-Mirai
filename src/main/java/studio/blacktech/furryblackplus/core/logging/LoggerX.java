@@ -64,7 +64,7 @@ public abstract class LoggerX {
   }
 
   protected static void setLevel(LoggerXLevel level) {
-    DEFAULT_LEVEL = Objects.requireNonNull(level, "Can't set logging level to null !");
+    DEFAULT_LEVEL = Objects.requireNonNull(level, "Can't setLevel logging level to null !");
   }
 
   //= ==========================================================================
@@ -82,8 +82,8 @@ public abstract class LoggerX {
     enablePrefix = false;
   }
 
-  protected static void loadPrefix(Map<String, LoggerXLevel> prefixes) {
-    prefixes.forEach(PREFIX::set);
+  protected static void injectPrefix(String prefix, LoggerXLevel level) {
+    PREFIX.setLevel(prefix, level);
   }
 
   private static class Node {
@@ -118,7 +118,7 @@ public abstract class LoggerX {
       return current.getLevel();
     }
 
-    public void set(String path, LoggerXLevel level) {
+    public void setLevel(String path, LoggerXLevel level) {
       add(path.split("\\.")).level = level;
     }
 

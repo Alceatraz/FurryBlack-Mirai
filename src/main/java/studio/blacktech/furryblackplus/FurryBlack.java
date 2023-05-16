@@ -612,7 +612,7 @@ CONF_THREADS_SCHEDULE=0
     // -D user.country=zh
     // -D user.language=CN
     if (System.getenv("FURRYBLACK_LOCALE_SKIP") == null) {
-      System.err.println("Env FURRYBLACK_LOCALE_SKIP not set, Setting JVM local to Locale.SIMPLIFIED_CHINESE");
+      System.err.println("Env FURRYBLACK_LOCALE_SKIP not setLevel, Setting JVM local to Locale.SIMPLIFIED_CHINESE");
       Locale.setDefault(Locale.SIMPLIFIED_CHINESE);
     }
 
@@ -621,7 +621,7 @@ CONF_THREADS_SCHEDULE=0
 
     // -D user.timezone=Asia/Shanghai
     if (System.getenv("FURRYBLACK_TIMEZONE_SKIP") == null) {
-      System.err.println("Env FURRYBLACK_TIMEZONE_SKIP not set, Setting JVM timezone to Asia/Shanghai");
+      System.err.println("Env FURRYBLACK_TIMEZONE_SKIP not setLevel, Setting JVM timezone to Asia/Shanghai");
       TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
     }
 
@@ -739,8 +739,29 @@ CONF_THREADS_SCHEDULE=0
 
       List<String> lines = FileEnhance.readLine(path);
 
-      LoggerXFactory.injectPrefix(lines);
+      if (lines.isEmpty()) {
+
+        System.out.println("[FurryBlack][ARGS]日志前缀 - 前缀配置为空 切换至默认模式");
+
+      } else {
+
+        for (String line : lines) {
+          String[] split = line.split("=");
+          var k = split[0];
+          var v = split[1];
+
+          LoggerXLevel of = LoggerXLevel.of(v);
+
+          System.out.println("[FurryBlack][ARGS]日志前缀 - " + v + " " + k);
+
+          LoggerXFactory.injectPrefix(k, of);
+        }
+
+      }
+
     }
+
+    System.out.println("[FurryBlack][ARGS]日志前缀 - " + kernelConfig.prefix);
 
     //= ========================================================================
     //= 日志后端
@@ -771,8 +792,9 @@ CONF_THREADS_SCHEDULE=0
 
       LoggerXFactory.setDefault(loggerClazz);
 
-      System.out.println("[FurryBlack][ARGS]日志后端 - 加载日志后端成功 -> " + LoggerXFactory.getDefault());
     }
+
+    System.out.println("[FurryBlack][ARGS]日志后端 - " + LoggerXFactory.getDefault());
 
     System.out.println("[FurryBlack][INIT]内核配置初始化完成");
 

@@ -6,8 +6,6 @@ import studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class LoggerXFactory {
 
@@ -35,20 +33,8 @@ public class LoggerXFactory {
   //= ==================================================================================================================
   //= 前缀系统
 
-  public static void injectPrefix(List<String> lines) {
-    Map<String, LoggerXLevel> temp = new TreeMap<>();
-    for (String line : lines) {
-      String[] split = line.split("=");
-      var k = split[0];
-      var v = split[1];
-      temp.put(k, LoggerXLevel.of(v));
-    }
-    if (temp.isEmpty()) {
-      LoggerX.disablePrefix();
-    } else {
-      LoggerX.enablePrefix();
-      LoggerX.loadPrefix(temp);
-    }
+  public static void injectPrefix(String prefix,LoggerXLevel level) {
+    LoggerX.injectPrefix(prefix,level);
   }
 
   //= ==================================================================================================================

@@ -37,6 +37,6 @@ public class FirstBootException extends SchemaException {
 
   public static String require(String value, String... name) {
     if (value != null) return value;
-    throw new FirstBootException("Required field " + String.join(".", name) + " not set");
+    throw new FirstBootException("Required field " + String.join(".", name) + " not setLevel");
   }
 }
