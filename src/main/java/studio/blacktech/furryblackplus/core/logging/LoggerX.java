@@ -190,6 +190,32 @@ public abstract class LoggerX {
     return clazz == null ? simpleName : fullName;
   }
 
+  //= ==========================================================================
+  //= 内置级别
+
+  protected final boolean isError() {
+    return ERROR.isEnable(DEFAULT_LEVEL);
+  }
+
+  protected final boolean isWarn() {
+    return WARN.isEnable(DEFAULT_LEVEL);
+  }
+
+  protected final boolean isInfo() {
+    return INFO.isEnable(DEFAULT_LEVEL);
+  }
+
+  protected final boolean isDebug() {
+    return DEBUG.isEnable(DEFAULT_LEVEL);
+  }
+
+  protected final boolean isTrace() {
+    return TRACE.isEnable(DEFAULT_LEVEL);
+  }
+
+  //= ==========================================================================
+  //= Slf4j级别
+
   public final boolean isErrorEnabled() {
     if (enablePrefix) {
       return PREFIX.getLevel(fullName).isEnable(DEFAULT_LEVEL);

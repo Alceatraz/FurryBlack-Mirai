@@ -396,52 +396,52 @@ BOLD_BRIGHT_CYAN +
 
       // @formatter:off
 
-                                  "# ===========================================================================================================" + LINE +
-                                  "NO COLOR ---------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + LINE +
-                                  "# ===========================================================================================================" + LINE +
-      BLACK                     + "BLACK ------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      RED                       + "RED --------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      GREEN                     + "GREEN ------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      YELLOW                    + "YELLOW ------------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BLUE                      + "BLUE -------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      MAGENTA                   + "MAGENTA ----------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      CYAN                      + "CYAN -------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      WHITE                     + "WHITE ------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BRIGHT_BLACK              + "BRIGHT_BLACK ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BRIGHT_RED                + "BRIGHT_RED -------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BRIGHT_GREEN              + "BRIGHT_GREEN ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BRIGHT_YELLOW             + "BRIGHT_YELLOW ----------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BRIGHT_BLUE               + "BRIGHT_BLUE ------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BRIGHT_MAGENTA            + "BRIGHT_MAGENTA ---------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BRIGHT_CYAN               + "BRIGHT_CYAN ------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BRIGHT_WHITE              + "BRIGHT_WHITE ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-                                  "# ===========================================================================================================" + LINE +
-      BOLD_BLACK                + "BOLD_BLACK -------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BOLD_RED                  + "BOLD_RED ---------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BOLD_GREEN                + "BOLD_GREEN -------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BOLD_YELLOW               + "BOLD_YELLOW ------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BOLD_BLUE                 + "BOLD_BLUE --------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BOLD_MAGENTA              + "BOLD_MAGENTA ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BOLD_CYAN                 + "BOLD_CYAN --------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BOLD_WHITE                + "BOLD_WHITE -------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BOLD_BRIGHT_BLACK         + "BOLD_BRIGHT_BLACK ------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BOLD_BRIGHT_RED           + "BOLD_BRIGHT_RED --------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BOLD_BRIGHT_GREEN         + "BOLD_BRIGHT_GREEN ------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BOLD_BRIGHT_YELLOW        + "BOLD_BRIGHT_YELLOW ------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BOLD_BRIGHT_BLUE          + "BOLD_BRIGHT_BLUE -------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BOLD_BRIGHT_MAGENTA       + "BOLD_BRIGHT_MAGENTA ----- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BOLD_BRIGHT_CYAN          + "BOLD_BRIGHT_CYAN -------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-      BOLD_BRIGHT_WHITE         + "BOLD_BRIGHT_WHITE ------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
-                                  "# ===========================================================================================================" + LINE +
-      BOLD_BRIGHT_RED           + "FATAL / BOLD_BRIGHT_RED --------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
-      BOLD_RED                  + "ERROR / BOLD_RED ---------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
-      BOLD_BRIGHT_YELLOW        + "WARN  / BOLD_BRIGHT_YELLOW ------ [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
-      BRIGHT_CYAN               + "HINT  / BRIGHT_CYAN ------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
-      BRIGHT_GREEN              + "SEEK  / BRIGHT_GREEN ------------ [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
-                                  "INFO  / BRIGHT_RED -------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + LINE +
-      BRIGHT_BLACK              + "DEBUG / BRIGHT_BLACK ------------ [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
-      BLACK                     + "TRACE / BLACK ------------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
-                                  "# ==========================================================================================================="
+                      "# ===========================================================================================================" + LINE +
+                      "NO COLOR ---------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + LINE +
+                      "# ===========================================================================================================" + LINE +
+BLACK               + "BLACK ------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+RED                 + "RED --------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+GREEN               + "GREEN ------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+YELLOW              + "YELLOW ------------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BLUE                + "BLUE -------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+MAGENTA             + "MAGENTA ----------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+CYAN                + "CYAN -------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+WHITE               + "WHITE ------------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BRIGHT_BLACK        + "BRIGHT_BLACK ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BRIGHT_RED          + "BRIGHT_RED -------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BRIGHT_GREEN        + "BRIGHT_GREEN ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BRIGHT_YELLOW       + "BRIGHT_YELLOW ----------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BRIGHT_BLUE         + "BRIGHT_BLUE ------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BRIGHT_MAGENTA      + "BRIGHT_MAGENTA ---------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BRIGHT_CYAN         + "BRIGHT_CYAN ------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BRIGHT_WHITE        + "BRIGHT_WHITE ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+                      "# ===========================================================================================================" + LINE +
+BOLD_BLACK          + "BOLD_BLACK -------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BOLD_RED            + "BOLD_RED ---------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BOLD_GREEN          + "BOLD_GREEN -------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BOLD_YELLOW         + "BOLD_YELLOW ------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BOLD_BLUE           + "BOLD_BLUE --------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BOLD_MAGENTA        + "BOLD_MAGENTA ------------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BOLD_CYAN           + "BOLD_CYAN --------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BOLD_WHITE          + "BOLD_WHITE -------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BOLD_BRIGHT_BLACK   + "BOLD_BRIGHT_BLACK ------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BOLD_BRIGHT_RED     + "BOLD_BRIGHT_RED --------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BOLD_BRIGHT_GREEN   + "BOLD_BRIGHT_GREEN ------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BOLD_BRIGHT_YELLOW  + "BOLD_BRIGHT_YELLOW ------ THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BOLD_BRIGHT_BLUE    + "BOLD_BRIGHT_BLUE -------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BOLD_BRIGHT_MAGENTA + "BOLD_BRIGHT_MAGENTA ----- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BOLD_BRIGHT_CYAN    + "BOLD_BRIGHT_CYAN -------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+BOLD_BRIGHT_WHITE   + "BOLD_BRIGHT_WHITE ------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + RESET + LINE +
+                      "# ===========================================================================================================" + LINE +
+BOLD_BRIGHT_RED     + "FATAL / BOLD_BRIGHT_RED --------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
+BOLD_RED            + "ERROR / BOLD_RED ---------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
+BOLD_BRIGHT_YELLOW  + "WARN  / BOLD_BRIGHT_YELLOW ------ [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
+BRIGHT_CYAN         + "HINT  / BRIGHT_CYAN ------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
+BRIGHT_GREEN        + "SEEK  / BRIGHT_GREEN ------------ [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
+                      "INFO  / BRIGHT_RED -------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + LINE +
+BRIGHT_BLACK        + "DEBUG / BRIGHT_BLACK ------------ [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
+BLACK               + "TRACE / BLACK ------------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
+                      "# ==========================================================================================================="
 
       // @formatter:on
 
@@ -451,45 +451,45 @@ BOLD_BRIGHT_CYAN +
 
       // @formatter:off
 
-      """
-      #===============================================================================
-      # 账号配置
-      #===============================================================================
-      # 认证模式 PASSWD/QRCODE
-      CONF_ACCOUNT_AUTH=PASSWD
-      # 账号
-      CONF_ACCOUNT_USERNAME=0000
-      # 密码
-      CONF_ACCOUNT_PASSWORD=0000
-      #===============================================================================
-      # 设备设置
-      #===============================================================================
-      # 设备类型 IPAD/MACOS/PAD/PHONE/WATCH
-      CONF_DEVICE_TYPE=IPAD
-      # 设备信息 需要使用Aoki生成
-      CONF_DEVICE_INFO=device.json
-      #===============================================================================
-      # 设备设置
-      #===============================================================================
-      # 命令识别正则
-      CONF_COMMAND_REGEX=/[a-zA-Z0-9]{2,16}
-      # 监听器线程池
-      CONF_THREADS_MONITOR=0
-      # 定时器线程池
-      CONF_THREADS_SCHEDULE=0
-      #===============================================================================
-      """
-
-      .replaceAll("CONF_ACCOUNT_AUTH",     String.join(".", CONF_ACCOUNT_AUTH))
-      .replaceAll("CONF_ACCOUNT_USERNAME", String.join(".", CONF_ACCOUNT_USERNAME))
-      .replaceAll("CONF_ACCOUNT_PASSWORD", String.join(".", CONF_ACCOUNT_PASSWORD))
-      .replaceAll("CONF_DEVICE_TYPE",      String.join(".", CONF_DEVICE_TYPE))
-      .replaceAll("CONF_DEVICE_INFO",      String.join(".", CONF_DEVICE_INFO))
-      .replaceAll("CONF_COMMAND_REGEX",    String.join(".", CONF_COMMAND_REGEX))
-      .replaceAll("CONF_THREADS_MONITOR",  String.join(".", CONF_THREADS_MONITOR))
-      .replaceAll("CONF_THREADS_SCHEDULE", String.join(".", CONF_THREADS_SCHEDULE))
+"""
+#===============================================================================
+# 账号配置
+#===============================================================================
+# 认证模式 PASSWD/QRCODE
+CONF_ACCOUNT_AUTH=PASSWD
+# 账号
+CONF_ACCOUNT_USERNAME=0000
+# 密码
+CONF_ACCOUNT_PASSWORD=0000
+#===============================================================================
+# 设备设置
+#===============================================================================
+# 设备类型 IPAD/MACOS/PAD/PHONE/WATCH
+CONF_DEVICE_TYPE=IPAD
+# 设备信息 需要使用Aoki生成
+CONF_DEVICE_INFO=device.json
+#===============================================================================
+# 设备设置
+#===============================================================================
+# 命令识别正则
+CONF_COMMAND_REGEX=/[a-zA-Z0-9]{2,16}
+# 监听器线程池
+CONF_THREADS_MONITOR=0
+# 定时器线程池
+CONF_THREADS_SCHEDULE=0
+#===============================================================================
+"""
 
       // @formatter:on
+
+  .replaceAll("CONF_ACCOUNT_AUTH", String.join(".", CONF_ACCOUNT_AUTH))
+  .replaceAll("CONF_ACCOUNT_USERNAME", String.join(".", CONF_ACCOUNT_USERNAME))
+  .replaceAll("CONF_ACCOUNT_PASSWORD", String.join(".", CONF_ACCOUNT_PASSWORD))
+  .replaceAll("CONF_DEVICE_TYPE", String.join(".", CONF_DEVICE_TYPE))
+  .replaceAll("CONF_DEVICE_INFO", String.join(".", CONF_DEVICE_INFO))
+  .replaceAll("CONF_COMMAND_REGEX", String.join(".", CONF_COMMAND_REGEX))
+  .replaceAll("CONF_THREADS_MONITOR", String.join(".", CONF_THREADS_MONITOR))
+  .replaceAll("CONF_THREADS_SCHEDULE", String.join(".", CONF_THREADS_SCHEDULE))
 
     ;
 
@@ -501,9 +501,7 @@ BOLD_BRIGHT_CYAN +
   //=
   //= ==================================================================================================================
 
-  private FurryBlack() {
-
-  }
+  private FurryBlack() {}
 
   //= ==================================================================================================================
   //
@@ -733,33 +731,31 @@ BOLD_BRIGHT_CYAN +
     //= ========================================================================
     //= 日志前缀
 
-    if (kernelConfig.prefix == null) {
-
-      System.out.println("[FurryBlack][ARGS]日志前缀 - 使用统一日志级别");
-
-    } else {
+    if (kernelConfig.prefix != null) {
 
       System.out.println("[FurryBlack][ARGS]日志前缀 - 尝试加载前缀配置 -> " + kernelConfig.prefix);
 
       Path path = Paths.get(kernelConfig.prefix);
-      List<String> lines = FileEnhance.readLine(path);
-      LoggerXFactory.injectPrefix(lines);
 
+      List<String> lines = FileEnhance.readLine(path);
+
+      LoggerXFactory.injectPrefix(lines);
     }
 
     //= ========================================================================
     //= 日志后端
 
-    if (kernelConfig.provider == null) {
-      System.out.println("[FurryBlack][ARGS]日志后端 - " + LoggerXFactory.getDefault());
-    } else {
+    if (kernelConfig.provider != null) {
+
       System.out.println("[FurryBlack][ARGS]日志后端 - 尝试加载日志后端 -> " + kernelConfig.provider);
+
       Class<?> clazz;
       try {
         clazz = Class.forName(kernelConfig.provider);
       } catch (Exception exception) {
         throw new CoreException("[FurryBlack][ARGS]日志后端 - 尝试加载日志后端失败, 加载类失败 -> " + kernelConfig.provider, exception);
       }
+
       Class<? extends LoggerX> loggerClazz;
       if (LoggerX.class.isAssignableFrom(clazz)) {
         @SuppressWarnings("unchecked")
@@ -768,10 +764,13 @@ BOLD_BRIGHT_CYAN +
       } else {
         throw new CoreException("[FurryBlack][ARGS]日志后端 - 尝试加载日志后端失败, 指定的类未继承 LoggerX -> " + kernelConfig.provider);
       }
+
       if (!loggerClazz.isAnnotationPresent(LoggerXConfig.class)) {
         throw new CoreException("[FurryBlack][ARGS]日志后端 - 尝试加载日志后端失败, 指定的类未添加 LoggerXConfig 注解 -> " + kernelConfig.provider);
       }
+
       LoggerXFactory.setDefault(loggerClazz);
+
       System.out.println("[FurryBlack][ARGS]日志后端 - 加载日志后端成功 -> " + LoggerXFactory.getDefault());
     }
 

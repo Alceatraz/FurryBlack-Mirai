@@ -59,63 +59,63 @@ public final class DefaultLoggerX extends WrappedLoggerX {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][FATAL][" + simpleName + "]" + message;
     FurryBlack.println(COLOR_FATAL + content + RESET);
-    FileEnhance.append(path, content + LINE);
+    if (isError()) FileEnhance.append(path, content + LINE);
   }
 
   @Override
   public void errorImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][ERROR][" + simpleName + "]" + message;
-    FurryBlack.println(COLOR_ERROR + content + RESET);
     FileEnhance.append(path, content + LINE);
+    if (isError()) FurryBlack.println(COLOR_ERROR + content + RESET);
   }
 
   @Override
   public void warnImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][WARN][" + simpleName + "]" + message;
-    FurryBlack.println(COLOR_WARN + content + RESET);
     FileEnhance.append(path, content + LINE);
+    if (isWarn()) FurryBlack.println(COLOR_WARN + content + RESET);
   }
 
   @Override
   public void hintImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][HINT][" + simpleName + "]" + message;
-    FurryBlack.println(COLOR_HINT + content + RESET);
     FileEnhance.append(path, content + LINE);
+    if (isInfo()) FurryBlack.println(COLOR_HINT + content + RESET);
   }
 
   @Override
   public void seekImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][SEEK][" + simpleName + "]" + message;
-    FurryBlack.println(COLOR_SEEK + content + RESET);
     FileEnhance.append(path, content + LINE);
+    if (isInfo()) FurryBlack.println(COLOR_SEEK + content + RESET);
   }
 
   @Override
   public void infoImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][INFO][" + simpleName + "]" + message;
-    FurryBlack.println(COLOR_INFO + content + RESET);
     FileEnhance.append(path, content + LINE);
+    if (isInfo()) FurryBlack.println(COLOR_INFO + content + RESET);
   }
 
   @Override
   public void debugImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][DEBUG][" + simpleName + "]" + message;
-    FurryBlack.println(COLOR_DEBUG + content + RESET);
     FileEnhance.append(path, content + LINE);
+    if (isDebug()) FurryBlack.println(COLOR_DEBUG + content + RESET);
   }
 
   @Override
   public void traceImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][TRACE][" + simpleName + "]" + message;
-    FurryBlack.println(COLOR_TRACE + content + RESET);
     FileEnhance.append(path, content + LINE);
+    if (isTrace()) FurryBlack.println(COLOR_TRACE + content + RESET);
   }
 
 }
