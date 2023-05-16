@@ -58,8 +58,8 @@ public final class DefaultLoggerX extends WrappedLoggerX {
   public void fatalImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][FATAL][" + simpleName + "]" + message;
-    FurryBlack.println(COLOR_FATAL + content + RESET);
-    if (isErrorEnabled()) FileEnhance.append(path, content + LINE);
+    FileEnhance.append(path, content + LINE);
+    if (isErrorEnabled()) FurryBlack.println(COLOR_FATAL + content + RESET);
   }
 
   @Override
