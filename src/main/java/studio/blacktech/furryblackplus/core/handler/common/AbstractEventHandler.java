@@ -497,7 +497,7 @@ public abstract class AbstractEventHandler {
   //= ==========================================================================
 
   @Comment("从配置加载")
-  protected final byte get(String name, byte defaultValue) {
+  protected final byte getProperty(String name, byte defaultValue) {
     String value = CONFIG.getProperty(name);
     if (value == null) return defaultValue;
     try {
@@ -508,7 +508,7 @@ public abstract class AbstractEventHandler {
   }
 
   @Comment("从配置加载")
-  protected final short get(String name, short defaultValue) {
+  protected final short getProperty(String name, short defaultValue) {
     String value = CONFIG.getProperty(name);
     if (value == null) return defaultValue;
     try {
@@ -519,7 +519,7 @@ public abstract class AbstractEventHandler {
   }
 
   @Comment("从配置加载")
-  protected final int get(String name, int defaultValue) {
+  protected final int getProperty(String name, int defaultValue) {
     String value = CONFIG.getProperty(name);
     if (value == null) return defaultValue;
     try {
@@ -530,7 +530,7 @@ public abstract class AbstractEventHandler {
   }
 
   @Comment("从配置加载")
-  protected final long get(String name, long defaultValue) {
+  protected final long getProperty(String name, long defaultValue) {
     String value = CONFIG.getProperty(name);
     if (value == null) return defaultValue;
     try {
@@ -541,7 +541,7 @@ public abstract class AbstractEventHandler {
   }
 
   @Comment("从配置加载")
-  protected final boolean get(String name, boolean defaultValue) {
+  protected final boolean getProperty(String name, boolean defaultValue) {
     String value = CONFIG.getProperty(name);
     if (value == null) return defaultValue;
     try {
@@ -552,7 +552,7 @@ public abstract class AbstractEventHandler {
   }
 
   @Comment("从配置加载")
-  protected final String get(String name, String defaultValue) {
+  protected final String getProperty(String name, String defaultValue) {
     return CONFIG.getProperty(name, defaultValue);
   }
 
