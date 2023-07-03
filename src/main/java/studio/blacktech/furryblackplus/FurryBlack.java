@@ -191,8 +191,8 @@ public class FurryBlack {
   //=
   //= ==================================================================================================================
 
-  public static final String APP_VERSION = "3.0.0";
-  public static final String MIRAI_VERSION = "2.15.0";
+  public static final String APP_VERSION = "3.0.1";
+  public static final String MIRAI_VERSION = "2.15.0-RC";
 
   //= ==========================================================================
 
