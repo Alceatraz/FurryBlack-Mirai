@@ -11,12 +11,12 @@ public class Slf4jLoggerXServiceProvider implements SLF4JServiceProvider {
 
   @Override
   public void initialize() {
-
+    loggerFactory.initialize();
   }
 
   @Override
   public String getRequestedApiVersion() {
-    return "1.0.0";
+    return "2.0.0";
   }
 
   @Override

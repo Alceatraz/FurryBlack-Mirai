@@ -10,4 +10,8 @@ public class Slf4jLoggerXFactory implements ILoggerFactory {
     return new Slf4jLoggerX(name);
   }
 
+  public void initialize() {
+
+  }
+
 }
