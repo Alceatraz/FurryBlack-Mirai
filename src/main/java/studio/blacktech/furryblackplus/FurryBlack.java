@@ -1065,22 +1065,11 @@ CONF_THREADS_SCHEDULE=0
         throw new CoreException("[UPGRADE/PROTOCOL] Invoke method failure", exception);
       }
 
-      {
-
-        try {
-          Method methodSync = clazz.getMethod("sync", BotConfiguration.MiraiProtocol.class);
-          methodSync.invoke(null, BotConfiguration.MiraiProtocol.ANDROID_PAD);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException exception) {
-          throw new CoreException("[UPGRADE/PROTOCOL] Invoke method failure", exception);
-        }
-
-        try {
-          Method methodSync = clazz.getMethod("load", BotConfiguration.MiraiProtocol.class);
-          methodSync.invoke(null, BotConfiguration.MiraiProtocol.ANDROID_PAD);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException exception) {
-          throw new CoreException("[UPGRADE/PROTOCOL] Invoke method failure", exception);
-        }
-
+      try {
+        Method methodSync = clazz.getMethod("load", BotConfiguration.MiraiProtocol.class);
+        methodSync.invoke(null, BotConfiguration.MiraiProtocol.ANDROID_PAD);
+      } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException exception) {
+        throw new CoreException("[UPGRADE/PROTOCOL] Invoke method failure", exception);
       }
 
       Method methodInfo;
