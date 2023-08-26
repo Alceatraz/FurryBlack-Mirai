@@ -105,6 +105,7 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -786,7 +787,7 @@ CONF_THREADS_SCHEDULE=0
 
     System.out.println("[FurryBlack][ARGS]日志后端 - " + LoggerXFactory.getDefault());
 
-    LoggerXFactory.setEnableFullName(true);
+    ServiceLoader<MiraiLogger.Factory> load = ServiceLoader.load(MiraiLogger.Factory.class);
 
     System.out.println("[FurryBlack][INIT]内核配置初始化完成");
 

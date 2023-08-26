@@ -130,7 +130,6 @@
       <artifactId>mirai-logging-slf4j</artifactId>
       <version>${mirai.version}</version>
       <scope>runtime</scope>
-      <type>pom</type>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.jline/jline -->
