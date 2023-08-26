@@ -787,7 +787,9 @@ CONF_THREADS_SCHEDULE=0
 
     System.out.println("[FurryBlack][ARGS]日志后端 - " + LoggerXFactory.getDefault());
 
-    ServiceLoader<MiraiLogger.Factory> load = ServiceLoader.load(MiraiLogger.Factory.class);
+    ServiceLoader<MiraiLogger.Factory> providers = ServiceLoader.load(MiraiLogger.Factory.class);
+
+    providers.stream().forEach(it -> System.out.println("[FurryBlack][ARGS]日志桥接 - " + it.getClass().getName()));
 
     System.out.println("[FurryBlack][INIT]内核配置初始化完成");
 
