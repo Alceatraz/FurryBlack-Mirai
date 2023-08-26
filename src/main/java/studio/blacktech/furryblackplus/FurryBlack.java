@@ -36,7 +36,6 @@ import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageSource;
 import net.mamoe.mirai.message.data.PlainText;
 import net.mamoe.mirai.utils.BotConfiguration;
-import net.mamoe.mirai.utils.LoggerAdapters;
 import net.mamoe.mirai.utils.MiraiLogger;
 import org.jetbrains.annotations.Nullable;
 import org.jline.builtins.Completers.TreeCompleter;
@@ -74,7 +73,6 @@ import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 import studio.blacktech.furryblackplus.core.handler.common.Command;
 import studio.blacktech.furryblackplus.core.logging.LoggerX;
 import studio.blacktech.furryblackplus.core.logging.LoggerXFactory;
-import studio.blacktech.furryblackplus.core.logging.Slf4jLoggerX;
 import studio.blacktech.furryblackplus.core.logging.annotation.LoggerXConfig;
 import studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel;
 
@@ -787,6 +785,8 @@ CONF_THREADS_SCHEDULE=0
     }
 
     System.out.println("[FurryBlack][ARGS]日志后端 - " + LoggerXFactory.getDefault());
+
+    LoggerXFactory.setEnableFullName(true);
 
     System.out.println("[FurryBlack][INIT]内核配置初始化完成");
 
@@ -2517,8 +2517,7 @@ CONF_THREADS_SCHEDULE=0
 
           // logger verbose name
           // logger verbose slf4j
-          new TreeCompleter(node("logger", node("verbose", node("name", node("enable", "disable"))))),
-          new TreeCompleter(node("logger", node("verbose", node("slf4j", node("enable", "disable"))))),
+          new TreeCompleter(node("logger", node("verbose", node("name", node("true", "false"))))),
 
           // ?
           // help

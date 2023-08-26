@@ -75,7 +75,7 @@ public abstract class LoggerX {
   private static final Map<String, LoggerXLevel> CACHE = new ConcurrentHashMap<>();
 
   private static boolean enablePrefix = false;
-  private static boolean enableFullName = false;
+  private static boolean enableFullName = true;
 
   //= ==========================================================================
   //= 功能开关
