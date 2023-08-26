@@ -36,6 +36,7 @@ import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageSource;
 import net.mamoe.mirai.message.data.PlainText;
 import net.mamoe.mirai.utils.BotConfiguration;
+import net.mamoe.mirai.utils.LoggerAdapters;
 import net.mamoe.mirai.utils.MiraiLogger;
 import org.jetbrains.annotations.Nullable;
 import org.jline.builtins.Completers.TreeCompleter;
@@ -73,6 +74,7 @@ import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 import studio.blacktech.furryblackplus.core.handler.common.Command;
 import studio.blacktech.furryblackplus.core.logging.LoggerX;
 import studio.blacktech.furryblackplus.core.logging.LoggerXFactory;
+import studio.blacktech.furryblackplus.core.logging.Slf4jLoggerX;
 import studio.blacktech.furryblackplus.core.logging.annotation.LoggerXConfig;
 import studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel;
 
