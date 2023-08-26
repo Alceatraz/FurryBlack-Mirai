@@ -7,6 +7,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class MiraiLoggerXFactory implements MiraiLogger.Factory {
 
+  public MiraiLoggerXFactory() {
+    System.out.println("[FurryBlack][LOGS] MiraiLoggerXFactory loaded");
+  }
+
   @NotNull
   @Override
   public MiraiLogger create(@NotNull Class<?> clazz, @Nullable String identity) {
