@@ -48,6 +48,7 @@ import org.jline.reader.impl.completer.AggregateCompleter;
 import org.jline.reader.impl.completer.ArgumentCompleter;
 import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.widget.AutopairWidgets;
+import org.slf4j.spi.SLF4JServiceProvider;
 import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 import studio.blacktech.furryblackplus.core.common.enhance.FileEnhance;
 import studio.blacktech.furryblackplus.core.common.enhance.LockEnhance;
@@ -607,6 +608,18 @@ CONF_THREADS_SCHEDULE=0
 
     System.out.println("[FurryBlack][BOOT]FurryBlackMirai - " + APP_VERSION + " " + TimeEnhance.datetime(BOOT_TIME));
 
+    {
+      System.err.println("日志后端 org.slf4j.spi.SLF4JServiceProvider");
+      ServiceLoader<SLF4JServiceProvider> providers = ServiceLoader.load(SLF4JServiceProvider.class);
+      providers.stream().forEach(System.out::println);
+    }
+
+    {
+      System.err.println("日志垫片 net.mamoe.mirai.utils.MiraiLogger.Factory");
+      ServiceLoader<MiraiLogger.Factory> providers = ServiceLoader.load(MiraiLogger.Factory.class);
+      providers.stream().forEach(System.out::println);
+    }
+
     //= ================================================================================================================
     //= 跳过语言设置
 
@@ -786,10 +799,6 @@ CONF_THREADS_SCHEDULE=0
     }
 
     System.out.println("[FurryBlack][ARGS]日志后端 - " + LoggerXFactory.getDefault());
-
-    ServiceLoader<MiraiLogger.Factory> providers = ServiceLoader.load(MiraiLogger.Factory.class);
-
-    providers.stream().forEach(it -> System.out.println("[FurryBlack][ARGS]日志桥接 - " + it.getClass().getName()));
 
     System.out.println("[FurryBlack][INIT]内核配置初始化完成");
 
