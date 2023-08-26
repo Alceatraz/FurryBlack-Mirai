@@ -16,11 +16,12 @@
  *
  */
 
-package studio.blacktech.furryblackplus.core.logging;
+package studio.blacktech.furryblackplus.core.logging.backend;
 
 import studio.blacktech.furryblackplus.FurryBlack;
 import studio.blacktech.furryblackplus.core.common.enhance.FileEnhance;
 import studio.blacktech.furryblackplus.core.common.enhance.TimeEnhance;
+import studio.blacktech.furryblackplus.core.logging.WrappedLoggerX;
 import studio.blacktech.furryblackplus.core.logging.annotation.LoggerXConfig;
 
 import java.nio.file.Path;
@@ -31,16 +32,16 @@ import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.RE
 @SuppressWarnings("unused")
 
 @LoggerXConfig(needLoggerFile = true)
-public final class DefaultLoggerX extends WrappedLoggerX {
+public final class FileLoggerX extends WrappedLoggerX {
 
   private static Path path;
   private static volatile boolean lock = false;
 
-  public DefaultLoggerX(String simple) {
+  public FileLoggerX(String simple) {
     super(simple);
   }
 
-  public DefaultLoggerX(Class<?> clazz) {
+  public FileLoggerX(Class<?> clazz) {
     super(clazz);
   }
 
@@ -49,7 +50,7 @@ public final class DefaultLoggerX extends WrappedLoggerX {
   public static void init(Path path) {
     if (lock) return;
     lock = true;
-    DefaultLoggerX.path = path;
+    FileLoggerX.path = path;
   }
 
   //= ==================================================================================================================
@@ -57,7 +58,7 @@ public final class DefaultLoggerX extends WrappedLoggerX {
   @Override
   public void fatalImpl(String message) {
     if (message == null) return;
-    String content = "[" + TimeEnhance.datetime() + "][FATAL][" + simpleName + "]" + message;
+    String content = "[" + TimeEnhance.datetime() + "][FATAL][" + getName() + "]" + message;
     FileEnhance.append(path, content + LINE);
     if (isErrorEnabled()) FurryBlack.println(COLOR_FATAL + content + RESET);
   }
@@ -65,7 +66,7 @@ public final class DefaultLoggerX extends WrappedLoggerX {
   @Override
   public void errorImpl(String message) {
     if (message == null) return;
-    String content = "[" + TimeEnhance.datetime() + "][ERROR][" + simpleName + "]" + message;
+    String content = "[" + TimeEnhance.datetime() + "][ERROR][" + getName() + "]" + message;
     FileEnhance.append(path, content + LINE);
     if (isErrorEnabled()) FurryBlack.println(COLOR_ERROR + content + RESET);
   }
@@ -73,7 +74,7 @@ public final class DefaultLoggerX extends WrappedLoggerX {
   @Override
   public void warnImpl(String message) {
     if (message == null) return;
-    String content = "[" + TimeEnhance.datetime() + "][WARN][" + simpleName + "]" + message;
+    String content = "[" + TimeEnhance.datetime() + "][WARN][" + getName() + "]" + message;
     FileEnhance.append(path, content + LINE);
     if (isWarnEnabled()) FurryBlack.println(COLOR_WARN + content + RESET);
   }
@@ -81,7 +82,7 @@ public final class DefaultLoggerX extends WrappedLoggerX {
   @Override
   public void hintImpl(String message) {
     if (message == null) return;
-    String content = "[" + TimeEnhance.datetime() + "][HINT][" + simpleName + "]" + message;
+    String content = "[" + TimeEnhance.datetime() + "][HINT][" + getName() + "]" + message;
     FileEnhance.append(path, content + LINE);
     if (isInfoEnabled()) FurryBlack.println(COLOR_HINT + content + RESET);
   }
@@ -89,7 +90,7 @@ public final class DefaultLoggerX extends WrappedLoggerX {
   @Override
   public void seekImpl(String message) {
     if (message == null) return;
-    String content = "[" + TimeEnhance.datetime() + "][SEEK][" + simpleName + "]" + message;
+    String content = "[" + TimeEnhance.datetime() + "][SEEK][" + getName() + "]" + message;
     FileEnhance.append(path, content + LINE);
     if (isInfoEnabled()) FurryBlack.println(COLOR_SEEK + content + RESET);
   }
@@ -97,7 +98,7 @@ public final class DefaultLoggerX extends WrappedLoggerX {
   @Override
   public void infoImpl(String message) {
     if (message == null) return;
-    String content = "[" + TimeEnhance.datetime() + "][INFO][" + simpleName + "]" + message;
+    String content = "[" + TimeEnhance.datetime() + "][INFO][" + getName() + "]" + message;
     FileEnhance.append(path, content + LINE);
     if (isInfoEnabled()) FurryBlack.println(COLOR_INFO + content + RESET);
   }
@@ -105,7 +106,7 @@ public final class DefaultLoggerX extends WrappedLoggerX {
   @Override
   public void debugImpl(String message) {
     if (message == null) return;
-    String content = "[" + TimeEnhance.datetime() + "][DEBUG][" + simpleName + "]" + message;
+    String content = "[" + TimeEnhance.datetime() + "][DEBUG][" + getName() + "]" + message;
     FileEnhance.append(path, content + LINE);
     if (isDebugEnabled()) FurryBlack.println(COLOR_DEBUG + content + RESET);
   }
@@ -113,7 +114,7 @@ public final class DefaultLoggerX extends WrappedLoggerX {
   @Override
   public void traceImpl(String message) {
     if (message == null) return;
-    String content = "[" + TimeEnhance.datetime() + "][TRACE][" + simpleName + "]" + message;
+    String content = "[" + TimeEnhance.datetime() + "][TRACE][" + getName() + "]" + message;
     FileEnhance.append(path, content + LINE);
     if (isTraceEnabled()) FurryBlack.println(COLOR_TRACE + content + RESET);
   }

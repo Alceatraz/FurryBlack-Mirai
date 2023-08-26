@@ -191,7 +191,7 @@ public class FurryBlack {
   //=
   //= ==================================================================================================================
 
-  public static final String APP_VERSION = "3.0.2";
+  public static final String APP_VERSION = "3.0.3";
   public static final String MIRAI_VERSION = "2.15.0";
 
   //= ==========================================================================
@@ -612,7 +612,7 @@ CONF_THREADS_SCHEDULE=0
     // -D user.country=zh
     // -D user.language=CN
     if (System.getenv("FURRYBLACK_LOCALE_SKIP") == null) {
-      System.err.println("Env FURRYBLACK_LOCALE_SKIP not setLevel, Setting JVM local to Locale.SIMPLIFIED_CHINESE");
+      System.err.println("Env FURRYBLACK_LOCALE_SKIP not set, Setting JVM local to Locale.SIMPLIFIED_CHINESE");
       Locale.setDefault(Locale.SIMPLIFIED_CHINESE);
     }
 
@@ -621,7 +621,7 @@ CONF_THREADS_SCHEDULE=0
 
     // -D user.timezone=Asia/Shanghai
     if (System.getenv("FURRYBLACK_TIMEZONE_SKIP") == null) {
-      System.err.println("Env FURRYBLACK_TIMEZONE_SKIP not setLevel, Setting JVM timezone to Asia/Shanghai");
+      System.err.println("Env FURRYBLACK_TIMEZONE_SKIP not set, Setting JVM timezone to Asia/Shanghai");
       TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
     }
 
@@ -749,7 +749,7 @@ CONF_THREADS_SCHEDULE=0
           LoggerXFactory.injectPrefix(k, of);
           System.out.println("[FurryBlack][ARGS]日志前缀 - 加载 " + v + " " + k);
         }
-        LoggerXFactory.enablePrefix();
+        LoggerXFactory.setEnablePrefix(true);
       }
     }
 
@@ -1707,6 +1707,24 @@ CONF_THREADS_SCHEDULE=0
 
     //= ========================================================================
 
+    dispatcher.registerExclusive()
+      .command("logger", "verbose", "name")
+      .function(it -> {
+        if (it == null) {
+          FurryBlack.println("当前详细名称 -> " + LoggerXFactory.isEnableFullName());
+        } else {
+          if (it.getBooleanOrFalse(0)) {
+            LoggerXFactory.setEnableFullName(true);
+            FurryBlack.println("设置详细名称为 -> 开启");
+          } else {
+            LoggerXFactory.setEnableFullName(false);
+            FurryBlack.println("设置详细名称为 -> 关闭");
+          }
+        }
+      });
+
+    //= ========================================================================
+
     dispatcher.registerFunction()
       .command("schema")
       .function(it -> FurryBlack.println(schema.verboseStatus()));
@@ -2161,7 +2179,7 @@ CONF_THREADS_SCHEDULE=0
     }
 
     @Override public String getIdentity() {
-      return logger.getSimpleName();
+      return logger.getName();
     }
 
     @Override public boolean isEnabled() {
@@ -2495,6 +2513,11 @@ CONF_THREADS_SCHEDULE=0
           // logger level xxx
           new TreeCompleter(node("logger", node("level", node("TRACE", "DEBUG", "INFO", "SEEK", "HINT", "WARN", "ERROR", "FATAL", "CLOSE")))),
 
+          // logger verbose name
+          // logger verbose slf4j
+          new TreeCompleter(node("logger", node("verbose", node("name", node("enable", "disable"))))),
+          new TreeCompleter(node("logger", node("verbose", node("slf4j", node("enable", "disable"))))),
+
           // ?
           // help
           // info
@@ -2612,6 +2635,7 @@ CONF_THREADS_SCHEDULE=0
     }
   }
 
+  @SuppressWarnings("unused")
   private record ConsoleSubCommand(String[] args) {
 
     public String getOrNull(int i) {
@@ -2620,6 +2644,22 @@ CONF_THREADS_SCHEDULE=0
 
     public String getOrEmpty(int i) {
       return i < args.length ? args[i] : "";
+    }
+
+    public boolean getBooleanOrTrue(int i) {
+      if (i < args.length) {
+        return Boolean.parseBoolean(args[i]);
+      } else {
+        return true;
+      }
+    }
+
+    public boolean getBooleanOrFalse(int i) {
+      if (i < args.length) {
+        return Boolean.parseBoolean(args[i]);
+      } else {
+        return false;
+      }
     }
 
     @Override

@@ -4,13 +4,13 @@ import studio.blacktech.furryblackplus.core.logging.WrappedLoggerX;
 import studio.blacktech.furryblackplus.core.logging.annotation.LoggerXConfig;
 
 @LoggerXConfig
-public class StdioLoggerX extends WrappedLoggerX {
+public class NullLogger extends WrappedLoggerX {
 
-  protected StdioLoggerX(Class<?> clazz) {
+  protected NullLogger(Class<?> clazz) {
     super(clazz);
   }
 
-  protected StdioLoggerX(String simpleName) {
+  protected NullLogger(String simpleName) {
     super(simpleName);
   }
 

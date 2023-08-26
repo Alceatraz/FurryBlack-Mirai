@@ -75,18 +75,33 @@ public abstract class LoggerX {
   private static final Map<String, LoggerXLevel> CACHE = new ConcurrentHashMap<>();
 
   private static boolean enablePrefix = false;
+  private static boolean enableFullName = false;
 
-  protected static void enablePrefix() {
-    enablePrefix = true;
+  //= ==========================================================================
+  //= 功能开关
+
+  protected static boolean isEnablePrefix() {
+    return enablePrefix;
   }
 
-  protected static void disablePrefix() {
-    enablePrefix = false;
+  protected static boolean isEnableFullName() {
+    return enableFullName;
+  }
+
+  protected static void setEnablePrefix(boolean enablePrefix) {
+    LoggerX.enablePrefix = enablePrefix;
+  }
+
+  protected static void setEnableFullName(boolean enableFullName) {
+    LoggerX.enableFullName = enableFullName;
   }
 
   protected static void injectPrefix(String prefix, LoggerXLevel level) {
     PREFIX.setLevel(prefix, level);
   }
+
+  //= ==========================================================================
+  //= 功能开关
 
   private static class Node {
 
@@ -267,16 +282,8 @@ public abstract class LoggerX {
     return clazz;
   }
 
-  public String getFullName() {
-    return fullName;
-  }
-
-  public String getSimpleName() {
-    return simpleName;
-  }
-
-  public String getSafeName() {
-    return clazz == null ? simpleName : fullName;
+  public String getName() {
+    return enableFullName ? fullName : simpleName;
   }
 
   //= ==========================================================================

@@ -1,6 +1,7 @@
 package studio.blacktech.furryblackplus.core.logging;
 
 import studio.blacktech.furryblackplus.core.logging.annotation.LoggerXConfig;
+import studio.blacktech.furryblackplus.core.logging.backend.FileLoggerX;
 import studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel;
 
 import java.lang.reflect.InvocationTargetException;
@@ -8,7 +9,7 @@ import java.nio.file.Path;
 
 public class LoggerXFactory {
 
-  private static Class<? extends LoggerX> DEFAULT_LOGGER = DefaultLoggerX.class;
+  private static Class<? extends LoggerX> DEFAULT_LOGGER = FileLoggerX.class;
 
   //= ==================================================================================================================
   //= 配置系统
@@ -30,15 +31,26 @@ public class LoggerXFactory {
   }
 
   //= ==================================================================================================================
+  //= 功能开关
+
+  public static boolean isEnablePrefix() {
+    return LoggerX.isEnablePrefix();
+  }
+
+  public static boolean isEnableFullName() {
+    return LoggerX.isEnableFullName();
+  }
+
+  public static void setEnablePrefix(boolean value) {
+    LoggerX.setEnablePrefix(value);
+  }
+
+  public static void setEnableFullName(boolean value) {
+    LoggerX.setEnableFullName(value);
+  }
+
+  //= ==================================================================================================================
   //= 前缀系统
-
-  public static void enablePrefix() {
-    LoggerX.enablePrefix();
-  }
-
-  public static void disablePrefix() {
-    LoggerX.disablePrefix();
-  }
 
   public static void injectPrefix(String prefix, LoggerXLevel level) {
     LoggerX.injectPrefix(prefix, level);

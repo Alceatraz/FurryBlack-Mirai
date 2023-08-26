@@ -16,10 +16,11 @@
  *
  */
 
-package studio.blacktech.furryblackplus.core.logging;
+package studio.blacktech.furryblackplus.core.logging.backend;
 
 import studio.blacktech.furryblackplus.FurryBlack;
 import studio.blacktech.furryblackplus.core.common.enhance.TimeEnhance;
+import studio.blacktech.furryblackplus.core.logging.WrappedLoggerX;
 import studio.blacktech.furryblackplus.core.logging.annotation.LoggerXConfig;
 
 import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.RESET;
@@ -27,13 +28,13 @@ import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.RE
 @SuppressWarnings("unused")
 
 @LoggerXConfig
-public final class PrintLoggerX extends WrappedLoggerX {
+public final class StdLoggerX extends WrappedLoggerX {
 
-  public PrintLoggerX(String simple) {
+  public StdLoggerX(String simple) {
     super(simple);
   }
 
-  public PrintLoggerX(Class<?> clazz) {
+  public StdLoggerX(Class<?> clazz) {
     super(clazz);
   }
 
@@ -42,56 +43,56 @@ public final class PrintLoggerX extends WrappedLoggerX {
   @Override
   public void fatalImpl(String message) {
     if (message == null) return;
-    String content = "[" + TimeEnhance.datetime() + "][FATAL][" + simpleName + "]" + message;
+    String content = "[" + TimeEnhance.datetime() + "][FATAL][" + getName() + "]" + message;
     FurryBlack.println(COLOR_FATAL + content + RESET);
   }
 
   @Override
   public void errorImpl(String message) {
     if (message == null) return;
-    String content = "[" + TimeEnhance.datetime() + "][ERROR][" + simpleName + "]" + message;
+    String content = "[" + TimeEnhance.datetime() + "][ERROR][" + getName() + "]" + message;
     FurryBlack.println(COLOR_ERROR + content + RESET);
   }
 
   @Override
   public void warnImpl(String message) {
     if (message == null) return;
-    String content = "[" + TimeEnhance.datetime() + "][WARN][" + simpleName + "]" + message;
+    String content = "[" + TimeEnhance.datetime() + "][WARN][" + getName() + "]" + message;
     FurryBlack.println(COLOR_WARN + content + RESET);
   }
 
   @Override
   public void hintImpl(String message) {
     if (message == null) return;
-    String content = "[" + TimeEnhance.datetime() + "][HINT][" + simpleName + "]" + message;
+    String content = "[" + TimeEnhance.datetime() + "][HINT][" + getName() + "]" + message;
     FurryBlack.println(COLOR_HINT + content + RESET);
   }
 
   @Override
   public void seekImpl(String message) {
     if (message == null) return;
-    String content = "[" + TimeEnhance.datetime() + "][SEEK][" + simpleName + "]" + message;
+    String content = "[" + TimeEnhance.datetime() + "][SEEK][" + getName() + "]" + message;
     FurryBlack.println(COLOR_SEEK + content + RESET);
   }
 
   @Override
   public void infoImpl(String message) {
     if (message == null) return;
-    String content = "[" + TimeEnhance.datetime() + "][INFO][" + simpleName + "]" + message;
+    String content = "[" + TimeEnhance.datetime() + "][INFO][" + getName() + "]" + message;
     FurryBlack.println(COLOR_INFO + content + RESET);
   }
 
   @Override
   public void debugImpl(String message) {
     if (message == null) return;
-    String content = "[" + TimeEnhance.datetime() + "][DEBUG][" + simpleName + "]" + message;
+    String content = "[" + TimeEnhance.datetime() + "][DEBUG][" + getName() + "]" + message;
     FurryBlack.println(COLOR_DEBUG + content + RESET);
   }
 
   @Override
   public void traceImpl(String message) {
     if (message == null) return;
-    String content = "[" + TimeEnhance.datetime() + "][TRACE][" + simpleName + "]" + message;
+    String content = "[" + TimeEnhance.datetime() + "][TRACE][" + getName() + "]" + message;
     FurryBlack.println(COLOR_TRACE + content + RESET);
   }
 

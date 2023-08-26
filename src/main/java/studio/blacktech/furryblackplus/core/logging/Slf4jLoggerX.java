@@ -17,7 +17,7 @@ public class Slf4jLoggerX implements Logger {
 
   @Override
   public String getName() {
-    return logger.getSafeName();
+    return logger.getName();
   }
 
   //= ==========================================================================
