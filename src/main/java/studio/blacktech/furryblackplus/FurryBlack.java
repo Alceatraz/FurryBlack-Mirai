@@ -36,7 +36,6 @@ import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageSource;
 import net.mamoe.mirai.message.data.PlainText;
 import net.mamoe.mirai.utils.BotConfiguration;
-import net.mamoe.mirai.utils.LoggerAdapters;
 import net.mamoe.mirai.utils.MiraiLogger;
 import org.jetbrains.annotations.Nullable;
 import org.jline.builtins.Completers.TreeCompleter;
@@ -49,7 +48,6 @@ import org.jline.reader.impl.completer.AggregateCompleter;
 import org.jline.reader.impl.completer.ArgumentCompleter;
 import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.widget.AutopairWidgets;
-import org.slf4j.spi.SLF4JServiceProvider;
 import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 import studio.blacktech.furryblackplus.core.common.enhance.FileEnhance;
 import studio.blacktech.furryblackplus.core.common.enhance.LockEnhance;
@@ -75,7 +73,6 @@ import studio.blacktech.furryblackplus.core.handler.common.AbstractEventHandler;
 import studio.blacktech.furryblackplus.core.handler.common.Command;
 import studio.blacktech.furryblackplus.core.logging.LoggerX;
 import studio.blacktech.furryblackplus.core.logging.LoggerXFactory;
-import studio.blacktech.furryblackplus.core.logging.Slf4jLoggerX;
 import studio.blacktech.furryblackplus.core.logging.annotation.LoggerXConfig;
 import studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel;
 
@@ -108,7 +105,6 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -609,18 +605,6 @@ CONF_THREADS_SCHEDULE=0
     //= ================================================================================================================
 
     System.out.println("[FurryBlack][BOOT]FurryBlackMirai - " + APP_VERSION + " " + TimeEnhance.datetime(BOOT_TIME));
-
-    {
-      System.err.println("日志后端 org.slf4j.spi.SLF4JServiceProvider");
-      ServiceLoader<SLF4JServiceProvider> providers = ServiceLoader.load(SLF4JServiceProvider.class);
-      providers.stream().forEach(System.out::println);
-    }
-
-    {
-      System.err.println("日志垫片 net.mamoe.mirai.utils.MiraiLogger.Factory");
-      ServiceLoader<MiraiLogger.Factory> providers = ServiceLoader.load(MiraiLogger.Factory.class);
-      providers.stream().forEach(System.out::println);
-    }
 
     //= ================================================================================================================
     //= 跳过语言设置
