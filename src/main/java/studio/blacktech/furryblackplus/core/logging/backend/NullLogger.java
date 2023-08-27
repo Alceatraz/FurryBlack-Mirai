@@ -1,7 +1,7 @@
 package studio.blacktech.furryblackplus.core.logging.backend;
 
-import studio.blacktech.furryblackplus.core.logging.WrappedLoggerX;
 import studio.blacktech.furryblackplus.core.logging.annotation.LoggerXConfig;
+import studio.blacktech.furryblackplus.core.logging.backend.wrapper.WrappedLoggerX;
 
 @LoggerXConfig
 public class NullLogger extends WrappedLoggerX {
@@ -14,8 +14,11 @@ public class NullLogger extends WrappedLoggerX {
     super(simpleName);
   }
 
-
   @Override protected void fatalImpl(String message) {
+
+  }
+
+  @Override protected void fatalImpl(Throwable throwable) {
 
   }
 
@@ -23,7 +26,15 @@ public class NullLogger extends WrappedLoggerX {
 
   }
 
+  @Override protected void errorImpl(Throwable throwable) {
+
+  }
+
   @Override protected void warnImpl(String message) {
+
+  }
+
+  @Override protected void warnImpl(Throwable throwable) {
 
   }
 
@@ -31,7 +42,15 @@ public class NullLogger extends WrappedLoggerX {
 
   }
 
+  @Override protected void hintImpl(Throwable throwable) {
+
+  }
+
   @Override protected void infoImpl(String message) {
+
+  }
+
+  @Override protected void infoImpl(Throwable throwable) {
 
   }
 
@@ -39,11 +58,17 @@ public class NullLogger extends WrappedLoggerX {
 
   }
 
+  @Override protected void seekImpl(Throwable throwable) {
+
+  }
+
   @Override protected void debugImpl(String message) {
 
   }
 
-  @Override protected void traceImpl(String message) {
+  @Override protected void debugImpl(Throwable throwable) {  }
 
-  }
+  @Override protected void traceImpl(String message) {  }
+
+  @Override protected void traceImpl(Throwable throwable) {  }
 }

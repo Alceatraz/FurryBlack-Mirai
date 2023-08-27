@@ -1,4 +1,6 @@
-package studio.blacktech.furryblackplus.core.logging;
+package studio.blacktech.furryblackplus.core.logging.backend.wrapper;
+
+import studio.blacktech.furryblackplus.core.logging.LoggerX;
 
 import static studio.blacktech.furryblackplus.FurryBlack.LINE;
 import static studio.blacktech.furryblackplus.core.common.enhance.StringEnhance.extractStackTrace;
@@ -11,6 +13,10 @@ public abstract class WrappedLoggerX extends LoggerX {
 
   protected WrappedLoggerX(String simpleName) {
     super(simpleName);
+  }
+
+  @Override protected void fatalImpl(Throwable throwable) {
+    fatalImpl(extractStackTrace(throwable));
   }
 
   @Override protected void fatalImpl(String message, Throwable throwable) {
@@ -31,6 +37,10 @@ public abstract class WrappedLoggerX extends LoggerX {
     }
   }
 
+  @Override protected void errorImpl(Throwable throwable) {
+    errorImpl(extractStackTrace(throwable));
+  }
+
   @Override protected void errorImpl(String message, Throwable throwable) {
     if (throwable == null) {
       errorImpl(message);
@@ -47,6 +57,10 @@ public abstract class WrappedLoggerX extends LoggerX {
     } else {
       errorImpl(inject(messagePattern, objects));
     }
+  }
+
+  @Override protected void warnImpl(Throwable throwable) {
+    warnImpl(extractStackTrace(throwable));
   }
 
   @Override protected void warnImpl(String message, Throwable throwable) {
@@ -67,6 +81,10 @@ public abstract class WrappedLoggerX extends LoggerX {
     }
   }
 
+  @Override protected void hintImpl(Throwable throwable) {
+    hintImpl(extractStackTrace(throwable));
+  }
+
   @Override protected void hintImpl(String message, Throwable throwable) {
     if (throwable == null) {
       hintImpl(message);
@@ -83,6 +101,10 @@ public abstract class WrappedLoggerX extends LoggerX {
     } else {
       hintImpl(inject(messagePattern, objects));
     }
+  }
+
+  @Override protected void seekImpl(Throwable throwable) {
+    seekImpl(extractStackTrace(throwable));
   }
 
   @Override protected void seekImpl(String message, Throwable throwable) {
@@ -103,6 +125,10 @@ public abstract class WrappedLoggerX extends LoggerX {
     }
   }
 
+  @Override protected void infoImpl(Throwable throwable) {
+    infoImpl(extractStackTrace(throwable));
+  }
+
   @Override protected void infoImpl(String message, Throwable throwable) {
     if (throwable == null) {
       infoImpl(message);
@@ -121,6 +147,10 @@ public abstract class WrappedLoggerX extends LoggerX {
     }
   }
 
+  @Override protected void debugImpl(Throwable throwable) {
+    debugImpl(extractStackTrace(throwable));
+  }
+
   @Override protected void debugImpl(String message, Throwable throwable) {
     if (throwable == null) {
       debugImpl(message);
@@ -137,6 +167,10 @@ public abstract class WrappedLoggerX extends LoggerX {
     } else {
       debugImpl(inject(messagePattern, objects));
     }
+  }
+
+  @Override protected void traceImpl(Throwable throwable) {
+    traceImpl(extractStackTrace(throwable));
   }
 
   @Override protected void traceImpl(String message, Throwable throwable) {

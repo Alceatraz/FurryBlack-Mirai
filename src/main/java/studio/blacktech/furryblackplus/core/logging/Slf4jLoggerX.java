@@ -5,8 +5,6 @@ import org.slf4j.Marker;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 
-import java.util.Objects;
-
 public class Slf4jLoggerX implements Logger {
 
   private final LoggerX logger;
@@ -149,7 +147,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.errorImpl(message);
     } else {
-      logger.errorImpl("[" + Objects.requireNonNull(marker) + "]" + message);
+      logger.errorImpl("[" + marker + "]" + message);
     }
   }
 
@@ -158,7 +156,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.errorImpl(message, throwable);
     } else {
-      logger.errorImpl("[" + Objects.requireNonNull(marker) + "]" + message, throwable);
+      logger.errorImpl("[" + marker + "]" + message, throwable);
     }
   }
 
@@ -167,7 +165,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.errorImpl(messagePattern, objects);
     } else {
-      logger.errorImpl("[" + Objects.requireNonNull(marker) + "]" + messagePattern, objects);
+      logger.errorImpl("[" + marker + "]" + messagePattern, objects);
     }
   }
 
@@ -176,7 +174,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.errorImpl(messagePattern, object1);
     } else {
-      logger.errorImpl("[" + Objects.requireNonNull(marker) + "]" + messagePattern, object1);
+      logger.errorImpl("[" + marker + "]" + messagePattern, object1);
     }
   }
 
@@ -185,7 +183,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.errorImpl(messagePattern, object1, object2);
     } else {
-      logger.errorImpl("[" + Objects.requireNonNull(marker) + "]" + messagePattern, object1, object2);
+      logger.errorImpl("[" + marker + "]" + messagePattern, object1, object2);
     }
   }
 
@@ -219,7 +217,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.warnImpl(message);
     } else {
-      logger.warnImpl("[" + Objects.requireNonNull(marker) + "]" + message);
+      logger.warnImpl("[" + marker + "]" + message);
     }
   }
 
@@ -228,7 +226,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.warnImpl(message, throwable);
     } else {
-      logger.warnImpl("[" + Objects.requireNonNull(marker) + "]" + message, throwable);
+      logger.warnImpl("[" + marker + "]" + message, throwable);
     }
   }
 
@@ -237,7 +235,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.warnImpl(messagePattern, objects);
     } else {
-      logger.warnImpl("[" + Objects.requireNonNull(marker) + "]" + messagePattern, objects);
+      logger.warnImpl("[" + marker + "]" + messagePattern, objects);
     }
   }
 
@@ -246,7 +244,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.warnImpl(messagePattern, object1);
     } else {
-      logger.warnImpl("[" + Objects.requireNonNull(marker) + "]" + messagePattern, object1);
+      logger.warnImpl("[" + marker + "]" + messagePattern, object1);
     }
   }
 
@@ -255,7 +253,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.warnImpl(messagePattern, object1, object2);
     } else {
-      logger.warnImpl("[" + Objects.requireNonNull(marker) + "]" + messagePattern, object1, object2);
+      logger.warnImpl("[" + marker + "]" + messagePattern, object1, object2);
     }
   }
 
@@ -289,7 +287,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.infoImpl(message);
     } else {
-      logger.infoImpl("[" + Objects.requireNonNull(marker) + "]" + message);
+      logger.infoImpl("[" + marker + "]" + message);
     }
   }
 
@@ -298,7 +296,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.infoImpl(message, throwable);
     } else {
-      logger.infoImpl("[" + Objects.requireNonNull(marker) + "]" + message, throwable);
+      logger.infoImpl("[" + marker + "]" + message, throwable);
     }
   }
 
@@ -307,7 +305,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.infoImpl(messagePattern, objects);
     } else {
-      logger.infoImpl("[" + Objects.requireNonNull(marker) + "]" + messagePattern, objects);
+      logger.infoImpl("[" + marker + "]" + messagePattern, objects);
     }
   }
 
@@ -316,7 +314,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.infoImpl(messagePattern, object1);
     } else {
-      logger.infoImpl("[" + Objects.requireNonNull(marker) + "]" + messagePattern, object1);
+      logger.infoImpl("[" + marker + "]" + messagePattern, object1);
     }
   }
 
@@ -325,7 +323,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.infoImpl(messagePattern, object1, object2);
     } else {
-      logger.infoImpl("[" + Objects.requireNonNull(marker) + "]" + messagePattern, object1, object2);
+      logger.infoImpl("[" + marker + "]" + messagePattern, object1, object2);
     }
   }
 
@@ -359,7 +357,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.debugImpl(message);
     } else {
-      logger.debugImpl("[" + Objects.requireNonNull(marker) + "]" + message);
+      logger.debugImpl("[" + marker + "]" + message);
     }
   }
 
@@ -368,7 +366,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.debugImpl(message, throwable);
     } else {
-      logger.debugImpl("[" + Objects.requireNonNull(marker) + "]" + message, throwable);
+      logger.debugImpl("[" + marker + "]" + message, throwable);
     }
   }
 
@@ -377,7 +375,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.debugImpl(messagePattern, objects);
     } else {
-      logger.debugImpl("[" + Objects.requireNonNull(marker) + "]" + messagePattern, objects);
+      logger.debugImpl("[" + marker + "]" + messagePattern, objects);
     }
   }
 
@@ -386,7 +384,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.debugImpl(messagePattern, object1);
     } else {
-      logger.debugImpl("[" + Objects.requireNonNull(marker) + "]" + messagePattern, object1);
+      logger.debugImpl("[" + marker + "]" + messagePattern, object1);
     }
   }
 
@@ -395,7 +393,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.debugImpl(messagePattern, object1, object2);
     } else {
-      logger.debugImpl("[" + Objects.requireNonNull(marker) + "]" + messagePattern, object1, object2);
+      logger.debugImpl("[" + marker + "]" + messagePattern, object1, object2);
     }
   }
 
@@ -429,7 +427,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.traceImpl(message);
     } else {
-      logger.traceImpl("[" + Objects.requireNonNull(marker) + "]" + message);
+      logger.traceImpl("[" + marker + "]" + message);
     }
   }
 
@@ -438,7 +436,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.traceImpl(message, throwable);
     } else {
-      logger.traceImpl("[" + Objects.requireNonNull(marker) + "]" + message, throwable);
+      logger.traceImpl("[" + marker + "]" + message, throwable);
     }
   }
 
@@ -447,7 +445,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.traceImpl(messagePattern, objects);
     } else {
-      logger.traceImpl("[" + Objects.requireNonNull(marker) + "]" + messagePattern, objects);
+      logger.traceImpl("[" + marker + "]" + messagePattern, objects);
     }
   }
 
@@ -456,7 +454,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.traceImpl(messagePattern, object1);
     } else {
-      logger.traceImpl("[" + Objects.requireNonNull(marker) + "]" + messagePattern, object1);
+      logger.traceImpl("[" + marker + "]" + messagePattern, object1);
     }
   }
 
@@ -465,7 +463,7 @@ public class Slf4jLoggerX implements Logger {
     if (marker == null) {
       logger.traceImpl(messagePattern, object1, object2);
     } else {
-      logger.traceImpl("[" + Objects.requireNonNull(marker) + "]" + messagePattern, object1, object2);
+      logger.traceImpl("[" + marker + "]" + messagePattern, object1, object2);
     }
   }
 

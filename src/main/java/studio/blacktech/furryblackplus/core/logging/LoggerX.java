@@ -32,7 +32,7 @@ import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel.WA
   attention = {
     "Impl转发可以强制要求实现 OperationNotSupportedException 只有在运行时才能发现问题 不调用永远不会发现",
     "SLF4j使用isEnable控制是否打印对应日志,LoggerX实现了一个简易的按包路径设置不同级别的机制",
-    "为了节省性能,FurryBlack和Mirai的日志只受DEFAULT_LEVEL控制,忽略包路径设置",
+    "FurryBlack日志拥有更多颜色,模块默认注入的logger为LoggerX而非Slf4jLogger",
   }
 )
 public abstract class LoggerX {
@@ -146,7 +146,7 @@ public abstract class LoggerX {
   }
 
   //= ==========================================================================
-  //= 内置级别
+  //= 级别开关
 
   public final boolean isErrorEnabled() {
     if (enablePrefix) {
@@ -293,6 +293,10 @@ public abstract class LoggerX {
     fatalImpl(message);
   }
 
+  public final void fatal(Throwable throwable) {
+    fatalImpl(throwable);
+  }
+
   public final void fatal(String message, Throwable throwable) {
     fatalImpl(message, throwable);
   }
@@ -301,8 +305,14 @@ public abstract class LoggerX {
     fatalImpl(messagePattern, objects);
   }
 
+  //
+
   public final void error(String message) {
     errorImpl(message);
+  }
+
+  public final void error(Throwable throwable) {
+    errorImpl(throwable);
   }
 
   public final void error(String message, Throwable throwable) {
@@ -313,8 +323,14 @@ public abstract class LoggerX {
     errorImpl(messagePattern, objects);
   }
 
+  //
+
   public final void warn(String message) {
     warnImpl(message);
+  }
+
+  public final void warn(Throwable throwable) {
+    warnImpl(throwable);
   }
 
   public final void warn(String message, Throwable throwable) {
@@ -325,8 +341,14 @@ public abstract class LoggerX {
     warnImpl(messagePattern, objects);
   }
 
+  //
+
   public final void hint(String message) {
     hintImpl(message);
+  }
+
+  public final void hint(Throwable throwable) {
+    hintImpl(throwable);
   }
 
   public final void hint(String message, Throwable throwable) {
@@ -337,8 +359,14 @@ public abstract class LoggerX {
     hintImpl(messagePattern, objects);
   }
 
+  //
+
   public final void seek(String message) {
     seekImpl(message);
+  }
+
+  public final void seek(Throwable throwable) {
+    seekImpl(throwable);
   }
 
   public final void seek(String message, Throwable throwable) {
@@ -349,8 +377,14 @@ public abstract class LoggerX {
     seekImpl(messagePattern, objects);
   }
 
+  //
+
   public final void info(String message) {
     infoImpl(message);
+  }
+
+  public final void info(Throwable throwable) {
+    infoImpl(throwable);
   }
 
   public final void info(String message, Throwable throwable) {
@@ -361,8 +395,14 @@ public abstract class LoggerX {
     infoImpl(messagePattern, objects);
   }
 
+  //
+
   public final void debug(String message) {
     debugImpl(message);
+  }
+
+  public final void debug(Throwable throwable) {
+    debugImpl(throwable);
   }
 
   public final void debug(String message, Throwable throwable) {
@@ -373,8 +413,14 @@ public abstract class LoggerX {
     debugImpl(messagePattern, objects);
   }
 
+  //
+
   public final void trace(String message) {
     traceImpl(message);
+  }
+
+  public final void trace(Throwable throwable) {
+    traceImpl(throwable);
   }
 
   public final void trace(String message, Throwable throwable) {
@@ -390,47 +436,77 @@ public abstract class LoggerX {
 
   protected abstract void fatalImpl(String message);
 
+  protected abstract void fatalImpl(Throwable throwable);
+
   protected abstract void fatalImpl(String message, Throwable throwable);
 
   protected abstract void fatalImpl(String messagePattern, Object... objects);
 
+  //
+
   protected abstract void errorImpl(String message);
+
+  protected abstract void errorImpl(Throwable throwable);
 
   protected abstract void errorImpl(String message, Throwable throwable);
 
   protected abstract void errorImpl(String messagePattern, Object... objects);
 
+  //
+
   protected abstract void warnImpl(String message);
+
+  protected abstract void warnImpl(Throwable throwable);
 
   protected abstract void warnImpl(String message, Throwable throwable);
 
   protected abstract void warnImpl(String messagePattern, Object... objects);
 
+  //
+
   protected abstract void hintImpl(String message);
+
+  protected abstract void hintImpl(Throwable throwable);
 
   protected abstract void hintImpl(String message, Throwable throwable);
 
   protected abstract void hintImpl(String messagePattern, Object... objects);
 
+  //
+
   protected abstract void infoImpl(String message);
+
+  protected abstract void infoImpl(Throwable throwable);
 
   protected abstract void infoImpl(String message, Throwable throwable);
 
   protected abstract void infoImpl(String messagePattern, Object... objects);
 
+  //
+
   protected abstract void seekImpl(String message);
+
+  protected abstract void seekImpl(Throwable throwable);
 
   protected abstract void seekImpl(String message, Throwable throwable);
 
   protected abstract void seekImpl(String messagePattern, Object... objects);
 
+  //
+
   protected abstract void debugImpl(String message);
+
+  protected abstract void debugImpl(Throwable throwable);
 
   protected abstract void debugImpl(String message, Throwable throwable);
 
   protected abstract void debugImpl(String messagePattern, Object... objects);
 
+  //
+
   protected abstract void traceImpl(String message);
+
+  protected abstract void traceImpl(Throwable throwable);
 
   protected abstract void traceImpl(String message, Throwable throwable);
 

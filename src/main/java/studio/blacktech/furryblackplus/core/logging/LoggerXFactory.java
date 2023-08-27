@@ -1,7 +1,7 @@
 package studio.blacktech.furryblackplus.core.logging;
 
 import studio.blacktech.furryblackplus.core.logging.annotation.LoggerXConfig;
-import studio.blacktech.furryblackplus.core.logging.backend.FileLoggerX;
+import studio.blacktech.furryblackplus.core.logging.backend.WritterLoggerX;
 import studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel;
 
 import java.lang.reflect.InvocationTargetException;
@@ -9,7 +9,7 @@ import java.nio.file.Path;
 
 public class LoggerXFactory {
 
-  private static Class<? extends LoggerX> DEFAULT_LOGGER = FileLoggerX.class;
+  private static Class<? extends LoggerX> DEFAULT_LOGGER = WritterLoggerX.class;
 
   //= ==================================================================================================================
   //= 配置系统

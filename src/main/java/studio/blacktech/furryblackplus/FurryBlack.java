@@ -612,7 +612,9 @@ CONF_THREADS_SCHEDULE=0
     // -D user.country=zh
     // -D user.language=CN
     if (System.getenv("FURRYBLACK_LOCALE_SKIP") == null) {
-      System.err.println("Env FURRYBLACK_LOCALE_SKIP not set, Setting JVM local to Locale.SIMPLIFIED_CHINESE");
+      if (System.getenv("FURRYBLACK_MUTE") == null) {
+        System.err.println("Env FURRYBLACK_LOCALE_SKIP not set, Setting JVM local to Locale.SIMPLIFIED_CHINESE");
+      }
       Locale.setDefault(Locale.SIMPLIFIED_CHINESE);
     }
 
@@ -621,7 +623,9 @@ CONF_THREADS_SCHEDULE=0
 
     // -D user.timezone=Asia/Shanghai
     if (System.getenv("FURRYBLACK_TIMEZONE_SKIP") == null) {
-      System.err.println("Env FURRYBLACK_TIMEZONE_SKIP not set, Setting JVM timezone to Asia/Shanghai");
+      if (System.getenv("FURRYBLACK_MUTE") == null) {
+        System.err.println("Env FURRYBLACK_TIMEZONE_SKIP not set, Setting JVM timezone to Asia/Shanghai");
+      }
       TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
     }
 
