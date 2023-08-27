@@ -18,15 +18,7 @@ public class NullLogger extends WrappedLoggerX {
 
   }
 
-  @Override protected void fatalImpl(Throwable throwable) {
-
-  }
-
   @Override protected void errorImpl(String message) {
-
-  }
-
-  @Override protected void errorImpl(Throwable throwable) {
 
   }
 
@@ -34,15 +26,7 @@ public class NullLogger extends WrappedLoggerX {
 
   }
 
-  @Override protected void warnImpl(Throwable throwable) {
-
-  }
-
   @Override protected void hintImpl(String message) {
-
-  }
-
-  @Override protected void hintImpl(Throwable throwable) {
 
   }
 
@@ -50,15 +34,7 @@ public class NullLogger extends WrappedLoggerX {
 
   }
 
-  @Override protected void infoImpl(Throwable throwable) {
-
-  }
-
   @Override protected void seekImpl(String message) {
-
-  }
-
-  @Override protected void seekImpl(Throwable throwable) {
 
   }
 
@@ -66,9 +42,8 @@ public class NullLogger extends WrappedLoggerX {
 
   }
 
-  @Override protected void debugImpl(Throwable throwable) {  }
+  @Override protected void traceImpl(String message) {
 
-  @Override protected void traceImpl(String message) {  }
+  }
 
-  @Override protected void traceImpl(Throwable throwable) {  }
 }

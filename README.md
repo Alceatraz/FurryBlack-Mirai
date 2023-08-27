@@ -15,41 +15,30 @@
 
 See LICENSE
 
-```text
-           BTS Anti-Commercial GNU AFFERO GENERAL PUBLIC LICENSE
-
-  This GNU Affero General Public License is extends from The GNU Affero General
-Public License, But as Additional Terms, Here is override:
-
-  1: Override A-GPL No.5, "I" keep power to "discriminate against any person or
-group of persons.", But for one proper's and for one proper's only:
-Any form commercial activity relay on this framework is forbidden, And I will
-revoke the permission of "You" to see/use/modify. otherwise, If you use it in
-commercial activity (framework itself or your extension or ghostwrite) You will
-banned by this project, This project equivalent close source for you. Any read/
-copy/use/modify/develop-base-on-it will be legal.
-
-For example:
-
-    If you are charged service provider, You MUST provide OpenAPI for everyone
-and create wrapper by FurryBlack into QQ, Clients pay for you OpenAPI NOT the
-FurryBlack or your extensions, You extensions must implements A-GPL. Must be
-opensource and free to use.
-
-  2: Downstream code/project/your-extension must annotation as BTS Anti 
-Commercial GNU AFFERO GENERAL PUBLIC LICENSE, Using another LICENSE equivalent
-as commercial usage. You is banned if you do it.
-```
-
 ## 如何运行
 
 ```shell
-java -cp "binary/*.jar" 'studio.blacktech.furryblackplus.core.Bootstrap'
+FURRYBLACK_MUTE=true
+FURRYBLACK_LOCALE_SKIP=true
+FURRYBLACK_TIMEZONE_SKIP=true
+
+java \
+-cp "binary/*" 'studio.blacktech.furryblackplus.FurryBlack' \
+--namespace 12345678 \
+--12345678-upgrade \
+--12345678-logger-level TRACE \
+--12345678-logger-prefix config/logging-prefix.txt 
 ```
 
-- 框架于代码中强制使用UTF-8,建议 `-Dfile.encoding=UTF-8`
-- 按需添加 `-Dmirai.no-desktop=true`
-- `FurryBlack`是API主类而非启动类
+- 强烈建议使用`-Dfile.encoding=UTF-8`以强制使用UTF8处理文件
+- 推荐搭配`fix-protocol-version`和Q-sign服务器使用
+- 推荐使用namespace隔离所有环境
+
+### 环境变量
+
+- `FURRYBLACK_MUTE`设置为任何值可关闭开头的两句提示
+- `FURRYBLACK_LOCALE_SKIP`设置为任何值都可跳过`Locale.setDefault(Locale.SIMPLIFIED_CHINESE);`
+- `FURRYBLACK_TIMEZONE_SKIP`设置为任何值都可跳过`TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));`
 
 ## 如何开发
 
@@ -165,8 +154,9 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryB
 
 ### 3.0.3
 
-- 尝试接入QSign
-- LoggerX添加完整路径开关
+- 添加MiraiLoggerXFactory接管日志
+- 添加LoggerX显示完整类名
+- 修复LICENSE语法错误
 
 ### 3.0.2
 

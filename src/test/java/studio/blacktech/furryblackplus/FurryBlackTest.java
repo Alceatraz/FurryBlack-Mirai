@@ -17,7 +17,7 @@ public class FurryBlackTest {
 
   @Test
   public void test2() {
-    System.err.println("net.mamoe.mirai.utils.MiraiLogger.Factory");
+    System.err.println("net.mamoe.mirai.utils.MiraiLogger$Factory");
     ServiceLoader<MiraiLogger.Factory> providers = ServiceLoader.load(MiraiLogger.Factory.class);
     providers.stream().map(it -> it.get().getClass().getName()).forEach(System.out::println);
   }
