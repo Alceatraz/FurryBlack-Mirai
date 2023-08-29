@@ -191,7 +191,7 @@ public class FurryBlack {
   //=
   //= ==================================================================================================================
 
-  public static final String APP_VERSION = "3.0.3";
+  public static final String APP_VERSION = "3.0.4";
   public static final String MIRAI_VERSION = "2.15.0";
 
   //= ==========================================================================
@@ -201,6 +201,7 @@ public class FurryBlack {
   private static final String[] ARGS_UPGRADE = {"upgrade"};
   private static final String[] ARGS_NO_LOGIN = {"no", "login"};
   private static final String[] ARGS_NO_JLINE = {"no", "jline"};
+  private static final String[] ARGS_FULL_NAME = {"full", "name"};
   private static final String[] ARGS_NO_CONSOLE = {"no", "console"};
   private static final String[] ARGS_FORCE_EXIT = {"force", "exit"};
   private static final String[] ARGS_LOGGER_LEVEL = {"logger", "level"};
@@ -302,6 +303,7 @@ BOLD_BRIGHT_CYAN +
 "--no-jline -------------------------- 选项 不使用jline终端" + LINE +
 "--no-console ------------------------ 选项 不使用终端" + LINE +
 "--force-exit ------------------------ 选项 关闭后将强退JVM" + LINE +
+"--full-name ------------------------- 选项 日志显示完成类名" + LINE +
 "--logger-level ---------------------- 参数 设置默认日志级别*" + LINE +
 "--logger-prefix --------------------- 参数 使用指定的日志级别配置*" + LINE +
 "--logger-provider ------------------- 参数 使用指定类名的日志实现后端*" + LINE +
@@ -313,8 +315,8 @@ BOLD_BRIGHT_CYAN +
 "※ FurryBlack 参数传递 ===========================================================" + RESET + LINE +
 "例如 foo bar 参数 可由三种方式传递" + LINE +
 "环境变量 export FOO_BAR -------------- 转换为大写 下划线拼接" + LINE +
-"系统配置 -Dfoo.bar ------------------- 转换为小写 中横线拼接" + LINE +
-"程序参数 --foo-bar ------------------- 转换为小写 英句号拼接" + LINE +
+"系统配置 -Dfoo.bar ------------------- 转换为小写 英句号拼接" + LINE +
+"程序参数 --foo-bar ------------------- 转换为小写 中横线拼接" + LINE +
 "配置文件 foo.bar --------------------- 转换为小写 英句号拼接" + LINE +
 
 BOLD_BRIGHT_CYAN +
@@ -731,6 +733,15 @@ CONF_THREADS_SCHEDULE=0
       LoggerXFactory.setLevel(level);
 
     }
+
+    //= ========================================================================
+    //= 日志全名
+
+    if (kernelConfig.fullname) {
+      LoggerXFactory.setEnableFullName(true);
+    }
+
+    System.out.println("[FurryBlack][ARGS]日志全名 - " + (kernelConfig.fullname ? "开启" : "关闭"));
 
     //= ========================================================================
     //= 日志前缀
@@ -2027,6 +2038,11 @@ CONF_THREADS_SCHEDULE=0
     //= ================================================================================================================
 
     //= ========================================================================
+    //= 安全模式
+
+    kernelConfig.unsafe = false;
+
+    //= ========================================================================
     //= 启动订阅
 
     EVENT_ENABLE = true;
@@ -2872,7 +2888,7 @@ CONF_THREADS_SCHEDULE=0
 
   private static final class Schema {
 
-    private final LoggerX logger = LoggerXFactory.getLogger(Schema.class);
+    private final LoggerX logger = LoggerXFactory.getLogger("Schema");
 
     private final Path folder;
 
@@ -5128,6 +5144,7 @@ CONF_THREADS_SCHEDULE=0
     private boolean upgrade;
     private boolean noLogin;
     private boolean noJline;
+    private boolean fullname;
     private boolean noConsole;
     private boolean forceExit;
 
@@ -5144,6 +5161,7 @@ CONF_THREADS_SCHEDULE=0
       config.upgrade = argument.checkKernelOption(ARGS_UPGRADE);
       config.noLogin = argument.checkKernelOption(ARGS_NO_LOGIN);
       config.noJline = argument.checkKernelOption(ARGS_NO_JLINE);
+      config.fullname = argument.checkKernelOption(ARGS_FULL_NAME);
       config.noConsole = argument.checkKernelOption(ARGS_NO_CONSOLE);
       config.forceExit = argument.checkKernelOption(ARGS_FORCE_EXIT);
 
@@ -5667,7 +5685,7 @@ CONF_THREADS_SCHEDULE=0
   //= ==========================================================================
   //= 机器人功能
 
-  @Comment("获取Mirai机器人实例 只有--unsafe模式下可以使用")
+  @Comment("获取Mirai机器人实例 只有--unsafe模式下可以使用 并且必须在启动完成前调用")
   public static Bot getBot() {
     if (kernelConfig.unsafe) {
       return bot;
@@ -5676,7 +5694,7 @@ CONF_THREADS_SCHEDULE=0
       for (StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
         System.out.println(stackTraceElement);
       }
-      throw new CoreException("Get Mirai-BOT instance only allowed when --unsafe present!");
+      throw new CoreException("Get Mirai-BOT instance only allowed when --unsafe present! And only allowed before booted.");
     }
   }
 

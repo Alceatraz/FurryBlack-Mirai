@@ -9,10 +9,14 @@ public class MiraiLoggerX implements MiraiLogger {
   private final LoggerX logger;
 
   public MiraiLoggerX(Class<?> clazz, String customNane) {
-    if (customNane == null) {
-      logger = LoggerXFactory.getLogger(clazz);
+    if (clazz == null) {
+      if (customNane == null || customNane.isBlank()) {
+        throw new IllegalArgumentException("MiraiLoggerX need class or name, but got both null");
+      } else {
+        logger = LoggerXFactory.getLogger(customNane);
+      }
     } else {
-      logger = LoggerXFactory.getLogger(customNane);
+      logger = LoggerXFactory.getLogger(clazz);
     }
   }
 
@@ -64,7 +68,7 @@ public class MiraiLoggerX implements MiraiLogger {
 
   @Override
   public void error(Throwable e) {
-    logger.error(null, e);
+    logger.error(e);
   }
 
   @Override
@@ -79,7 +83,7 @@ public class MiraiLoggerX implements MiraiLogger {
 
   @Override
   public void warning(Throwable e) {
-    logger.warn(null, e);
+    logger.warn(e);
   }
 
   @Override
@@ -94,7 +98,7 @@ public class MiraiLoggerX implements MiraiLogger {
 
   @Override
   public void info(Throwable e) {
-    logger.info(null, e);
+    logger.info(e);
   }
 
   @Override
@@ -109,7 +113,7 @@ public class MiraiLoggerX implements MiraiLogger {
 
   @Override
   public void verbose(Throwable e) {
-    logger.debug(null, e);
+    logger.debug(e);
   }
 
   @Override
@@ -124,7 +128,7 @@ public class MiraiLoggerX implements MiraiLogger {
 
   @Override
   public void debug(Throwable e) {
-    logger.trace(null, e);
+    logger.trace(e);
   }
 
   @Override

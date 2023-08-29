@@ -21,14 +21,14 @@ package studio.blacktech.furryblackplus.core.logging.backend;
 import studio.blacktech.furryblackplus.FurryBlack;
 import studio.blacktech.furryblackplus.core.common.enhance.TimeEnhance;
 import studio.blacktech.furryblackplus.core.logging.annotation.LoggerXConfig;
-import studio.blacktech.furryblackplus.core.logging.backend.wrapper.WrappedLoggerX;
+import studio.blacktech.furryblackplus.core.logging.backend.wrapper.PlaceholdLoggerX;
 
 import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.RESET;
 
 @SuppressWarnings("unused")
 
 @LoggerXConfig
-public final class PrintLoggerX extends WrappedLoggerX {
+public final class PrintLoggerX extends PlaceholdLoggerX {
 
   public PrintLoggerX(String simple) {
     super(simple);

@@ -1,10 +1,10 @@
 package studio.blacktech.furryblackplus.core.logging.backend;
 
 import studio.blacktech.furryblackplus.core.logging.annotation.LoggerXConfig;
-import studio.blacktech.furryblackplus.core.logging.backend.wrapper.WrappedLoggerX;
+import studio.blacktech.furryblackplus.core.logging.backend.wrapper.PlaceholdLoggerX;
 
 @LoggerXConfig
-public class NullLogger extends WrappedLoggerX {
+public class NullLogger extends PlaceholdLoggerX {
 
   protected NullLogger(Class<?> clazz) {
     super(clazz);

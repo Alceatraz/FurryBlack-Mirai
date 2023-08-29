@@ -22,7 +22,7 @@ import studio.blacktech.furryblackplus.FurryBlack;
 import studio.blacktech.furryblackplus.core.common.enhance.FileEnhance;
 import studio.blacktech.furryblackplus.core.common.enhance.TimeEnhance;
 import studio.blacktech.furryblackplus.core.logging.annotation.LoggerXConfig;
-import studio.blacktech.furryblackplus.core.logging.backend.wrapper.WrappedLoggerX;
+import studio.blacktech.furryblackplus.core.logging.backend.wrapper.PlaceholdLoggerX;
 
 import java.nio.file.Path;
 
@@ -32,7 +32,7 @@ import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.RE
 @SuppressWarnings("unused")
 
 @LoggerXConfig(needLoggerFile = true)
-public final class WritterLoggerX extends WrappedLoggerX {
+public final class WritterLoggerX extends PlaceholdLoggerX {
 
   private static Path path;
   private static volatile boolean lock = false;

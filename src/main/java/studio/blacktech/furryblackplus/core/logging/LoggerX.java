@@ -9,8 +9,6 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static studio.blacktech.furryblackplus.FurryBlack.LINE;
-import static studio.blacktech.furryblackplus.core.common.enhance.StringEnhance.extractStackTrace;
 import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel.DEBUG;
 import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel.ERROR;
 import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel.INFO;
@@ -75,7 +73,7 @@ public abstract class LoggerX {
   private static final Map<String, LoggerXLevel> CACHE = new ConcurrentHashMap<>();
 
   private static boolean enablePrefix = false;
-  private static boolean enableFullName = true;
+  private static boolean enableFullName = false;
 
   //= ==========================================================================
   //= 功能开关
@@ -229,30 +227,6 @@ public abstract class LoggerX {
     } else {
       return TRACE.isEnable(DEFAULT_LEVEL);
     }
-  }
-
-  //= ==================================================================================================================
-  //=
-  //= ==================================================================================================================
-
-  protected static String inject(String pattern, Object... objects) {
-    for (Object object : objects) {
-      if (object == null) {
-        pattern = pattern.replace("{}", "null");
-      } else if (object instanceof Throwable throwable) {
-        String message = throwable.getMessage();
-        pattern = pattern.replace("{}", throwable.getClass().getName() + ":" + message);
-      } else {
-        try {
-          String message = Objects.toString(object);
-          pattern = pattern.replace("{}", message);
-        } catch (Exception exception) {
-          pattern = pattern.replace("{}", "<<LoggerX Exception>>");
-          pattern = pattern + LINE + extractStackTrace(exception);
-        }
-      }
-    }
-    return pattern;
   }
 
   //= ==================================================================================================================

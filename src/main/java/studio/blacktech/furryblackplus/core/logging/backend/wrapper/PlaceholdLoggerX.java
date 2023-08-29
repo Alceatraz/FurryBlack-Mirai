@@ -2,16 +2,18 @@ package studio.blacktech.furryblackplus.core.logging.backend.wrapper;
 
 import studio.blacktech.furryblackplus.core.logging.LoggerX;
 
+import java.util.Objects;
+
 import static studio.blacktech.furryblackplus.FurryBlack.LINE;
 import static studio.blacktech.furryblackplus.core.common.enhance.StringEnhance.extractStackTrace;
 
-public abstract class WrappedLoggerX extends LoggerX {
+public abstract class PlaceholdLoggerX extends LoggerX {
 
-  protected WrappedLoggerX(Class<?> clazz) {
+  protected PlaceholdLoggerX(Class<?> clazz) {
     super(clazz);
   }
 
-  protected WrappedLoggerX(String simpleName) {
+  protected PlaceholdLoggerX(String simpleName) {
     super(simpleName);
   }
 
@@ -33,7 +35,7 @@ public abstract class WrappedLoggerX extends LoggerX {
     if (objects == null || objects.length == 0) {
       fatalImpl(messagePattern);
     } else {
-      fatalImpl(inject(messagePattern, objects));
+      fatalImpl(placeholder(messagePattern, objects));
     }
   }
 
@@ -55,7 +57,7 @@ public abstract class WrappedLoggerX extends LoggerX {
     if (objects == null || objects.length == 0) {
       errorImpl(messagePattern);
     } else {
-      errorImpl(inject(messagePattern, objects));
+      errorImpl(placeholder(messagePattern, objects));
     }
   }
 
@@ -77,7 +79,7 @@ public abstract class WrappedLoggerX extends LoggerX {
     if (objects == null || objects.length == 0) {
       warnImpl(messagePattern);
     } else {
-      warnImpl(inject(messagePattern, objects));
+      warnImpl(placeholder(messagePattern, objects));
     }
   }
 
@@ -99,7 +101,7 @@ public abstract class WrappedLoggerX extends LoggerX {
     if (objects == null || objects.length == 0) {
       hintImpl(messagePattern);
     } else {
-      hintImpl(inject(messagePattern, objects));
+      hintImpl(placeholder(messagePattern, objects));
     }
   }
 
@@ -121,7 +123,7 @@ public abstract class WrappedLoggerX extends LoggerX {
     if (objects == null || objects.length == 0) {
       seekImpl(messagePattern);
     } else {
-      seekImpl(inject(messagePattern, objects));
+      seekImpl(placeholder(messagePattern, objects));
     }
   }
 
@@ -143,7 +145,7 @@ public abstract class WrappedLoggerX extends LoggerX {
     if (objects == null || objects.length == 0) {
       infoImpl(messagePattern);
     } else {
-      infoImpl(inject(messagePattern, objects));
+      infoImpl(placeholder(messagePattern, objects));
     }
   }
 
@@ -165,7 +167,7 @@ public abstract class WrappedLoggerX extends LoggerX {
     if (objects == null || objects.length == 0) {
       debugImpl(messagePattern);
     } else {
-      debugImpl(inject(messagePattern, objects));
+      debugImpl(placeholder(messagePattern, objects));
     }
   }
 
@@ -187,7 +189,31 @@ public abstract class WrappedLoggerX extends LoggerX {
     if (objects == null || objects.length == 0) {
       traceImpl(messagePattern);
     } else {
-      traceImpl(inject(messagePattern, objects));
+      traceImpl(placeholder(messagePattern, objects));
     }
+  }
+
+  //= ==================================================================================================================
+  //=
+  //= ==================================================================================================================
+
+  private static String placeholder(String pattern, Object... objects) {
+    for (Object object : objects) {
+      if (object == null) {
+        pattern = pattern.replace("{}", "null");
+      } else if (object instanceof Throwable throwable) {
+        String message = throwable.getMessage();
+        pattern = pattern.replace("{}", throwable.getClass().getName() + ":" + message);
+      } else {
+        try {
+          String message = Objects.toString(object);
+          pattern = pattern.replace("{}", message);
+        } catch (Exception exception) {
+          pattern = pattern.replace("{}", "<<LoggerX Exception>>");
+          pattern = pattern + LINE + extractStackTrace(exception);
+        }
+      }
+    }
+    return pattern;
   }
 }

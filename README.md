@@ -152,6 +152,11 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryB
 
 ## CHANGELOG
 
+### 3.0.4
+
+- 完善日志
+- 增加 full name 参数
+
 ### 3.0.3
 
 - 添加MiraiLoggerXFactory接管日志
