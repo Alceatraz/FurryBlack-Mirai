@@ -1099,7 +1099,7 @@ CONF_THREADS_SCHEDULE=0
         if (invoke instanceof Map<?, ?> map) {
           @SuppressWarnings("unchecked")
           Map<BotConfiguration.MiraiProtocol, String> info = (Map<BotConfiguration.MiraiProtocol, String>) map;
-          info.forEach((k, v) -> logger.info(v + " -> " + k.name()));
+          info.forEach((k, v) -> logger.info(v));
         }
       } catch (Exception exception) {
         throw new CoreException("[UPGRADE/PROTOCOL] Invoke method failure", exception);
