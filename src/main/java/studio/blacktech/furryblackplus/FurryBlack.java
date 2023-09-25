@@ -94,6 +94,7 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -127,6 +128,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.jline.builtins.Completers.TreeCompleter.node;
@@ -198,7 +200,6 @@ public class FurryBlack {
 
   private static final String[] ARGS_DEBUG = {"debug"};
   private static final String[] ARGS_UNSAFE = {"unsafe"};
-  private static final String[] ARGS_UPGRADE = {"upgrade"};
   private static final String[] ARGS_NO_LOGIN = {"no", "login"};
   private static final String[] ARGS_NO_JLINE = {"no", "jline"};
   private static final String[] ARGS_FULL_NAME = {"full", "name"};
@@ -216,6 +217,7 @@ public class FurryBlack {
   private static final String[] CONF_COMMAND_REGEX = {"command", "regex"};
   private static final String[] CONF_THREADS_MONITOR = {"threads", "monitor"};
   private static final String[] CONF_THREADS_SCHEDULE = {"threads", "schedule"};
+  private static final String[] CONF_UPGRADE_PROTOCOLS = {"upgrade", "protocols"};
 
   //= ==========================================================================
 
@@ -340,6 +342,7 @@ BOLD_BRIGHT_CYAN +
 "command.prefix --------------------- 命令识别正则" + LINE +
 "threads.monitor -------------------- 监听器线程池" + LINE +
 "threads.schedule ------------------- 定时器线程池" + LINE +
+"upgrade.protocols ------------------ 升级协议版本" + LINE +
 YELLOW +
 "* 为了避免有人把密码写在命令行导致所有人都能在task里看见, 密码不从系统配置或程序参数读取" + LINE +
 "* 如若执意要如此使用, 需要使用unsafe配置项, 解锁安全限制后使用, 强烈反对使用因其极度危险" + RESET + LINE +
@@ -684,10 +687,6 @@ CONF_THREADS_SCHEDULE=0
       System.out.println("[FurryBlack][ARGS]安全策略 - 标准策略");
     }
 
-    if (kernelConfig.upgrade) {
-      System.out.println("[FurryBlack][ARGS]协议补丁 - 启用升级");
-    }
-
     if (kernelConfig.noLogin) {
       System.out.println("[FurryBlack][ARGS]登录模式 - 跳过登录");
     } else {
@@ -905,10 +904,6 @@ CONF_THREADS_SCHEDULE=0
       logger.info("内核配置/安全策略 - 标准策略");
     }
 
-    if (kernelConfig.upgrade) {
-      logger.info("内核配置/协议补丁 - 启用升级");
-    }
-
     if (kernelConfig.noLogin) {
       logger.info("内核配置/登录模式 - 跳过登录");
     } else {
@@ -1051,14 +1046,15 @@ CONF_THREADS_SCHEDULE=0
     //= 机器人子系统
     //= ================================================================================================================
 
-    logger.hint("初始化机器人");
-
     //= ========================================================================
     //= 升级客户端协议
 
-    if (kernelConfig.upgrade) {
+    if (systemConfig.upgradeProtocols != null) {
 
-      logger.info("升级客户端协议");
+      logger.hint("升级协议版本");
+
+      System.setProperty("xyz.cssxsh.mirai.tool.KFCFactory.config", "config/qsign.json");
+      System.setProperty("xyz.cssxsh.mirai.tool.FixProtocolVersion.folder", "config/protocol");
 
       Class<?> clazz;
       try {
@@ -1067,24 +1063,20 @@ CONF_THREADS_SCHEDULE=0
         throw new CoreException("[UPGRADE/PROTOCOL] Load class failure", exception);
       }
 
-      Method methodUpdate;
+      Method methodLoad;
       try {
-        methodUpdate = clazz.getMethod("update");
+        methodLoad = clazz.getMethod("load", BotConfiguration.MiraiProtocol.class);
       } catch (NoSuchMethodException exception) {
-        throw new CoreException("[UPGRADE/PROTOCOL] Load method failure", exception);
-      }
-
-      try {
-        methodUpdate.invoke(null);
-      } catch (IllegalAccessException | InvocationTargetException exception) {
         throw new CoreException("[UPGRADE/PROTOCOL] Invoke method failure", exception);
       }
 
-      try {
-        Method methodSync = clazz.getMethod("load", BotConfiguration.MiraiProtocol.class);
-        methodSync.invoke(null, BotConfiguration.MiraiProtocol.ANDROID_PAD);
-      } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException exception) {
-        throw new CoreException("[UPGRADE/PROTOCOL] Invoke method failure", exception);
+      for (BotConfiguration.MiraiProtocol miraiProtocol : systemConfig.upgradeProtocols) {
+        logger.info("升级协议 -> " + miraiProtocol.name());
+        try {
+          methodLoad.invoke(null, miraiProtocol);
+        } catch (IllegalAccessException | InvocationTargetException exception) {
+          throw new CoreException("[UPGRADE/PROTOCOL] Invoke method failure", exception);
+        }
       }
 
       Method methodInfo;
@@ -1093,6 +1085,8 @@ CONF_THREADS_SCHEDULE=0
       } catch (NoSuchMethodException exception) {
         throw new CoreException("[UPGRADE/PROTOCOL] Load method failure", exception);
       }
+
+      logger.info("当前协议版本");
 
       Object invoke;
       try {
@@ -1111,6 +1105,10 @@ CONF_THREADS_SCHEDULE=0
         throw new CoreException("[UPGRADE/PROTOCOL] Invoke method failure", exception);
       }
     }
+
+    //= ========================================================================
+
+    logger.hint("初始化机器人");
 
     //= ========================================================================
     //= 加载客户端配置
@@ -1527,7 +1525,6 @@ CONF_THREADS_SCHEDULE=0
           "命名空间: " + (NAMESPACE == null || NAMESPACE.isBlank() ? "无" : NAMESPACE ) + LINE +
           "调试开关: " + (kernelConfig.debug ? "调试模式" : "生产模式") + LINE +
           "安全策略: " + (kernelConfig.unsafe ? "宽松策略" : "标准策略") + LINE +
-          "协议补丁: " + (kernelConfig.upgrade ? "启用升级" : "原生模式") + LINE +
           "终端模式: " + (kernelConfig.noJline ? "精简终端" : "完整终端") + LINE +
           "登录模式: " + (kernelConfig.noLogin ? "跳过登录" : "真实登录") + LINE +
           "关闭策略: " + (SHUTDOWN_HALT ? "强制退出" : "正常退出") + LINE +
@@ -5141,7 +5138,6 @@ CONF_THREADS_SCHEDULE=0
 
     private volatile boolean debug;
     private volatile boolean unsafe;
-    private boolean upgrade;
     private boolean noLogin;
     private boolean noJline;
     private boolean fullname;
@@ -5158,7 +5154,6 @@ CONF_THREADS_SCHEDULE=0
 
       config.debug = argument.checkKernelOption(ARGS_DEBUG);
       config.unsafe = argument.checkKernelOption(ARGS_UNSAFE);
-      config.upgrade = argument.checkKernelOption(ARGS_UPGRADE);
       config.noLogin = argument.checkKernelOption(ARGS_NO_LOGIN);
       config.noJline = argument.checkKernelOption(ARGS_NO_JLINE);
       config.fullname = argument.checkKernelOption(ARGS_FULL_NAME);
@@ -5191,6 +5186,7 @@ CONF_THREADS_SCHEDULE=0
     Pattern commandRegex;
     Integer monitorThreads;
     Integer scheduleThreads;
+    Set<BotConfiguration.MiraiProtocol> upgradeProtocols;
 
     static SystemConfig getInstance(Argument argument) {
 
@@ -5319,6 +5315,20 @@ CONF_THREADS_SCHEDULE=0
         } else {
           logger.seek("定时器池 -> " + config.scheduleThreads);
         }
+      }
+
+      //= ======================================================================
+
+      String upgradeProtocols = argument.getSystemParameter(CONF_UPGRADE_PROTOCOLS);
+
+      if (upgradeProtocols == null || upgradeProtocols.isBlank()) {
+        config.upgradeProtocols = null;
+      } else {
+        String[] strings = upgradeProtocols.split(",");
+        config.upgradeProtocols = Arrays.stream(strings)
+          .map(DeviceType::of)
+          .map(DeviceType::toMiraiProtocol)
+          .collect(Collectors.toUnmodifiableSet());
       }
 
       //= ======================================================================
