@@ -524,6 +524,7 @@ CONF_THREADS_SCHEDULE=0
 
   private static String NAMESPACE; // 命名空间
 
+  private static volatile boolean BOOTED;
   private static volatile boolean EVENT_ENABLE;
 
   private static volatile boolean KERNEL_DEBUG;
@@ -2037,7 +2038,7 @@ CONF_THREADS_SCHEDULE=0
     //= ========================================================================
     //= 安全模式
 
-    kernelConfig.unsafe = false;
+    BOOTED = false;
 
     //= ========================================================================
     //= 启动订阅
@@ -5698,13 +5699,20 @@ CONF_THREADS_SCHEDULE=0
   @Comment("获取Mirai机器人实例 只有--unsafe模式下可以使用 并且必须在启动完成前调用")
   public static Bot getBot() {
     if (kernelConfig.unsafe) {
+      if (BOOTED) {
+        logger.warn("获取机器人实例禁止 并且必须在启动完成前调用");
+        for (StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
+          System.out.println(stackTraceElement);
+        }
+        throw new CoreException("Get Mirai-BOT instance only allowed before booted.");
+      }
       return bot;
     } else {
       logger.warn("获取机器人实例禁止 只有在unsafe模式下可用");
       for (StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
         System.out.println(stackTraceElement);
       }
-      throw new CoreException("Get Mirai-BOT instance only allowed when --unsafe present! And only allowed before booted.");
+      throw new CoreException("Get Mirai-BOT instance only allowed unsafe enabled.");
     }
   }
 
