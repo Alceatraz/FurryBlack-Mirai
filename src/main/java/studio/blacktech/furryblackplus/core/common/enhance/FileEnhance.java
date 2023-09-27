@@ -45,7 +45,7 @@ public class FileEnhance {
         throw new RuntimeException("目标非文件 -> " + path);
       }
     } else {
-      throw new RuntimeException("文件不存在 -> " + path);
+      throw new RuntimeException("文件不存在 -> " + path.toFile().getAbsolutePath());
     }
     return path;
   }

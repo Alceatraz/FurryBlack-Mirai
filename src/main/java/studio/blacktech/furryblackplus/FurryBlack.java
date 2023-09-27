@@ -713,11 +713,12 @@ CONF_THREADS_SCHEDULE=0
     //= ========================================================================
     //= 日志等级
 
+    LoggerXLevel customLevel;
     if (kernelConfig.level != null) {
 
-      LoggerXLevel level = LoggerXLevel.of(kernelConfig.level);
+      customLevel = LoggerXLevel.of(kernelConfig.level);
 
-      if (level == null) {
+      if (customLevel == null) {
         System.out.println("[FurryBlack][ARGS]日志级别 - 输入值无效 -> " + kernelConfig.level + ", 可用日志级别为:");
         System.out.println("[FurryBlack][ARGS] - CLOSE");
         System.out.println("[FurryBlack][ARGS] - ERROR");
@@ -730,8 +731,8 @@ CONF_THREADS_SCHEDULE=0
         System.out.println("[FurryBlack][ARGS]日志级别 - " + kernelConfig.level);
       }
 
-      LoggerXFactory.setLevel(level);
-
+    } else {
+      customLevel = LoggerXLevel.INFO;
     }
 
     //= ========================================================================
@@ -1393,7 +1394,7 @@ CONF_THREADS_SCHEDULE=0
     //= ========================================================================
     //= 启动线程池
 
-    logger.seek("启动线程池");
+    logger.hint("启动线程池");
 
     logger.info("启动监听器线程池");
 
@@ -1713,6 +1714,7 @@ CONF_THREADS_SCHEDULE=0
 
             );
           } else {
+            LoggerXFactory.setLevel(of);
             FurryBlack.println("日志级别修改为 -> " + LoggerXFactory.getLevel());
           }
         }
@@ -1733,6 +1735,39 @@ CONF_THREADS_SCHEDULE=0
             LoggerXFactory.setEnableFullName(false);
             FurryBlack.println("设置详细名称为 -> 关闭");
           }
+        }
+      });
+
+    //= ========================================================================
+
+    dispatcher.registerExclusive()
+      .command("logger", "prefix")
+      .function(it -> {
+
+        if (it == null) {
+
+          Map<String, LoggerXLevel> prefix = LoggerXFactory.listPrefix();
+
+          FurryBlack.println("当前级别前缀 -> " + prefix.size());
+
+          for (Map.Entry<String, LoggerXLevel> entry : prefix.entrySet()) {
+            FurryBlack.println(String.format("%5s", entry.getValue()) + " " + entry.getKey());
+          }
+
+        } else {
+
+          String code = it.getOrEmpty(0);
+          String path = it.getOrEmpty(1);
+
+          switch (code) {
+            case "test" -> FurryBlack.println(path + " -> " + LoggerXFactory.testPrefix(path));
+            case "delete", "remove" -> LoggerXFactory.delPrefix(path);
+            default -> {
+              LoggerXLevel of = LoggerXLevel.of(code);
+              LoggerXFactory.setPrefix(path, of);
+            }
+          }
+
         }
       });
 
@@ -2049,6 +2084,8 @@ CONF_THREADS_SCHEDULE=0
     //= 启动完成
 
     logger.hint("系统启动完成 耗时" + TimeEnhance.duration(System.currentTimeMillis() - BOOT_TIME));
+
+    LoggerXFactory.setLevel(customLevel);
 
     //= ========================================================================
     //= 正常工作
@@ -2535,6 +2572,10 @@ CONF_THREADS_SCHEDULE=0
           // logger verbose slf4j
           new TreeCompleter(node("logger", node("verbose", node("name", node("true", "false"))))),
 
+          // logger prefix
+          // logger prefix delete xxx.xxx.xx.x.x
+          new TreeCompleter(node("logger", node("prefix", node("test", "delete", "remove", "CLOSE", "ERROR", "WARN", "INFO", "DEBUG", "TRACE")))),
+
           // ?
           // help
           // info
@@ -2565,12 +2606,12 @@ CONF_THREADS_SCHEDULE=0
       return new ConsoleCommand(command);
     }
 
-    private ConsoleCommand(String[] args) {
-      this.args = args;
-    }
-
     private ConsoleCommand(String command) {
       this(parseCommand(command));
+    }
+
+    private ConsoleCommand(String[] args) {
+      this.args = args;
     }
 
     private static String[] parseCommand(String command) {

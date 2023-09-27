@@ -107,32 +107,32 @@ public class MiraiLoggerX implements MiraiLogger {
   }
 
   @Override
-  public void verbose(String s) {
-    logger.debug(s);
-  }
-
-  @Override
-  public void verbose(Throwable e) {
-    logger.debug(e);
-  }
-
-  @Override
-  public void verbose(String s, Throwable throwable) {
-    logger.debug(s);
-  }
-
-  @Override
   public void debug(String s) {
-    logger.trace(s);
+    logger.debug(s);
   }
 
   @Override
   public void debug(Throwable e) {
-    logger.trace(e);
+    logger.debug(e);
   }
 
   @Override
   public void debug(String s, Throwable throwable) {
+    logger.debug(s);
+  }
+
+  @Override
+  public void verbose(String s) {
+    logger.trace(s);
+  }
+
+  @Override
+  public void verbose(Throwable e) {
+    logger.trace(e);
+  }
+
+  @Override
+  public void verbose(String s, Throwable throwable) {
     logger.trace(s, throwable);
   }
 }

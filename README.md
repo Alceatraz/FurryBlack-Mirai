@@ -155,6 +155,9 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryB
 ### 3.0.5
 
 - 更新 Mirai 2.16.0-RC
+- 修复日志级别写反的BUG
+- 修复控制台无法修改日志界别的BUG
+- 新增启动时TRACE,启动后设为INFO或者用户指定级别的功能
 
 ### 3.0.4
 

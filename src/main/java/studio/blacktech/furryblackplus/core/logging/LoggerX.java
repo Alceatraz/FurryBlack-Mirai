@@ -56,21 +56,21 @@ public abstract class LoggerX {
   //= ==========================================================================
   //= 日志等级
 
-  private static LoggerXLevel DEFAULT_LEVEL = INFO;
+  private static LoggerXLevel DEFAULT_LEVEL = TRACE;
 
   protected static LoggerXLevel getLevel() {
     return DEFAULT_LEVEL;
   }
 
   protected static void setLevel(LoggerXLevel level) {
-    DEFAULT_LEVEL = Objects.requireNonNull(level, "Can't setLevel logging level to null !");
+    DEFAULT_LEVEL = Objects.requireNonNull(level, "Can't addPrefix logging level to null !");
   }
 
   //= ==========================================================================
   //= 分组等级
 
   private static final Node PREFIX = Node.root();
-  private static final Map<String, LoggerXLevel> CACHE = new ConcurrentHashMap<>();
+  private static final Map<String, LoggerXLevel> CACHES = new ConcurrentHashMap<>();
 
   private static boolean enablePrefix = false;
   private static boolean enableFullName = false;
@@ -94,8 +94,24 @@ public abstract class LoggerX {
     LoggerX.enableFullName = enableFullName;
   }
 
-  protected static void injectPrefix(String prefix, LoggerXLevel level) {
-    PREFIX.setLevel(prefix, level);
+  protected static void flushPrefixCache() {
+    CACHES.clear();
+  }
+
+  protected static Map<String, LoggerXLevel> listPrefix() {
+    return PREFIX.listPrefix();
+  }
+
+  protected static LoggerXLevel testPrefix(String path) {
+    return PREFIX.getLevel(path);
+  }
+
+  protected static void setPrefix(String path, LoggerXLevel level) {
+    PREFIX.addPrefix(path, level);
+  }
+
+  protected static void delPrefix(String path) {
+    PREFIX.delLevel(path);
   }
 
   //= ==========================================================================
@@ -123,6 +139,14 @@ public abstract class LoggerX {
       return current;
     }
 
+    private void del(String[] paths) {
+      Node current = this;
+      for (String path : paths) {
+        current = current.nodes.computeIfAbsent(path, i -> new Node());
+      }
+      current.level = null;
+    }
+
     private LoggerXLevel get(String[] paths) {
       Node current = this;
       for (String path : paths) {
@@ -133,12 +157,36 @@ public abstract class LoggerX {
       return current.getLevel();
     }
 
-    public void setLevel(String path, LoggerXLevel level) {
+    public void delLevel(String path) {
+      del(path.split("\\."));
+    }
+
+    public void addPrefix(String path, LoggerXLevel level) {
       add(path.split("\\.")).level = level;
     }
 
     public LoggerXLevel getLevel(String path) {
-      return CACHE.computeIfAbsent(path, i -> get(i.split("\\.")));
+      return CACHES.computeIfAbsent(path, i -> get(i.split("\\.")));
+    }
+
+    public Map<String, LoggerXLevel> listPrefix() {
+      Map<String, LoggerXLevel> map = new TreeMap<>();
+      recursiveNodes("", map);
+      return map;
+    }
+
+    private void recursiveNodes(String prefix, Map<String, LoggerXLevel> map) {
+      if (nodes.isEmpty()) {
+        if (prefix.isBlank()) {
+          map.put(".", DEFAULT_LEVEL);
+        } else {
+          map.put(prefix, level);
+        }
+      } else {
+        for (Map.Entry<String, Node> entry : nodes.entrySet()) {
+          entry.getValue().recursiveNodes((prefix.isBlank() ? "" : prefix + ".") + entry.getKey(), map);
+        }
+      }
     }
 
   }

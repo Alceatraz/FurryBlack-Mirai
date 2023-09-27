@@ -6,6 +6,7 @@ import studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel;
 
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
+import java.util.Map;
 
 public class LoggerXFactory {
 
@@ -14,20 +15,40 @@ public class LoggerXFactory {
   //= ==================================================================================================================
   //= 配置系统
 
-  public static void setDefault(Class<? extends LoggerX> provider) {
-    DEFAULT_LOGGER = provider;
-  }
-
-  public static String getDefault() {
-    return DEFAULT_LOGGER.getSimpleName();
-  }
-
   public static LoggerXLevel getLevel() {
     return LoggerX.getLevel();
   }
 
   public static void setLevel(LoggerXLevel level) {
     LoggerX.setLevel(level);
+  }
+
+  public static String getDefault() {
+    return DEFAULT_LOGGER.getSimpleName();
+  }
+
+  public static void setDefault(Class<? extends LoggerX> provider) {
+    DEFAULT_LOGGER = provider;
+  }
+
+  public static void flushPrefixCache() {
+    LoggerX.flushPrefixCache();
+  }
+
+  public static Map<String, LoggerXLevel> listPrefix() {
+    return LoggerX.listPrefix();
+  }
+
+  public static LoggerXLevel testPrefix(String node) {
+    return LoggerX.testPrefix(node);
+  }
+
+  public static void setPrefix(String node, LoggerXLevel level) {
+    LoggerX.setPrefix(node, level);
+  }
+
+  public static void delPrefix(String node) {
+    LoggerX.delPrefix(node);
   }
 
   //= ==================================================================================================================
@@ -53,7 +74,7 @@ public class LoggerXFactory {
   //= 前缀系统
 
   public static void injectPrefix(String prefix, LoggerXLevel level) {
-    LoggerX.injectPrefix(prefix, level);
+    LoggerX.setPrefix(prefix, level);
   }
 
   //= ==================================================================================================================
