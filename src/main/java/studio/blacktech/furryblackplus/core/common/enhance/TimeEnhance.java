@@ -107,16 +107,15 @@ public class TimeEnhance {
   }
 
   public static long plus(Integer year, Integer month, Integer date, Integer hour, Integer minute, Integer second, Integer nano) {
-    LocalDateTime now = LocalDateTime.now();
-    LocalDateTime next = LocalDateTime.of(
-      year == null ? now.getYear() : year == 0 ? 0 : now.getYear() + year,
-      month == null ? now.getMonthValue() : month == 0 ? 0 : now.getMonthValue() + month,
-      date == null ? now.getDayOfMonth() : date == 0 ? 0 : now.getDayOfMonth() + date,
-      hour == null ? now.getHour() : hour == 0 ? 0 : now.getHour() + hour,
-      second == null ? now.getSecond() : second == 0 ? 0 : now.getSecond() + second,
-      nano == null ? now.getNano() : nano == 0 ? 0 : now.getNano() + nano
-    );
-    return next.toEpochSecond(SYSTEM_OFFSET) * 1000;
+    LocalDateTime value = LocalDateTime.now();
+    if (nano != null) value = nano == 0 ? value.withNano(0) : value.plusNanos(nano);
+    if (second != null) value = second == 0 ? value.withSecond(0) : value.plusSeconds(second);
+    if (minute != null) value = minute == 0 ? value.withMinute(0) : value.plusMinutes(minute);
+    if (hour != null) value = hour == 0 ? value.withHour(0) : value.plusHours(hour);
+    if (date != null) value = date == 0 ? value.withDayOfMonth(1) : value.plusDays(date);
+    if (month != null) value = month == 0 ? value.withMonth(1) : value.plusMonths(month);
+    if (year != null) value = year == 0 ? value.withYear(0) : value.plusYears(year);
+    return value.toEpochSecond(TimeEnhance.SYSTEM_OFFSET) * 1000;
   }
 
   //= ==========================================================================
