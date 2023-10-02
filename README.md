@@ -2,7 +2,7 @@
 
 ## 自豪的使用[Mirai](https://github.com/mamoe/mirai)
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/fcb9badd8cc1414d944c0965cba13ab5)](https://www.codacy.com/gh/Alceatraz/FurryBlack-Mirai/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Alceatraz/FurryBlack-Mirai&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/6d123a4b9d6e434086e17e2b1f378c5c)](https://app.codacy.com/gh/Alceatraz/FurryBlack-Mirai/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 ### 消歧义
 
