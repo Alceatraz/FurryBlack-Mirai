@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import static java.nio.file.StandardOpenOption.APPEND;
-import static java.nio.file.StandardOpenOption.WRITE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
 @Comment("文件工具")
 public class FileEnhance {
@@ -194,7 +194,7 @@ public class FileEnhance {
   public static void write(Path path, String content) {
     ensureFile(path);
     try {
-      Files.writeString(path, content, StandardCharsets.UTF_8, WRITE);
+      Files.writeString(path, content, StandardCharsets.UTF_8, TRUNCATE_EXISTING);
     } catch (IOException exception) {
       throw new RuntimeException("写入失败 -> ", exception);
     }
@@ -204,7 +204,7 @@ public class FileEnhance {
   public static void write(Path path, List<String> content) {
     ensureFile(path);
     try {
-      Files.write(path, content, StandardCharsets.UTF_8, WRITE);
+      Files.write(path, content, StandardCharsets.UTF_8, TRUNCATE_EXISTING);
     } catch (IOException exception) {
       throw new RuntimeException("写入失败 -> ", exception);
     }

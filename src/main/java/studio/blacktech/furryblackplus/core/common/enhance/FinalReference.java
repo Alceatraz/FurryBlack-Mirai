@@ -57,7 +57,7 @@ public class FinalReference<T> {
   private void setInternal(T instance) {
     synchronized (reference) {
       if (reference.get() != null) {
-        throw new IllegalStateException("Value already addPrefix, Override not allow.");
+        throw new IllegalStateException("Value already set, Override not allow.");
       }
       reference.set(instance);
     }

@@ -36,6 +36,7 @@ import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageSource;
 import net.mamoe.mirai.message.data.PlainText;
 import net.mamoe.mirai.utils.BotConfiguration;
+import net.mamoe.mirai.utils.DeviceInfo;
 import net.mamoe.mirai.utils.MiraiLogger;
 import org.jetbrains.annotations.Nullable;
 import org.jline.builtins.Completers.TreeCompleter;
@@ -131,6 +132,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.nio.file.StandardOpenOption.READ;
+import static net.mamoe.mirai.utils.BotConfiguration.MiraiProtocol.*;
 import static org.jline.builtins.Completers.TreeCompleter.node;
 import static studio.blacktech.furryblackplus.core.common.enhance.DataEnhance.parseInt;
 import static studio.blacktech.furryblackplus.core.common.enhance.DataEnhance.parseLong;
@@ -188,15 +191,25 @@ import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXColor.YE
 public class FurryBlack {
 
   //= ==================================================================================================================
-  //=
-  //= 静态数据
-  //=
+  //
+  //  公共常量
+  //
   //= ==================================================================================================================
 
-  public static final String APP_VERSION = "3.0.4";
-  public static final String MIRAI_VERSION = "2.15.0";
+  @Comment("") public static final String APP_VERSION = "3.0.5";
+  @Comment("") public static final String MIRAI_VERSION = "2.15.0";
 
-  //= ==========================================================================
+  @Comment("") public static final String CRLF = "\r\n";
+  @Comment("") public static final String LINE = System.lineSeparator();
+
+  public static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
+  public static final long BOOT_TIME = ManagementFactory.getRuntimeMXBean().getStartTime();
+
+  //= ==================================================================================================================
+  //
+  //  框架常量
+  //
+  //= ==================================================================================================================
 
   private static final String[] ARGS_DEBUG = {"debug"};
   private static final String[] ARGS_UNSAFE = {"unsafe"};
@@ -209,53 +222,117 @@ public class FurryBlack {
   private static final String[] ARGS_LOGGER_PREFIX = {"logger", "prefix"};
   private static final String[] ARGS_LOGGER_PROVIDER = {"logger", "provider"};
 
-  private static final String[] CONF_DEVICE_TYPE = {"device", "type"};
-  private static final String[] CONF_DEVICE_INFO = {"device", "info"};
   private static final String[] CONF_ACCOUNT_AUTH = {"account", "auth"};
   private static final String[] CONF_ACCOUNT_USERNAME = {"account", "username"};
   private static final String[] CONF_ACCOUNT_PASSWORD = {"account", "password"};
+
+  private static final String[] CONF_DEVICE_INFO = {"device", "info"};
+  private static final String[] CONF_DEVICE_TYPE = {"device", "type"};
+  private static final String[] CONF_DEVICE_UPGRADE = {"device", "upgrade"};
+
   private static final String[] CONF_COMMAND_REGEX = {"command", "regex"};
   private static final String[] CONF_THREADS_MONITOR = {"threads", "monitor"};
   private static final String[] CONF_THREADS_SCHEDULE = {"threads", "schedule"};
-  private static final String[] CONF_UPGRADE_PROTOCOLS = {"upgrade", "protocols"};
+
+  private static final Path FOLDER_ROOT = Paths.get(System.getProperty("user.dir"));
+  private static final Path FOLDER_CONFIG = FileEnhance.get(FOLDER_ROOT, "config");
+  private static final Path FOLDER_PLUGIN = FileEnhance.get(FOLDER_ROOT, "plugin");
+  private static final Path FOLDER_DEPEND = FileEnhance.get(FOLDER_ROOT, "depend");
+  private static final Path FOLDER_MODULE = FileEnhance.get(FOLDER_ROOT, "module");
+  private static final Path FOLDER_LOGGER = FileEnhance.get(FOLDER_ROOT, "logger");
+  private static final Path FILE_APPLICATION_CONFIG = FileEnhance.get(FOLDER_CONFIG, "application.properties");
+
+  private static final String CONTENT_INIT;
+  private static final String CONTENT_DONE;
+  private static final String CONTENT_INFO;
+  private static final String CONTENT_HELP;
+  private static final String CONTENT_COLOR;
+  private static final String DEFAULT_CONFIG;
 
   //= ==========================================================================
 
-  private static final DateTimeFormatter FORMATTER;
-
-  //= ==========================================================================
-
-  @Comment("QQ用换行符") public static final String CRLF = "\r\n";
-  @Comment("系统换行符") public static final String LINE;
-
-  public static final int CPU_CORES;
-  public static final long BOOT_TIME;
-
-  public static final String CONTENT_INFO;
-  public static final String CONTENT_HELP;
-  public static final String CONTENT_COLOR;
-  public static final String DEFAULT_CONFIG;
+  private static final LockEnhance.Latch LATCH = new LockEnhance.Latch();
+  private static final DateTimeFormatter FORMATTER = TimeEnhance.pattern("yyyy-MM-dd HH-mm-ss");
 
   //= ==================================================================================================================
+  //
+  //  框架变量
+  //
+  //= ==================================================================================================================
+
+  private static String NAMESPACE; // 命名空间
+
+  private static volatile boolean BOOTED;
+  private static volatile boolean EVENT_ENABLE;
+
+  private static volatile boolean KERNEL_DEBUG;
+  private static volatile boolean SHUTDOWN_HALT;
+  private static volatile boolean SHUTDOWN_DROP;
+  private static volatile boolean SHUTDOWN_KILL;
+
+  private static KernelConfig kernelConfig;
+  private static SystemConfig systemConfig;
+
+  private static LoggerX logger;
+  private static Terminal terminal;
+  private static Dispatcher dispatcher;
+
+  private static Bot bot;
+  private static Schema schema;
+  private static Nickname nickname;
+
+  private static String MESSAGE_INFO;
+  private static String MESSAGE_EULA;
+  private static String MESSAGE_HELP;
+  private static String MESSAGE_LIST_USERS;
+  private static String MESSAGE_LIST_GROUP;
+
+  private static ThreadPoolExecutor MONITOR_PROCESS;
+  private static ScheduledThreadPoolExecutor SCHEDULE_SERVICE;
 
   static {
 
-    //= ================================================================================================================
-    //= 系统信息
+    // @formatter:off
 
-    LINE = System.lineSeparator();
+//= ====================================================================================================================
+//= ====================================================================================================================
+//= ====================================================================================================================
 
-    BOOT_TIME = ManagementFactory.getRuntimeMXBean().getStartTime();
-    CPU_CORES = Runtime.getRuntime().availableProcessors();
+CONTENT_INIT =
 
-    FORMATTER = TimeEnhance.pattern("yyyy-MM-dd HH-mm-ss");
+BOLD_BRIGHT_CYAN +
+"※ FurryBlack 安装模式 ===========================================================" + RESET + LINE + LINE +
 
-    //= ================================================================================================================
-    //= 框架信息
+"A Mirai wrapper framework make with love and 🧦" + LINE +
+"Create by: Alceatraz Warprays @ BlackTechStudio" + LINE + LINE +
 
-    CONTENT_INFO =
+BOLD_BRIGHT_CYAN +
+"#===============================================================================" + RESET
 
-      // @formatter:off
+;
+
+CONTENT_DONE =
+
+BOLD_BRIGHT_CYAN +
+"# ==============================================================================" + RESET + LINE + LINE +
+
+"文件展开完成, 请退出后修改配置文件 config/application.properties" + LINE +
+"推荐通过使用 Aoki 在真实设备登录, 以获得最大程度模拟真实设备的设备信息文件" + LINE +
+"推荐使用 fix-protocol-version 和 QSign 服务, 以避免出现无法登录的问题" + LINE + LINE +
+
+BOLD_BRIGHT_RED +
+"完成后务必删除--init或--install参数,否则配置文件将会被覆盖!" + RESET + LINE + LINE +
+
+BOLD_BRIGHT_CYAN +
+"※ FurryBlack 安装完成 ===========================================================" + RESET
+
+;
+
+//= ====================================================================================================================
+//= ====================================================================================================================
+//= ====================================================================================================================
+
+CONTENT_INFO =
 
 BOLD_BRIGHT_CYAN +
 "※ FurryBlack 版本信息 ===========================================================" + RESET + LINE + LINE +
@@ -272,13 +349,13 @@ BOLD_BRIGHT_CYAN +
 BOLD_BRIGHT_CYAN +
 "# ==============================================================================" + RESET
 
-      // @formatter:on
+;
 
-    ;
+//= ====================================================================================================================
+//= ====================================================================================================================
+//= ====================================================================================================================
 
-    CONTENT_HELP =
-
-      // @formatter:off
+CONTENT_HELP =
 
 BOLD_BRIGHT_CYAN +
 "※ FurryBlack 版本信息 ===========================================================" + RESET + LINE +
@@ -289,6 +366,11 @@ BOLD_BRIGHT_CYAN +
 "内核源码 https://github.com/mamoe/mirai" + LINE +
 "框架源码 https://github.com/Alceatraz/FurryBlack-Mirai" + LINE +
 "示例插件 https://github.com/Alceatraz/FurryBlack-Mirai-Extensions" + LINE +
+
+BOLD_BRIGHT_CYAN +
+"※ FurryBlack 安装模式 ===========================================================" + RESET + LINE +
+"--install --------------------------- 展开文件" + LINE +
+"* 安装模式用于生成所有目录和默认配置文件, 执行后退出" + LINE +
 
 BOLD_BRIGHT_CYAN +
 "※ FurryBlack 交互模式 ===========================================================" + RESET + LINE +
@@ -393,13 +475,13 @@ BOLD_BRIGHT_CYAN +
 BOLD_BRIGHT_CYAN +
 "# ==============================================================================" + RESET
 
-      // @formatter:on
+;
 
-    ;
+//= ====================================================================================================================
+//= ====================================================================================================================
+//= ====================================================================================================================
 
-    CONTENT_COLOR =
-
-      // @formatter:off
+CONTENT_COLOR =
 
                       "# ===========================================================================================================" + LINE +
                       "NO COLOR ---------------- THE QUICK BROWN FOX JUMP OVER A LAZY DOG | the quick brown fox jump over a lazy dog" + LINE +
@@ -448,55 +530,74 @@ BRIGHT_BLACK        + "DEBUG / BRIGHT_BLACK ------------ [2000-00-00 00:00:00][F
 BLACK               + "TRACE / BLACK ------------------- [2000-00-00 00:00:00][FurryBlack] The Quick Brown Fox Jump Over A Lazy Dog" + RESET + LINE +
                       "# ==========================================================================================================="
 
-      // @formatter:on
-
     ;
 
-    DEFAULT_CONFIG =
+//= ====================================================================================================================
+//= ====================================================================================================================
+//= ====================================================================================================================
 
-      // @formatter:off
+DEFAULT_CONFIG =
 
 """
-#===============================================================================
-# 账号配置
-#===============================================================================
+#==========================================================
+#=                                                        =
+#= FurryBlack 框架配置文件                                  =
+#=                                                        =
+#==========================================================
+# 本配置文件为标准 java property 文件, 但是以 UTF8 模式读取
+# 修改配置以后请务必关闭 --init 或 --install 开关 避免被覆盖
+#==========================================================
+
+#----------------------------------------------------------
+# 协议配置
+#----------------------------------------------------------
+# 鉴于风控越来越严格, 强力推荐使用
+# PASSWD + PAD + fix-protocol-version升级 + qsign验证 模式登录
+# 使用 Aoki 生成设备信息, Mirai随机生成的设备容易被检测故直接禁用功能
+# 使用 fix-protocol-version 组件动态加载协议配置文件以及访问Q-Sign
+#
 # 认证模式 PASSWD/QRCODE
 CONF_ACCOUNT_AUTH=PASSWD
 # 账号
 CONF_ACCOUNT_USERNAME=0000
-# 密码
+# 密码 二维码模式忽略此设置
 CONF_ACCOUNT_PASSWORD=0000
-#===============================================================================
-# 设备设置
-#===============================================================================
-# 设备类型 IPAD/MACOS/PAD/PHONE/WATCH
-CONF_DEVICE_TYPE=IPAD
-# 设备信息 需要使用Aoki生成
+# 设备信息 注意: 此路径基于 config/
 CONF_DEVICE_INFO=device.json
-#===============================================================================
-# 设备设置
-#===============================================================================
+# 设备类型 PAD/PHONE/WATCH/IPAD/MACOS
+CONF_DEVICE_TYPE=PAD
+# 协议补丁 注意: 需要 fix-protocol-version 和对应的协议文件
+CONF_DEVICE_UPGRADE=PAD
+
+#----------------------------------------------------------
+# 框架设置
+#----------------------------------------------------------
 # 命令识别正则
 CONF_COMMAND_REGEX=/[a-zA-Z0-9]{2,16}
-# 监听器线程池
+# 监听器线程池 提示: 0 表示自动, 使用CPU核心数(含HT)
 CONF_THREADS_MONITOR=0
-# 定时器线程池
+# 定时器线程池 提示: 0 表示自动, 使用CPU核心数(含HT)
 CONF_THREADS_SCHEDULE=0
-#===============================================================================
+#----------------------------------------------------------
 """
 
-      // @formatter:on
+.replaceAll("CONF_ACCOUNT_AUTH", String.join(".", CONF_ACCOUNT_AUTH))
+.replaceAll("CONF_ACCOUNT_USERNAME", String.join(".", CONF_ACCOUNT_USERNAME))
+.replaceAll("CONF_ACCOUNT_PASSWORD", String.join(".", CONF_ACCOUNT_PASSWORD))
+.replaceAll("CONF_DEVICE_TYPE", String.join(".", CONF_DEVICE_TYPE))
+.replaceAll("CONF_DEVICE_INFO", String.join(".", CONF_DEVICE_INFO))
+.replaceAll("CONF_DEVICE_UPGRADE", String.join(".", CONF_DEVICE_UPGRADE))
+.replaceAll("CONF_COMMAND_REGEX", String.join(".", CONF_COMMAND_REGEX))
+.replaceAll("CONF_THREADS_MONITOR", String.join(".", CONF_THREADS_MONITOR))
+.replaceAll("CONF_THREADS_SCHEDULE", String.join(".", CONF_THREADS_SCHEDULE))
 
-  .replaceAll("CONF_ACCOUNT_AUTH", String.join(".", CONF_ACCOUNT_AUTH))
-  .replaceAll("CONF_ACCOUNT_USERNAME", String.join(".", CONF_ACCOUNT_USERNAME))
-  .replaceAll("CONF_ACCOUNT_PASSWORD", String.join(".", CONF_ACCOUNT_PASSWORD))
-  .replaceAll("CONF_DEVICE_TYPE", String.join(".", CONF_DEVICE_TYPE))
-  .replaceAll("CONF_DEVICE_INFO", String.join(".", CONF_DEVICE_INFO))
-  .replaceAll("CONF_COMMAND_REGEX", String.join(".", CONF_COMMAND_REGEX))
-  .replaceAll("CONF_THREADS_MONITOR", String.join(".", CONF_THREADS_MONITOR))
-  .replaceAll("CONF_THREADS_SCHEDULE", String.join(".", CONF_THREADS_SCHEDULE))
+;
 
-    ;
+//= ====================================================================================================================
+//= ====================================================================================================================
+//= ====================================================================================================================
+
+    // @formatter:on
 
   }
 
@@ -506,58 +607,9 @@ CONF_THREADS_SCHEDULE=0
   //=
   //= ==================================================================================================================
 
-  private FurryBlack() {}
+  private FurryBlack() {
 
-  //= ==================================================================================================================
-  //
-  //  框架常量
-  //
-  //= ==================================================================================================================
-
-  private static final LockEnhance.Latch LATCH = new LockEnhance.Latch();
-
-  //= ==================================================================================================================
-  //
-  //  框架变量
-  //
-  //= ==================================================================================================================
-
-  private static String NAMESPACE; // 命名空间
-
-  private static volatile boolean BOOTED;
-  private static volatile boolean EVENT_ENABLE;
-
-  private static volatile boolean KERNEL_DEBUG;
-  private static volatile boolean SHUTDOWN_HALT;
-  private static volatile boolean SHUTDOWN_DROP;
-  private static volatile boolean SHUTDOWN_KILL;
-
-  private static KernelConfig kernelConfig;
-  private static SystemConfig systemConfig;
-
-  private static LoggerX logger;
-  private static Terminal terminal;
-  private static Dispatcher dispatcher;
-
-  private static Bot bot;
-  private static Schema schema;
-  private static Nickname nickname;
-
-  private static Path FOLDER_ROOT;
-  private static Path FOLDER_CONFIG;
-  private static Path FOLDER_PLUGIN;
-  private static Path FOLDER_DEPEND;
-  private static Path FOLDER_MODULE;
-  private static Path FOLDER_LOGGER;
-
-  private static String MESSAGE_INFO;
-  private static String MESSAGE_EULA;
-  private static String MESSAGE_HELP;
-  private static String MESSAGE_LIST_USERS;
-  private static String MESSAGE_LIST_GROUP;
-
-  private static ThreadPoolExecutor MONITOR_PROCESS;
-  private static ScheduledThreadPoolExecutor SCHEDULE_SERVICE;
+  }
 
   //= ==================================================================================================================
   //=
@@ -576,31 +628,90 @@ CONF_THREADS_SCHEDULE=0
     //= ================================================================================================================
 
     boolean dryRun = false;
+    boolean install = false;
 
     List<String> arguments = List.of(args);
 
-    // 显示 信息
-    if (arguments.contains("--info")) {
-      System.out.println(CONTENT_INFO);
+    if (arguments.contains("--init") || arguments.contains("--install")) {
+
+      install = true;
+
+      System.out.println(CONTENT_INIT);
       System.out.println();
-      dryRun = true;
+      System.out.println();
+
+    } else {
+
+      // 显示 信息
+      if (arguments.contains("--info")) {
+        System.out.println(CONTENT_INFO);
+        System.out.println();
+        dryRun = true;
+      }
+
+      // 显示 帮助
+      if (arguments.contains("--help")) {
+        System.out.println(CONTENT_HELP);
+        System.out.println();
+        dryRun = true;
+      }
+
+      // 显示 颜色
+      if (arguments.contains("--color")) {
+        System.out.println(CONTENT_COLOR);
+        System.out.println();
+        dryRun = true;
+      }
+
+      if (dryRun) return;
+
     }
 
-    // 显示 帮助
-    if (arguments.contains("--help")) {
-      System.out.println(CONTENT_HELP);
-      System.out.println();
-      dryRun = true;
-    }
+    //= ================================================================================================================
+    //=
+    //=
+    //= 安装模式
+    //=
+    //=
+    //= ================================================================================================================
 
-    // 显示 颜色
-    if (arguments.contains("--color")) {
-      System.out.println(CONTENT_COLOR);
-      System.out.println();
-      dryRun = true;
-    }
+    if (install) {
 
-    if (dryRun) return;
+      System.out.println("框架工作目录 " + FOLDER_ROOT);
+
+      System.out.println("框架配置目录 " + FOLDER_PLUGIN);
+      String ensureFolderConfig = FileEnhance.ensureFolderSafe(FOLDER_CONFIG);
+      CoreException.check("初始化框架配置目录失败 -> ", ensureFolderConfig);
+
+      System.out.println("插件扫描目录 " + FOLDER_PLUGIN);
+      String ensureFolderPlugin = FileEnhance.ensureFolderSafe(FOLDER_PLUGIN);
+      CoreException.check("初始化插件扫描目录失败 -> ", ensureFolderPlugin);
+
+      System.out.println("插件依赖目录 " + FOLDER_DEPEND);
+      String ensureFolderDepend = FileEnhance.ensureFolderSafe(FOLDER_DEPEND);
+      CoreException.check("初始化插件依赖目录失败 -> ", ensureFolderDepend);
+
+      System.out.println("模块数据目录 " + FOLDER_MODULE);
+      String ensureFolderModule = FileEnhance.ensureFolderSafe(FOLDER_MODULE);
+      CoreException.check("初始化模块数据目录失败 -> ", ensureFolderModule);
+
+      System.out.println("框架日志目录 " + FOLDER_LOGGER);
+      String ensureFolderLogger = FileEnhance.ensureFolderSafe(FOLDER_LOGGER);
+      CoreException.check("初始化框架日志目录失败 -> ", ensureFolderLogger);
+
+      System.out.println("框架配置文件 " + FILE_APPLICATION_CONFIG);
+      String ensureConfigApplication = FileEnhance.ensureFileSafe(FILE_APPLICATION_CONFIG);
+      CoreException.check("初始化框架配置文件失败 -> ", ensureConfigApplication);
+
+      FileEnhance.write(FILE_APPLICATION_CONFIG, DEFAULT_CONFIG);
+
+      System.out.println();
+      System.out.println();
+
+      System.out.println(CONTENT_DONE);
+      return;
+
+    }
 
     //= ================================================================================================================
     //=
@@ -619,7 +730,7 @@ CONF_THREADS_SCHEDULE=0
     // -D user.language=CN
     if (System.getenv("FURRYBLACK_LOCALE_SKIP") == null) {
       if (System.getenv("FURRYBLACK_MUTE") == null) {
-        System.err.println("Env FURRYBLACK_LOCALE_SKIP not set, Setting JVM local to Locale.SIMPLIFIED_CHINESE");
+        System.out.println("Env FURRYBLACK_LOCALE_SKIP not set, Setting JVM local to Locale.SIMPLIFIED_CHINESE");
       }
       Locale.setDefault(Locale.SIMPLIFIED_CHINESE);
     }
@@ -630,7 +741,7 @@ CONF_THREADS_SCHEDULE=0
     // -D user.timezone=Asia/Shanghai
     if (System.getenv("FURRYBLACK_TIMEZONE_SKIP") == null) {
       if (System.getenv("FURRYBLACK_MUTE") == null) {
-        System.err.println("Env FURRYBLACK_TIMEZONE_SKIP not set, Setting JVM timezone to Asia/Shanghai");
+        System.out.println("Env FURRYBLACK_TIMEZONE_SKIP not set, Setting JVM timezone to Asia/Shanghai");
       }
       TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
     }
@@ -710,10 +821,53 @@ CONF_THREADS_SCHEDULE=0
       System.out.println("[FurryBlack][ARGS]关闭策略 - 正常退出");
     }
 
+    //= ================================================================================================================
+    //= 终端子系统
+    //= ================================================================================================================
+
+    if (kernelConfig.noConsole) {
+      terminal = NoConsoleTerminal.getInstance();
+    } else {
+      if (kernelConfig.noJline) {
+        terminal = StdinTerminal.getInstance();
+      } else {
+        terminal = JlineTerminal.getInstance();
+      }
+    }
+
+    FurryBlack.println("[FurryBlack][INIT]终端系统初始化完成");
+
+    //= ================================================================================================================
+    //= 文件子系统
+    //= ================================================================================================================
+
+    //= ========================================================================
+    //= 初始化目录
+
+    String ensureFolderConfig = FileEnhance.ensureFolderSafe(FOLDER_CONFIG);
+    String ensureFolderPlugin = FileEnhance.ensureFolderSafe(FOLDER_PLUGIN);
+    String ensureFolderDepend = FileEnhance.ensureFolderSafe(FOLDER_DEPEND);
+    String ensureFolderModule = FileEnhance.ensureFolderSafe(FOLDER_MODULE);
+    String ensureFolderLogger = FileEnhance.ensureFolderSafe(FOLDER_LOGGER);
+
+    CoreException.check("初始化配置目录失败 -> ", ensureFolderConfig);
+    CoreException.check("初始化插件目录失败 -> ", ensureFolderPlugin);
+    CoreException.check("初始化依赖目录失败 -> ", ensureFolderDepend);
+    CoreException.check("初始化数据目录失败 -> ", ensureFolderModule);
+    CoreException.check("初始化日志目录失败 -> ", ensureFolderLogger);
+
+    FurryBlack.println("[FurryBlack][INIT]应用工作目录 " + FOLDER_ROOT);
+    FurryBlack.println("[FurryBlack][INIT]核心配置目录 " + FOLDER_CONFIG);
+    FurryBlack.println("[FurryBlack][INIT]插件扫描目录 " + FOLDER_PLUGIN);
+    FurryBlack.println("[FurryBlack][INIT]模块依赖目录 " + FOLDER_DEPEND);
+    FurryBlack.println("[FurryBlack][INIT]模块数据目录 " + FOLDER_MODULE);
+    FurryBlack.println("[FurryBlack][INIT]核心日志目录 " + FOLDER_LOGGER);
+
     //= ========================================================================
     //= 日志等级
 
     LoggerXLevel customLevel;
+
     if (kernelConfig.level != null) {
 
       customLevel = LoggerXLevel.of(kernelConfig.level);
@@ -732,7 +886,9 @@ CONF_THREADS_SCHEDULE=0
       }
 
     } else {
+
       customLevel = LoggerXLevel.INFO;
+
     }
 
     //= ========================================================================
@@ -803,55 +959,6 @@ CONF_THREADS_SCHEDULE=0
     System.out.println("[FurryBlack][ARGS]日志后端 - " + LoggerXFactory.getDefault());
 
     System.out.println("[FurryBlack][INIT]内核配置初始化完成");
-
-    //= ================================================================================================================
-    //= 终端子系统
-    //= ================================================================================================================
-
-    if (kernelConfig.noConsole) {
-      terminal = NoConsoleTerminal.getInstance();
-    } else {
-      if (kernelConfig.noJline) {
-        terminal = StdinTerminal.getInstance();
-      } else {
-        terminal = JlineTerminal.getInstance();
-      }
-    }
-
-    FurryBlack.println("[FurryBlack][INIT]终端系统初始化完成");
-
-    //= ================================================================================================================
-    //= 文件子系统
-    //= ================================================================================================================
-
-    //= ========================================================================
-    //= 初始化目录
-
-    FOLDER_ROOT = Paths.get(System.getProperty("user.dir"));
-
-    FOLDER_CONFIG = FileEnhance.get(FOLDER_ROOT, "config");
-    FOLDER_PLUGIN = FileEnhance.get(FOLDER_ROOT, "plugin");
-    FOLDER_DEPEND = FileEnhance.get(FOLDER_ROOT, "depend");
-    FOLDER_MODULE = FileEnhance.get(FOLDER_ROOT, "module");
-    FOLDER_LOGGER = FileEnhance.get(FOLDER_ROOT, "logger");
-
-    String ensureFolderConfig = FileEnhance.ensureFolderSafe(FOLDER_CONFIG);
-    String ensureFolderPlugin = FileEnhance.ensureFolderSafe(FOLDER_PLUGIN);
-    String ensureFolderDepend = FileEnhance.ensureFolderSafe(FOLDER_DEPEND);
-    String ensureFolderModule = FileEnhance.ensureFolderSafe(FOLDER_MODULE);
-    String ensureFolderLogger = FileEnhance.ensureFolderSafe(FOLDER_LOGGER);
-
-    CoreException.check("初始化配置目录失败 -> ", ensureFolderConfig);
-    CoreException.check("初始化插件目录失败 -> ", ensureFolderPlugin);
-    CoreException.check("初始化依赖目录失败 -> ", ensureFolderDepend);
-    CoreException.check("初始化数据目录失败 -> ", ensureFolderModule);
-    CoreException.check("初始化日志目录失败 -> ", ensureFolderLogger);
-
-    FurryBlack.println("[FurryBlack][INIT]应用工作目录 " + FOLDER_ROOT);
-    FurryBlack.println("[FurryBlack][INIT]插件扫描目录 " + FOLDER_PLUGIN);
-    FurryBlack.println("[FurryBlack][INIT]模块依赖目录 " + FOLDER_DEPEND);
-    FurryBlack.println("[FurryBlack][INIT]模块数据目录 " + FOLDER_MODULE);
-    FurryBlack.println("[FurryBlack][INIT]核心日志目录 " + FOLDER_LOGGER);
 
     FurryBlack.println("[FurryBlack][INIT]日志后端 " + LoggerXFactory.getDefault());
     FurryBlack.println("[FurryBlack][INIT]日志级别 " + LoggerXFactory.getLevel().name());
@@ -949,23 +1056,21 @@ CONF_THREADS_SCHEDULE=0
     //= ========================================================================
     //= 加载配置文件
 
-    Path FILE_CONFIG = FileEnhance.get(FOLDER_CONFIG, "application.properties");
-
     logger.info("检查配置文件");
 
-    if (Files.exists(FILE_CONFIG)) {
+    if (Files.exists(FILE_APPLICATION_CONFIG)) {
 
       Properties properties = new Properties();
 
       logger.info("加载配置文件");
 
       try (
-        InputStream inputStream = Files.newInputStream(FILE_CONFIG);
-        Reader reader = new InputStreamReader(inputStream)
+        InputStream inputStream = Files.newInputStream(FILE_APPLICATION_CONFIG, READ);
+        Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)
       ) {
         properties.load(reader);
       } catch (IOException exception) {
-        throw new CoreException("读取配置文件失败 -> " + FILE_CONFIG, exception);
+        throw new CoreException("读取配置文件失败 -> " + FILE_APPLICATION_CONFIG, exception);
       }
 
       logger.info("合并配置文件");
@@ -991,29 +1096,9 @@ CONF_THREADS_SCHEDULE=0
     //= ========================================================================
     //= 检查配置项目
 
-    logger.info("检查配置项目");
+    logger.info("加载配置项目");
 
-    try {
-
-      systemConfig = SystemConfig.getInstance(argument);
-
-    } catch (FirstBootException exception) {
-
-      logger.fatal("必要配置项目缺失, 写入默认配置文件 -> " + FILE_CONFIG);
-
-      try {
-        Files.writeString(FILE_CONFIG, DEFAULT_CONFIG);
-      } catch (IOException ioException) {
-        logger.fatal("写入默认配置文件失败", ioException);
-        CoreException CoreException = new CoreException(ioException);
-        CoreException.addSuppressed(exception);
-        throw CoreException;
-
-      }
-
-      throw exception;
-
-    }
+    systemConfig = SystemConfig.getInstance(argument);
 
     //= ================================================================================================================
     //= 模板消息子系统
@@ -1433,8 +1518,7 @@ CONF_THREADS_SCHEDULE=0
       try {
         currentThread.join();
       } catch (InterruptedException exception) {
-        FurryBlack.println("[FurryBlack][EXIT]FATAL -> Shutdown hook interrupted, Shutdown process not finished.");
-        exception.printStackTrace();
+        FurryBlack.println("[FurryBlack][EXIT]Shutdown hook interrupted -> " + exception.getMessage());
       }
 
       FurryBlack.println("[FurryBlack][EXIT]FurryBlack normally closed, Bye.");
@@ -1446,6 +1530,7 @@ CONF_THREADS_SCHEDULE=0
         FurryBlack.println("[FurryBlack][EXIT]FurryBlack normally close with drop, Execute halt now.");
         Runtime.getRuntime().halt(1);
       }
+
     }));
 
     //= ================================================================================================================
@@ -2233,110 +2318,132 @@ CONF_THREADS_SCHEDULE=0
       this.logger = LoggerXFactory.getLogger(name);
     }
 
-    @Override public String getIdentity() {
+    @Override
+    public String getIdentity() {
       return logger.getName();
     }
 
-    @Override public boolean isEnabled() {
+    @Override
+    public boolean isEnabled() {
       return true;
     }
 
-    @Override public boolean isErrorEnabled() {
+    @Override
+    public boolean isErrorEnabled() {
       return logger.isErrorEnabled();
     }
 
-    @Override public boolean isWarningEnabled() {
+    @Override
+    public boolean isWarningEnabled() {
       return logger.isWarnEnabled();
     }
 
-    @Override public boolean isInfoEnabled() {
+    @Override
+    public boolean isInfoEnabled() {
       return logger.isInfoEnabled();
     }
 
-    @Override public boolean isDebugEnabled() {
+    @Override
+    public boolean isDebugEnabled() {
       return logger.isDebugEnabled();
     }
 
-    @Override public boolean isVerboseEnabled() {
+    @Override
+    public boolean isVerboseEnabled() {
       return logger.isTraceEnabled();
     }
 
-    @Override public void error(String message) {
+    @Override
+    public void error(String message) {
       if (message == null) return;
       logger.error(message);
     }
 
-    @Override public void error(Throwable throwable) {
+    @Override
+    public void error(Throwable throwable) {
       if (throwable == null) return;
       logger.error(StringEnhance.extractStackTrace(throwable));
     }
 
-    @Override public void error(String message, Throwable throwable) {
+    @Override
+    public void error(String message, Throwable throwable) {
       if (throwable == null) error(message);
       if (message == null) error(throwable);
       logger.error(message, throwable);
     }
 
-    @Override public void warning(String message) {
+    @Override
+    public void warning(String message) {
       if (message == null) return;
       logger.warn(message);
     }
 
-    @Override public void warning(Throwable throwable) {
+    @Override
+    public void warning(Throwable throwable) {
       if (throwable == null) return;
       logger.warn(StringEnhance.extractStackTrace(throwable));
     }
 
-    @Override public void warning(String message, Throwable throwable) {
+    @Override
+    public void warning(String message, Throwable throwable) {
       if (throwable == null) warning(message);
       if (message == null) warning(throwable);
       logger.warn(message, throwable);
     }
 
-    @Override public void info(String message) {
+    @Override
+    public void info(String message) {
       if (message == null) return;
       logger.info(message);
     }
 
-    @Override public void info(Throwable throwable) {
+    @Override
+    public void info(Throwable throwable) {
       if (throwable == null) return;
       logger.info(StringEnhance.extractStackTrace(throwable));
     }
 
-    @Override public void info(String message, Throwable throwable) {
+    @Override
+    public void info(String message, Throwable throwable) {
       if (throwable == null) info(message);
       if (message == null) info(throwable);
       logger.info(message, throwable);
     }
 
-    @Override public void debug(String message) {
+    @Override
+    public void debug(String message) {
       if (message == null) return;
       logger.error(message);
 
     }
 
-    @Override public void debug(Throwable throwable) {
+    @Override
+    public void debug(Throwable throwable) {
       if (throwable == null) return;
       logger.debug(StringEnhance.extractStackTrace(throwable));
     }
 
-    @Override public void debug(String message, Throwable throwable) {
+    @Override
+    public void debug(String message, Throwable throwable) {
       if (throwable == null) debug(message);
       if (message == null) debug(throwable);
       logger.debug(message, throwable);
     }
 
-    @Override public void verbose(String message) {
+    @Override
+    public void verbose(String message) {
       if (message == null) return;
       logger.trace(message);
     }
 
-    @Override public void verbose(Throwable throwable) {
+    @Override
+    public void verbose(Throwable throwable) {
       if (throwable == null) return;
       logger.trace(StringEnhance.extractStackTrace(throwable));
     }
 
-    @Override public void verbose(String message, Throwable throwable) {
+    @Override
+    public void verbose(String message, Throwable throwable) {
       if (throwable == null) verbose(message);
       if (message == null) verbose(throwable);
       logger.trace(message, throwable);
@@ -2458,7 +2565,7 @@ CONF_THREADS_SCHEDULE=0
         writer.write(message);
         writer.flush();
       } catch (IOException exception) {
-        exception.printStackTrace();
+        throw new RuntimeException(exception);
       }
     }
 
@@ -2521,7 +2628,8 @@ CONF_THREADS_SCHEDULE=0
 
       private Completer completer;
 
-      private CompleterDelegate() {}
+      private CompleterDelegate() {
+      }
 
       @Override
       public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
@@ -2564,6 +2672,9 @@ CONF_THREADS_SCHEDULE=0
           // nickname reload
           // nickname export
           new TreeCompleter(node("nickname", node("list", "clean", "append", "reload", "export"))),
+
+          // logger color
+          new TreeCompleter(node("logger", node("color"))),
 
           // logger level xxx
           new TreeCompleter(node("logger", node("level", node("TRACE", "DEBUG", "INFO", "SEEK", "HINT", "WARN", "ERROR", "FATAL", "CLOSE")))),
@@ -2640,7 +2751,7 @@ CONF_THREADS_SCHEDULE=0
             if (filed) {
               builder.append(chat);
             } else {
-              if (builder.length() == 0) {
+              if (builder.isEmpty()) {
                 continue;
               }
               parts.add(builder.toString());
@@ -3042,7 +3153,7 @@ CONF_THREADS_SCHEDULE=0
     //= 生成信息
 
     public String generateUsersExecutorList() {
-      if (EXECUTOR_USERS_POOL.size() == 0) {
+      if (EXECUTOR_USERS_POOL.isEmpty()) {
         return "没有任何已装载的命令";
       }
       StringBuilder builder = new StringBuilder();
@@ -3062,7 +3173,7 @@ CONF_THREADS_SCHEDULE=0
     }
 
     public String generateGroupExecutorList() {
-      if (EXECUTOR_GROUP_POOL.size() == 0) {
+      if (EXECUTOR_GROUP_POOL.isEmpty()) {
         return "没有任何已装载的命令";
       }
       StringBuilder builder = new StringBuilder();
@@ -3143,7 +3254,7 @@ CONF_THREADS_SCHEDULE=0
         throw new SchemaException("扫描插件目录失败", exception);
       }
 
-      if (listFiles.size() == 0) {
+      if (listFiles.isEmpty()) {
         logger.warn("插件目录为空");
         return;
       }
@@ -5007,7 +5118,7 @@ CONF_THREADS_SCHEDULE=0
     }
 
     /**
-     * a,b,c -> A_B_C for envs export A_B_C=xxx
+     * a,b,c -> A_B_C for env export A_B_C=xxx
      */
     public static String toEnvironmentName(String... name) {
       String join = String.join("_", name);
@@ -5096,9 +5207,7 @@ CONF_THREADS_SCHEDULE=0
       if (value != null) return value;
       value = System.getProperty(toPropertyName(name));
       if (value != null) return value;
-      value = parameters.get(toArgumentName(name));
-      if (value != null) return value;
-      return null;
+      return parameters.get(toArgumentName(name));
     }
 
     //= ========================================================================
@@ -5118,10 +5227,9 @@ CONF_THREADS_SCHEDULE=0
       if (value != null) return value;
       value = System.getProperty(toPropertyName(name));
       if (value != null) return value;
-      value = parameters.get(toArgumentName(name)); if (value != null) return value;
-      value = properties.getProperty(toConfigName(name));
+      value = parameters.get(toArgumentName(name));
       if (value != null) return value;
-      return null;
+      return properties.getProperty(toConfigName(name));
     }
 
     @Comment("环境变量 > unsafe(系统配置) > unsafe(程序参数) > 配置文件")
@@ -5165,9 +5273,7 @@ CONF_THREADS_SCHEDULE=0
           return value;
         }
       }
-      value = properties.getProperty(toConfigName(name));
-      if (value != null) return value;
-      return null;
+      return properties.getProperty(toConfigName(name));
     }
 
   }
@@ -5209,7 +5315,8 @@ CONF_THREADS_SCHEDULE=0
       return config;
     }
 
-    private KernelConfig() {}
+    private KernelConfig() {
+    }
   }
 
   //= ==================================================================================================================
@@ -5303,17 +5410,31 @@ CONF_THREADS_SCHEDULE=0
       Path deviceInfoPath = FileEnhance.get(FOLDER_CONFIG, deviceInfo == null ? "device.json" : deviceInfo);
 
       if (Files.notExists(deviceInfoPath)) {
-        throw new FirstBootException("配置无效 - 设备信息文件不存在 -> " + deviceInfoPath);
+        if (kernelConfig.noLogin) {
+          logger.warn("跳过登录/配置无效 - 设备信息文件不存在 -> " + deviceInfoPath);
+        } else {
+          throw new FirstBootException("配置无效 - 设备信息文件不存在 -> " + deviceInfoPath);
+        }
       }
 
       if (!Files.isRegularFile(deviceInfoPath)) {
-        throw new FirstBootException("配置无效 - 设备信息不是平文件 -> " + deviceInfoPath);
+        if (kernelConfig.noLogin) {
+          logger.warn("跳过登录/配置无效 - 设备信息不是平文件 -> " + deviceInfoPath);
+        } else {
+          throw new FirstBootException("配置无效 - 设备信息不是平文件 -> " + deviceInfoPath);
+        }
       }
 
       try {
         config.deviceInfo = Files.readString(deviceInfoPath);
       } catch (IOException exception) {
-        throw new CoreException("配置无效 - 设备信息文件无法读取 -> " + deviceInfoPath, exception);
+        if (kernelConfig.noLogin) {
+          logger.warn("跳过登录/配置无效 - 设备信息文件无法读取 -> " + deviceInfoPath);
+          config.deviceInfo = DeviceInfo.random().toString();
+          logger.warn("跳过登录/配置无效 - 使用随机设备信息 -> " + config.deviceInfo);
+        } else {
+          throw new CoreException("配置无效 - 设备信息文件无法读取 -> " + deviceInfoPath, exception);
+        }
       }
 
       //= ======================================================================
@@ -5361,7 +5482,7 @@ CONF_THREADS_SCHEDULE=0
 
       //= ======================================================================
 
-      String upgradeProtocols = argument.getSystemParameter(CONF_UPGRADE_PROTOCOLS);
+      String upgradeProtocols = argument.getSystemParameter(CONF_DEVICE_UPGRADE);
 
       if (upgradeProtocols == null || upgradeProtocols.isBlank()) {
         config.upgradeProtocols = null;
@@ -5378,7 +5499,8 @@ CONF_THREADS_SCHEDULE=0
       return config;
     }
 
-    private SystemConfig() {}
+    private SystemConfig() {
+    }
 
   }
 
@@ -5427,9 +5549,9 @@ CONF_THREADS_SCHEDULE=0
 
     public BotConfiguration.MiraiProtocol toMiraiProtocol() {
       return switch (this) {
-        case PAD -> BotConfiguration.MiraiProtocol.ANDROID_PAD;
-        case PHONE -> BotConfiguration.MiraiProtocol.ANDROID_PHONE;
-        case WATCH -> BotConfiguration.MiraiProtocol.ANDROID_WATCH;
+        case PAD -> ANDROID_PAD;
+        case PHONE -> ANDROID_PHONE;
+        case WATCH -> ANDROID_WATCH;
         case IPAD -> BotConfiguration.MiraiProtocol.IPAD;
         case MACOS -> BotConfiguration.MiraiProtocol.MACOS;
       };

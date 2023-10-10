@@ -27,7 +27,7 @@
 
   <name>FurryBlack-Mirai-Core</name>
 
-  <version>3.0.4</version>
+  <version>3.0.5</version>
 
   <packaging>jar</packaging>
 
@@ -57,11 +57,34 @@
         </configuration>
       </plugin>
 
-      <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-jar-plugin -->
+      <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-dependency-plugin -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.3.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>studio.blacktech.furryblackplus.FurryBlack</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-shade-plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-dependency-plugin -->
