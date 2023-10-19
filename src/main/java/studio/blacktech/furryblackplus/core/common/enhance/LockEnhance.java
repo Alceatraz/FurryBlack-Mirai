@@ -16,7 +16,7 @@ public class LockEnhance {
       try {
         condition.await();
       } catch (InterruptedException exception) {
-        exception.printStackTrace();
+        throw new RuntimeException(exception);
       } finally {
         lock.unlock();
       }

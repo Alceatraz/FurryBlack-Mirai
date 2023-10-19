@@ -152,6 +152,10 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryB
 
 ## CHANGELOG
 
+### 3.0.6
+
+- 更新Java21
+
 ### 3.0.5
 
 - 更新 Mirai 2.16.0-RC

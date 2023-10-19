@@ -89,7 +89,7 @@ public final class Command {
           if (isFiled) {
             builder.append(chat);
           } else {
-            if (builder.length() == 0) {
+            if (builder.isEmpty()) {
               continue;
             }
             commandBodySlice.add(builder.toString());

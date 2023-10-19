@@ -196,8 +196,8 @@ public class FurryBlack {
   //
   //= ==================================================================================================================
 
-  @Comment("") public static final String APP_VERSION = "3.0.5";
-  @Comment("") public static final String MIRAI_VERSION = "2.15.0";
+  @Comment("") public static final String APP_VERSION = "3.0.6";
+  @Comment("") public static final String MIRAI_VERSION = "2.16.0-RC";
 
   @Comment("") public static final String CRLF = "\r\n";
   @Comment("") public static final String LINE = System.lineSeparator();
@@ -1641,7 +1641,7 @@ CONF_THREADS_SCHEDULE=0
           if (o1 == o2) return 0;
           Thread o1Key = o1.getKey();
           Thread o2Key = o2.getKey();
-          return (int) (o1Key.getId() - o2Key.getId());
+          return (int) (o1Key.threadId() - o2Key.threadId());
         });
 
         for (Map.Entry<Thread, StackTraceElement[]> entry : entries) {
@@ -1653,7 +1653,7 @@ CONF_THREADS_SCHEDULE=0
           } else {
             builder.append("Thread-");
           }
-          builder.append(k.getId()).append(" ").append(k.getState());
+          builder.append(k.threadId()).append(" ").append(k.getState());
           builder.append(" (").append(k.getName()).append(") ").append(k.getPriority());
           builder.append(" [").append(k.getThreadGroup().getName()).append("]").append(LINE);
           for (StackTraceElement element : v) {
@@ -5500,6 +5500,7 @@ CONF_THREADS_SCHEDULE=0
     }
 
     private SystemConfig() {
+
     }
 
   }
