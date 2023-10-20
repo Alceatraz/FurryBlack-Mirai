@@ -30,7 +30,6 @@ import static studio.blacktech.furryblackplus.core.logging.enums.LoggerXLevel.WA
   attention = {
     "Impl转发可以强制要求实现 OperationNotSupportedException 只有在运行时才能发现问题 不调用永远不会发现",
     "SLF4j使用isEnable控制是否打印对应日志,LoggerX实现了一个简易的按包路径设置不同级别的机制",
-    "FurryBlack日志拥有更多颜色,模块默认注入的logger为LoggerX而非Slf4jLogger",
   }
 )
 public abstract class LoggerX {
@@ -48,7 +47,7 @@ public abstract class LoggerX {
   public static final LoggerXColor COLOR_ERROR = LoggerXColor.BRIGHT_RED;
   public static final LoggerXColor COLOR_WARN = LoggerXColor.BRIGHT_YELLOW;
   public static final LoggerXColor COLOR_HINT = LoggerXColor.BRIGHT_CYAN;
-  public static final LoggerXColor COLOR_SEEK = LoggerXColor.BRIGHT_GREEN;
+  public static final LoggerXColor COLOR_SEEK = LoggerXColor.GREEN;
   public static final LoggerXColor COLOR_INFO = LoggerXColor.WHITE;
   public static final LoggerXColor COLOR_DEBUG = LoggerXColor.BRIGHT_BLACK;
   public static final LoggerXColor COLOR_TRACE = LoggerXColor.BRIGHT_BLACK;
