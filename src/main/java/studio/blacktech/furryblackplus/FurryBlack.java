@@ -3437,7 +3437,7 @@ CONF_THREADS_SCHEDULE=0
         String pluginName = MODULE_PLUGIN_RELATION.get(moduleName);
         Plugin plugin = plugins.get(pluginName);
         URLClassLoader dependClassLoader = plugin.getDependClassLoader();
-        logger.seek("加载定时器" + pluginName + ":" + moduleName + "[" + annotation.priority() + "] -> " + clazz.getName());
+        logger.info("加载定时器" + pluginName + ":" + moduleName + "[" + annotation.priority() + "] -> " + clazz.getName());
         EventHandlerRunner instance;
         try {
           instance = clazz.getConstructor().newInstance();
