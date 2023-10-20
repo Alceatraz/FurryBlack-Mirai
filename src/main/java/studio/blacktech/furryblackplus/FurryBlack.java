@@ -866,11 +866,9 @@ CONF_THREADS_SCHEDULE=0
     //= ========================================================================
     //= 日志等级
 
-    LoggerXLevel customLevel;
-
     if (kernelConfig.level != null) {
 
-      customLevel = LoggerXLevel.of(kernelConfig.level);
+      LoggerXLevel customLevel = LoggerXLevel.of(kernelConfig.level);
 
       if (customLevel == null) {
         System.out.println("[FurryBlack][ARGS]日志级别 - 输入值无效 -> " + kernelConfig.level + ", 可用日志级别为:");
@@ -885,9 +883,7 @@ CONF_THREADS_SCHEDULE=0
         System.out.println("[FurryBlack][ARGS]日志级别 - " + kernelConfig.level);
       }
 
-    } else {
-
-      customLevel = LoggerXLevel.INFO;
+      LoggerXFactory.setLevel(customLevel);
 
     }
 
@@ -2169,8 +2165,6 @@ CONF_THREADS_SCHEDULE=0
     //= 启动完成
 
     logger.hint("系统启动完成 耗时" + TimeEnhance.duration(System.currentTimeMillis() - BOOT_TIME));
-
-    LoggerXFactory.setLevel(customLevel);
 
     //= ========================================================================
     //= 正常工作

@@ -55,7 +55,7 @@ public abstract class LoggerX {
   //= ==========================================================================
   //= 日志等级
 
-  private static LoggerXLevel DEFAULT_LEVEL = TRACE;
+  private static LoggerXLevel DEFAULT_LEVEL = INFO;
 
   protected static LoggerXLevel getLevel() {
     return DEFAULT_LEVEL;
