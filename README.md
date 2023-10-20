@@ -154,7 +154,7 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryB
 
 ### 3.1.0
 
-- 将模块内的LoggerX替换为Slf4jLogger
+- LoggerX颜色修改
 
 ### 3.0.6
 
