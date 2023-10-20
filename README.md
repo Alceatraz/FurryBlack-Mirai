@@ -152,6 +152,10 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryB
 
 ## CHANGELOG
 
+### 3.1.0
+
+- 将模块内的LoggerX替换为Slf4jLogger
+
 ### 3.0.6
 
 - 更新Java21

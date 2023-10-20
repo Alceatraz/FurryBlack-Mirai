@@ -1,5 +1,7 @@
 package studio.blacktech.furryblackplus.core.handler.common;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import studio.blacktech.furryblackplus.FurryBlack;
 import studio.blacktech.furryblackplus.core.common.annotation.Comment;
 import studio.blacktech.furryblackplus.core.common.enhance.FileEnhance;
@@ -9,8 +11,6 @@ import studio.blacktech.furryblackplus.core.exception.moduels.BootException;
 import studio.blacktech.furryblackplus.core.exception.moduels.InitException;
 import studio.blacktech.furryblackplus.core.exception.moduels.ModuleException;
 import studio.blacktech.furryblackplus.core.exception.moduels.ShutException;
-import studio.blacktech.furryblackplus.core.logging.LoggerX;
-import studio.blacktech.furryblackplus.core.logging.LoggerXFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +29,7 @@ import java.util.Properties;
 @Comment("基础模块类")
 public abstract class AbstractEventHandler {
 
-  protected final LoggerX logger = LoggerXFactory.getLogger(getClass());
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   private volatile boolean internalInitLock;
 
@@ -442,7 +442,7 @@ public abstract class AbstractEventHandler {
   @Comment("初始化默认配置文件")
   protected final void initConfig() {
     if (Files.notExists(FILE_CONFIG)) {
-      logger.seek("创建新配置文件 " + FILE_CONFIG);
+      logger.info("创建新配置文件 " + FILE_CONFIG);
       try {
         FileEnhance.ensureFile(FILE_CONFIG);
       } catch (Exception exception) {
