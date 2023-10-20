@@ -17,7 +17,7 @@ public class StringEnhance {
     var printWriter = new PrintWriter(stringWriter);
     throwable.printStackTrace(printWriter);
     printWriter.close();
-    return stringWriter.toString();
+    return stringWriter.toString().trim();
   }
 
   @Comment("将hash转换为人类有好格式")

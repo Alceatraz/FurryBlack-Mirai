@@ -2,7 +2,8 @@ package studio.blacktech.furryblackplus.core.logging.backend.wrapper;
 
 import studio.blacktech.furryblackplus.core.logging.LoggerX;
 
-import java.util.Objects;
+import java.util.Arrays;
+import java.util.Iterator;
 
 import static studio.blacktech.furryblackplus.FurryBlack.LINE;
 import static studio.blacktech.furryblackplus.core.common.enhance.StringEnhance.extractStackTrace;
@@ -27,7 +28,7 @@ public abstract class PlaceholdLoggerX extends LoggerX {
     } else if (message == null) {
       fatalImpl(extractStackTrace(throwable));
     } else {
-      fatalImpl(message + LINE + extractStackTrace(throwable));
+      fatalImpl(message + " -> " + extractStackTrace(throwable));
     }
   }
 
@@ -49,7 +50,7 @@ public abstract class PlaceholdLoggerX extends LoggerX {
     } else if (message == null) {
       errorImpl(extractStackTrace(throwable));
     } else {
-      errorImpl(message + LINE + extractStackTrace(throwable));
+      errorImpl(message + " -> " + extractStackTrace(throwable));
     }
   }
 
@@ -71,7 +72,7 @@ public abstract class PlaceholdLoggerX extends LoggerX {
     } else if (message == null) {
       warnImpl(extractStackTrace(throwable));
     } else {
-      warnImpl(message + LINE + extractStackTrace(throwable));
+      warnImpl(message + " -> " + extractStackTrace(throwable));
     }
   }
 
@@ -93,7 +94,7 @@ public abstract class PlaceholdLoggerX extends LoggerX {
     } else if (message == null) {
       hintImpl(extractStackTrace(throwable));
     } else {
-      hintImpl(message + LINE + extractStackTrace(throwable));
+      hintImpl(message + " -> " + extractStackTrace(throwable));
     }
   }
 
@@ -115,7 +116,7 @@ public abstract class PlaceholdLoggerX extends LoggerX {
     } else if (message == null) {
       seekImpl(extractStackTrace(throwable));
     } else {
-      seekImpl(message + LINE + extractStackTrace(throwable));
+      seekImpl(message + " -> " + extractStackTrace(throwable));
     }
   }
 
@@ -137,7 +138,7 @@ public abstract class PlaceholdLoggerX extends LoggerX {
     } else if (message == null) {
       infoImpl(extractStackTrace(throwable));
     } else {
-      infoImpl(message + LINE + extractStackTrace(throwable));
+      infoImpl(message + " -> " + extractStackTrace(throwable));
     }
   }
 
@@ -159,7 +160,7 @@ public abstract class PlaceholdLoggerX extends LoggerX {
     } else if (message == null) {
       debugImpl(extractStackTrace(throwable));
     } else {
-      debugImpl(message + LINE + extractStackTrace(throwable));
+      debugImpl(message + " -> " + extractStackTrace(throwable));
     }
   }
 
@@ -181,7 +182,7 @@ public abstract class PlaceholdLoggerX extends LoggerX {
     } else if (message == null) {
       traceImpl(extractStackTrace(throwable));
     } else {
-      traceImpl(message + LINE + extractStackTrace(throwable));
+      traceImpl(message + " -> " + extractStackTrace(throwable));
     }
   }
 
@@ -198,22 +199,71 @@ public abstract class PlaceholdLoggerX extends LoggerX {
   //= ==================================================================================================================
 
   private static String placeholder(String pattern, Object... objects) {
-    for (Object object : objects) {
-      if (object == null) {
-        pattern = pattern.replace("{}", "null");
-      } else if (object instanceof Throwable throwable) {
-        String message = throwable.getMessage();
-        pattern = pattern.replace("{}", throwable.getClass().getName() + ":" + message);
-      } else {
-        try {
-          String message = Objects.toString(object);
-          pattern = pattern.replace("{}", message);
-        } catch (Exception exception) {
-          pattern = pattern.replace("{}", "<<LoggerX Exception>>");
-          pattern = pattern + LINE + extractStackTrace(exception);
+    StringBuilder builder = new StringBuilder();
+    Iterator<Object> iterator = Arrays.stream(objects).iterator();
+    boolean escape = false;
+    boolean placeholder = false;
+    char[] charArray = pattern.toCharArray();
+    for (int i = 0; i < charArray.length; i++) {
+      char chat = charArray[i];
+      switch (chat) {
+        case '\\' -> {
+          if (escape) {
+            escape = false;
+            builder.append('\\');
+          } else {
+            escape = true;
+          }
+        }
+        case '{' -> {
+          if (escape) {
+            escape = false;
+            builder.append('{');
+          } else {
+            char next = charArray[i + 1];
+            if (next == '}') {
+              placeholder = true;
+            } else {
+              builder.append('{');
+            }
+          }
+        }
+        default -> {
+          if (placeholder) {
+            escape = false;
+            placeholder = false;
+            if (iterator.hasNext()) {
+              Object object = iterator.next();
+              if (object == null) {
+                builder.append("{null}");
+              } else if (object instanceof Throwable throwable) {
+                builder.append(throwable.getClass().getName());
+                builder.append(": ");
+                builder.append(throwable.getMessage());
+              } else {
+                builder.append(object);
+              }
+            } else {
+              builder.append("{0}");
+            }
+          } else {
+            builder.append(chat);
+          }
         }
       }
     }
-    return pattern;
+
+    while (iterator.hasNext()) {
+      Object object = iterator.next();
+      builder.append(LINE);
+      if (object == null) {
+        builder.append("{null}");
+      } else if (object instanceof Throwable throwable) {
+        builder.append(extractStackTrace(throwable));
+      } else {
+        builder.append(object);
+      }
+    }
+    return builder.toString();
   }
 }

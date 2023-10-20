@@ -3293,14 +3293,14 @@ CONF_THREADS_SCHEDULE=0
         var pluginName = pluginEntry.getKey();
         var pluginPackage = pluginEntry.getValue();
 
-        logger.info("尝试注册插件 -> " + pluginName);
+        logger.seek("尝试注册插件 -> " + pluginName);
 
         if (pluginPackage.getModules().isEmpty()) {
           logger.warn("插件包内不含任何模块 " + pluginName);
           return;
         }
 
-        logger.info("模块冲突检查 -> " + pluginName);
+        logger.seek("模块冲突检查 -> " + pluginName);
 
         for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> moduleEntry : pluginPackage.getRunnerClassMap().entrySet()) {
           var k = moduleEntry.getKey();
@@ -3359,7 +3359,7 @@ CONF_THREADS_SCHEDULE=0
           }
         }
 
-        logger.info("冲突检查通过 -> " + pluginName);
+        logger.seek("冲突检查通过 -> " + pluginName);
 
         for (Map.Entry<Runner, Class<? extends EventHandlerRunner>> entry : pluginPackage.getRunnerClassMap().entrySet()) {
           var k = entry.getKey();
