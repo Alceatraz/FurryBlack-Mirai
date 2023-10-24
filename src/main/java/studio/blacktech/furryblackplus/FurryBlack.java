@@ -1108,9 +1108,9 @@ CONF_THREADS_SCHEDULE=0
       Path FILE_INFO = FileEnhance.get(FOLDER_CONFIG, "message_info.txt");
       Path FILE_HELP = FileEnhance.get(FOLDER_CONFIG, "message_help.txt");
 
-      MESSAGE_EULA = FileEnhance.read(FILE_EULA).replace("APP_VERSION", APP_VERSION).replace("MIRIA_VERSION", MIRAI_VERSION);
-      MESSAGE_INFO = FileEnhance.read(FILE_INFO).replace("APP_VERSION", APP_VERSION).replace("MIRIA_VERSION", MIRAI_VERSION);
-      MESSAGE_HELP = FileEnhance.read(FILE_HELP).replace("APP_VERSION", APP_VERSION).replace("MIRIA_VERSION", MIRAI_VERSION);
+      MESSAGE_EULA = FileEnhance.read(FILE_EULA).replace("APP_VERSION", APP_VERSION).replace("MIRAI_VERSION", MIRAI_VERSION);
+      MESSAGE_INFO = FileEnhance.read(FILE_INFO).replace("APP_VERSION", APP_VERSION).replace("MIRAI_VERSION", MIRAI_VERSION);
+      MESSAGE_HELP = FileEnhance.read(FILE_HELP).replace("APP_VERSION", APP_VERSION).replace("MIRAI_VERSION", MIRAI_VERSION);
 
     }
 
