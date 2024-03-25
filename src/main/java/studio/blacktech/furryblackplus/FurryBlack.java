@@ -3996,6 +3996,7 @@ CONF_THREADS_SCHEDULE=0
       logger.info("启动模块 " + name + " -> " + instanceName);
       try {
         moduleInstance.bootWrapper();
+        moduleInstance.setEnable(true);
       } catch (Exception exception) {
         logger.warn("启动模块发生错误 " + name + " " + instanceName, exception);
       }
@@ -4012,6 +4013,7 @@ CONF_THREADS_SCHEDULE=0
       logger.info("关闭模块 " + name + " -> " + instanceName);
       try {
         moduleInstance.shutWrapper();
+        moduleInstance.setEnable(false);
       } catch (Exception exception) {
         logger.warn("关闭模块发生错误 " + name + " " + instanceName, exception);
       }
