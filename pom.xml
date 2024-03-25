@@ -27,12 +27,12 @@
 
   <name>FurryBlack-Mirai-Core</name>
 
-  <version>3.1.0</version>
+  <version>3.1.1</version>
 
   <packaging>jar</packaging>
 
   <properties>
-    <mirai.version>2.16.0-RC</mirai.version>
+    <mirai.version>2.16.0</mirai.version>
     <maven.compiler.target>21</maven.compiler.target>
     <maven.compiler.source>21</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -44,7 +44,6 @@
     <finalName>furryblack</finalName>
 
     <plugins>
-
 
       <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
       <plugin>

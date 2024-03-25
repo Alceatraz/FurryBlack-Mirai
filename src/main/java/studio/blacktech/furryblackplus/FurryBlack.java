@@ -196,8 +196,8 @@ public class FurryBlack {
   //
   //= ==================================================================================================================
 
-  @Comment("") public static final String APP_VERSION = "3.1.0";
-  @Comment("") public static final String MIRAI_VERSION = "2.16.0-RC";
+  @Comment("") public static final String APP_VERSION = "3.1.1";
+  @Comment("") public static final String MIRAI_VERSION = "2.16.0";
 
   @Comment("") public static final String CRLF = "\r\n";
   @Comment("") public static final String LINE = System.lineSeparator();

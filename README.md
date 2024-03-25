@@ -150,7 +150,14 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryB
 
 ## DEVELOPING
 
+- Shamrock
+
 ## CHANGELOG
+
+### 3.1.1
+
+- 更新 Mirai 2.16.0
+- 强制使用 fix-protocol-version
 
 ### 3.1.0
 
