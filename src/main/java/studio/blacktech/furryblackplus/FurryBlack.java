@@ -133,7 +133,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.nio.file.StandardOpenOption.READ;
-import static net.mamoe.mirai.utils.BotConfiguration.MiraiProtocol.*;
+import static net.mamoe.mirai.utils.BotConfiguration.MiraiProtocol.ANDROID_PAD;
+import static net.mamoe.mirai.utils.BotConfiguration.MiraiProtocol.ANDROID_PHONE;
+import static net.mamoe.mirai.utils.BotConfiguration.MiraiProtocol.ANDROID_WATCH;
 import static org.jline.builtins.Completers.TreeCompleter.node;
 import static studio.blacktech.furryblackplus.core.common.enhance.DataEnhance.parseInt;
 import static studio.blacktech.furryblackplus.core.common.enhance.DataEnhance.parseLong;
