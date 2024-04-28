@@ -473,6 +473,7 @@ public abstract class AbstractEventHandler {
       Writer writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8)
     ) {
       CONFIG.store(writer, "Saved by FurryBlack at " + TimeEnhance.datetime());
+      writer.flush();
     } catch (IOException exception) {
       throw new RuntimeException("保存配置错误", exception);
     }
