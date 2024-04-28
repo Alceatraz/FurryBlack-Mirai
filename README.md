@@ -154,6 +154,10 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryB
 
 ## CHANGELOG
 
+### 3.2.0
+
+- 模块内enable改为private
+
 ### 3.1.1
 
 - 更新 Mirai 2.16.0

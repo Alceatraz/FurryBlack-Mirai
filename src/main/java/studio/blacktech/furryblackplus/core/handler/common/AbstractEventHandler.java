@@ -38,9 +38,10 @@ public abstract class AbstractEventHandler {
 
   //= ==================================================================================================================
 
+  @Comment("模块启停") private volatile boolean enable;
+
   @Comment("插件名字") protected String pluginName;
   @Comment("模块名字") protected String moduleName;
-  @Comment("模块启停") protected volatile boolean enable;
 
   @Comment("插件目录") protected Path FOLDER_ROOT;
   @Comment("配置目录") protected Path FOLDER_CONF;

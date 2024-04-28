@@ -198,7 +198,7 @@ public class FurryBlack {
   //
   //= ==================================================================================================================
 
-  @Comment("") public static final String APP_VERSION = "3.1.1";
+  @Comment("") public static final String APP_VERSION = "3.2.0";
   @Comment("") public static final String MIRAI_VERSION = "2.16.0";
 
   @Comment("") public static final String CRLF = "\r\n";

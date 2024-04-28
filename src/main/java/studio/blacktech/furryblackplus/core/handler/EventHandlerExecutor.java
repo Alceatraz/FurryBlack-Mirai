@@ -46,10 +46,10 @@ public abstract class EventHandlerExecutor extends AbstractEventHandler {
   protected abstract void handleGroupMessage(GroupMessageEvent event, Command command);
 
   public void handleUsersMessageWrapper(UserMessageEvent event, Command command) {
-    if (enable) handleUsersMessage(event, command);
+    if (isEnable()) handleUsersMessage(event, command);
   }
 
   public void handleGroupMessageWrapper(GroupMessageEvent event, Command command) {
-    if (enable) handleGroupMessage(event, command);
+    if (isEnable()) handleGroupMessage(event, command);
   }
 }
