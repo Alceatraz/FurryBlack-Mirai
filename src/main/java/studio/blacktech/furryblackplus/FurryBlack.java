@@ -2640,12 +2640,12 @@ CONF_THREADS_SCHEDULE=0
 
         return new AggregateCompleter(
 
-          // system dump
+          // system stacks
           // system status
           // system power-off
           // system rapid-stop
           // system force-exit
-          new TreeCompleter(node("system", node("status", "dump", "power-off", "rapid-stop", "force-exit"))),
+          new TreeCompleter(node("system", node("status", "stacks", "power-off", "rapid-stop", "force-exit"))),
 
           // system debug
           // system debug enable|disable
