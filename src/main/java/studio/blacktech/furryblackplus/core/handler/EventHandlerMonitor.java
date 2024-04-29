@@ -16,10 +16,10 @@ public abstract class EventHandlerMonitor extends AbstractEventHandler {
   protected abstract void handleGroupMessage(GroupMessageEvent event);
 
   public void handleUsersMessageWrapper(UserMessageEvent event) {
-    handleUsersMessage(event);
+    if (isEnable() && isReady()) handleUsersMessage(event);
   }
 
   public void handleGroupMessageWrapper(GroupMessageEvent event) {
-    handleGroupMessage(event);
+    if (isEnable() && isReady()) handleGroupMessage(event);
   }
 }

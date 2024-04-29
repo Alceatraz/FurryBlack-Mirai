@@ -157,6 +157,7 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryB
 ### 3.2.0
 
 - 模块内enable改为private
+- 修改enable逻辑
 
 ### 3.1.1
 

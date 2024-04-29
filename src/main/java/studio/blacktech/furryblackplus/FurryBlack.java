@@ -1238,13 +1238,15 @@ CONF_THREADS_SCHEDULE=0
 
       try {
 
-        for (EventHandlerFilter eventHandlerFilter : schema.getFilterUsersChain()) {
-          if (eventHandlerFilter.handleUsersMessageWrapper(event)) return;
+        for (EventHandlerFilter it : schema.getFilterUsersChain()) {
+          if (!it.isEnable()) continue;
+          if (it.handleUsersMessageWrapper(event)) return;
         }
 
         MONITOR_PROCESS.submit(() -> {
-          for (EventHandlerMonitor item : schema.getMonitorUsersChain()) {
-            item.handleUsersMessageWrapper(event);
+          for (EventHandlerMonitor it : schema.getMonitorUsersChain()) {
+            if (!it.isEnable()) continue;
+            it.handleUsersMessageWrapper(event);
           }
         });
 
@@ -1277,16 +1279,16 @@ CONF_THREADS_SCHEDULE=0
 
             default -> {
               EventHandlerExecutor executor = schema.getExecutorUsersPool().get(commandName);
-              if (executor == null) {
-                FurryBlack.sendMessage(event, "没有此命令");
-                return;
-              }
+              if (executor == null) return;
+              if (!executor.isEnable()) return;
               for (EventHandlerChecker checker : schema.getGlobalCheckerUsersPool()) {
+                if (!checker.isEnable()) continue;
                 if (checker.handleUsersMessageWrapper(event, command)) return;
               }
               List<EventHandlerChecker> commandCheckerUsersPool = schema.getCommandCheckerUsersPool(commandName);
               if (commandCheckerUsersPool != null) {
                 for (EventHandlerChecker checker : commandCheckerUsersPool) {
+                  if (!checker.isEnable()) continue;
                   if (checker.handleUsersMessageWrapper(event, command)) return;
                 }
               }
@@ -1306,13 +1308,15 @@ CONF_THREADS_SCHEDULE=0
 
       try {
 
-        for (EventHandlerFilter eventHandlerFilter : schema.getFilterGroupChain()) {
-          if (eventHandlerFilter.handleGroupMessageWrapper(event)) return;
+        for (EventHandlerFilter it : schema.getFilterGroupChain()) {
+          if (!it.isEnable()) continue;
+          if (it.handleGroupMessageWrapper(event)) return;
         }
 
         MONITOR_PROCESS.submit(() -> {
-          for (EventHandlerMonitor item : schema.getMonitorGroupChain()) {
-            item.handleGroupMessageWrapper(event);
+          for (EventHandlerMonitor it : schema.getMonitorGroupChain()) {
+            if (!it.isEnable()) continue;
+            it.handleGroupMessageWrapper(event);
           }
         });
 
@@ -1373,18 +1377,17 @@ CONF_THREADS_SCHEDULE=0
 
             default -> {
               EventHandlerExecutor executor = schema.getExecutorGroupPool().get(commandName);
-              if (executor == null) {
-                return;
-              }
+              if (executor == null) return;
+              if (!executor.isEnable()) return;
               for (EventHandlerChecker checker : schema.getGlobalCheckerGroupPool()) {
-                if (checker.handleGroupMessageWrapper(event, command))
-                  return;
+                if (!checker.isEnable()) continue;
+                if (checker.handleGroupMessageWrapper(event, command)) return;
               }
               List<EventHandlerChecker> commandCheckerGroupPool = schema.getCommandCheckerGroupPool(commandName);
               if (commandCheckerGroupPool != null) {
                 for (EventHandlerChecker checker : commandCheckerGroupPool) {
-                  if (checker.handleGroupMessageWrapper(event, command))
-                    return;
+                  if (!checker.isEnable()) continue;
+                  if (checker.handleGroupMessageWrapper(event, command)) return;
                 }
               }
               executor.handleGroupMessageWrapper(event, command);
@@ -3978,38 +3981,26 @@ CONF_THREADS_SCHEDULE=0
 
     private AbstractEventHandler getModuleInstance(String name) {
 
-      if (!modules.containsKey(name)) {
-        return null;
-      }
+      if (!modules.containsKey(name)) return null;
 
       for (Map.Entry<Runner, EventHandlerRunner> entry : COMPONENT_RUNNER_INSTANCE.entrySet()) {
-        if (entry.getKey().value().equals(name)) {
-          return entry.getValue();
-        }
+        if (entry.getKey().value().equals(name)) return entry.getValue();
       }
 
       for (Map.Entry<Filter, EventHandlerFilter> entry : COMPONENT_FILTER_INSTANCE.entrySet()) {
-        if (entry.getKey().value().equals(name)) {
-          return entry.getValue();
-        }
+        if (entry.getKey().value().equals(name)) return entry.getValue();
       }
 
       for (Map.Entry<Monitor, EventHandlerMonitor> entry : COMPONENT_MONITOR_INSTANCE.entrySet()) {
-        if (entry.getKey().value().equals(name)) {
-          return entry.getValue();
-        }
+        if (entry.getKey().value().equals(name)) return entry.getValue();
       }
 
       for (Map.Entry<Checker, EventHandlerChecker> entry : COMPONENT_CHECKER_INSTANCE.entrySet()) {
-        if (entry.getKey().value().equals(name)) {
-          return entry.getValue();
-        }
+        if (entry.getKey().value().equals(name)) return entry.getValue();
       }
 
       for (Map.Entry<Executor, EventHandlerExecutor> entry : COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
-        if (entry.getKey().value().equals(name)) {
-          return entry.getValue();
-        }
+        if (entry.getKey().value().equals(name)) return entry.getValue();
       }
 
       return null;
@@ -4020,8 +4011,7 @@ CONF_THREADS_SCHEDULE=0
 
     public void initModule(String name) {
       AbstractEventHandler moduleInstance = getModuleInstanceEnsure(name);
-      if (moduleInstance == null)
-        return;
+      if (moduleInstance == null) return;
       String instanceName = moduleInstance.getClass().getName();
       logger.info("预载模块 " + name + " -> " + instanceName);
       try {
@@ -4036,13 +4026,11 @@ CONF_THREADS_SCHEDULE=0
 
     public void bootModule(String name) {
       AbstractEventHandler moduleInstance = getModuleInstanceEnsure(name);
-      if (moduleInstance == null)
-        return;
+      if (moduleInstance == null) return;
       String instanceName = moduleInstance.getClass().getName();
       logger.info("启动模块 " + name + " -> " + instanceName);
       try {
         moduleInstance.bootWrapper();
-        moduleInstance.setEnable(true);
       } catch (Exception exception) {
         logger.warn("启动模块发生错误 " + name + " " + instanceName, exception);
       }
@@ -4053,13 +4041,11 @@ CONF_THREADS_SCHEDULE=0
 
     public void shutModule(String name) {
       AbstractEventHandler moduleInstance = getModuleInstanceEnsure(name);
-      if (moduleInstance == null)
-        return;
+      if (moduleInstance == null) return;
       String instanceName = moduleInstance.getClass().getName();
       logger.info("关闭模块 " + name + " -> " + instanceName);
       try {
         moduleInstance.shutWrapper();
-        moduleInstance.setEnable(false);
       } catch (Exception exception) {
         logger.warn("关闭模块发生错误 " + name + " " + instanceName, exception);
       }
@@ -4070,8 +4056,7 @@ CONF_THREADS_SCHEDULE=0
 
     public void rebootModule(String name) {
       AbstractEventHandler moduleInstance = getModuleInstanceEnsure(name);
-      if (moduleInstance == null)
-        return;
+      if (moduleInstance == null) return;
       String instanceName = moduleInstance.getClass().getName();
       logger.info("重启模块 " + name + " -> " + instanceName);
       try {
@@ -4136,36 +4121,28 @@ CONF_THREADS_SCHEDULE=0
 
     private void unloadModule(Runner annotation) {
       EventHandlerRunner instance = COMPONENT_RUNNER_INSTANCE.remove(annotation);
-      instance.setEnable(false);
       instance.shutWrapper();
       logger.info("定时器已卸载 -> " + printAnnotation(annotation));
     }
 
     private void unloadModule(Filter annotation) {
       EventHandlerFilter instance = COMPONENT_FILTER_INSTANCE.remove(annotation);
-      instance.setEnable(false);
-      if (annotation.users())
-        FILTER_USERS_CHAIN.remove(instance);
-      if (annotation.group())
-        FILTER_GROUP_CHAIN.remove(instance);
+      if (annotation.users()) FILTER_USERS_CHAIN.remove(instance);
+      if (annotation.group()) FILTER_GROUP_CHAIN.remove(instance);
       instance.shutWrapper();
       logger.info("过滤器已卸载 -> " + printAnnotation(annotation));
     }
 
     private void unloadModule(Monitor annotation) {
       EventHandlerMonitor instance = COMPONENT_MONITOR_INSTANCE.remove(annotation);
-      instance.setEnable(false);
-      if (annotation.users())
-        MONITOR_USERS_CHAIN.remove(instance);
-      if (annotation.group())
-        MONITOR_GROUP_CHAIN.remove(instance);
+      if (annotation.users()) MONITOR_USERS_CHAIN.remove(instance);
+      if (annotation.group()) MONITOR_GROUP_CHAIN.remove(instance);
       instance.shutWrapper();
       logger.info("监听器已卸载 -> " + printAnnotation(annotation));
     }
 
     private void unloadModule(Checker annotation) {
       EventHandlerChecker instance = COMPONENT_CHECKER_INSTANCE.remove(annotation);
-      instance.setEnable(false);
       if (annotation.users()) {
         if ("*".equals(annotation.command())) {
           GLOBAL_CHECKER_USERS_POOL.remove(instance);
@@ -4186,11 +4163,8 @@ CONF_THREADS_SCHEDULE=0
 
     private void unloadModule(Executor annotation) {
       EventHandlerExecutor instance = COMPONENT_EXECUTOR_INSTANCE.remove(annotation);
-      instance.setEnable(false);
-      if (annotation.users())
-        EXECUTOR_USERS_POOL.remove(annotation.command());
-      if (annotation.group())
-        EXECUTOR_GROUP_POOL.remove(annotation.command());
+      if (annotation.users()) EXECUTOR_USERS_POOL.remove(annotation.command());
+      if (annotation.group()) EXECUTOR_GROUP_POOL.remove(annotation.command());
       COMMAND_EXECUTOR_RELATION.remove(annotation.command());
       instance.shutWrapper();
       logger.info("执行器已卸载 -> " + printAnnotation(annotation));

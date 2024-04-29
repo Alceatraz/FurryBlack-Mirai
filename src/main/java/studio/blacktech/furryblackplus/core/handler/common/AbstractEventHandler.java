@@ -38,7 +38,8 @@ public abstract class AbstractEventHandler {
 
   //= ==================================================================================================================
 
-  @Comment("模块启停") private volatile boolean enable;
+  @Comment("模块开关") private volatile boolean enable = true;
+  @Comment("模块状态") private volatile boolean status = false;
 
   @Comment("插件名字") protected String pluginName;
   @Comment("模块名字") protected String moduleName;
@@ -109,6 +110,7 @@ public abstract class AbstractEventHandler {
   //= 启动
 
   public final void bootWrapper() throws CoreException {
+    if (!enable) return;
     ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
     try {
       Thread.currentThread().setContextClassLoader(exclusiveClassLoader);
@@ -118,14 +120,15 @@ public abstract class AbstractEventHandler {
     } finally {
       Thread.currentThread().setContextClassLoader(contextClassLoader);
     }
-    enable = true;
+    status = true;
   }
 
   //= ==========================================================================
   //= 关闭
 
   public final void shutWrapper() throws CoreException {
-    enable = false;
+    if (!enable || !status) return;
+    status = false;
     ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
     try {
       Thread.currentThread().setContextClassLoader(exclusiveClassLoader);
@@ -156,14 +159,24 @@ public abstract class AbstractEventHandler {
   //= ==========================================================================
   //= 模块
 
+  @Comment("查询模块的工作状态")
+  public boolean isReady() {
+    return status;
+  }
+
   @Comment("查询模块的启用状态")
   public final boolean isEnable() {
     return enable;
   }
 
-  @Comment("改变模块的启用状态")
-  public final void setEnable(boolean enable) {
-    this.enable = enable;
+  @Comment("改变模块的开关状态 启用")
+  public final void setEnable() {
+    this.enable = true;
+  }
+
+  @Comment("改变模块的开关状态 禁用")
+  public final void setDisable() {
+    this.enable = false;
   }
 
   @Comment("获取本插件的名字")
@@ -245,10 +258,12 @@ public abstract class AbstractEventHandler {
     return FileEnhance.read(path);
   }
 
+  @Comment("读取文件")
   protected final List<String> readLine(Path path) {
     return readLine(path, false);
   }
 
+  @Comment("读取文件")
   protected final List<String> readLine(Path path, boolean keepComment) {
     List<String> strings = FileEnhance.readLine(path);
     return keepComment ? strings : removeComment(strings);

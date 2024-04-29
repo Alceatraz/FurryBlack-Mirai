@@ -16,10 +16,18 @@ public abstract class EventHandlerFilter extends AbstractEventHandler {
   protected abstract boolean handleGroupMessage(GroupMessageEvent event);
 
   public boolean handleUsersMessageWrapper(UserMessageEvent event) {
-    return handleUsersMessage(event);
+    if (isEnable() && isReady()) {
+      return handleUsersMessage(event);
+    } else {
+      return true;
+    }
   }
 
   public boolean handleGroupMessageWrapper(GroupMessageEvent event) {
-    return handleGroupMessage(event);
+    if (isEnable() && isReady()) {
+      return handleGroupMessage(event);
+    } else {
+      return true;
+    }
   }
 }

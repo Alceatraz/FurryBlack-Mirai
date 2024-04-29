@@ -17,10 +17,18 @@ public abstract class EventHandlerChecker extends AbstractEventHandler {
   protected abstract boolean handleGroupMessage(GroupMessageEvent event, Command command);
 
   public boolean handleUsersMessageWrapper(UserMessageEvent event, Command command) {
-    return handleUsersMessage(event, command);
+    if (isEnable() && isReady()) {
+      return handleUsersMessage(event, command);
+    } else {
+      return true;
+    }
   }
 
   public boolean handleGroupMessageWrapper(GroupMessageEvent event, Command command) {
-    return handleGroupMessage(event, command);
+    if (isEnable() && isReady()) {
+      return handleGroupMessage(event, command);
+    } else {
+      return true;
+    }
   }
 }
