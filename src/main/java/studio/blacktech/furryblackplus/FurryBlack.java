@@ -3635,48 +3635,68 @@ CONF_THREADS_SCHEDULE=0
       logger.hint("启动定时器");
 
       for (Runner annotation : SORTED_RUNNER) {
-        EventHandlerRunner clazz = COMPONENT_RUNNER_INSTANCE.get(annotation);
-        logger.seek("启动定时器" + annotation.value() + "[" + annotation.priority() + "] -> " + clazz.getClass().getName());
+        EventHandlerRunner instance = COMPONENT_RUNNER_INSTANCE.get(annotation);
+        if (instance.isEnable()) {
+          logger.seek("启动定时器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+        } else {
+          logger.seek("跳过定时器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+          continue;
+        }
         try {
-          clazz.bootWrapper();
+          instance.bootWrapper();
         } catch (Exception exception) {
-          throw new SchemaException("启动定时器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
+          throw new SchemaException("启动定时器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
         }
       }
 
       logger.hint("启动过滤器");
 
       for (Filter annotation : SORTED_FILTER) {
-        EventHandlerFilter clazz = COMPONENT_FILTER_INSTANCE.get(annotation);
-        logger.seek("启动过滤器" + annotation.value() + "[" + annotation.priority() + "] -> " + clazz.getClass().getName());
+        EventHandlerFilter instance = COMPONENT_FILTER_INSTANCE.get(annotation);
+        if (instance.isEnable()) {
+          logger.seek("启动过滤器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+        } else {
+          logger.seek("跳过过滤器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+          continue;
+        }
         try {
-          clazz.bootWrapper();
+          instance.bootWrapper();
         } catch (Exception exception) {
-          throw new SchemaException("启动过滤器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
+          throw new SchemaException("启动过滤器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
         }
       }
 
       logger.hint("启动监听器");
 
       for (Monitor annotation : SORTED_MONITOR) {
-        EventHandlerMonitor clazz = COMPONENT_MONITOR_INSTANCE.get(annotation);
-        logger.seek("启动监听器" + annotation.value() + "[" + annotation.priority() + "] -> " + clazz.getClass().getName());
+        EventHandlerMonitor instance = COMPONENT_MONITOR_INSTANCE.get(annotation);
+        if (instance.isEnable()) {
+          logger.seek("启动监听器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+        } else {
+          logger.seek("跳过监听器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+          continue;
+        }
         try {
-          clazz.bootWrapper();
+          instance.bootWrapper();
         } catch (Exception exception) {
-          throw new SchemaException("启动监听器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
+          throw new SchemaException("启动监听器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
         }
       }
 
       logger.hint("启动检查器");
 
       for (Checker annotation : SORTED_CHECKER) {
-        EventHandlerChecker clazz = COMPONENT_CHECKER_INSTANCE.get(annotation);
-        logger.seek("启动检查器" + annotation.value() + "[" + annotation.priority() + "] -> " + clazz.getClass().getName());
+        EventHandlerChecker instance = COMPONENT_CHECKER_INSTANCE.get(annotation);
+        if (instance.isEnable()) {
+          logger.seek("启动检查器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+        } else {
+          logger.seek("启动检查器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+          continue;
+        }
         try {
-          clazz.bootWrapper();
+          instance.bootWrapper();
         } catch (Exception exception) {
-          throw new SchemaException("启动检查器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
+          throw new SchemaException("启动检查器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
         }
       }
 
@@ -3684,12 +3704,16 @@ CONF_THREADS_SCHEDULE=0
 
       for (Map.Entry<Executor, EventHandlerExecutor> entry : COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
         Executor annotation = entry.getKey();
-        EventHandlerExecutor clazz = entry.getValue();
-        logger.seek("启动执行器" + annotation.value() + "[" + annotation.command() + "] -> " + clazz.getClass().getName());
+        EventHandlerExecutor instance = entry.getValue();
+        if (instance.isEnable()) {
+          logger.seek("启动执行器" + annotation.value() + "[" + annotation.command() + "] -> " + instance.getClass().getName());
+        } else {
+          logger.seek("跳过执行器" + annotation.value() + "[" + annotation.command() + "] -> " + instance.getClass().getName());
+        }
         try {
-          clazz.bootWrapper();
+          instance.bootWrapper();
         } catch (Exception exception) {
-          throw new SchemaException("启动执行器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + clazz.getClass().getName(), exception);
+          throw new SchemaException("启动执行器失败 " + MODULE_PLUGIN_RELATION.get(annotation.value()) + ":" + annotation.value() + " -> " + instance.getClass().getName(), exception);
         }
       }
     }
@@ -3704,6 +3728,10 @@ CONF_THREADS_SCHEDULE=0
       for (Map.Entry<Executor, EventHandlerExecutor> entry : COMPONENT_EXECUTOR_INSTANCE.entrySet()) {
         Executor annotation = entry.getKey();
         EventHandlerExecutor instance = entry.getValue();
+        if (!instance.isEnable()) {
+          logger.seek("跳过执行器" + annotation.value() + "[" + annotation.command() + "] -> " + instance.getClass().getName());
+          continue;
+        }
         try {
           if (SHUTDOWN_DROP) {
             logger.seek("丢弃执行器" + annotation.value() + "[" + annotation.command() + "] -> " + instance.getClass().getName());
@@ -3725,6 +3753,10 @@ CONF_THREADS_SCHEDULE=0
       Collections.reverse(checkers);
       for (Checker annotation : checkers) {
         EventHandlerChecker instance = COMPONENT_CHECKER_INSTANCE.get(annotation);
+        if (!instance.isEnable()) {
+          logger.seek("跳过检查器" + annotation.value() + "[" + annotation.command() + "] -> " + instance.getClass().getName());
+          continue;
+        }
         try {
           if (SHUTDOWN_DROP) {
             logger.seek("丢弃检查器" + annotation.value() + "[" + annotation.command() + "/" + annotation.priority() + "] -> " + instance.getClass().getName());
@@ -3746,18 +3778,22 @@ CONF_THREADS_SCHEDULE=0
       Collections.reverse(monitors);
       for (Monitor annotation : monitors) {
         EventHandlerMonitor instance = COMPONENT_MONITOR_INSTANCE.get(annotation);
+        if (!instance.isEnable()) {
+          logger.seek("跳过监听器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+          continue;
+        }
         try {
           if (SHUTDOWN_DROP) {
-            logger.seek("丢弃检查器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+            logger.seek("丢弃监听器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
             Thread thread = new Thread(instance::shutWrapper);
             thread.setDaemon(true);
             thread.start();
           } else {
-            logger.seek("关闭检查器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+            logger.seek("关闭监听器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
             instance.shutWrapper();
           }
         } catch (Exception exception) {
-          logger.warn("关闭检查器异常" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName(), exception);
+          logger.warn("关闭检监听异常" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName(), exception);
         }
       }
 
@@ -3767,6 +3803,10 @@ CONF_THREADS_SCHEDULE=0
       Collections.reverse(filters);
       for (Filter annotation : filters) {
         EventHandlerFilter instance = COMPONENT_FILTER_INSTANCE.get(annotation);
+        if (!instance.isEnable()) {
+          logger.seek("跳过过滤器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+          continue;
+        }
         try {
           if (SHUTDOWN_DROP) {
             logger.seek("丢弃过滤器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
@@ -3788,6 +3828,10 @@ CONF_THREADS_SCHEDULE=0
       Collections.reverse(runners);
       for (Runner annotation : runners) {
         EventHandlerRunner instance = COMPONENT_RUNNER_INSTANCE.get(annotation);
+        if (!instance.isEnable()) {
+          logger.seek("跳过定时器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
+          continue;
+        }
         try {
           if (SHUTDOWN_DROP) {
             logger.seek("丢弃定时器" + annotation.value() + "[" + annotation.priority() + "] -> " + instance.getClass().getName());
