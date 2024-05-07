@@ -135,7 +135,7 @@ public abstract class LoggerX {
     }
 
     public LoggerXLevel getLevel() {
-      return level == null ? DEFAULT_LEVEL : level;
+      return level;
     }
 
     private Node add(String[] paths) {
@@ -173,7 +173,8 @@ public abstract class LoggerX {
     }
 
     public LoggerXLevel getLevel(String path) {
-      return CACHES.computeIfAbsent(path, i -> get(i.split("\\.")));
+      LoggerXLevel level = CACHES.computeIfAbsent(path, i -> get(i.split("\\.")));
+      return level == null ? DEFAULT_LEVEL : level;
     }
 
     public Map<String, LoggerXLevel> listPrefix() {
