@@ -1,14 +1,16 @@
 package top.btswork.furryblack.core.logging.enums;
 
+import java.util.Locale;
+
 public enum LoggerXLevel {
 
-  CLOSE(0),
-  ERROR(1),
-  WARN(2),
-  INFO(3),
-  DEBUG(4),
-  TRACE(5),
-
+  EVERYTHING(0),
+  TRACE(10),
+  DEBUG(20),
+  INFO(30),
+  WARN(40),
+  ERROR(50),
+  CLOSE(Integer.MAX_VALUE),
   ;
 
   public final int level;
@@ -17,18 +19,17 @@ public enum LoggerXLevel {
     this.level = level;
   }
 
-  public boolean isEnable(LoggerXLevel level) {
-    return this.level <= level.level;
+  public boolean isEnable(LoggerXLevel targetLevel) {
+    return level <= targetLevel.level;
   }
 
   public static LoggerXLevel of(String name) {
-    return switch (name) {
-      case "close", "CLOSE" -> CLOSE;
-      case "error", "ERROR" -> ERROR;
-      case "warn", "WARN" -> WARN;
-      case "info", "INFO" -> INFO;
-      case "debug", "DEBUG" -> DEBUG;
-      case "trace", "TRACE" -> TRACE;
+    return switch (name.toUpperCase(Locale.ROOT)) {
+      case "TRACE" -> TRACE;
+      case "DEBUG" -> DEBUG;
+      case "INFO" -> INFO;
+      case "WARN" -> WARN;
+      case "ERROR" -> ERROR;
       default -> null;
     };
   }

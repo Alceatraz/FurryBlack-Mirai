@@ -1800,8 +1800,17 @@ CONF_THREADS_SCHEDULE=0
 
             );
           } else {
+
             LoggerXFactory.setLevel(of);
+
             FurryBlack.println("日志级别修改为 -> " + LoggerXFactory.getLevel());
+
+            logger.trace("Level TRACE");
+            logger.debug("Level DEBUG");
+            logger.info("Level INFO");
+            logger.warn("Level WARN");
+            logger.error("Level ERROR");
+
           }
         }
       });
