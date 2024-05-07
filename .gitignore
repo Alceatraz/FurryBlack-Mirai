@@ -163,7 +163,7 @@ fabric.properties
 # Editor-based Rest Client
 .idea/httpRequests
 
-# Android studio 3.1+ serialized cache file
+# Android top 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 
 ### JetBrains+all Patch ###

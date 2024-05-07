@@ -23,7 +23,7 @@ FURRYBLACK_LOCALE_SKIP=true
 FURRYBLACK_TIMEZONE_SKIP=true
 
 java \
--cp "binary/*" 'studio.blacktech.furryblackplus.FurryBlack' \
+-cp "binary/*" 'top.furryblack.btswork.FurryBlack' \
 --namespace 12345678 \
 --12345678-upgrade \
 --12345678-logger-level TRACE \
@@ -56,7 +56,7 @@ java \
 
 ### HOW-TO:
 
-- 编写插件需要继承接口并填写注解，`studio.blacktech.furryblackplus.demo`包含示例模块代码；
+- 编写插件需要继承接口并填写注解，`top.btswork.furryblack.demo`包含示例模块代码；
 - 插件包必须是Jar，需要包含Manifest信息以供框架识别和加载；
 - 插件包的名字写在Manifest中，和文件名无关；
 - 框架会在依赖目录中查找插件同名目录，将其中文件作为依赖，创建URLCLassLoader；
@@ -138,7 +138,7 @@ Extension-Source: https://github.com/Alceatraz/FurryBlack-Mirai-Extensions
 
 ```bash
 BOT1_FURRYBLACK_LOGGER_LEVEL=INFO
-java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryBlack --namespace 'bot1'
+java -Dbot1.debug -Dbot1.unsafe -cp *.jar top.furryblack.btswork.FurryBlack --namespace 'bot1'
 
 ```
 
@@ -153,6 +153,10 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar studio.blacktech.furryblackplus.FurryB
 - Shamrock
 
 ## CHANGELOG
+
+### 4.0.0
+
+- 因域名过期，修改包名
 
 ### 3.2.0
 
