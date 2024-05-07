@@ -39,6 +39,10 @@ public class LoggerXFactory {
     return LoggerX.listPrefix();
   }
 
+  public static Map<String, LoggerXLevel> listPrefixCache() {
+    return LoggerX.listPrefixCache();
+  }
+
   public static LoggerXLevel testPrefix(String node) {
     return LoggerX.testPrefix(node);
   }

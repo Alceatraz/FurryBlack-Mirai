@@ -62,7 +62,7 @@ public abstract class LoggerX {
   }
 
   protected static void setLevel(LoggerXLevel level) {
-    DEFAULT_LEVEL = Objects.requireNonNull(level, "Can't addPrefix logging level to null !");
+    DEFAULT_LEVEL = Objects.requireNonNull(level, "Can't addPrefix logging level to null!");
   }
 
   //= ==========================================================================
@@ -98,7 +98,15 @@ public abstract class LoggerX {
   }
 
   protected static Map<String, LoggerXLevel> listPrefix() {
-    return PREFIX.listPrefix();
+    TreeMap<String, LoggerXLevel> temp = new TreeMap<>(String::compareTo);
+    temp.putAll(PREFIX.listPrefix());
+    return temp;
+  }
+
+  protected static Map<String, LoggerXLevel> listPrefixCache() {
+    TreeMap<String, LoggerXLevel> temp = new TreeMap<>(String::compareTo);
+    temp.putAll(CACHES);
+    return temp;
   }
 
   protected static LoggerXLevel testPrefix(String path) {
@@ -305,6 +313,14 @@ public abstract class LoggerX {
 
   public String getName() {
     return enableFullName ? fullName : simpleName;
+  }
+
+  public String getFullName() {
+    return fullName;
+  }
+
+  public String getSimpleName() {
+    return simpleName;
   }
 
   //= ==========================================================================

@@ -25,11 +25,13 @@ public enum LoggerXLevel {
 
   public static LoggerXLevel of(String name) {
     return switch (name.toUpperCase(Locale.ROOT)) {
+      case "EVERYTHING" -> EVERYTHING;
       case "TRACE" -> TRACE;
       case "DEBUG" -> DEBUG;
       case "INFO" -> INFO;
       case "WARN" -> WARN;
       case "ERROR" -> ERROR;
+      case "CLOSE" -> CLOSE;
       default -> null;
     };
   }

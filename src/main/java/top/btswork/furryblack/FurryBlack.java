@@ -874,7 +874,6 @@ CONF_THREADS_SCHEDULE=0
 
       if (customLevel == null) {
         System.out.println("[FurryBlack][ARGS]日志级别 - 输入值无效 -> " + kernelConfig.level + ", 可用日志级别为:");
-        System.out.println("[FurryBlack][ARGS] - CLOSE");
         System.out.println("[FurryBlack][ARGS] - ERROR");
         System.out.println("[FurryBlack][ARGS] - WARN");
         System.out.println("[FurryBlack][ARGS] - INFO");
@@ -1805,11 +1804,11 @@ CONF_THREADS_SCHEDULE=0
 
             FurryBlack.println("日志级别修改为 -> " + LoggerXFactory.getLevel());
 
-            logger.trace("Level TRACE");
-            logger.debug("Level DEBUG");
-            logger.info("Level INFO");
-            logger.warn("Level WARN");
             logger.error("Level ERROR");
+            logger.warn("Level WARN");
+            logger.info("Level INFO");
+            logger.debug("Level DEBUG");
+            logger.trace("Level TRACE");
 
           }
         }
@@ -1856,6 +1855,8 @@ CONF_THREADS_SCHEDULE=0
 
           switch (code) {
             case "test" -> FurryBlack.println(path + " -> " + LoggerXFactory.testPrefix(path));
+            case "cache" -> LoggerXFactory.listPrefixCache().forEach((k, v) -> FurryBlack.println(k + " " + v.name()));
+            case "flush" -> LoggerXFactory.flushPrefixCache();
             case "delete", "remove" -> LoggerXFactory.delPrefix(path);
             default -> {
               LoggerXLevel of = LoggerXLevel.of(code);
@@ -2685,15 +2686,15 @@ CONF_THREADS_SCHEDULE=0
           new TreeCompleter(node("logger", node("color"))),
 
           // logger level xxx
-          new TreeCompleter(node("logger", node("level", node("TRACE", "DEBUG", "INFO", "SEEK", "HINT", "WARN", "ERROR", "FATAL", "CLOSE")))),
+          new TreeCompleter(node("logger", node("level", node("EVERYTHING", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "CLOSE")))),
 
           // logger verbose name
           // logger verbose slf4j
-          new TreeCompleter(node("logger", node("verbose", node("name", node("true", "false"))))),
+          new TreeCompleter(node("logger", node("verbose", node("true", "false")))),
 
           // logger prefix
           // logger prefix delete xxx.xxx.xx.x.x
-          new TreeCompleter(node("logger", node("prefix", node("test", "delete", "remove", "CLOSE", "ERROR", "WARN", "INFO", "DEBUG", "TRACE")))),
+          new TreeCompleter(node("logger", node("prefix", node("test", "cache", "flush", "delete", "remove")))),
 
           // ?
           // help
@@ -5336,8 +5337,7 @@ CONF_THREADS_SCHEDULE=0
       return config;
     }
 
-    private KernelConfig() {
-    }
+    private KernelConfig() {}
   }
 
   //= ==================================================================================================================
