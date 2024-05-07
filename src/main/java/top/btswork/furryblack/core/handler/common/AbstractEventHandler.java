@@ -74,7 +74,7 @@ public abstract class AbstractEventHandler {
       coreException.setStackTrace(stackTrace);
       throw coreException;
     }
-    if (!"top.furryblack.btswork.FurryBlack$Schema".equals(schemaClazz.getClassName())) {
+    if (!"top.btswork.furryblack.FurryBlack$Schema".equals(schemaClazz.getClassName())) {
       CoreException coreException = new CoreException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
       coreException.setStackTrace(stackTrace);
       throw coreException;
