@@ -20,7 +20,7 @@ public enum LoggerXLevel {
   }
 
   public boolean isEnable(LoggerXLevel targetLevel) {
-    return level <= targetLevel.level;
+    return level >= targetLevel.level;
   }
 
   public static LoggerXLevel of(String name) {
