@@ -2963,11 +2963,6 @@ CONF_THREADS_SCHEDULE=0
 
     public synchronized void registerExclusive(List<String[]> commands, Consumer<ConsoleSubCommand> function) {
       for (String[] command : commands) {
-        if (isAdopted(command)) {
-          throw new RuntimeException("Command already registered -> " + String.join(" ", command));
-        }
-      }
-      for (String[] command : commands) {
         Tree node = this;
         for (String arg : command) {
           Tree next = node.tree.get(arg);
