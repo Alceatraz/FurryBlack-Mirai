@@ -2878,7 +2878,7 @@ CONF_THREADS_SCHEDULE=0
       }
 
       public RegisterFunctionAccessor command(String... command) {
-        if (dispatcher.tree.isAdopted()) {
+        if (dispatcher.tree.isAdopted(command)) {
           throw new IllegalArgumentException("Can't register this command -> " + String.join(".", command));
         }
         commands.add(command);
@@ -2900,7 +2900,7 @@ CONF_THREADS_SCHEDULE=0
       }
 
       public RegisterExclusiveAccessor command(String... command) {
-        if (dispatcher.tree.isAdopted()) {
+        if (dispatcher.tree.isAdopted(command)) {
           throw new IllegalArgumentException("Can't register this command -> " + String.join(".", command));
         }
         commands.add(command);
@@ -2943,11 +2943,6 @@ CONF_THREADS_SCHEDULE=0
     }
 
     public synchronized void registerFunction(List<String[]> commands, Consumer<ConsoleSubCommand> function) {
-      for (String[] command : commands) {
-        if (isAdopted(command)) {
-          throw new RuntimeException("Command already registered -> " + String.join(" ", command));
-        }
-      }
       for (String[] command : commands) {
         Tree node = this;
         for (String arg : command) {
