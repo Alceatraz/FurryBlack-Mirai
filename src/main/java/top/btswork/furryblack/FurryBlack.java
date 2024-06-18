@@ -2774,11 +2774,6 @@ CONF_THREADS_SCHEDULE=0
       return parts.toArray(new String[0]);
     }
 
-    public String[] copy() {
-      String[] copy = new String[args.length];
-      System.arraycopy(args, 0, copy, 0, args.length);
-      return copy;
-    }
 
     public ConsoleSubCommand subCommand(int i) {
       if (i > args.length) {
@@ -2997,8 +2992,7 @@ CONF_THREADS_SCHEDULE=0
 
     public boolean execute(ConsoleCommand consoleCommand) {
       Tree node = this;
-      String[] args = consoleCommand.copy();
-      for (String arg : args) {
+      for (String arg : consoleCommand.args) {
         Tree next = node.tree.get(arg);
         if (next == null) {
           return false;
