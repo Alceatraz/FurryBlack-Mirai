@@ -18,12 +18,12 @@ public class FileEnhance {
 
   //= ==================================================================================================================
 
-  public static Path get(Path path, String name) {
-    return Paths.get(path.toAbsolutePath().toString(), name);
+  public static Path get(Path path, String... name) {
+    return Paths.get(path.toString(), name);
   }
 
-  public static Path get(File path, String name) {
-    return Paths.get(path.getAbsolutePath(), name);
+  public static Path get(File path, String... name) {
+    return Paths.get(path.getPath(), name);
   }
 
   //= ==================================================================================================================
@@ -244,13 +244,15 @@ public class FileEnhance {
     return checkWritable(get(path, name));
   }
 
-  public static Path ensureFile(Path path, String name) {
+  public static Path ensureFile(Path path, String... name) {
     return ensureFile(get(path, name));
   }
 
-  public static Path ensureFolder(Path path, String name) {
+  public static Path ensureFolder(Path path, String... name) {
     return ensureFolder(get(path, name));
   }
+
+  //= ==================================================================================================================
 
   public static String read(Path path, String name) {
     return read(get(path, name));

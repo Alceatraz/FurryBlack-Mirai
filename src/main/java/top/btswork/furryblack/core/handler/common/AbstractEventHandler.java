@@ -38,21 +38,32 @@ public abstract class AbstractEventHandler {
 
   //= ==================================================================================================================
 
-  @Comment("模块开关") private volatile boolean enable = true;
-  @Comment("模块状态") private volatile boolean status = false;
+  @Comment("模块开关")
+  private volatile boolean enable = true;
+  @Comment("模块状态")
+  private volatile boolean status = false;
 
-  @Comment("插件名字") protected String pluginName;
-  @Comment("模块名字") protected String moduleName;
+  @Comment("插件名字")
+  protected String pluginName;
+  @Comment("模块名字")
+  protected String moduleName;
 
-  @Comment("插件目录") protected Path FOLDER_ROOT;
-  @Comment("配置目录") protected Path FOLDER_CONF;
-  @Comment("数据目录") protected Path FOLDER_DATA;
-  @Comment("日志目录") protected Path FOLDER_LOGS;
+  @Comment("插件目录")
+  protected Path FOLDER_ROOT;
+  @Comment("配置目录")
+  protected Path FOLDER_CONF;
+  @Comment("数据目录")
+  protected Path FOLDER_DATA;
+  @Comment("日志目录")
+  protected Path FOLDER_LOGS;
 
-  @Comment("配置文件") protected Path FILE_CONFIG;
+  @Comment("配置文件")
+  protected Path FILE_CONFIG;
 
-  @Comment("配置对象") protected Properties CONFIG;
-  @Comment("全新配置") protected boolean NEW_CONFIG;
+  @Comment("配置对象")
+  protected Properties CONFIG;
+  @Comment("全新配置")
+  protected boolean NEW_CONFIG;
 
   //= ==================================================================================================================
   //= 生命周期
@@ -215,59 +226,59 @@ public abstract class AbstractEventHandler {
   //= ==========================================================================
 
   @Comment("获取目录下的文件")
-  protected final Path getFile(String name) {
+  protected final Path getFile(String... name) {
     return FileEnhance.get(FOLDER_ROOT, name);
   }
 
   @Comment("获取配置目录下的文件")
-  protected final Path getConfFile(String name) {
+  protected final Path getConfFile(String... name) {
     return FileEnhance.get(FOLDER_CONF, name);
   }
 
   @Comment("获取数据目录下的文件")
-  protected final Path getDataFile(String name) {
+  protected final Path getDataFile(String... name) {
     return FileEnhance.get(FOLDER_DATA, name);
   }
 
   @Comment("获取日志目录下的文件")
-  protected final Path getLogsFile(String name) {
+  protected final Path getLogsFile(String... name) {
     return FileEnhance.get(FOLDER_LOGS, name);
   }
 
   @Comment("初始化目录下的文件")
-  protected final Path ensureFile(String name) {
+  protected final Path ensureFile(String... name) {
     return FileEnhance.ensureFile(FOLDER_ROOT, name);
   }
 
   @Comment("初始化配置目录下的文件")
-  protected final Path ensureConfFile(String name) {
+  protected final Path ensureConfFile(String... name) {
     return FileEnhance.ensureFile(FOLDER_CONF, name);
   }
 
   @Comment("初始化数据目录下的文件")
-  protected final Path ensureDataFile(String name) {
+  protected final Path ensureDataFile(String... name) {
     return FileEnhance.ensureFile(FOLDER_DATA, name);
   }
 
   @Comment("初始化日志目录下的文件")
-  protected final Path ensureLogsFile(String name) {
+  protected final Path ensureLogsFile(String... name) {
     return FileEnhance.ensureFile(FOLDER_LOGS, name);
   }
 
   //= ==========================================================================
 
   @Comment("初始化配置目录下的目录")
-  protected final Path ensureConfFolder(String name) {
+  protected final Path ensureConfFolder(String... name) {
     return FileEnhance.ensureFolder(FOLDER_CONF, name);
   }
 
   @Comment("初始化数据目录下的目录")
-  protected final Path ensureDataFolder(String name) {
+  protected final Path ensureDataFolder(String... name) {
     return FileEnhance.ensureFolder(FOLDER_DATA, name);
   }
 
   @Comment("初始化日志目录下的目录")
-  protected final Path ensureLogsFolder(String name) {
+  protected final Path ensureLogsFolder(String... name) {
     return FileEnhance.ensureFolder(FOLDER_LOGS, name);
   }
 
@@ -361,12 +372,12 @@ public abstract class AbstractEventHandler {
 
   private List<String> removeComment(List<String> lines) {
     return lines.stream()
-      .filter(it -> !it.isBlank())
-      .filter(it -> !it.startsWith("#"))
-      .map(it -> {
-        int index = it.indexOf("#");
-        return index > 0 ? it.substring(0, index).trim() : it;
-      }).toList();
+             .filter(it -> !it.isBlank())
+             .filter(it -> !it.startsWith("#"))
+             .map(it -> {
+               int index = it.indexOf("#");
+               return index > 0 ? it.substring(0, index).trim() : it;
+             }).toList();
   }
 
   //= ==========================================================================

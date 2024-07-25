@@ -18,7 +18,7 @@ public class FinalReference<T> {
     this.check = check;
   }
 
-  private String extraceStackTrace(StackTraceElement[] stackTrace) {
+  private String extractStackTrace(StackTraceElement[] stackTrace) {
     int i = 0;
     StringBuilder builder = new StringBuilder();
     for (StackTraceElement stackTraceElement : stackTrace) {
@@ -37,7 +37,7 @@ public class FinalReference<T> {
 
   public String test() {
     StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-    return extraceStackTrace(stackTrace);
+    return extractStackTrace(stackTrace);
   }
 
   public void set(T instance) {
