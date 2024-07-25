@@ -94,22 +94,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -198,11 +183,15 @@ public class FurryBlack {
   //
   //= ==================================================================================================================
 
-  @Comment("") public static final String APP_VERSION = "4.0.0";
-  @Comment("") public static final String MIRAI_VERSION = "2.16.0";
+  @Comment("")
+  public static final String APP_VERSION = "4.0.0";
+  @Comment("")
+  public static final String MIRAI_VERSION = "2.16.0";
 
-  @Comment("") public static final String CRLF = "\r\n";
-  @Comment("") public static final String LINE = System.lineSeparator();
+  @Comment("")
+  public static final String CRLF = "\r\n";
+  @Comment("")
+  public static final String LINE = System.lineSeparator();
 
   public static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
   public static final long BOOT_TIME = ManagementFactory.getRuntimeMXBean().getStartTime();
@@ -2038,7 +2027,7 @@ CONF_THREADS_SCHEDULE=0
           String name = it.getString(1, null);
 
           if (type == null || name == null) {
-            FurryBlack.println("USAGE: schema module init|boot|shut|reboot|unload <name>");
+            FurryBlack.println("USAGE: schema module init|boot|shut|reboot|unload|execute <name>");
             return;
           }
 
@@ -2048,8 +2037,26 @@ CONF_THREADS_SCHEDULE=0
             case "shut" -> schema.shutModule(name);
             case "reboot" -> schema.rebootModule(name);
             case "unload" -> schema.unloadModule(name);
-            default -> FurryBlack.println("USAGE: schema module init|boot|shut|reboot|unload <name>");
+            case "execute" -> schema.executeModule(name, it.toModuleCommand(2));
+            default -> FurryBlack.println("USAGE: schema module init|boot|shut|reboot|unload|execute <name>");
           }
+        }
+      });
+
+    //= ========================================================================
+
+    dispatcher.registerExclusive()
+      .command("exec")
+      .command("execute")
+      .function(it -> {
+        String string = it.getString(0, null);
+        if (string == null) {
+          FurryBlack.println("USAGE: exec|execute <name> xxx xxx xxx ...");
+          return;
+        }
+        boolean code = schema.executeModule(string, it.toModuleCommand(2));
+        if (!code) {
+          FurryBlack.println("ERROR: 指定模块不存在 -> ");
         }
       });
 
@@ -2134,6 +2141,7 @@ CONF_THREADS_SCHEDULE=0
         FileEnhance.write(path, builder.toString());
         FurryBlack.println("昵称已导出 -> " + path);
       });
+
 
     //= ========================================================================
 
@@ -2651,6 +2659,8 @@ CONF_THREADS_SCHEDULE=0
 
       private AggregateCompleter buildCompleter() {
 
+        StringsCompleter stringsCompleter = new StringsCompleter(schema.listModuleName());
+
         return new AggregateCompleter(
 
           // system stacks
@@ -2673,7 +2683,8 @@ CONF_THREADS_SCHEDULE=0
           // schema module shut xxx
           // schema module reboot xxx
           // schema module unload xxx
-          new TreeCompleter(node("schema", node("module", node("init", "boot", "shut", "reboot", "unload", node(new StringsCompleter(schema.listModuleName())))))),
+          // schema module execute xxx xxx xxx xxxx
+          new TreeCompleter(node("schema", node("module", node("init", "boot", "shut", "reboot", "unload", "execute", node(stringsCompleter))))),
 
           // nickname list
           // nickname clean
@@ -2695,6 +2706,11 @@ CONF_THREADS_SCHEDULE=0
           // logger prefix
           // logger prefix delete xxx.xxx.xx.x.x
           new TreeCompleter(node("logger", node("prefix", node("test", "cache", "flush", "delete", "remove")))),
+
+          // exec <name> xxx xxx xxx
+          // execute <name> xxx xxx xxx
+          new TreeCompleter(node("exec", "execute", node(stringsCompleter))),
+
 
           // ?
           // help
@@ -2722,12 +2738,12 @@ CONF_THREADS_SCHEDULE=0
 
     private final String[] args;
 
-    private ConsoleCommand(String command) {
-      this(parseCommand(command));
-    }
-
     private ConsoleCommand(String[] args) {
       this.args = args;
+    }
+
+    private ConsoleCommand(String command) {
+      this(parseCommand(command));
     }
 
     private static String[] parseCommand(String command) {
@@ -2775,64 +2791,134 @@ CONF_THREADS_SCHEDULE=0
     }
 
 
-    public ConsoleSubCommand subCommand(int i) {
-      if (i > args.length) {
-        throw new IllegalArgumentException("Too long");
-      }
-      String[] copy = new String[args.length - i];
-      System.arraycopy(args, i, copy, 0, copy.length);
-      return new ConsoleSubCommand(copy);
-    }
-
     public int length() {
       return args.length;
     }
-
-    @Override
-    public String toString() {
-      StringBuilder builder = new StringBuilder();
-      for (String arg : args) {
-        if (arg.contains(" ")) {
-          builder.append("'").append(arg).append("'");
-        } else {
-          builder.append(arg);
-        }
-        builder.append(" ");
-      }
-      builder.setLength(builder.length() - 1);
-      return builder.toString();
-    }
-  }
-
-  private record ConsoleSubCommand(String[] args) {
 
     public String getString(int i, String defaultValue) {
       return i < args.length ? args[i] : defaultValue;
     }
 
     public boolean getBoolean(int i, boolean defaultValue) {
-      if (i < args.length) {
-        return Boolean.parseBoolean(args[i]);
-      } else {
-        return defaultValue;
-      }
+      return i < args.length ? Boolean.parseBoolean(args[i]) : defaultValue;
     }
 
-    @Override
-    public String toString() {
-      StringBuilder builder = new StringBuilder();
-      for (String arg : args) {
-        if (arg.contains(" ")) {
-          builder.append("'").append(arg).append("'");
-        } else {
-          builder.append(arg);
-        }
-        builder.append(" ");
+
+    public ConsoleCommand subCommand(int i) {
+      if (i > args.length) {
+        throw new IllegalArgumentException("Index out of command boundary");
       }
-      builder.setLength(builder.length() - 1);
-      return builder.toString();
+
+      String[] copy = Arrays.copyOfRange(args, i, args.length - 1);
+      return new ConsoleCommand(copy);
     }
+
+    public ModuleCommand toModuleCommand(int depth) {
+      if (depth > args.length) {
+        throw new IllegalArgumentException("Index out of command boundary");
+      }
+
+      String[] copy = Arrays.copyOfRange(args, depth, args.length - 1);
+      return new ModuleCommand(copy);
+    }
+
   }
+
+  @Comment("用于模块的命令投递")
+  public static class ModuleCommand {
+
+    private final String[] argument;
+    private final List<String> options;
+    private final Map<String, String> parameters;
+
+    private ModuleCommand(String[] args) {
+
+      List<String> argument = new ArrayList<>();
+      List<String> options = new ArrayList<>();
+      Map<String, String> parameters = new LinkedHashMap<>();
+
+      for (String arg : args) {
+        if (arg.startsWith("--")) {
+          int i = arg.indexOf("=");
+          if (i > 0) {
+            parameters.put(arg.substring(2, i), arg.substring(i + 1));
+          } else {
+            options.add(arg.substring(2));
+          }
+        } else {
+          argument.add(arg);
+        }
+      }
+
+      this.argument = new String[argument.size()];
+      argument.toArray(this.argument);
+
+      this.options = Collections.unmodifiableList(options);
+      this.parameters = Collections.unmodifiableMap(parameters);
+
+    }
+
+    @Comment("获取命令")
+    public String[] getArgument() {
+      return argument;
+    }
+
+    @Comment("获取选项")
+    public List<String> getOptions() {
+      return options;
+    }
+
+    @Comment("获取参数")
+    public Map<String, String> getParameters() {
+      return parameters;
+    }
+
+    @Comment("获取命令")
+    public String getArgument(int i) {
+      return argument[i];
+    }
+
+    @Comment("获取选项")
+    public boolean hasOption(String option) {
+      return options.contains(option);
+    }
+
+    @Comment("获取参数")
+    public String getParameter(String key, String defaultValue) {
+      return parameters.getOrDefault(key, defaultValue);
+    }
+
+  }
+
+//  public record ConsoleCommand(String[] args) {
+//
+//    public String getString(int i, String defaultValue) {
+//      return i < args.length ? args[i] : defaultValue;
+//    }
+//
+//    public boolean getBoolean(int i, boolean defaultValue) {
+//      if (i < args.length) {
+//        return Boolean.parseBoolean(args[i]);
+//      } else {
+//        return defaultValue;
+//      }
+//    }
+//
+//    @Override
+//    public String toString() {
+//      StringBuilder builder = new StringBuilder();
+//      for (String arg : args) {
+//        if (arg.contains(" ")) {
+//          builder.append("'").append(arg).append("'");
+//        } else {
+//          builder.append(arg);
+//        }
+//        builder.append(" ");
+//      }
+//      builder.setLength(builder.length() - 1);
+//      return builder.toString();
+//    }
+//  }
 
   //= ================================================================================================================
   //= 调度器
@@ -2872,7 +2958,7 @@ CONF_THREADS_SCHEDULE=0
         return this;
       }
 
-      public void function(Consumer<ConsoleSubCommand> function) {
+      public void function(Consumer<ConsoleCommand> function) {
         dispatcher.tree.registerFunction(commands, function);
       }
     }
@@ -2894,7 +2980,7 @@ CONF_THREADS_SCHEDULE=0
         return this;
       }
 
-      public void function(Consumer<ConsoleSubCommand> function) {
+      public void function(Consumer<ConsoleCommand> function) {
         dispatcher.tree.registerExclusive(commands, function);
       }
     }
@@ -2912,7 +2998,7 @@ CONF_THREADS_SCHEDULE=0
 
     public String name;
     public Boolean exclusive = false;
-    public Consumer<ConsoleSubCommand> function;
+    public Consumer<ConsoleCommand> function;
 
     public Tree(Tree parent, int depth) {
       this.parent = parent;
@@ -2929,7 +3015,7 @@ CONF_THREADS_SCHEDULE=0
       return node.exclusive;
     }
 
-    public synchronized void registerFunction(List<String[]> commands, Consumer<ConsoleSubCommand> function) {
+    public synchronized void registerFunction(List<String[]> commands, Consumer<ConsoleCommand> function) {
       for (String[] command : commands) {
         Tree node = this;
         for (String arg : command) {
@@ -2948,7 +3034,7 @@ CONF_THREADS_SCHEDULE=0
       }
     }
 
-    public synchronized void registerExclusive(List<String[]> commands, Consumer<ConsoleSubCommand> function) {
+    public synchronized void registerExclusive(List<String[]> commands, Consumer<ConsoleCommand> function) {
       for (String[] command : commands) {
         Tree node = this;
         for (String arg : command) {
@@ -2986,7 +3072,7 @@ CONF_THREADS_SCHEDULE=0
       if (consoleCommand.length() == node.depth) {
         node.function.accept(null);
       } else {
-        ConsoleSubCommand subCommand = consoleCommand.subCommand(node.depth);
+        ConsoleCommand subCommand = consoleCommand.subCommand(node.depth);
         node.function.accept(subCommand);
       }
       return true;
@@ -4148,6 +4234,17 @@ CONF_THREADS_SCHEDULE=0
     }
 
     //= ========================================================================
+
+    public boolean executeModule(String name, ModuleCommand command) {
+      AbstractEventHandler instance = getModuleInstance(name);
+      if (instance == null) {
+        return false;
+      }
+      instance.executeWrapper(command);
+      return true;
+    }
+
+    //= ========================================================================
     //= 调试信息
     //= ========================================================================
 
@@ -4575,6 +4672,7 @@ CONF_THREADS_SCHEDULE=0
       return builder.toString();
 
     }
+
 
     private static final class Plugin {
 
@@ -5481,9 +5579,9 @@ CONF_THREADS_SCHEDULE=0
       } else {
         String[] strings = upgradeProtocols.split(",");
         config.upgradeProtocols = Arrays.stream(strings)
-          .map(DeviceType::of)
-          .map(DeviceType::toMiraiProtocol)
-          .collect(Collectors.toUnmodifiableSet());
+                                    .map(DeviceType::of)
+                                    .map(DeviceType::toMiraiProtocol)
+                                    .collect(Collectors.toUnmodifiableSet());
       }
 
       //= ======================================================================

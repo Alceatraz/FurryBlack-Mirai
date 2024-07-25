@@ -151,6 +151,21 @@ public abstract class AbstractEventHandler {
     }
   }
 
+  public final void executeWrapper(FurryBlack.ModuleCommand command) {
+    ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+    try {
+      Thread.currentThread().setContextClassLoader(exclusiveClassLoader);
+      String message = execute(command);
+      if (message != null) logger.error("命令执行失败 {} -> {}", command.toString(), message);
+    } catch (ModuleException exception) {
+      logger.error("命令执行失败 -> {}", command.toString(), exception);
+    } catch (Exception exception) {
+      throw new CoreException(exception);
+    } finally {
+      Thread.currentThread().setContextClassLoader(contextClassLoader);
+    }
+  }
+
   //= ==========================================================================
   //= 接口
 
@@ -162,6 +177,11 @@ public abstract class AbstractEventHandler {
 
   @Comment("生命周期 关闭时")
   protected abstract void shut() throws ShutException;
+
+  @Comment("辅助功能 执行命令")
+  protected String execute(FurryBlack.ModuleCommand consoleCommand) throws ModuleException {
+    return null;
+  }
 
   //= ==================================================================================================================
   //= 公共API
