@@ -2054,9 +2054,9 @@ CONF_THREADS_SCHEDULE=0
           FurryBlack.println("USAGE: exec|execute <name> xxx xxx xxx ...");
           return;
         }
-        boolean code = schema.executeModule(string, it.toModuleCommand(2));
+        boolean code = schema.executeModule(string, it.toModuleCommand(1));
         if (!code) {
-          FurryBlack.println("ERROR: 指定模块不存在 -> ");
+          FurryBlack.println("ERROR: 指定模块不存在 -> " + string);
         }
       });
 
@@ -2809,17 +2809,17 @@ CONF_THREADS_SCHEDULE=0
         throw new IllegalArgumentException("Index out of command boundary");
       }
 
-      String[] copy = Arrays.copyOfRange(args, i, args.length - 1);
+      String[] copy = Arrays.copyOfRange(args, i, args.length);
       return new ConsoleCommand(copy);
     }
 
     public ModuleCommand toModuleCommand(int depth) {
-      if (depth > args.length) {
-        throw new IllegalArgumentException("Index out of command boundary");
+      if (depth < args.length) {
+        String[] copy = Arrays.copyOfRange(args, depth, args.length);
+        return new ModuleCommand(copy);
+      } else {
+        return ModuleCommand.empty;
       }
-
-      String[] copy = Arrays.copyOfRange(args, depth, args.length - 1);
-      return new ModuleCommand(copy);
     }
 
   }
@@ -2827,9 +2827,17 @@ CONF_THREADS_SCHEDULE=0
   @Comment("用于模块的命令投递")
   public static class ModuleCommand {
 
+    private static final ModuleCommand empty = new ModuleCommand(new String[0], Collections.emptyList(), Collections.emptyMap());
+
     private final String[] argument;
     private final List<String> options;
     private final Map<String, String> parameters;
+
+    private ModuleCommand(String[] argument, List<String> options, Map<String, String> parameters) {
+      this.argument = argument;
+      this.options = options;
+      this.parameters = parameters;
+    }
 
     private ModuleCommand(String[] args) {
 
@@ -2875,6 +2883,9 @@ CONF_THREADS_SCHEDULE=0
 
     @Comment("获取命令")
     public String getArgument(int i) {
+      if (i > argument.length - 1) {
+        return null;
+      }
       return argument[i];
     }
 
