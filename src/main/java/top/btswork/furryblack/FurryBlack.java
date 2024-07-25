@@ -1671,7 +1671,7 @@ CONF_THREADS_SCHEDULE=0
         if (it == null) {
           FurryBlack.println("DEBUG模式 -> " + (KERNEL_DEBUG ? "已开启" : "已关闭"));
         } else {
-          switch (it.getOrEmpty(0).toLowerCase()) {
+          switch (it.getString(0, "")) {
             case "enable" -> {
               kernelConfig.debug = true;
               FurryBlack.println("DEBUG模式: 启动");
@@ -1775,14 +1775,17 @@ CONF_THREADS_SCHEDULE=0
     dispatcher.registerExclusive()
       .command("logger", "level")
       .function(it -> {
+
         if (it == null) {
           FurryBlack.println("当前日志级别 -> " + LoggerXFactory.getLevel());
         } else {
 
-          LoggerXLevel of = LoggerXLevel.of(it.getOrEmpty(0));
+          String target = it.getString(0, "IMPOSSIBLE");
+          LoggerXLevel of = LoggerXLevel.of(target);
 
           if (of == null) {
-            FurryBlack.println("日志级别不存在 -> " + it.getOrEmpty(0));
+
+            FurryBlack.println("日志级别不可用 -> " + target);
             FurryBlack.println(
 
               // @formatter:off
@@ -1799,6 +1802,7 @@ CONF_THREADS_SCHEDULE=0
 
             );
           } else {
+
 
             LoggerXFactory.setLevel(of);
 
@@ -1822,7 +1826,7 @@ CONF_THREADS_SCHEDULE=0
         if (it == null) {
           FurryBlack.println("当前详细名称 -> " + LoggerXFactory.isEnableFullName());
         } else {
-          if (it.getBooleanOrFalse(0)) {
+          if (it.getBoolean(0, false)) {
             LoggerXFactory.setEnableFullName(true);
             FurryBlack.println("设置详细名称为 -> 开启");
           } else {
@@ -1837,33 +1841,29 @@ CONF_THREADS_SCHEDULE=0
     dispatcher.registerExclusive()
       .command("logger", "prefix")
       .function(it -> {
-
         if (it == null) {
-
           Map<String, LoggerXLevel> prefix = LoggerXFactory.listPrefix();
-
           FurryBlack.println("当前级别前缀 -> " + prefix.size());
-
           for (Map.Entry<String, LoggerXLevel> entry : prefix.entrySet()) {
             FurryBlack.println(String.format("%5s", entry.getValue()) + " " + entry.getKey());
           }
-
         } else {
-
-          String code = it.getOrEmpty(0);
-          String path = it.getOrEmpty(1);
-
-          switch (code) {
-            case "test" -> FurryBlack.println(path + " -> " + LoggerXFactory.testPrefix(path));
-            case "cache" -> LoggerXFactory.listPrefixCache().forEach((k, v) -> FurryBlack.println(k + " " + v.name()));
-            case "flush" -> LoggerXFactory.flushPrefixCache();
-            case "delete", "remove" -> LoggerXFactory.delPrefix(path);
-            default -> {
-              LoggerXLevel of = LoggerXLevel.of(code);
-              LoggerXFactory.setPrefix(path, of);
+          String code = it.getString(0, null);
+          String path = it.getString(1, null);
+          if (code == null || path == null) {
+            FurryBlack.println("前缀格式无效 -> 输入为空");
+          } else {
+            switch (code) {
+              case "test" -> FurryBlack.println(path + " -> " + LoggerXFactory.testPrefix(path));
+              case "cache" -> LoggerXFactory.listPrefixCache().forEach((k, v) -> FurryBlack.println(k + " " + v.name()));
+              case "flush" -> LoggerXFactory.flushPrefixCache();
+              case "delete", "remove" -> LoggerXFactory.delPrefix(path);
+              default -> {
+                LoggerXLevel of = LoggerXLevel.of(code);
+                LoggerXFactory.setPrefix(path, of);
+              }
             }
           }
-
         }
       });
 
@@ -1881,7 +1881,7 @@ CONF_THREADS_SCHEDULE=0
         if (it == null) {
           FurryBlack.println("SCHEMA模式, 是否响应消息事件 -> " + (KERNEL_DEBUG ? "已开启" : "已关闭"));
         } else {
-          switch (it.getOrEmpty(0).toLowerCase()) {
+          switch (it.getString(0, "IMPOSSIBLE")) {
             case "enable" -> {
               kernelConfig.debug = true;
               FurryBlack.println("SCHEMA模式: 启动");
@@ -2034,8 +2034,8 @@ CONF_THREADS_SCHEDULE=0
 
         } else {
 
-          String type = it.getOrNull(0);
-          String name = it.getOrNull(1);
+          String type = it.getString(0, null);
+          String name = it.getString(1, null);
 
           if (type == null || name == null) {
             FurryBlack.println("USAGE: schema module init|boot|shut|reboot|unload <name>");
@@ -2774,11 +2774,6 @@ CONF_THREADS_SCHEDULE=0
       return parts.toArray(new String[0]);
     }
 
-    public String[] copy() {
-      String[] copy = new String[args.length];
-      System.arraycopy(args, 0, copy, 0, args.length);
-      return copy;
-    }
 
     public ConsoleSubCommand subCommand(int i) {
       if (i > args.length) {
@@ -2809,30 +2804,17 @@ CONF_THREADS_SCHEDULE=0
     }
   }
 
-  @SuppressWarnings("unused")
   private record ConsoleSubCommand(String[] args) {
 
-    public String getOrNull(int i) {
-      return i < args.length ? args[i] : null;
+    public String getString(int i, String defaultValue) {
+      return i < args.length ? args[i] : defaultValue;
     }
 
-    public String getOrEmpty(int i) {
-      return i < args.length ? args[i] : "";
-    }
-
-    public boolean getBooleanOrTrue(int i) {
+    public boolean getBoolean(int i, boolean defaultValue) {
       if (i < args.length) {
         return Boolean.parseBoolean(args[i]);
       } else {
-        return true;
-      }
-    }
-
-    public boolean getBooleanOrFalse(int i) {
-      if (i < args.length) {
-        return Boolean.parseBoolean(args[i]);
-      } else {
-        return false;
+        return defaultValue;
       }
     }
 
@@ -2883,7 +2865,7 @@ CONF_THREADS_SCHEDULE=0
       }
 
       public RegisterFunctionAccessor command(String... command) {
-        if (dispatcher.tree.isAdopted()) {
+        if (dispatcher.tree.isAdopted(command)) {
           throw new IllegalArgumentException("Can't register this command -> " + String.join(".", command));
         }
         commands.add(command);
@@ -2905,7 +2887,7 @@ CONF_THREADS_SCHEDULE=0
       }
 
       public RegisterExclusiveAccessor command(String... command) {
-        if (dispatcher.tree.isAdopted()) {
+        if (dispatcher.tree.isAdopted(command)) {
           throw new IllegalArgumentException("Can't register this command -> " + String.join(".", command));
         }
         commands.add(command);
@@ -2949,11 +2931,6 @@ CONF_THREADS_SCHEDULE=0
 
     public synchronized void registerFunction(List<String[]> commands, Consumer<ConsoleSubCommand> function) {
       for (String[] command : commands) {
-        if (isAdopted(command)) {
-          throw new RuntimeException("Command already registered -> " + String.join(" ", command));
-        }
-      }
-      for (String[] command : commands) {
         Tree node = this;
         for (String arg : command) {
           Tree next = node.tree.get(arg);
@@ -2972,11 +2949,6 @@ CONF_THREADS_SCHEDULE=0
     }
 
     public synchronized void registerExclusive(List<String[]> commands, Consumer<ConsoleSubCommand> function) {
-      for (String[] command : commands) {
-        if (isAdopted(command)) {
-          throw new RuntimeException("Command already registered -> " + String.join(" ", command));
-        }
-      }
       for (String[] command : commands) {
         Tree node = this;
         for (String arg : command) {
@@ -2997,8 +2969,7 @@ CONF_THREADS_SCHEDULE=0
 
     public boolean execute(ConsoleCommand consoleCommand) {
       Tree node = this;
-      String[] args = consoleCommand.copy();
-      for (String arg : args) {
+      for (String arg : consoleCommand.args) {
         Tree next = node.tree.get(arg);
         if (next == null) {
           return false;
