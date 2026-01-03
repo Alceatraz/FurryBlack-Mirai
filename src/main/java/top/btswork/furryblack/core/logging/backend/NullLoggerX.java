@@ -46,4 +46,12 @@ public class NullLogger extends PlaceholdLoggerX {
 
   }
 
+  @Override protected void printImpl(String message) {
+
+  }
+
+  @Override protected void printlnImpl(String message) {
+
+  }
+
 }
