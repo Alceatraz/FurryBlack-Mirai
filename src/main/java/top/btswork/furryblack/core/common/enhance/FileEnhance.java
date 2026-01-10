@@ -174,7 +174,7 @@ public class FileEnhance {
     try {
       return Files.readString(path, StandardCharsets.UTF_8);
     } catch (IOException exception) {
-      throw new RuntimeException("读取失败 -> ", exception);
+      throw new RuntimeException("读取失败 -> " + path, exception);
     }
   }
 
@@ -184,7 +184,7 @@ public class FileEnhance {
     try {
       return Files.readAllLines(path, StandardCharsets.UTF_8);
     } catch (IOException exception) {
-      throw new RuntimeException("读取失败 -> ", exception);
+      throw new RuntimeException("读取失败 -> " + path, exception);
     }
   }
 
@@ -196,7 +196,7 @@ public class FileEnhance {
     try {
       Files.writeString(path, content, StandardCharsets.UTF_8, TRUNCATE_EXISTING);
     } catch (IOException exception) {
-      throw new RuntimeException("写入失败 -> ", exception);
+      throw new RuntimeException("写入失败 -> " + path, exception);
     }
   }
 
@@ -206,7 +206,7 @@ public class FileEnhance {
     try {
       Files.write(path, content, StandardCharsets.UTF_8, TRUNCATE_EXISTING);
     } catch (IOException exception) {
-      throw new RuntimeException("写入失败 -> ", exception);
+      throw new RuntimeException("写入失败 -> " + path, exception);
     }
   }
 
@@ -216,7 +216,7 @@ public class FileEnhance {
     try {
       Files.writeString(path, content, StandardCharsets.UTF_8, APPEND);
     } catch (IOException exception) {
-      throw new RuntimeException("写入失败 -> ", exception);
+      throw new RuntimeException("写入失败 -> " + path, exception);
     }
   }
 
@@ -226,7 +226,7 @@ public class FileEnhance {
     try {
       Files.write(path, content, StandardCharsets.UTF_8, APPEND);
     } catch (IOException exception) {
-      throw new RuntimeException("写入失败 -> ", exception);
+      throw new RuntimeException("写入失败 -> " + path, exception);
     }
   }
 

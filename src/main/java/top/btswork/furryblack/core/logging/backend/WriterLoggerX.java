@@ -27,21 +27,22 @@ import top.btswork.furryblack.core.logging.backend.wrapper.PlaceholdLoggerX;
 
 import java.nio.file.Path;
 
+import static top.btswork.furryblack.FurryBlack.LINE;
 import static top.btswork.furryblack.core.logging.enums.LoggerXColor.RESET;
 
 @SuppressWarnings("unused")
 
 @LoggerXConfig(needLoggerFile = true)
-public final class WritterLoggerX extends PlaceholdLoggerX {
+public final class WriterLoggerX extends PlaceholdLoggerX {
 
   private static Path path;
   private static volatile boolean lock = false;
 
-  public WritterLoggerX(String simple) {
+  public WriterLoggerX(String simple) {
     super(simple);
   }
 
-  public WritterLoggerX(Class<?> clazz) {
+  public WriterLoggerX(Class<?> clazz) {
     super(clazz);
   }
 
@@ -50,7 +51,7 @@ public final class WritterLoggerX extends PlaceholdLoggerX {
   public static void init(Path path) {
     if (lock) return;
     lock = true;
-    WritterLoggerX.path = path;
+    WriterLoggerX.path = path;
   }
 
   //= ==================================================================================================================
@@ -59,64 +60,73 @@ public final class WritterLoggerX extends PlaceholdLoggerX {
   public void fatalImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][FATAL][" + getName() + "]" + message;
-    FileEnhance.append(path, content + FurryBlack.LINE);
-    if (isErrorEnabled()) FurryBlack.println(LoggerX.COLOR_FATAL + content + RESET);
+    if (isEnableWriteAll() || isErrorEnabled()) FileEnhance.append(path, content + LINE);
+    if (isErrorEnabled()) FurryBlack.terminalPrintln(LoggerX.COLOR_FATAL + content + RESET);
   }
 
   @Override
   public void errorImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][ERROR][" + getName() + "]" + message;
-    FileEnhance.append(path, content + FurryBlack.LINE);
-    if (isErrorEnabled()) FurryBlack.println(LoggerX.COLOR_ERROR + content + RESET);
+    if (isEnableWriteAll() || isErrorEnabled()) FileEnhance.append(path, content + LINE);
+    if (isErrorEnabled()) FurryBlack.terminalPrintln(LoggerX.COLOR_ERROR + content + RESET);
   }
 
   @Override
   public void warnImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][WARN][" + getName() + "]" + message;
-    FileEnhance.append(path, content + FurryBlack.LINE);
-    if (isWarnEnabled()) FurryBlack.println(LoggerX.COLOR_WARN + content + RESET);
+    if (isEnableWriteAll() || isWarnEnabled()) FileEnhance.append(path, content + LINE);
+    if (isWarnEnabled()) FurryBlack.terminalPrintln(LoggerX.COLOR_WARN + content + RESET);
   }
 
   @Override
   public void hintImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][HINT][" + getName() + "]" + message;
-    FileEnhance.append(path, content + FurryBlack.LINE);
-    if (isInfoEnabled()) FurryBlack.println(LoggerX.COLOR_HINT + content + RESET);
+    if (isEnableWriteAll() || isInfoEnabled()) FileEnhance.append(path, content + LINE);
+    if (isInfoEnabled()) FurryBlack.terminalPrintln(LoggerX.COLOR_HINT + content + RESET);
   }
 
   @Override
   public void seekImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][SEEK][" + getName() + "]" + message;
-    FileEnhance.append(path, content + FurryBlack.LINE);
-    if (isInfoEnabled()) FurryBlack.println(LoggerX.COLOR_SEEK + content + RESET);
+    if (isEnableWriteAll() || isInfoEnabled()) FileEnhance.append(path, content + LINE);
+    if (isInfoEnabled()) FurryBlack.terminalPrintln(LoggerX.COLOR_SEEK + content + RESET);
   }
 
   @Override
   public void infoImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][INFO][" + getName() + "]" + message;
-    FileEnhance.append(path, content + FurryBlack.LINE);
-    if (isInfoEnabled()) FurryBlack.println(LoggerX.COLOR_INFO + content + RESET);
+    if (isEnableWriteAll() || isInfoEnabled()) FileEnhance.append(path, content + LINE);
+    if (isInfoEnabled()) FurryBlack.terminalPrintln(LoggerX.COLOR_INFO + content + RESET);
   }
 
   @Override
   public void debugImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][DEBUG][" + getName() + "]" + message;
-    FileEnhance.append(path, content + FurryBlack.LINE);
-    if (isDebugEnabled()) FurryBlack.println(LoggerX.COLOR_DEBUG + content + RESET);
+    if (isEnableWriteAll() || isDebugEnabled()) FileEnhance.append(path, content + LINE);
+    if (isDebugEnabled()) FurryBlack.terminalPrintln(LoggerX.COLOR_DEBUG + content + RESET);
   }
 
   @Override
   public void traceImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][TRACE][" + getName() + "]" + message;
-    FileEnhance.append(path, content + FurryBlack.LINE);
-    if (isTraceEnabled()) FurryBlack.println(LoggerX.COLOR_TRACE + content + RESET);
+    if (isEnableWriteAll() || isTraceEnabled()) FileEnhance.append(path, content + LINE);
+    if (isTraceEnabled()) FurryBlack.terminalPrintln(LoggerX.COLOR_TRACE + content + RESET);
   }
 
+  @Override protected void printImpl(String message) {
+    FileEnhance.append(path, message);
+    FurryBlack.terminalPrint(message);
+  }
+
+  @Override protected void printlnImpl(String message) {
+    FileEnhance.append(path, message + LINE);
+    FurryBlack.terminalPrintln(message);
+  }
 }

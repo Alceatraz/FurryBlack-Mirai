@@ -73,6 +73,7 @@ public abstract class LoggerX {
 
   private static boolean enablePrefix = false;
   private static boolean enableFullName = false;
+  private static boolean enableWriteAll = false;
 
   //= ==========================================================================
   //= 功能开关
@@ -85,12 +86,20 @@ public abstract class LoggerX {
     return enableFullName;
   }
 
+  public static boolean isEnableWriteAll() {
+    return enableWriteAll;
+  }
+
   protected static void setEnablePrefix(boolean enablePrefix) {
     LoggerX.enablePrefix = enablePrefix;
   }
 
   protected static void setEnableFullName(boolean enableFullName) {
     LoggerX.enableFullName = enableFullName;
+  }
+
+  protected static void setEnableWriteAll(boolean enableWriteAll) {
+    LoggerX.enableWriteAll = enableWriteAll;
   }
 
   protected static void flushPrefixCache() {
@@ -469,6 +478,16 @@ public abstract class LoggerX {
     traceImpl(messagePattern, objects);
   }
 
+  //
+
+  public final void print(String message) {
+    printImpl(message);
+  }
+
+  public final void println(String message) {
+    printlnImpl(message);
+  }
+
   //= ==========================================================================
   //= 实现
 
@@ -549,5 +568,11 @@ public abstract class LoggerX {
   protected abstract void traceImpl(String message, Throwable throwable);
 
   protected abstract void traceImpl(String messagePattern, Object... objects);
+
+  //
+
+  protected abstract void printImpl(String message);
+
+  protected abstract void printlnImpl(String message);
 
 }

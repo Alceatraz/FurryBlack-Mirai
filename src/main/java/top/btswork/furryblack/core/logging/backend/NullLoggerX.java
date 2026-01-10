@@ -4,13 +4,13 @@ import top.btswork.furryblack.core.logging.annotation.LoggerXConfig;
 import top.btswork.furryblack.core.logging.backend.wrapper.PlaceholdLoggerX;
 
 @LoggerXConfig
-public class NullLogger extends PlaceholdLoggerX {
+public class NullLoggerX extends PlaceholdLoggerX {
 
-  protected NullLogger(Class<?> clazz) {
+  protected NullLoggerX(Class<?> clazz) {
     super(clazz);
   }
 
-  protected NullLogger(String simpleName) {
+  protected NullLoggerX(String simpleName) {
     super(simpleName);
   }
 

@@ -7,7 +7,11 @@ import java.util.Locale;
 import java.util.function.Supplier;
 
 @Comment("数值工具")
-public class DataEnhance {
+public final class DataEnhance {
+
+  public static String valueOf(Object value) {
+    return value == null ? null : value.toString();
+  }
 
   //= ==================================================================================================================
   //= Byte
@@ -218,6 +222,7 @@ public class DataEnhance {
 
   @Comment("数值转换")
   public static Boolean parseBoolean(String value, boolean defaultValue) {
+    if (value == null) return defaultValue;
     return switch (value.toUpperCase(Locale.ROOT)) {
       case "T", "TRUE" -> true;
       case "F", "FALSE" -> false;
@@ -228,6 +233,7 @@ public class DataEnhance {
   @Comment("数值转换")
   @Nullable
   public static Boolean parseBooleanOrNull(String value) {
+    if (value == null) return null;
     return switch (value.toUpperCase(Locale.ROOT)) {
       case "T", "TRUE" -> true;
       case "F", "FALSE" -> false;

@@ -45,56 +45,64 @@ public final class PrintLoggerX extends PlaceholdLoggerX {
   public void fatalImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][FATAL][" + getName() + "]" + message;
-    FurryBlack.println(LoggerX.COLOR_FATAL + content + RESET);
+    FurryBlack.terminalPrintln(LoggerX.COLOR_FATAL + content + RESET);
   }
 
   @Override
   public void errorImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][ERROR][" + getName() + "]" + message;
-    FurryBlack.println(LoggerX.COLOR_ERROR + content + RESET);
+    FurryBlack.terminalPrintln(LoggerX.COLOR_ERROR + content + RESET);
   }
 
   @Override
   public void warnImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][WARN][" + getName() + "]" + message;
-    FurryBlack.println(LoggerX.COLOR_WARN + content + RESET);
+    FurryBlack.terminalPrintln(LoggerX.COLOR_WARN + content + RESET);
   }
 
   @Override
   public void hintImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][HINT][" + getName() + "]" + message;
-    FurryBlack.println(LoggerX.COLOR_HINT + content + RESET);
+    FurryBlack.terminalPrintln(LoggerX.COLOR_HINT + content + RESET);
   }
 
   @Override
   public void seekImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][SEEK][" + getName() + "]" + message;
-    FurryBlack.println(LoggerX.COLOR_SEEK + content + RESET);
+    FurryBlack.terminalPrintln(LoggerX.COLOR_SEEK + content + RESET);
   }
 
   @Override
   public void infoImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][INFO][" + getName() + "]" + message;
-    FurryBlack.println(LoggerX.COLOR_INFO + content + RESET);
+    FurryBlack.terminalPrintln(LoggerX.COLOR_INFO + content + RESET);
   }
 
   @Override
   public void debugImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][DEBUG][" + getName() + "]" + message;
-    FurryBlack.println(LoggerX.COLOR_DEBUG + content + RESET);
+    FurryBlack.terminalPrintln(LoggerX.COLOR_DEBUG + content + RESET);
   }
 
   @Override
   public void traceImpl(String message) {
     if (message == null) return;
     String content = "[" + TimeEnhance.datetime() + "][TRACE][" + getName() + "]" + message;
-    FurryBlack.println(LoggerX.COLOR_TRACE + content + RESET);
+    FurryBlack.terminalPrintln(LoggerX.COLOR_TRACE + content + RESET);
+  }
+
+  @Override protected void printImpl(String message) {
+    FurryBlack.terminalPrint(message);
+  }
+
+  @Override protected void printlnImpl(String message) {
+    FurryBlack.terminalPrintln(message);
   }
 
 }

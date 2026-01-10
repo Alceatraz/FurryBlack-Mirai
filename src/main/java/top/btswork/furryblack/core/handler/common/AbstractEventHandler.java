@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import top.btswork.furryblack.FurryBlack;
 import top.btswork.furryblack.core.common.enhance.FileEnhance;
 import top.btswork.furryblack.core.common.enhance.TimeEnhance;
-import top.btswork.furryblack.core.exception.CoreException;
+import top.btswork.furryblack.core.exception.KernelException;
 import top.btswork.furryblack.core.exception.moduels.BootException;
 import top.btswork.furryblack.core.exception.moduels.InitException;
 import top.btswork.furryblack.core.exception.moduels.ModuleException;
@@ -76,19 +76,19 @@ public abstract class AbstractEventHandler {
     StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
     StackTraceElement schemaClazz = stackTrace[2];
     if (internalInitLock) {
-      CoreException coreException = new CoreException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
-      coreException.setStackTrace(stackTrace);
-      throw coreException;
+      KernelException kernelException = new KernelException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
+      kernelException.setStackTrace(stackTrace);
+      throw kernelException;
     }
     if (!"makeModule".equals(schemaClazz.getMethodName())) {
-      CoreException coreException = new CoreException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
-      coreException.setStackTrace(stackTrace);
-      throw coreException;
+      KernelException kernelException = new KernelException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
+      kernelException.setStackTrace(stackTrace);
+      throw kernelException;
     }
     if (!"top.btswork.furryblack.FurryBlack$Schema".equals(schemaClazz.getClassName())) {
-      CoreException coreException = new CoreException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
-      coreException.setStackTrace(stackTrace);
-      throw coreException;
+      KernelException kernelException = new KernelException("IllegalAccess - Invoke internalInit, And here is caller stack trace");
+      kernelException.setStackTrace(stackTrace);
+      throw kernelException;
     }
     this.internalInitLock = true;
     this.pluginName = pluginName;
@@ -105,13 +105,13 @@ public abstract class AbstractEventHandler {
   //= ==========================================================================
   //= 初始化
 
-  public final void initWrapper() throws CoreException {
+  public final void initWrapper() throws KernelException {
     ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
     try {
       Thread.currentThread().setContextClassLoader(exclusiveClassLoader);
       init();
     } catch (ModuleException exception) {
-      throw new CoreException(exception);
+      throw new KernelException(exception);
     } finally {
       Thread.currentThread().setContextClassLoader(contextClassLoader);
     }
@@ -120,14 +120,14 @@ public abstract class AbstractEventHandler {
   //= ==========================================================================
   //= 启动
 
-  public final void bootWrapper() throws CoreException {
+  public final void bootWrapper() throws KernelException {
     if (!enable) return;
     ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
     try {
       Thread.currentThread().setContextClassLoader(exclusiveClassLoader);
       boot();
     } catch (ModuleException exception) {
-      throw new CoreException(exception);
+      throw new KernelException(exception);
     } finally {
       Thread.currentThread().setContextClassLoader(contextClassLoader);
     }
@@ -137,7 +137,7 @@ public abstract class AbstractEventHandler {
   //= ==========================================================================
   //= 关闭
 
-  public final void shutWrapper() throws CoreException {
+  public final void shutWrapper() throws KernelException {
     if (!enable || !status) return;
     status = false;
     ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
@@ -145,7 +145,7 @@ public abstract class AbstractEventHandler {
       Thread.currentThread().setContextClassLoader(exclusiveClassLoader);
       shut();
     } catch (ModuleException exception) {
-      throw new CoreException(exception);
+      throw new KernelException(exception);
     } finally {
       Thread.currentThread().setContextClassLoader(contextClassLoader);
     }
@@ -160,7 +160,7 @@ public abstract class AbstractEventHandler {
     } catch (ModuleException exception) {
       logger.error("命令执行失败 -> {}", command.toString(), exception);
     } catch (Exception exception) {
-      throw new CoreException(exception);
+      throw new KernelException(exception);
     } finally {
       Thread.currentThread().setContextClassLoader(contextClassLoader);
     }

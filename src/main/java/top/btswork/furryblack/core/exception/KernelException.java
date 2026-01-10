@@ -3,29 +3,29 @@ package top.btswork.furryblack.core.exception;
 import top.btswork.furryblack.core.common.annotation.Comment;
 
 @Comment(value = "基础异常", attention = "RuntimeException")
-public class CoreException extends RuntimeException {
+public class KernelException extends RuntimeException {
 
-  public CoreException() {}
+  public KernelException() {}
 
-  public CoreException(String message) {
+  public KernelException(String message) {
     super(message);
   }
 
-  public CoreException(String message, Throwable cause) {
+  public KernelException(String message, Throwable cause) {
     super(message, cause);
   }
 
-  public CoreException(Throwable cause) {
+  public KernelException(Throwable cause) {
     super(cause);
   }
 
   public static void check(String value) {
     if (value == null) return;
-    throw new CoreException(value);
+    throw new KernelException(value);
   }
 
   public static void check(String message, String value) {
     if (value == null) return;
-    throw new CoreException(message + value);
+    throw new KernelException(message + value);
   }
 }

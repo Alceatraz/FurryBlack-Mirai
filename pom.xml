@@ -89,24 +89,35 @@
       <version>${mirai.version}</version>
     </dependency>
 
+    <!--
+
     <dependency>
-      <groupId>net.mamoe</groupId>
-      <artifactId>mirai-core-jvm</artifactId>
-      <version>${mirai.version}</version>
-      <scope>runtime</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.bouncycastle</groupId>
-          <artifactId>bcprov-jdk15on</artifactId>
-        </exclusion>
-      </exclusions>
+    <groupId>net.mamoe</groupId>
+    <artifactId>mirai-core-jvm</artifactId>
+    <version>${mirai.version}</version>
+    <scope>runtime</scope>
+    <exclusions>
+    <exclusion>
+    <groupId>org.bouncycastle</groupId>
+    <artifactId>bcprov-jdk15on</artifactId>
+    </exclusion>
+    </exclusions>
     </dependency>
+
+    -->
+
+    <dependency>
+      <groupId>top.mrxiaom.mirai</groupId>
+      <artifactId>overflow-core</artifactId>
+      <version>1.0.8</version>
+    </dependency>
+
 
     <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk18on</artifactId>
-      <version>1.78.1</version>
+      <version>1.83</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.jline/jline -->
@@ -124,24 +135,27 @@
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.asynchttpclient/async-http-client -->
+
+    <!--
     <dependency>
-      <groupId>org.asynchttpclient</groupId>
-      <artifactId>async-http-client</artifactId>
-      <version>3.0.0.Beta3</version>
+    <groupId>org.asynchttpclient</groupId>
+    <artifactId>async-http-client</artifactId>
+    <version>3.0.0.Beta3</version>
     </dependency>
+    -->
 
     <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>2.0.13</version>
+      <version>2.0.17</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>5.10.2</version>
+      <version>5.14.1</version>
     </dependency>
 
   </dependencies>

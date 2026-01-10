@@ -1,35 +1,46 @@
 package top.btswork.furryblack.core.config;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
-public  final class Argument {
+public final class Argument {
 
   public static Argument parse(String[] arguments) {
+
     Argument instance = new Argument();
+
     int length = arguments.length;
+
     for (int i = 0; i < length; i++) {
+
       String argument = arguments[i].trim();
+
       if (argument.startsWith("--")) {
+
+        if (argument.length() == 2) continue;
+
         if (i + 1 == length) {
           instance.options.add(argument.substring(2));
           break;
         }
+
         String next = arguments[i + 1];
+
         if (next.startsWith("--")) {
           instance.options.add(argument.substring(2));
         } else {
           instance.parameters.put(argument.substring(2), next);
           i++;
         }
+
       } else {
         instance.args.add(argument);
       }
+
     }
+
     return instance;
+
   }
 
   private final List<String> args;
@@ -88,6 +99,22 @@ public  final class Argument {
     } else {
       return defaultValue.get();
     }
+  }
+
+  public List<String> getArgs() {
+    return new LinkedList<>(args);
+  }
+
+  public List<String> getOptions() {
+    return new LinkedList<>(options);
+  }
+
+  public Map<String, String> getParameters() {
+    return new TreeMap<>(parameters);
+  }
+
+  public Set<Map.Entry<String, String>> getParametersEntrySet() {
+    return new TreeMap<>(parameters).entrySet();
   }
 
 }

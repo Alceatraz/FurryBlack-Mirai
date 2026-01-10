@@ -198,14 +198,22 @@ public abstract class PlaceholdLoggerX extends LoggerX {
   //= ==================================================================================================================
 
   private static String placeholder(String pattern, Object... objects) {
+
     StringBuilder builder = new StringBuilder();
+
     Iterator<Object> iterator = Arrays.stream(objects).iterator();
+
     boolean escape = false;
     boolean placeholder = false;
+
     char[] charArray = pattern.toCharArray();
+
     for (int i = 0; i < charArray.length; i++) {
+
       char chat = charArray[i];
+
       switch (chat) {
+
         case '\\' -> {
           if (escape) {
             escape = false;
@@ -214,6 +222,7 @@ public abstract class PlaceholdLoggerX extends LoggerX {
             escape = true;
           }
         }
+
         case '{' -> {
           if (escape) {
             escape = false;
@@ -227,6 +236,7 @@ public abstract class PlaceholdLoggerX extends LoggerX {
             }
           }
         }
+
         default -> {
           if (placeholder) {
             escape = false;

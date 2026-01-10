@@ -1,46 +1,33 @@
 # **FurryBlack - Mirai**
 
-## 自豪的使用[Mirai](https://github.com/mamoe/mirai)
+- 自豪的使用 [Mirai](https://github.com/mamoe/mirai)
+- 自豪的使用 [Overflow](https://github.com/MrXiaoM/Overflow)
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/6d123a4b9d6e434086e17e2b1f378c5c)](https://app.codacy.com/gh/Alceatraz/FurryBlack-Mirai/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-
-### 消歧义
-
-- 白熊机器人：指BTS为FurryBlack赋予的人物形象；
-- FurryBlack框架：指FurryBlack开源框架，分为JCQ和Mirai版；
-- FurryBlack扩展：指基于FurryBlack框架编写的插件；
-- FurryBlack机器人：指由BTS运营的基于FurryBlack框架的机器人。
-
-### 许可证
+# 许可证
 
 See LICENSE
 
-## 如何运行
+---
+
+# 快速上手
 
 ```shell
-FURRYBLACK_MUTE=true
-FURRYBLACK_LOCALE_SKIP=true
-FURRYBLACK_TIMEZONE_SKIP=true
-
 java \
--cp "binary/*" 'top.furryblack.btswork.FurryBlack' \
---namespace 12345678 \
---12345678-upgrade \
---12345678-logger-level TRACE \
---12345678-logger-prefix config/logging-prefix.txt 
+  -Dfile.encoding=UTF-8 \
+  -Dstdout.encoding=UTF-8 \
+  -Dstderr.encoding=UTF-8 \
+  -Duser.country=CN \
+  -Duser.variant=CN \
+  -Duser.language=zh \
+  -Duser.timezone='Asia/Shanghai' \
+  -cp "binary/*" 'top.btswork.furryblack.FurryBlack'
 ```
 
-- 强烈建议使用`-Dfile.encoding=UTF-8`以强制使用UTF8处理文件
-- 推荐搭配`fix-protocol-version`和Q-sign服务器使用
-- 推荐使用namespace隔离所有环境
+## 环境变量
 
-### 环境变量
+---
 
-- `FURRYBLACK_MUTE`设置为任何值可关闭开头的两句提示
-- `FURRYBLACK_LOCALE_SKIP`设置为任何值都可跳过`Locale.setDefault(Locale.SIMPLIFIED_CHINESE);`
-- `FURRYBLACK_TIMEZONE_SKIP`设置为任何值都可跳过`TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));`
-
-## 如何开发
+# 如何开发
 
 ### 基本概念
 
@@ -148,15 +135,17 @@ java -Dbot1.debug -Dbot1.unsafe -cp *.jar top.furryblack.btswork.FurryBlack --na
 - 系统参数保持大小写，用句点分割 bot1 + unsafe -> -Dbot1.unsafe=true
 - 环境变量全转为大写，用下划线分割 bot1 + debug -> BOT1_DEBUG=true
 
-## DEVELOPING
+---
 
-- Shamrock
+# CHANGELOG
 
-## CHANGELOG
-
-### 4.0.0
+### 4.0.0-NIGHTLY
 
 - 因域名过期，修改包名
+- 将mirai-core替换为napcat-overflow
+- 移除 mirai-core所需要的代码
+- 移除 fix-protocol-version
+- 增加CLOSE级别
 
 ### 3.2.0
 

@@ -1,7 +1,7 @@
 package top.btswork.furryblack.core.logging;
 
 import top.btswork.furryblack.core.logging.annotation.LoggerXConfig;
-import top.btswork.furryblack.core.logging.backend.WritterLoggerX;
+import top.btswork.furryblack.core.logging.backend.WriterLoggerX;
 import top.btswork.furryblack.core.logging.enums.LoggerXLevel;
 
 import java.lang.reflect.InvocationTargetException;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class LoggerXFactory {
 
-  private static Class<? extends LoggerX> DEFAULT_LOGGER = WritterLoggerX.class;
+  private static Class<? extends LoggerX> DEFAULT_LOGGER = WriterLoggerX.class;
 
   //= ==================================================================================================================
   //= 配置系统
@@ -23,8 +23,8 @@ public class LoggerXFactory {
     LoggerX.setLevel(level);
   }
 
-  public static String getDefault() {
-    return DEFAULT_LOGGER.getSimpleName();
+  public static Class<? extends LoggerX> getDefault() {
+    return DEFAULT_LOGGER;
   }
 
   public static void setDefault(Class<? extends LoggerX> provider) {
@@ -66,12 +66,20 @@ public class LoggerXFactory {
     return LoggerX.isEnableFullName();
   }
 
+  public static boolean isEnableWriteAll() {
+    return LoggerX.isEnableWriteAll();
+  }
+
   public static void setEnablePrefix(boolean value) {
     LoggerX.setEnablePrefix(value);
   }
 
   public static void setEnableFullName(boolean value) {
     LoggerX.setEnableFullName(value);
+  }
+
+  public static void setEnableWriteAll(boolean value) {
+    LoggerX.setEnableWriteAll(value);
   }
 
   //= ==================================================================================================================
